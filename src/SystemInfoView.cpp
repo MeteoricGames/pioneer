@@ -17,7 +17,7 @@
 #include "graphics/Drawables.h"
 #include "Factions.h"
 
-SystemInfoView::SystemInfoView()
+SystemInfoView::SystemInfoView() : UIView()
 {
 	SetTransparency(true);
 	m_refresh = false;
@@ -412,6 +412,7 @@ void SystemInfoView::Draw3D()
 {
 	m_renderer->SetTransform(matrix4x4f::Identity());
 	m_renderer->ClearScreen();
+	UIView::Draw3D();
 }
 
 void SystemInfoView::Update()
@@ -420,12 +421,14 @@ void SystemInfoView::Update()
 		SystemChanged(Pi::sectorView->GetSelectedSystem());
 		m_refresh = false;
 	}
+    UIView::Update();
 }
 
 void SystemInfoView::OnSwitchTo()
 {
 	if (!m_system || !Pi::sectorView->GetSelectedSystem().IsSameSystem(m_system->GetPath()))
 		m_refresh = true;
+    UIView::OnSwitchTo();
 }
 
 void SystemInfoView::NextPage()

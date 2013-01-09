@@ -39,7 +39,7 @@ enum DetailSelection {
 static const float ZOOM_SPEED = 15;
 static const float WHEEL_SENSITIVITY = .03f;		// Should be a variable in user settings.
 
-SectorView::SectorView()
+SectorView::SectorView() : UIView()
 {
 	InitDefaults();
 
@@ -66,7 +66,7 @@ SectorView::SectorView()
 	InitObject();
 }
 
-SectorView::SectorView(Serializer::Reader &rd)
+SectorView::SectorView(Serializer::Reader &rd) : UIView()
 {
 	InitDefaults();
 
@@ -416,6 +416,8 @@ void SectorView::Draw3D()
 	UpdateFactionToggles();
 
 	m_renderer->SetBlendMode(BLEND_SOLID);
+
+	UIView::Draw3D();
 }
 
 void SectorView::SetHyperspaceTarget(const SystemPath &path)
@@ -943,6 +945,8 @@ void SectorView::OnSwitchTo() {
 		m_onKeyPressConnection =
 			Pi::onKeyPress.connect(sigc::mem_fun(this, &SectorView::OnKeyPressed));
 
+	UIView::OnSwitchTo();
+
 	Update();
 
 	UpdateSystemLabels(m_selectedSystemLabels, m_selected);
@@ -1162,6 +1166,8 @@ void SectorView::Update()
 	ShrinkCache();
 
 	m_playerHyperspaceRange = Pi::player->GetStats().hyperspace_range;
+
+	UIView::Update();
 }
 
 void SectorView::ShowAll()

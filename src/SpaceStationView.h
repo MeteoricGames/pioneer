@@ -6,17 +6,16 @@
 
 #include "libs.h"
 #include "gui/Gui.h"
-#include "View.h"
+#include "UIView.h"
 #include "Form.h"
 #include "FormController.h"
 #include "FaceVideoLink.h"
 
-class SpaceStationView: public View {
+class SpaceStationView: public UIView {
 public:
 	SpaceStationView();
 	virtual ~SpaceStationView();
 	virtual void Update();
-	virtual void Draw3D() {}
 
 protected:
 	virtual void OnSwitchTo();

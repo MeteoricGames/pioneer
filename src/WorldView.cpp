@@ -38,13 +38,13 @@ static const float WHEEL_SENSITIVITY = .2f;	// Should be a variable in user sett
 static const float HUD_CROSSHAIR_SIZE = 24.0f;
 static const float HUD_ALPHA          = 0.34f;
 
-WorldView::WorldView(): View()
+WorldView::WorldView(): UIView()
 {
 	m_camType = CAM_INTERNAL;
 	InitObject();
 }
 
-WorldView::WorldView(Serializer::Reader &rd): View()
+WorldView::WorldView(Serializer::Reader &rd): UIView()
 {
 	m_camType = CamType(rd.Int32());
 	InitObject();
@@ -386,6 +386,7 @@ void WorldView::Draw3D()
 	assert(Pi::player);
 	assert(!Pi::player->IsDead());
 	m_camera->Draw(m_renderer, GetCamType() == CAM_INTERNAL ? Pi::player : 0);
+	UIView::Draw3D();
 }
 
 void WorldView::OnToggleLabels()
@@ -856,10 +857,13 @@ void WorldView::Update()
 		Body* const target = PickBody(double(Gui::Screen::GetWidth())/2.0, double(Gui::Screen::GetHeight())/2.0);
 		SelectBody(target, false);
 	}
+
+	UIView::Update();
 }
 
 void WorldView::OnSwitchTo()
 {
+	UIView::OnSwitchTo();
 	RefreshButtonStateAndVisibility();
 }
 

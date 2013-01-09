@@ -7,7 +7,7 @@
 #include "libs.h"
 #include "gui/Gui.h"
 #include "gui/GuiWidget.h"
-#include "View.h"
+#include "UIView.h"
 #include "Serializer.h"
 #include "Background.h"
 #include "EquipType.h"
@@ -20,7 +20,7 @@ class Ship;
 class NavTunnelWidget;
 namespace Gui { class TexturedQuad; }
 
-class WorldView: public View {
+class WorldView: public UIView {
 public:
 	friend class NavTunnelWidget;
 	WorldView();

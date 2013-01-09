@@ -10,7 +10,7 @@
 
 #include "StationServicesForm.h"
 
-SpaceStationView::SpaceStationView(): View()
+SpaceStationView::SpaceStationView(): UIView()
 {
 	Gui::Label *l = new Gui::Label(Lang::COMMS_LINK);
 	l->Color(1,.7f,0);
@@ -116,6 +116,8 @@ void SpaceStationView::Update()
 		m_statusBox->Hide();
 	else
 		m_statusBox->Show();
+
+	UIView::Update();
 }
 
 void SpaceStationView::OnSwitchTo()
@@ -126,6 +128,7 @@ void SpaceStationView::OnSwitchTo()
 		m_videoLink = 0;
 	}
 	m_formController->JumpToForm(new StationServicesForm(m_formController));
+	UIView::OnSwitchTo();
 }
 
 void SpaceStationView::RefreshForForm(Form *f)

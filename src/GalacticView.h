@@ -9,9 +9,9 @@
 #include "View.h"
 #include <vector>
 #include <string>
-#include "View.h"
+#include "UIView.h"
 
-class GalacticView: public View {
+class GalacticView: public UIView {
 public:
 	GalacticView();
 	virtual ~GalacticView();
@@ -19,8 +19,6 @@ public:
 	virtual void Draw3D();
 	virtual void Save(Serializer::Writer &wr);
 	virtual void Load(Serializer::Reader &rd);
-protected:
-	virtual void OnSwitchTo() {}
 private:
 	void OnClickGalacticView();
 	void PutLabels(vector3d offset);
