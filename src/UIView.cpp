@@ -6,16 +6,6 @@
 #include "ui/Context.h"
 #include "gameui/Panel.h"
 
-void UIView::Update()
-{
-	Pi::ui->Update();
-}
-
-void UIView::Draw3D()
-{
-	Pi::ui->Draw();
-}
-
 void UIView::OnSwitchTo()
 {
 	UI::VBox *box = Pi::ui->VBox();
