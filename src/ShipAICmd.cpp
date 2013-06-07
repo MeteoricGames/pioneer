@@ -680,6 +680,7 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target) : AICommand(ship, CMD_FLYTO)
 	else m_dist = VICINITY_MUL*MaxEffectRad(target, ship);
 
 	if (target->IsType(Object::SPACESTATION) && static_cast<SpaceStation*>(target)->IsGroundStation()) {
+		
 		m_posoff = target->GetPosition() + 15000.0 * target->GetOrient().VectorY();
 		m_posoff.x+=Pi::rng.Int32(-500,500);
 	//	m_posoff += 500.0 * target->GetOrient().VectorX();
@@ -776,7 +777,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 				m_ship->SetJuice(20.0);
 			}
 			else {
-				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(-10000, 0, -99000));
+				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
 				m_ship->SetJuice(20.0);
 			}
 			return false;
@@ -785,10 +786,16 @@ bool AICmdFlyTo::TimeStepUpdate()
 
 	if (!m_target && !m_targframe) return true;			// deleted object
 
+		//intercept posoff
+	/*if (m_target){
+		if (15000.0>m_ship->GetPositionRelTo(m_target).Length())
+			m_posoff *= 0.5;
+	}*/
+
 	// sort out gear, launching
 	if (m_ship->GetFlightState() == Ship::FLYING) m_ship->SetWheelState(false);
 	else { LaunchShip(m_ship); return false; }
-
+	
 	// generate base target pos (with vicinity adjustment) & vel 
 	double timestep = Pi::game->GetTimeStep();
 	vector3d targpos, targvel;
@@ -908,7 +915,7 @@ printf("Autopilot dist = %.1f, speed = %.1f, zthrust = %.2f, state = %i\n",
 	//sdiff/=180.0;
 
 	// linear thrust application, decel check
-	vector3d vdiff = linaccel*reldir + perpspeed*perpdir;
+	vector3d vdiff = 0.9*linaccel*reldir + perpspeed*perpdir;  //0.9 so we dont overshoot and face forward.
 	bool decel = sdiff <= 0;
 	m_ship->SetDecelerating(decel);
 	if (decel) m_ship->AIChangeVelBy(vdiff * m_ship->GetOrient());
