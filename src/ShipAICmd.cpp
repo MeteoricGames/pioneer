@@ -13,7 +13,7 @@
 #include "Space.h"
 
 
-static const double VICINITY_MIN = 15000.0;
+static const double VICINITY_MIN = 8000.0;
 static const double VICINITY_MUL = 4.0;
 
 AICommand *AICommand::Load(Serializer::Reader &rd)
@@ -681,14 +681,14 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target) : AICommand(ship, CMD_FLYTO)
 
 	if (target->IsType(Object::SPACESTATION) && static_cast<SpaceStation*>(target)->IsGroundStation()) {
 		
-		m_posoff = target->GetPosition() + 15000.0 * target->GetOrient().VectorY();
+		m_posoff = target->GetPosition() + 8000.0 * target->GetOrient().VectorY();
 		m_posoff.x+=Pi::rng.Int32(-500,500);
 	//	m_posoff += 500.0 * target->GetOrient().VectorX();
 		m_targframe = target->GetFrame(); m_target = 0;
 	}
 	else { m_target = target; m_targframe = 0; }
 
-	if (ship->GetPositionRelTo(target).Length() <= 15000.0) {		
+	if (ship->GetPositionRelTo(target).Length() <= 8000.0) {		
 		m_targframe = 0;
 		m_ship->SetJuice(1.0);
 	}
@@ -786,12 +786,6 @@ bool AICmdFlyTo::TimeStepUpdate()
 
 	if (!m_target && !m_targframe) return true;			// deleted object
 
-		//intercept posoff
-	/*if (m_target){
-		if (15000.0>m_ship->GetPositionRelTo(m_target).Length())
-			m_posoff *= 0.5;
-	}*/
-
 	// sort out gear, launching
 	if (m_ship->GetFlightState() == Ship::FLYING) m_ship->SetWheelState(false);
 	else { LaunchShip(m_ship); return false; }
@@ -859,6 +853,9 @@ printf("Autopilot dist = %.1f, speed = %.1f, zthrust = %.2f, state = %i\n",
 	maxdecel -= gravdir * GetGravityAtPos(m_ship->GetFrame(), m_ship->GetPosition());
 	if (maxdecel < 0) maxdecel = 0.0;
 
+	if (targdist < 50000.0 && m_ship->GetVelocity().Length()>1000.0) maxdecel*=0.25; //prevent overshooting.
+	if (targdist < 10000.0 && m_ship->GetVelocity().Length()>1000.0) maxdecel*=0.125; //prevent overshooting.
+
 	// target ship acceleration adjustment
 	if (m_target && m_target->IsType(Object::SHIP)) {
 		Ship *targship = static_cast<Ship*>(m_target);
@@ -881,7 +878,7 @@ printf("Autopilot dist = %.1f, speed = %.1f, zthrust = %.2f, state = %i\n",
 
 	double sidefactor = perpspeed / (tt*0.5);
 	if (curspeed > (tt+timestep)*maxdecel || maxdecel < sidefactor) {
-		m_ship->AIFaceDirection(-relvel);
+		m_ship->AIFaceDirection(-relvel); //prevents retro
 		m_ship->AIMatchVel(targvel);
 		m_state = -5; return false;
 	}
@@ -924,8 +921,8 @@ printf("Autopilot dist = %.1f, speed = %.1f, zthrust = %.2f, state = %i\n",
 	// work out which way to head 
 	vector3d head = reldir;
 	if (!m_state && sdiff < -1.2*maxdecel*timestep) m_state = 1;
-	if (m_state && sdiff < maxdecel*timestep*60) head = head;
-	if (!m_state && decel) sidefactor = sidefactor;
+	if (m_state && sdiff < maxdecel*timestep*60) head = head;  //- but prevents retro
+	if (!m_state && decel) sidefactor = sidefactor;  //- but prevents retro
 	head = head*maxdecel + perpdir*sidefactor;
 
 	// face appropriate direction
