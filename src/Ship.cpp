@@ -411,7 +411,7 @@ vector3d Ship::GetMaxThrust(const vector3d &dir) const
 	maxThrust.z = (dir.z > 0) ? m_type->linThrust[ShipType::THRUSTER_REVERSE]
 		: -m_type->linThrust[ShipType::THRUSTER_FORWARD];
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if (m_curAICmd!=0 && GetVelocity().Length() > 1000) return maxThrust*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
+	if ((m_curAICmd!=0||(Pi::KeyState(SDLK_RSHIFT)&&Pi::KeyState(SDLK_RCTRL))) && GetVelocity().Length() > 1000) return maxThrust*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return maxThrust*m_juice;
 	return maxThrust;
 }
@@ -422,26 +422,26 @@ double Ship::GetAccelMin() const
 	val = std::min(val, m_type->linThrust[ShipType::THRUSTER_RIGHT]);
 	val = std::min(val, -m_type->linThrust[ShipType::THRUSTER_LEFT]);
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if (m_curAICmd!=0 && GetVelocity().Length() > 1000) return (val / GetMass())*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
+	if ((m_curAICmd!=0||(Pi::KeyState(SDLK_RSHIFT)&&Pi::KeyState(SDLK_RCTRL))) && GetVelocity().Length() > 1000) return (val / GetMass())*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return (val / GetMass())*m_juice;
 	return (val / GetMass());
 }
 
 double Ship::GetAccelFwd() const { 
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if (m_curAICmd!=0 && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
+	if ((m_curAICmd!=0||(Pi::KeyState(SDLK_RSHIFT)&&Pi::KeyState(SDLK_RCTRL))) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 	return -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass(); 
 }
 double Ship::GetAccelRev() const { 
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if (m_curAICmd!=0 && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
+	if ((m_curAICmd!=0||(Pi::KeyState(SDLK_RSHIFT)&&Pi::KeyState(SDLK_RCTRL))) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
 	return m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass(); 
 }
 double Ship::GetAccelUp() const { 
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if (m_curAICmd!=0 && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
+	if ((m_curAICmd!=0||(Pi::KeyState(SDLK_RSHIFT)&&Pi::KeyState(SDLK_RCTRL))) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
 	return m_type->linThrust[ShipType::THRUSTER_UP] / GetMass(); 
 }
@@ -997,7 +997,7 @@ void Ship::StaticUpdate(const float timeStep)
 				vector3d vdir = GetVelocity().Normalized();
 				vector3d pdir = -GetOrient().VectorZ();
 				double dot = vdir.Dot(pdir);
-				if ((m_stats.free_capacity) && (dot > 0.95) && (speed > 2000.0) && (density > 1.0)) {
+				if ((m_stats.free_capacity) && (dot > 0.95) && (speed > 2000.0) && (density > 0.0)) {
 					double rate = speed*density*0.00001f;
 					if (Pi::rng.Double() < rate) {
 						m_equipment.Add(Equip::HYDROGEN);
