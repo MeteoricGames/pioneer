@@ -130,9 +130,11 @@ void WorldView::InitObject()
 
 	m_transitButton = new Gui::MultiStateImageButton();
 	m_transitButton->SetShortcut(SDLK_F7, KMOD_NONE);
+	m_transitButton->AddState(5, "icons/transit_unavailable.png", "");
 	m_transitButton->AddState(6, "icons/transit_off.png", "");
-	m_transitButton->AddState(7, "icons/transit_on.png", "");  
-	m_transitButton->AddState(5, "icons/transit_unavailable.png", "");   
+	m_transitButton->AddState(7, "icons/transit_off.png", "");
+	m_transitButton->AddState(8, "icons/transit_on.png", "");
+	m_transitButton->AddState(9, "icons/transit_on.png", "");
 	m_transitButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeTransitState));
 	m_transitButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_transitButton, 66, 2);
@@ -344,6 +346,20 @@ void WorldView::OnChangeWheelsState(Gui::MultiStateImageButton *b)
 void WorldView::OnChangeTransitState(Gui::MultiStateImageButton *b)
 {
 	Pi::BoinkNoise();
+	int newState = b->GetState();
+	switch (newState) {
+			case 7:
+				Pi::player->SetJuice(20.0);
+				break;
+			case 9:
+				Pi::player->SetJuice(1.0);
+				break;
+			case 5:
+				newState = 6;
+				break;
+			default: break;
+	}
+	if (newState!=5) b->SetActiveState(newState);
 }
 
 	/*if (Pi::player->GetNavTarget() || Pi::player->GetCombatTarget()) {
@@ -506,18 +522,27 @@ void WorldView::RefreshButtonStateAndVisibility()
 	//dim auto and transit if no target
 	if (Pi::player->GetNavTarget() || Pi::player->GetCombatTarget()) {
 		m_flightControlButton->SetActiveState(6);
-		m_transitButton->SetActiveState(6);
 	}
 	else {
 		m_flightControlButton->SetActiveState(5);
-		m_transitButton->SetActiveState(6);
 	}
 
 	//lit up autopilot button when it's active, off maneuver.
 	if (Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_AUTOPILOT) {
 		m_maneuverButton->SetActiveState(6);
 		m_flightControlButton->SetActiveState(7);
+		if (m_transitButton->GetState()<8) m_transitButton->SetActiveState(8); //autopilot uses transit..
 	}
+
+	//lit transit from juice
+	if (Pi::player->GetJuice() == 1.0)
+		m_transitButton->SetActiveState(6);
+	else
+		m_transitButton->SetActiveState(8);
+
+	//dim transit if speed < 1 km/S
+	if (Pi::player->GetVelocity().Length()<1000.0)
+		m_transitButton->SetActiveState(5);
 
 	switch(Pi::player->GetFlightState()) {
 		case Ship::LANDED:
