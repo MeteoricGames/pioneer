@@ -117,6 +117,7 @@ public:
 	float GetWheelState() const { return m_wheelState; }
 	float GetJuice() const { return m_juice; }
 	int GetTransitState() const { return m_transitstate; }
+	int GetHaleState() const { return m_hale; }
 	int GetWheelTransition() const { return m_wheelTransition; }
 	bool SpawnCargo(CargoBody * c_body) const;
 
@@ -124,6 +125,7 @@ public:
 
 	void SetJuice(const double &juice) { m_juice = juice; }
 	void SetTransitState(const int &transitstate) { m_transitstate = transitstate; }
+	void SetHaleState(const int &halestate) { m_hale = halestate; }
 	void SetHyperspaceDest(const SystemPath &dest) { m_hyperspace.dest = dest; }
 	const SystemPath &GetHyperspaceDest() const { return m_hyperspace.dest; }
 	double GetHyperspaceDuration() const { return m_hyperspace.duration; }
@@ -298,6 +300,7 @@ private:
 	int m_wheelTransition;
 	double m_juice;
 	int m_transitstate;
+	int m_hale;
 
 	vector3d m_thrusters;
 	vector3d m_angThrusters;
