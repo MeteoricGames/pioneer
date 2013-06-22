@@ -1151,14 +1151,14 @@ void WorldView::UpdateCommsOptions()
 		button = AddCommsOption(stringf("Agreed"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 4));
 		ypos += 32;
+		button = AddCommsOption(stringf("No sorry, I cannot"), ypos, optnum++);
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 7));
+		ypos += 32;
 		button = AddCommsOption(stringf("Let me go and you can have half my cargo"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 5));
 		ypos += 32;
 		button = AddCommsOption(stringf("Let me go and you can have all my cargo"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 6));
-		ypos += 32;
-		button = AddCommsOption(stringf("No."), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 7));
 		ypos += 32;
 		button = AddCommsOption(stringf("No! Prepare to be destroyed!"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 8));
