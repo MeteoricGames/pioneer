@@ -1060,6 +1060,35 @@ static int l_ship_ai_fly_to(lua_State *l)
 	return 0;
 }
 
+static int l_ship_get_hale(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	if (s->GetFlightState() == Ship::HYPERSPACE)
+		return luaL_error(l, "Ship:AIFlyTo() cannot be called on a ship in hyperspace");
+	Ship *target = LuaObject<Ship>::CheckFromLua(2);
+	lua_pushinteger(l, target->GetHaleState());
+	return 1;
+}
+
+static int l_ship_set_hale(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	if (s->GetFlightState() == Ship::HYPERSPACE)
+		return luaL_error(l, "Ship:AIFlyTo() cannot be called on a ship in hyperspace");
+	Ship *target = LuaObject<Ship>::CheckFromLua(2);
+	int h = 0;
+	if (lua_isnumber(l, 3)) {
+			h = int(luaL_checknumber(l, 3));
+			if (h < 0 ) {
+				pi_lua_warn(l,
+					"argument out of range: Ship{%s}:dist(%g)",
+					s->GetLabel().c_str(), h);
+			}
+	}
+	target->SetHaleState(h);
+	return 0;
+}
+
 /*
  * Method: AIFlyToClose
  *
@@ -1286,6 +1315,8 @@ template <> void LuaObject<Ship>::RegisterClass()
 		{ "RemoveEquip",      l_ship_remove_equip        },
 		{ "GetEquipCount",    l_ship_get_equip_count     },
 		{ "GetEquipFree",     l_ship_get_equip_free      },
+		{ "GetHale",		  l_ship_get_hale			 },
+		{ "SetHale",		  l_ship_set_hale			 },
 
 		{ "SpawnCargo", l_ship_spawn_cargo },
 
