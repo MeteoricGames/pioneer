@@ -1135,12 +1135,23 @@ void WorldView::UpdateCommsOptions()
 		}
 	}
 
+
+	//player
+
+	//0 nothing or reject
+	//1 Being haled (if accept set 2, else set 0)
+	//2 Accepted commchannel, haler asks and sets 3
+	//3 Varous responses
+
 	if (Pi::player->GetHaleState()==1)
 	{
 		m_commsOptions->Add(new Gui::Label("#fff"+std::string("Response")), 16, float(ypos));
 		ypos += 32;
 		button = AddCommsOption(stringf("Open comm channel"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 2));
+		ypos += 32;
+		button = AddCommsOption(stringf("Reject!"), ypos, optnum++);
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 0));
 		ypos += 32;
 	}
 
@@ -1151,9 +1162,7 @@ void WorldView::UpdateCommsOptions()
 		button = AddCommsOption(stringf("Agreed"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 4));
 		ypos += 32;
-		button = AddCommsOption(stringf("No sorry, I cannot"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 7));
-		ypos += 32;
+
 		button = AddCommsOption(stringf("Let me go and you can have half my cargo"), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 5));
 		ypos += 32;

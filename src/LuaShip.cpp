@@ -1198,8 +1198,8 @@ static int l_ship_get_hale(lua_State *l)
 	Ship *s = LuaObject<Ship>::CheckFromLua(1);
 	if (s->GetFlightState() == Ship::HYPERSPACE)
 		return luaL_error(l, "Ship:GetHale() cannot be called on a ship in hyperspace");
-	Ship *target = LuaObject<Ship>::CheckFromLua(2);
-	lua_pushinteger(l, target->GetHaleState());
+	//Ship *target = LuaObject<Ship>::CheckFromLua(2);
+	lua_pushinteger(l, s->GetHaleState());
 	return 1;
 }
 
@@ -1208,7 +1208,7 @@ static int l_ship_get_hale(lua_State *l)
  *
  * Get hale status from ship for comms
  *
- * > ship:GetHale(comm)
+ * > ship:SetHale(comm)
  *
  * Parameters:
  *
@@ -1227,17 +1227,17 @@ static int l_ship_set_hale(lua_State *l)
 	Ship *s = LuaObject<Ship>::CheckFromLua(1);
 	if (s->GetFlightState() == Ship::HYPERSPACE)
 		return luaL_error(l, "Ship:SetHale() cannot be called on a ship in hyperspace");
-	Ship *target = LuaObject<Ship>::CheckFromLua(2);
+	//Ship *target = LuaObject<Ship>::CheckFromLua(2);
 	int h = 0;
-	if (lua_isnumber(l, 3)) {
-			h = int(luaL_checknumber(l, 3));
+	if (lua_isnumber(l, 2)) {
+			h = int(luaL_checknumber(l, 2));
 			if (h < 0 ) {
 				pi_lua_warn(l,
 					"argument out of range: Ship{%s}:dist(%g)",
 					s->GetLabel().c_str(), h);
 			}
 	}
-	target->SetHaleState(h);
+	s->SetHaleState(h);
 	return 0;
 }
 
