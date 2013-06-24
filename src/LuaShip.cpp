@@ -1176,21 +1176,57 @@ static int l_ship_ai_fly_to(lua_State *l)
 	return 0;
 }
 
+/*
+ * Method: GetHale
+ *
+ * Get hale status from ship for comms
+ *
+ * > ship:GetHale()
+ *
+ * Parameters:
+ *
+ * Availability:
+ *
+ *  June 2013
+ *
+ * Status:
+ *
+ *  experimental
+ */
 static int l_ship_get_hale(lua_State *l)
 {
 	Ship *s = LuaObject<Ship>::CheckFromLua(1);
 	if (s->GetFlightState() == Ship::HYPERSPACE)
-		return luaL_error(l, "Ship:AIFlyTo() cannot be called on a ship in hyperspace");
+		return luaL_error(l, "Ship:GetHale() cannot be called on a ship in hyperspace");
 	Ship *target = LuaObject<Ship>::CheckFromLua(2);
 	lua_pushinteger(l, target->GetHaleState());
 	return 1;
 }
 
+/*
+ * Method: SetHale
+ *
+ * Get hale status from ship for comms
+ *
+ * > ship:GetHale(comm)
+ *
+ * Parameters:
+ *
+ * comm - interger to set status of communication, used for interaction.
+ *
+ * Availability:
+ *
+ *  June 2013
+ *
+ * Status:
+ *
+ *  experimental
+ */
 static int l_ship_set_hale(lua_State *l)
 {
 	Ship *s = LuaObject<Ship>::CheckFromLua(1);
 	if (s->GetFlightState() == Ship::HYPERSPACE)
-		return luaL_error(l, "Ship:AIFlyTo() cannot be called on a ship in hyperspace");
+		return luaL_error(l, "Ship:SetHale() cannot be called on a ship in hyperspace");
 	Ship *target = LuaObject<Ship>::CheckFromLua(2);
 	int h = 0;
 	if (lua_isnumber(l, 3)) {
