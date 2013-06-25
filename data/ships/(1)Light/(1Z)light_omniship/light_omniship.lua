@@ -18,7 +18,7 @@ define_ship {
 		{ v(0,-4.42,26.04), v(0,0,1), 5, 'HORIZONTAL' },
 	},
 	max_cargo = 120,
-	max_missile = 1,
+	max_missile = 6,
 	max_laser = 2,
 	max_cargoscoop = 0,
 	max_fuelscoop = 1,

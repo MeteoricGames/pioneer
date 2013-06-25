@@ -265,7 +265,7 @@ bool AICmdKill::TimeStepUpdate()
 
 	if (m_leadTime < Pi::game->GetTime())
 	{
-		double skillShoot = 0.5;		// todo: should come from AI stats
+		double skillShoot = 0.0;		// todo: should come from AI stats
 
 		double headdiff = (leaddir - heading).Length();
 		double leaddiff = (leaddir - targdir).Length();
@@ -293,7 +293,7 @@ bool AICmdKill::TimeStepUpdate()
 	vector3d evadethrust(0,0,0);
 	if (m_evadeTime < Pi::game->GetTime())		// evasion time!
 	{
-		double skillEvade = 0.5;			// todo: should come from AI stats
+		double skillEvade = 10.0;			// todo: should come from AI stats
 		m_evadeTime = Pi::game->GetTime() + Pi::rng.Double(3.0,10.0) * skillEvade;
 		if (heading.Dot(targdir) < 0.7) skillEvade += 0.5;		// not in view
 		skillEvade += Pi::rng.Double(-0.5,0.5);

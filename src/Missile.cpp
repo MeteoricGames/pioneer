@@ -97,7 +97,7 @@ void Missile::Explode()
 	Pi::game->GetSpace()->KillBody(this);
 
 	const double damageRadius = 200.0;
-	const double kgDamage = 10000.0;
+	double kgDamage = 40000.0;
 
 	Space::BodyNearList nearby;
 	Pi::game->GetSpace()->GetBodiesMaybeNear(this, damageRadius, nearby);
@@ -105,7 +105,8 @@ void Missile::Explode()
 		if ((*i)->GetFrame() != GetFrame()) continue;
 		double dist = ((*i)->GetPosition() - GetPosition()).Length();
 		if (dist < damageRadius) {
-			// linear damage decay with distance
+			// linear damage decay with distance and give player an atvantage
+			if ((*i)->IsType(Object::PLAYER)) kgDamage*=0.5;
 			(*i)->OnDamage(m_owner, kgDamage * (damageRadius - dist) / damageRadius);
 			if ((*i)->IsType(Object::SHIP))
 				LuaEvent::Queue("onShipHit", dynamic_cast<Ship*>(*i), m_owner);

@@ -19,7 +19,7 @@ define_ship {
 	},
 	max_cargo = 50,
 	max_laser = 1,
-	max_missile = 2,
+	max_missile = 16,
 	max_cargoscoop = 1,
 	max_fuelscoop = 1,
 	min_crew = 1,
