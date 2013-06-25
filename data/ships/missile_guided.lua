@@ -4,13 +4,13 @@
 define_missile {
 	name = 'MISSILE_GUIDED',
 	model = 'missile',
-	forward_thrust = 6e5,
-	reverse_thrust = 6e5,
-	angular_thrust = 12e5,
-	up_thrust = 1e5,
-	down_thrust = 1e5,
-	left_thrust = 1e5,
-	right_thrust = 1e5,
+	forward_thrust = 20e5,
+	reverse_thrust = 20e5,
+	angular_thrust = 40e5,
+	up_thrust = 5e5,
+	down_thrust = 5e5,
+	left_thrust = 5e5,
+	right_thrust = 5e5,
 	hull_mass=1,
 	price=100
 }

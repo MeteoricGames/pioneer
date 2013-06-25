@@ -4,7 +4,7 @@
 define_missile {
 	name = 'MISSILE_UNGUIDED',
 	model = 'missile',
-	forward_thrust = 16e5,
+	forward_thrust = 20e5,
 	hull_mass=1,
 	price=100
 }
