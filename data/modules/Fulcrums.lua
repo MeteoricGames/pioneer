@@ -45,6 +45,13 @@ local onEnterSystem = function (player)
 			y=y+200
 			player:SetPos(fulcrum,x,y,z)
 			fulcrum:UseECM()
+			local p=Space.SpawnShipNear('military_gun_emplacement', Game.player, 1, 1)
+			p:AddEquip('PULSECANNON_DUAL_1MW')
+			p:AddEquip('LASER_COOLING_BOOSTER')
+			p:SetLabel('[Military Sentry]')
+			p:SetFuelPercent(0)
+			p:AIHoldPos()
+			p:AIKill(Game.player)
 		end
 	end
 end

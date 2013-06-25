@@ -423,7 +423,7 @@ static int l_space_spawn_ship_parked_offset(lua_State *l)
 	Ship *ship = new Ship(type);
 	assert(ship);
 
-	double dist = station->GetFrame()->GetBody()->GetPhysRadius()*0.26;
+	double dist = station->GetFrame()->GetBody()->GetPhysRadius()*0.75;
 
 	double parkDist = station->GetStationType()->parkingDistance*0.5+dist;
 	parkDist -= ship->GetPhysRadius();		// park inside parking radius
