@@ -267,6 +267,7 @@ bool AICmdKill::TimeStepUpdate()
 	if (m_leadTime < Pi::game->GetTime())
 	{
 		double skillShoot = 0.5;		// todo: should come from AI stats
+		if (m_ship->GetShipType()->tag!=ShipType::TAG_STATIC_SHIP) skillShoot = 0.0;  //XXX turrets have good skills.
 
 		double headdiff = (leaddir - heading).Length();
 		double leaddiff = (leaddir - targdir).Length();
