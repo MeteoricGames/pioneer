@@ -11,12 +11,16 @@ local spawnTurrets = function (ship)
  	Timer:CallAt(Game.time+1, function ()
 		if ship==nil or not ship:exists() then return end
 		for x=1,5 do
-			turrets[x]=Space.SpawnShipNear('military_gun_emplacement', fulcrum, 1, 1)
-			turrets[x]:AddEquip('PULSECANNON_20MW')
-			turrets[x]:AddEquip('PULSECANNON_20MW')
-			turrets[x]:AddEquip('LASER_COOLING_BOOSTER')
-			turrets[x]:SetLabel('[Military Sentry]')
-			turrets[x]:AIHoldPos()
+			local t	=Space.SpawnShipNear('military_gun_emplacement', fulcrum, 1, 1)
+			turrets[t] = {
+				ship	= t,
+				status	='idle',
+			}
+			turrets[t].ship:AddEquip('PULSECANNON_20MW')
+			turrets[t].ship:AddEquip('PULSECANNON_20MW')
+			turrets[t].ship:AddEquip('LASER_COOLING_BOOSTER')
+			turrets[t].ship:SetLabel('[Military Sentry]')
+			turrets[t].ship:AIHoldPos()
 		end
 	end)
 end
@@ -68,18 +72,34 @@ local onEnterSystem = function (player)
 end
 
 local onShipDestroyed = function (ship, attacker)
-	if turrets~=nil and ship==turret_target then 
+
+end
+
+local onAICompleted = function (ship, ai_error)
+
+	if ship==nil then return end
+	if not ship:exists() then return end
+
+	if turrets~=nil then 
 		for k,v in pairs(turrets) do
-			if v==attacker then
-				v:CancelAI()
-				v:AIHoldPos()
+			if ship==v.ship and fulcrum:exists() then
+				if v.status=='attacking' then
+					v.ship:CancelAI()
+					v.status='cancel'
+					print ('got aicomplete...')
+					Timer:CallAt(Game.time+1, function ()
+						if v.ship~=nil and v.ship:exists() and v.status=='cancel' then
+							v.ship:AIHoldPos()
+							v.status='idle'
+							print ('aicomplete:idle')
+						end
+					end)
+				end
 			end
 		end
 		--turret_target = nil
 	end
-end
 
-local onAICompleted = function (ship, ai_error)
 	if not ship:IsPlayer() and playerarrived==true then return end
 	playerarrived=false
 end
@@ -96,9 +116,52 @@ local onShipHit = function (ship, attacker)
 	if ship==nil or not ship:exists() or ship==attacker then return end
 	if turrets==nil then return end
 	for k,v in pairs(turrets) do
-		if v~=nil and v:exists() and v:isa('Ship') and (ship==fulcrum or v==ship or ship==Game.player) then
-			v:AIKill(attacker)
+		--attacker exists and turret in range:
+		if attacker~=nil and v~=nil and attacker:exists() and v.ship:exists() and v.ship:isa('Ship') and (ship==fulcrum or v.ship==ship or ship==Game.player) and attacker:DistanceTo(ship)<4000 then
+			--on cancel attack:
+			if v.status=='cancel' then
+				v.ship:AIKill(attacker)
+				turret_target=attacker
+				v.status='attacking'
+				print ('attacking ..'..attacker.label)
+			end
+			-- on idle, cancel
+			if v.status=='idle' then
+				v.ship:CancelAI()
+				v.status='cancel'
+				print ('got cancel ..')
+			end
+		else
+
+			-- attacker exists out of range
+			if attacker~=nil and v.ship~=nil and v.ship:exists() and attacker:exists() and turret_target~=nil and turret_target~=attacker then --using turret target to determine out of range
+				v.status='norange'
+				print ('got out of range..')
+				Timer:CallAt(Game.time+1, function ()
+					if v.ship~=nil and v.ship:exists() and v.status=='norange' then
+							v.ship:AIHoldPos()
+							v.status='idle'
+							print ('norange:idle:holdpos')
+					end
+				end)
+			end
+
+
+			-- attacker is gone..
+			if attacker==nil and v.ship~=nil and v.ship:exists() then 
+				v.status='noattacker' 
+				print ('got no attacker...')
+				Timer:CallAt(Game.time+1, function ()
+					if v.ship~=nil and v.ship:exists() and v.status=='noattacker' then
+							v.ship:AIHoldPos()
+							v.status='idle'
+							print ('noattacker:idle:holdpos')
+					end
+				end)
+			end
 		end
+
+	
 	end
 end
 
