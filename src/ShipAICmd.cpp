@@ -251,7 +251,8 @@ bool AICmdKill::TimeStepUpdate()
 	m_lastVel = m_target->GetVelocity();		// may need next frame
 	vector3d leaddir = m_ship->AIGetLeadDir(m_target, targaccel, 0);
 
-	if (targpos.Length() >= VICINITY_MIN+1000.0) {	// if really far from target, intercept
+	//XXX -> dont do this if you're a turret
+	if (targpos.Length() >= VICINITY_MIN+1000.0 && m_ship->GetShipType()->tag!=ShipType::TAG_STATIC_SHIP) {  // if really far from target, intercept
 //		printf("%s started AUTOPILOT\n", m_ship->GetLabel().c_str());
 		m_ship->SetJuice(20.0);
 		m_child = new AICmdFlyTo(m_ship, m_target);
@@ -354,6 +355,12 @@ bool AICmdKill::TimeStepUpdate()
 	}
 	else evadethrust.z = m_ship->GetThrusterState().z;
 	m_ship->SetThrusterState(evadethrust);
+
+	//XXX You're a turret, keep pos and stay here:
+	if (m_ship->GetShipType()->tag==ShipType::TAG_STATIC_SHIP) {
+		m_ship->AIMatchVel(vector3d(0,0,0));
+		return false;
+	} 
 
 	return false;
 }
