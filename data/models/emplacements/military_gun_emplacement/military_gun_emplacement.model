@@ -20,5 +20,5 @@ lod 1000
 mesh military_gun_emplacement.dae
 
 collision military_gun_emplacement_collision.obj
-mesh military_gun_emplacement_docking.dae
+
 
