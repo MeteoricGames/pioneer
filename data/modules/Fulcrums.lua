@@ -112,12 +112,18 @@ local onGameStart = function ()
 	loaded = nil
 end
 
+local doCancel = function(ship)
+	if ship~=nil and ship:exists() then
+		ship:CancelAI()
+	end
+end
+
 local onShipHit = function (ship, attacker)
 	if ship==nil or not ship:exists() or ship==attacker then return end
 	if turrets==nil then return end
 	for k,v in pairs(turrets) do
 		--attacker exists and turret in range:
-		if attacker~=nil and v~=nil and attacker:exists() and v.ship:exists() and v.ship:isa('Ship') and (ship==fulcrum or v.ship==ship or ship==Game.player) and attacker:DistanceTo(ship)<4000 then
+		if attacker~=nil and v.ship~=nil and attacker:exists() and v.ship:exists() and attacker:DistanceTo(ship)<4000 then --and ship==fulcrum then
 			--on cancel attack:
 			if v.status=='cancel' then
 				v.ship:AIKill(attacker)
@@ -127,9 +133,13 @@ local onShipHit = function (ship, attacker)
 			end
 			-- on idle, cancel
 			if v.status=='idle' then
-				v.ship:CancelAI()
-				v.status='cancel'
-				print ('got cancel ..')
+				Timer:CallAt(Game.time+1, function ()
+					if v.ship~=nil and v.ship:exists() then
+						v.ship:CancelAI()
+						v.status='cancel'
+						print ('got cancel ..')
+					end
+				end)
 			end
 		else
 
@@ -137,6 +147,7 @@ local onShipHit = function (ship, attacker)
 			if attacker~=nil and v.ship~=nil and v.ship:exists() and attacker:exists() and turret_target~=nil and turret_target~=attacker then --using turret target to determine out of range
 				v.status='norange'
 				print ('got out of range..')
+				doCancel(v.ship)
 				Timer:CallAt(Game.time+1, function ()
 					if v.ship~=nil and v.ship:exists() and v.status=='norange' then
 							v.ship:AIHoldPos()
@@ -151,6 +162,7 @@ local onShipHit = function (ship, attacker)
 			if attacker==nil and v.ship~=nil and v.ship:exists() then 
 				v.status='noattacker' 
 				print ('got no attacker...')
+				doCancel(v.ship)
 				Timer:CallAt(Game.time+1, function ()
 					if v.ship~=nil and v.ship:exists() and v.status=='noattacker' then
 							v.ship:AIHoldPos()
