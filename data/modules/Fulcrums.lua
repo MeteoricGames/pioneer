@@ -7,6 +7,7 @@ local playerarrived=false
 local turrets={}
 local turret_target=nil
 local lastCheck=0
+local target
 
 local check = function(ship)
 	if ship~=nil and ship:exists() and ship:isa('Ship') then return true end
@@ -15,6 +16,7 @@ end
 
 local spawnTurrets = function (ship)
  	Timer:CallAt(Game.time+1, function ()
+		if turrets==nil then turrets={} end
 		if ship==nil or not ship:exists() then return end
 		for x=1,5 do
 			local t	=Space.SpawnShipNear('military_gun_emplacement', fulcrum, 1, 1)
@@ -39,38 +41,41 @@ local checkTurrets = function (time)
 		return
 	end
 
+		
+
 		if turrets==nil then return end
 		for k,v in pairs(turrets) do
+			if check(target) and target == Game.player then target=Game.player end -- update pos.
 			-- inrange
-			     if check(v.ship) and v.status == 'idle' and check(v.killwho) and v.ship:DistanceTo(v.killwho)<4000 then
+			     if check(v.ship) and v.status == 'idle' and check(target) and v.ship:DistanceTo(target)<4000 then
 				v.status = 'cancel'
 				v.ship:CancelAI()
 				print "have idle, inrange, set cancel"
-			elseif check(v.ship) and v.status == 'cancel' and check(v.killwho) and v.ship:DistanceTo(v.killwho)<4000 then
+			elseif check(v.ship) and v.status == 'cancel' and check(target) and v.ship:DistanceTo(target)<4000 then
 				v.status = 'attack'
-				v.ship:AIKill(v.killwho)
+				v.ship:AIKill(target)
 				print "have cancel, inrange, set kill/attack"
 			-- out of range
-			elseif check(v.ship) and v.status == 'attack' and check(v.killwho) and v.ship:DistanceTo(v.killwho)>=4000 then
+			elseif check(v.ship) and v.status == 'attack' and check(target) and v.ship:DistanceTo(target)>=4000 then
 				v.status = 'cancel'
 				v.ship:CancelAI()
 				print "have attack, out of range, set cancel"
-			elseif check(v.ship) and v.status == 'cancel' and check(v.killwho) and v.ship:DistanceTo(v.killwho)>=4000 then
+			elseif check(v.ship) and v.status == 'cancel' and check(target) and v.ship:DistanceTo(target)>=4000 then
 				v.status = 'idle'
 				v.ship:AIHoldPos()
 				print "have cancel, out of range, setidle, and hold"
 			-- target is dead
-			elseif check(v.ship) and not check(v.killwho) and not v.status == 'cancel' then
+			elseif check(v.ship) and not check(target) and not v.status == 'cancel' then
 				v.status = 'cancel'
 				v.ship:CancelAI()
 				print "either, cancel"
-			elseif check(v.ship) and not check(v.killwho) and v.status == 'cancel' then
+			elseif check(v.ship) and not check(target) and v.status == 'cancel' then
 				v.status = 'idle'
 				v.ship:AIHoldPos()
 				print "have cancel either, set idle and hold"
 			else
 				print ('nothing.. stus :'..v.status)	
-				if check(v.killwho) and check(v.ship) then print(' dist:'..v.ship:DistanceTo(v.killwho)) end
+				if check(target) and check(v.ship) then print(' dist:'..v.ship:DistanceTo(target)) end
 			end
 		end
 end
@@ -159,7 +164,7 @@ local onShipHit = function (ship, attacker) --attacker location is a snapshot..b
 	if turrets==nil then return end
 	for k,v in pairs(turrets) do
 		if check(attacker) and check(v.ship) then
-			v.killwho=attacker
+			target=attacker
 			checkTurrets(Game.time)
 		end
 	end
