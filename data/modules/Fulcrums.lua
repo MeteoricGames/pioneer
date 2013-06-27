@@ -6,6 +6,12 @@ local fulcrum
 local playerarrived=false
 local turrets={}
 local turret_target=nil
+local lastCheck=0
+
+local check = function(ship)
+	if ship~=nil and ship:exists() and ship:isa('Ship') then return true end
+	return false
+end
 
 local spawnTurrets = function (ship)
  	Timer:CallAt(Game.time+1, function ()
@@ -15,6 +21,7 @@ local spawnTurrets = function (ship)
 			turrets[t] = {
 				ship	= t,
 				status	='idle',
+				killwho = nil,
 			}
 			turrets[t].ship:AddEquip('PULSECANNON_20MW')
 			turrets[t].ship:AddEquip('PULSECANNON_20MW')
@@ -23,6 +30,49 @@ local spawnTurrets = function (ship)
 			turrets[t].ship:AIHoldPos()
 		end
 	end)
+end
+
+local checkTurrets = function (time)
+	if time-lastCheck > 2 then
+		lastCheck=time
+	else
+		return
+	end
+
+		if turrets==nil then return end
+		for k,v in pairs(turrets) do
+			-- inrange
+			     if check(v.ship) and v.status == 'idle' and check(v.killwho) and v.ship:DistanceTo(v.killwho)<4000 then
+				v.status = 'cancel'
+				v.ship:CancelAI()
+				print "have idle, inrange, set cancel"
+			elseif check(v.ship) and v.status == 'cancel' and check(v.killwho) and v.ship:DistanceTo(v.killwho)<4000 then
+				v.status = 'attack'
+				v.ship:AIKill(v.killwho)
+				print "have cancel, inrange, set kill/attack"
+			-- out of range
+			elseif check(v.ship) and v.status == 'attack' and check(v.killwho) and v.ship:DistanceTo(v.killwho)>=4000 then
+				v.status = 'cancel'
+				v.ship:CancelAI()
+				print "have attack, out of range, set cancel"
+			elseif check(v.ship) and v.status == 'cancel' and check(v.killwho) and v.ship:DistanceTo(v.killwho)>=4000 then
+				v.status = 'idle'
+				v.ship:AIHoldPos()
+				print "have cancel, out of range, setidle, and hold"
+			-- target is dead
+			elseif check(v.ship) and not check(v.killwho) and not v.status == 'cancel' then
+				v.status = 'cancel'
+				v.ship:CancelAI()
+				print "either, cancel"
+			elseif check(v.ship) and not check(v.killwho) and v.status == 'cancel' then
+				v.status = 'idle'
+				v.ship:AIHoldPos()
+				print "have cancel either, set idle and hold"
+			else
+				print ('nothing.. stus :'..v.status)	
+				if check(v.killwho) and check(v.ship) then print(' dist:'..v.ship:DistanceTo(v.killwho)) end
+			end
+		end
 end
 
 local spawnShips = function ()
@@ -51,6 +101,11 @@ local spawnShips = function ()
 	return 0
 end
 
+local onLeaveSystem = function (player)
+	turrets=nil
+	turrets={}
+end
+
 local onEnterSystem = function (player)
 	
 	if player:IsPlayer() and spawnShips()~=nil then
@@ -60,6 +115,7 @@ local onEnterSystem = function (player)
 			Game.player:SetPos(fulcrum,x,y,z)
 			fulcrum:UseECM()
 			Game.player:AIFlyToClose(fulcrum,500)
+			checkTurrets(Game.time)
 		end
 	else
 		if fulcrum~=nil and player:exists() and fulcrum:exists() then
@@ -72,108 +128,40 @@ local onEnterSystem = function (player)
 end
 
 local onShipDestroyed = function (ship, attacker)
-
+	if turrets~=nil then checkTurrets(Game.time) end
 end
 
 local onAICompleted = function (ship, ai_error)
 
+	if turrets~=nil then checkTurrets(Game.time) end
 	if ship==nil then return end
 	if not ship:exists() then return end
-
-	if turrets~=nil then 
-		for k,v in pairs(turrets) do
-			if ship==v.ship and fulcrum:exists() then
-				if v.status=='attacking' then
-					v.ship:CancelAI()
-					v.status='cancel'
-					print ('got aicomplete...')
-					Timer:CallAt(Game.time+1, function ()
-						if v.ship~=nil and v.ship:exists() and v.status=='cancel' then
-							v.ship:AIHoldPos()
-							v.status='idle'
-							print ('aicomplete:idle')
-						end
-					end)
-				end
-			end
-		end
-		--turret_target = nil
-	end
 
 	if not ship:IsPlayer() and playerarrived==true then return end
 	playerarrived=false
 end
 
+local onShipAlertChanged = function (ship, alert)
+	if turrets==nil then return end
+	checkTurrets(Game.time)
+end
 
 local onGameStart = function ()
 	if loaded == nil then
 		spawnShips()
+		checkTurrets(Game.time)
 	end
 	loaded = nil
 end
 
-local doCancel = function(ship)
-	if ship~=nil and ship:exists() then
-		ship:CancelAI()
-	end
-end
-
-local onShipHit = function (ship, attacker)
-	if ship==nil or not ship:exists() or ship==attacker then return end
+local onShipHit = function (ship, attacker) --attacker location is a snapshot..bah..
+	if ship==nil or not ship:exists() or ship==attacker or not ship==fulcrum then return end
 	if turrets==nil then return end
 	for k,v in pairs(turrets) do
-		--attacker exists and turret in range:
-		if attacker~=nil and v.ship~=nil and attacker:exists() and v.ship:exists() and attacker:DistanceTo(ship)<4000 then --and ship==fulcrum then
-			--on cancel attack:
-			if v.status=='cancel' then
-				v.ship:AIKill(attacker)
-				turret_target=attacker
-				v.status='attacking'
-				print ('attacking ..'..attacker.label)
-			end
-			-- on idle, cancel
-			if v.status=='idle' then
-				Timer:CallAt(Game.time+1, function ()
-					if v.ship~=nil and v.ship:exists() then
-						v.ship:CancelAI()
-						v.status='cancel'
-						print ('got cancel ..')
-					end
-				end)
-			end
-		else
-
-			-- attacker exists out of range
-			if attacker~=nil and v.ship~=nil and v.ship:exists() and attacker:exists() and turret_target~=nil and turret_target~=attacker then --using turret target to determine out of range
-				v.status='norange'
-				print ('got out of range..')
-				doCancel(v.ship)
-				Timer:CallAt(Game.time+1, function ()
-					if v.ship~=nil and v.ship:exists() and v.status=='norange' then
-							v.ship:AIHoldPos()
-							v.status='idle'
-							print ('norange:idle:holdpos')
-					end
-				end)
-			end
-
-
-			-- attacker is gone..
-			if attacker==nil and v.ship~=nil and v.ship:exists() then 
-				v.status='noattacker' 
-				print ('got no attacker...')
-				doCancel(v.ship)
-				Timer:CallAt(Game.time+1, function ()
-					if v.ship~=nil and v.ship:exists() and v.status=='noattacker' then
-							v.ship:AIHoldPos()
-							v.status='idle'
-							print ('noattacker:idle:holdpos')
-					end
-				end)
-			end
+		if check(attacker) and check(v.ship) then
+			v.killwho=attacker
+			checkTurrets(Game.time)
 		end
-
-	
 	end
 end
 
@@ -186,6 +174,7 @@ local unserialize = function (data)
 	playerarrived=data[1]
 	fulcrum=data[2]
 	spawnTurrets(fulcrum)
+	checkTurrets(Game.time)
 end
 
 local onGameEnd = function ()
@@ -194,10 +183,12 @@ local onGameEnd = function ()
 	loaded,fulcrum,playerarrived,turrets=nil,nil,nil,nil
 end
 
-Event.Register("onShipDestroyed", onShipDestroyed)
+--Event.Register("onShipDestroyed", onShipDestroyed)
 Event.Register("onAICompleted", onAICompleted)
 Event.Register("onShipHit", onShipHit)
 Event.Register("onGameEnd", onGameEnd)
 Event.Register("onEnterSystem", onEnterSystem)
+Event.Register("onLeaveSystem", onLeaveSystem)
 Event.Register("onGameStart", onGameStart)
+Event.Register("onShipAlertChanged", onShipAlertChanged)
 Serializer:Register("Fulcrum", serialize, unserialize)
