@@ -102,9 +102,11 @@ private:
 	void OnClickLowThrustPower();
 	void OnSelectLowThrustPower(float power);
 
-	void OnClickHyperspace();
+	void OnClickHyperspace(Gui::MultiStateImageButton *b);
 	void OnChangeWheelsState(Gui::MultiStateImageButton *b);
+	void OnChangeTransitState(Gui::MultiStateImageButton *b);
 	void OnChangeFlightState(Gui::MultiStateImageButton *b);
+	void OnChangeManeuverState(Gui::MultiStateImageButton *b);
 	void OnHyperspaceTargetChanged();
 	void OnPlayerDockOrUndock();
 	void OnPlayerChangeTarget();
@@ -115,7 +117,8 @@ private:
 
 	NavTunnelWidget *m_navTunnel;
 
-	Gui::ImageButton *m_hyperspaceButton;
+	//Gui::ImageButton *m_hyperspaceButton;
+	Gui::MultiStateImageButton *m_hyperspaceButton;
 
 	Gui::Label *m_showCameraName;
 	Gui::Fixed *m_commsOptions;
@@ -124,6 +127,8 @@ private:
 	Gui::Fixed *m_lowThrustPowerOptions;
 	Gui::Label *m_flightStatus, *m_debugText;
 	Gui::ImageButton *m_launchButton;
+	Gui::MultiStateImageButton *m_maneuverButton;
+	Gui::MultiStateImageButton *m_transitButton;
 	Gui::MultiStateImageButton *m_wheelsButton;
 	Gui::MultiStateImageButton *m_flightControlButton;
 	bool m_labelsOn;

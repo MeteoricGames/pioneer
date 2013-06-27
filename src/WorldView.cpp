@@ -110,26 +110,51 @@ void WorldView::InitObject()
 	}
 
 	m_wheelsButton = new Gui::MultiStateImageButton();
-	m_wheelsButton->SetShortcut(SDLK_F6, KMOD_NONE);
+	//m_wheelsButton->SetShortcut(SDLK_F6, KMOD_NONE);
 	m_wheelsButton->AddState(0, "icons/wheels_up.png", Lang::WHEELS_ARE_UP);
 	m_wheelsButton->AddState(1, "icons/wheels_down.png", Lang::WHEELS_ARE_DOWN);
 	m_wheelsButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeWheelsState));
-	m_wheelsButton->SetRenderDimensions(30.0f, 22.0f);
+	m_wheelsButton->SetRenderDimensions(0.0f, 0.0f);
 	m_rightButtonBar->Add(m_wheelsButton, 34, 2);
 
-	Gui::ImageButton *set_low_thrust_power_button = new Gui::ImageButton("icons/set_low_thrust_power.png");
+	m_maneuverButton = new Gui::MultiStateImageButton();
+	m_maneuverButton->SetShortcut(SDLK_F6, KMOD_NONE);
+	m_maneuverButton->AddState(CONTROL_MANUAL, "icons/maneuver_on.png", Lang::MANUAL_CONTROL);
+	m_maneuverButton->AddState(CONTROL_FIXSPEED, "icons/maneuver_on.png", Lang::COMPUTER_SPEED_CONTROL);
+	m_maneuverButton->AddState(CONTROL_FIXHEADING_FORWARD, "icons/maneuver_on.png", Lang::COMPUTER_HEADING_CONTROL);
+	m_maneuverButton->AddState(CONTROL_FIXHEADING_BACKWARD, "icons/maneuver_on.png", Lang::COMPUTER_HEADING_CONTROL);
+	m_maneuverButton->AddState(5, "icons/maneuver_unavailable.png", "");
+	m_maneuverButton->AddState(6, "icons/maneuver_off.png", "");
+	m_maneuverButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeManeuverState));
+	m_maneuverButton->SetRenderDimensions(30.0f, 22.0f);
+	m_rightButtonBar->Add(m_maneuverButton, 34, 2);
+
+	m_transitButton = new Gui::MultiStateImageButton();
+	m_transitButton->SetShortcut(SDLK_F7, KMOD_NONE);
+	m_transitButton->AddState(5, "icons/transit_unavailable.png", "");
+	m_transitButton->AddState(6, "icons/transit_off.png", "");
+	m_transitButton->AddState(7, "icons/transit_off.png", "");
+	m_transitButton->AddState(8, "icons/transit_on.png", "");
+	m_transitButton->AddState(9, "icons/transit_on.png", "");
+	m_transitButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeTransitState));
+	m_transitButton->SetRenderDimensions(30.0f, 22.0f);
+	m_rightButtonBar->Add(m_transitButton, 66, 2);
+
+	/*Gui::ImageButton *set_low_thrust_power_button = new Gui::ImageButton("icons/set_low_thrust_power.png");
 	set_low_thrust_power_button->SetShortcut(SDLK_F8, KMOD_NONE);
 	set_low_thrust_power_button->SetToolTip(Lang::SELECT_LOW_THRUST_POWER_LEVEL);
 	set_low_thrust_power_button->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickLowThrustPower));
 	set_low_thrust_power_button->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(set_low_thrust_power_button, 98, 2);
+	m_rightButtonBar->Add(set_low_thrust_power_button, 98, 2);*/
 
-	m_hyperspaceButton = new Gui::ImageButton("icons/hyperspace_f8.png");
-	m_hyperspaceButton->SetShortcut(SDLK_F7, KMOD_NONE);
-	m_hyperspaceButton->SetToolTip(Lang::HYPERSPACE_JUMP);
+	m_hyperspaceButton = new Gui::MultiStateImageButton();
+	m_hyperspaceButton->SetShortcut(SDLK_F8, KMOD_NONE);
+	m_hyperspaceButton->AddState(0, "icons/jump_on.png", Lang::HYPERSPACE_JUMP);
+	m_hyperspaceButton->AddState(1, "icons/jump_off.png", Lang::HYPERSPACE_JUMP);
+	m_hyperspaceButton->AddState(2, "icons/jump_unavailable.png", Lang::HYPERSPACE_JUMP);
 	m_hyperspaceButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickHyperspace));
 	m_hyperspaceButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_hyperspaceButton, 66, 2);
+	m_rightButtonBar->Add(m_hyperspaceButton, 98, 2);
 
 	m_launchButton = new Gui::ImageButton("icons/blastoff.png");
 	m_launchButton->SetShortcut(SDLK_F5, KMOD_NONE);
@@ -141,11 +166,14 @@ void WorldView::InitObject()
 	m_flightControlButton = new Gui::MultiStateImageButton();
 	m_flightControlButton->SetShortcut(SDLK_F5, KMOD_NONE);
 	// these states must match Player::FlightControlState (so that the enum values match)
-	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/manual_control.png", Lang::MANUAL_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXSPEED, "icons/manual_control.png", Lang::COMPUTER_SPEED_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXHEADING_FORWARD, "icons/manual_control.png", Lang::COMPUTER_HEADING_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXHEADING_BACKWARD, "icons/manual_control.png", Lang::COMPUTER_HEADING_CONTROL);
-	m_flightControlButton->AddState(CONTROL_AUTOPILOT, "icons/autopilot.png", Lang::AUTOPILOT_ON);
+	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/autopilot_off.png", Lang::MANUAL_CONTROL);
+	//m_flightControlButton->AddState(CONTROL_FIXSPEED, "icons/autopilot_off.png", Lang::COMPUTER_SPEED_CONTROL);
+	//m_flightControlButton->AddState(CONTROL_FIXHEADING_FORWARD, "icons/autopilot_off.png", Lang::COMPUTER_HEADING_CONTROL);
+	//m_flightControlButton->AddState(CONTROL_FIXHEADING_BACKWARD, "icons/autopilot_off.png", Lang::COMPUTER_HEADING_CONTROL);
+	m_flightControlButton->AddState(6, "icons/autopilot_off.png", "");
+	m_flightControlButton->AddState(CONTROL_AUTOPILOT, "icons/autopilot_on.png", Lang::AUTOPILOT_ON);
+	m_flightControlButton->AddState(5, "icons/autopilot_unavailable.png", "");
+	m_flightControlButton->AddState(7, "icons/autopilot_on.png", Lang::AUTOPILOT_ON);
 	m_flightControlButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeFlightState));
 	m_flightControlButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_flightControlButton, 2, 2);
@@ -316,35 +344,83 @@ void WorldView::OnChangeWheelsState(Gui::MultiStateImageButton *b)
 	}
 }
 
-/* This is UI click to change flight control state (manual, speed ctrl) */
-void WorldView::OnChangeFlightState(Gui::MultiStateImageButton *b)
+void WorldView::OnChangeTransitState(Gui::MultiStateImageButton *b)
+{
+	Pi::BoinkNoise();
+	int newState = b->GetState();
+	switch (newState) {
+			case 7:
+				Pi::player->SetJuice(20.0);
+				break;
+			case 9:
+				Pi::player->SetJuice(1.0);
+				break;
+			case 5:
+				newState = 6;
+				break;
+			default: break;
+	}
+	if (newState!=5) b->SetActiveState(newState);
+}
+
+	/*if (Pi::player->GetNavTarget() || Pi::player->GetCombatTarget()) {
+		m_flightControlButton->SetActiveState(m_flightControlButton->GetState());
+		if (m_flightControlButton->GetState()==5) m_flightControlButton->SetActiveState(CONTROL_MANUAL);
+	}
+	else
+		m_flightControlButton->SetActiveState(5); */
+
+void WorldView::OnChangeManeuverState(Gui::MultiStateImageButton *b)
 {
 	Pi::BoinkNoise();
 	int newState = b->GetState();
 	if (Pi::KeyState(SDLK_LCTRL) || Pi::KeyState(SDLK_RCTRL)) {
-		// skip certain states
 		switch (newState) {
-			case CONTROL_FIXSPEED: newState = CONTROL_FIXHEADING_FORWARD; break;
-			case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
+			case CONTROL_FIXSPEED: 
+				newState = CONTROL_FIXHEADING_FORWARD; 
+				break;
+			case CONTROL_AUTOPILOT: 
+				newState = CONTROL_MANUAL; 
+				break;
 			default: break;
 		}
 	} else {
 		// skip certain states
 		switch (newState) {
 			case CONTROL_FIXHEADING_FORWARD: // fallthrough
-			case CONTROL_FIXHEADING_BACKWARD: newState = CONTROL_MANUAL; break;
-			case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
+			case CONTROL_FIXHEADING_BACKWARD: 
+				newState = CONTROL_MANUAL; 
+				break;
+			//case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
 			default: break;
 		}
 	}
-	b->SetActiveState(newState);
-	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
+	if (newState!=5) b->SetActiveState(newState);
+	if (newState!=5) Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
+}
+
+/* This is UI click to change flight control state (manual, speed ctrl) */
+void WorldView::OnChangeFlightState(Gui::MultiStateImageButton *b)
+{
+	Pi::BoinkNoise();
+	int newState = b->GetState();
+	switch (newState) {
+		case CONTROL_AUTOPILOT: 
+			newState = 6;
+			break;
+		case 5: 
+			newState = 6;
+			break;
+		default: break;
+	}
+	if (newState!=5) b->SetActiveState(newState);
+	//if (newState!=5) Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState)); 
 }
 
 /* This is when the flight control state actually changes... */
 void WorldView::OnPlayerChangeFlightControlState()
 {
-	m_flightControlButton->SetActiveState(Pi::player->GetPlayerController()->GetFlightControlState());
+	//m_flightControlButton->SetActiveState(Pi::player->GetPlayerController()->GetFlightControlState());
 }
 
 void WorldView::OnClickBlastoff()
@@ -360,7 +436,7 @@ void WorldView::OnClickBlastoff()
 	}
 }
 
-void WorldView::OnClickHyperspace()
+void WorldView::OnClickHyperspace(Gui::MultiStateImageButton *b)
 {
 	if (Pi::player->IsHyperspaceActive()) {
 		// Hyperspace countdown in effect.. abort!
@@ -415,9 +491,10 @@ static Color get_color_for_warning_meter_bar(float v) {
 
 void WorldView::RefreshHyperspaceButton() {
 	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget()))
-		m_hyperspaceButton->Show();
+		m_hyperspaceButton->SetActiveState(1);
 	else
-		m_hyperspaceButton->Hide();
+		m_hyperspaceButton->SetActiveState(2);
+	if (Pi::player->IsHyperspaceActive()) m_hyperspaceButton->SetActiveState(0);
 }
 
 void WorldView::RefreshButtonStateAndVisibility()
@@ -438,6 +515,35 @@ void WorldView::RefreshButtonStateAndVisibility()
 	m_wheelsButton->SetActiveState(int(Pi::player->GetWheelState()) || Pi::player->GetWheelTransition() == 1);
 
 	RefreshHyperspaceButton();
+
+	//5 unavail
+	//6 off blue
+	//7 on active
+
+	//dim auto and transit if no target
+	if (Pi::player->GetNavTarget() || Pi::player->GetCombatTarget()) {
+		m_flightControlButton->SetActiveState(6);
+	}
+	else {
+		m_flightControlButton->SetActiveState(5);
+	}
+
+	//lit up autopilot button when it's active, off maneuver.
+	if (Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_AUTOPILOT) {
+		m_maneuverButton->SetActiveState(6);
+		m_flightControlButton->SetActiveState(7);
+		if (m_transitButton->GetState()<8) m_transitButton->SetActiveState(8); //autopilot uses transit..
+	}
+
+	//lit transit from juice
+	if (Pi::player->GetJuice() == 1.0)
+		m_transitButton->SetActiveState(6);
+	else
+		m_transitButton->SetActiveState(8);
+
+	//dim transit if speed < 1 km/S
+	if (Pi::player->GetVelocity().Length()<1000.0)
+		m_transitButton->SetActiveState(5);
 
 	switch(Pi::player->GetFlightState()) {
 		case Ship::LANDED:
