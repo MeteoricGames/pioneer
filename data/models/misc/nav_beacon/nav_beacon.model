@@ -2,13 +2,12 @@ material material1
 
 tex_diff DIFF.dds
 tex_spec SPEC.dds
-tex_glow GLOW.dds
 specular 1.0 1.0 1.0
 diffuse 1.0 1.0 1.0
 
 
 lod 1000
-mesh buoy.dae
+mesh nav_beacon.dae
 
 collision buoy_collision.obj
 
