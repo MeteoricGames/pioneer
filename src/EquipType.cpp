@@ -98,6 +98,10 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	  Equip::SLOT_CARGO, -1, { Equip::METAL_ALLOYS, Equip::ROBOTS },
 	  1200, 1, 0, ECON_INDUSTRY, true, 0
 	},{
+	  Lang::MINING_DRONE,0,
+	  Equip::SLOT_CARGO, -1, { Equip::METAL_ALLOYS, Equip::ROBOTS },
+	  1200, 1, 0, ECON_INDUSTRY, true, 0
+	},{
 	  Lang::AIR_PROCESSORS,0,
 	  Equip::SLOT_CARGO, -1, { Equip::PLASTICS, Equip::INDUSTRIAL_MACHINERY },
 	  2000, 1, 0, ECON_INDUSTRY, true, 0

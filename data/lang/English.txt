@@ -318,6 +318,8 @@ FARM_MACHINERY
     Farm machinery
 MINING_MACHINERY
     Mining machinery
+MINING_DRONE
+    Mining drone
 AIR_PROCESSORS
     Air processors
 SLAVES

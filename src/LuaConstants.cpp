@@ -314,6 +314,7 @@ void LuaConstants::Register(lua_State *l)
 	 * INDUSTRIAL_MACHINERY - industrial machinery (CARGO)
 	 * FARM_MACHINERY - farm machinery (CARGO)
 	 * MINING_MACHINERY - mining machinery (CARGO
+	 * MINING_DRONE - mining drone (CARGO
 	 * AIR_PROCESSORS - air processors (CARGO)
 	 * SLAVES - slaves (CARGO)
 	 * HAND_WEAPONS - hand weapons (CARGO)
