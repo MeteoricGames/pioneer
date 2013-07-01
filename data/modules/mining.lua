@@ -1,6 +1,11 @@
 
 local miners = { }
 
+local check = function(object)
+	if object~=nil and object:exists() then return true end
+	return false
+end
+
 local onJettison = function (ship, cargo) 
 	if cargo == 'MINING_DRONE' then
 		local miner = nil
@@ -10,24 +15,28 @@ local onJettison = function (ship, cargo)
 
 			if #cargos>0 then 
 				miner = Space.SpawnShipNear('mining_drone', cargos[1], 0.00001, 0.00001)
-				cargos[1]:Remove()
-				cargos[1]=nil
+					cargos[1]:Remove()
+					cargos[1]=nil
+				miner:AddEquip('PULSECANNON_4MW')
+				miner:AddEquip('LASER_COOLING_BOOSTER')
+				miner:AddEquip('ATMOSPHERIC_SHIELDING')
+			else 
+				return
 			end
 
 			miners[miner] = {
 				status		= 'mining',
 				miner		= miner,
-				target		= Game.player:GetNavTarget()
+				target		= Game.player.frameBody
 			}
 			local miningrobot = miners[miner].miner
 		
-			if miningrobot~=nil then 
-				miningrobot:AIFlyToClose(Game.player:GetNavTarget(),100)
+			if check(miningrobot) then 
+				miningrobot:AIFlyToClose(Game.player.frameBody,100)
 				miningrobot:SetLabel('[mining drone]')
-			--	cargo:Remove('ok')
 				Timer:CallEvery(1, function()
-					if miningrobot:exists() and  miners[miner].status == 'mining' then miningrobot:AIFire(miningrobot) end
-				end)	
+					if check(miningrobot) and  miners[miner].status == 'hold' then miningrobot:AIFire(miningrobot) end
+				end)
 			end
 		end)
 	end	
@@ -35,57 +44,25 @@ end
 Event.Register("onJettison", onJettison)
 
 local onAICompleted = function (ship, ai_error)
-	if miners[ship] == nil then return end
+	if miners[ship]==nil then return end
 	
 	local miner = miners[ship]
 
 	print('Miner status :'..miner.status)
 
-	Timer:CallAt(Game.time+4, function () 
-	if miner.status == '___mining' then
-		miner.miner:AIEnterLowOrbit(miner.target)
+	Timer:CallAt(Game.time+2, function () 
+	if check(miner.miner) and miner.status == 'mining' then
+		miner.miner:AIHoldPos(miner.target)
 		miners[ship] = {
-			status		= 'orbit',
+			status		= 'hold',
 			miner		= miner.miner,
 			target		= miner.target
 		}
 	end
 	end)
 
-	Timer:CallAt(Game.time+4, function ()
-	if miner.status == 'docked' then
-		miner.miner:AIFlyToClose(miner.target,100)
-		miners[ship] = {
-			status		= 'deorbit',
-			miner		= miner.miner,
-			target		= miner.target
-		}
-	end
-	end)
+	Timer:CallAt(Game.time+600, function () 
 
-	Timer:CallAt(Game.time+4, function ()
-	if miner.status == 'mining' then
-		Timer:CallAt(Game.time+60, function ()
-		miner.miner:AIFlyToClose(miner.target,100)
-		miners[ship] = {
-			status		= 'docked',
-			miner		= miner.miner,
-			target		= miner.target
-		}
-		end)
-	end
 	end)
-
-	Timer:CallAt(Game.time+4, function ()
-	if miner.status == 'deorbit' then
-		miner.miner:AIFlyToClose(miner.target,100)
-		miners[ship] = {
-			status		= 'mining',
-			miner		= miner.miner,
-			target		= miner.target
-		}
-	end
-	end)
-
 end
---Event.Register("onAICompleted", onAICompleted)
+Event.Register("onAICompleted", onAICompleted)
