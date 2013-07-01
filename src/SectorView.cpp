@@ -26,9 +26,9 @@ using namespace Graphics;
 
 #define INNER_RADIUS (Sector::SIZE*1.5f)
 #define OUTER_RADIUS (Sector::SIZE*3.0f)
-#define FAR_THRESHOLD 5.f
-#define FAR_LIMIT     36.f
-#define FAR_MAX       46.f
+static const float FAR_THRESHOLD = 5.f;
+static const float FAR_LIMIT     = 36.f;
+static const float FAR_MAX       = 46.f;
 
 enum DetailSelection {
 	DETAILBOX_NONE    = 0
@@ -365,7 +365,7 @@ void SectorView::OnSearchBoxKeyPress(const SDL_keysym *keysym)
 		Pi::cpan->MsgLog()->Message("", Lang::NOT_FOUND);
 }
 
-#define DRAW_RAD	  3
+static const int DRAW_RAD = 3;
 #define FFRAC(_x)	((_x)-floor(_x))
 
 void SectorView::Draw3D()
@@ -854,6 +854,15 @@ void SectorView::DrawNearSector(int sx, int sy, int sz, const vector3f &playerAb
 			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(3.f));
 			m_disk->Draw(m_renderer);
 		}
+
+		// Show systems with large population
+		if (i->population>0.0) {
+			glDepthRange(0.15,1.0);
+			m_disk->SetColor(Color(0.f, 1.f, 0.f));
+			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.2f,1.0+i->population.ToFloat(),0.2f));
+			m_disk->Draw(m_renderer);
+		}
+
 		// selected indicator
 		if (i->IsSameSystem(m_current)) {
 			glDepthRange(0.1,1.0);
