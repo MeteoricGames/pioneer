@@ -101,6 +101,112 @@ local shipInfo = function (args)
 			})
 end
 
+local miningScreen = function ()
+	local orbitalBody -- What we, or our space station, are orbiting
+	local frameBody = Game.player.frameBody
+	if not frameBody then
+		-- Bug out if we're in a null frame. Save an embarrassing crash.
+		return ui:Label(t('FAILED'))
+	end
+	if frameBody.superType == 'STARPORT' then
+		orbitalBody = Space.GetBody(frameBody.path:GetSystemBody().parent.index)
+	else
+		orbitalBody = frameBody
+	end
+	
+	local distance = Game.player:DistanceTo(orbitalBody)
+	local mass = orbitalBody.path:GetSystemBody().mass
+	local radius = orbitalBody.path:GetSystemBody().radius
+	local name = orbitalBody.label
+
+	local G = 6.67428e-11
+
+	local vCircular = math.sqrt((G * mass)/distance)
+	local vEscape = math.sqrt((2 * G * mass)/distance)
+	local vDescent = math.sqrt(G * mass * ((2 / distance) - (2 / (distance + radius))))
+
+	local navbutton = UI.SmallLabeledButton.New(t("Nav close to surface"))
+	navbutton.button.onClick:Connect(function ()
+		Game.player:AIFlyToClose(Game.player.frameBody,1000)
+	end)
+
+	-- Make a cargo list widget that we can revisit and update
+	local miningListWidget = ui:Margin(0)
+
+	function updateMiningListWidget ()
+
+		local cargoNameColumn = {}
+		local cargoQuantityColumn = {}
+		local cargoJettisonColumn = {}
+
+		for i = 1,#Constants.EquipType do
+			local type = Constants.EquipType[i]
+			if type == "MINING_DRONE" and Game.player.frameBody then
+				local et = EquipDef[type]
+				local slot = et.slot
+				if slot == "CARGO" then
+					local count = Game.player:GetEquipCount(slot, type)
+					if count > 0 then
+						table.insert(cargoNameColumn, ui:Label(et.name))
+						table.insert(cargoQuantityColumn, ui:Label(count))
+
+						local jettisonButton = UI.SmallLabeledButton.New(t("DEPLOY DRONE"))
+						jettisonButton.button.onClick:Connect(function ()
+							Game.player:Jettison(type)
+							updateMiningListWidget()
+							miningListWidget:SetInnerWidget(updateMiningListWidget())
+						end)
+						table.insert(cargoJettisonColumn, jettisonButton.widget)
+					end
+				end
+			end
+		end
+
+		-- Function returns a UI with which to populate the cargo list widget
+		return
+			ui:VBox(4):PackEnd({
+				ui:Label(t("DRONES")):SetFont("HEADING_LARGE"),
+				ui:Scroller():SetInnerWidget(
+					ui:Grid(3,1)
+						:SetColumn(0, { ui:VBox():PackEnd(cargoNameColumn) })
+						:SetColumn(1, { ui:VBox():PackEnd(cargoQuantityColumn) })
+						:SetColumn(2, { ui:VBox():PackEnd(cargoJettisonColumn) })
+				)
+			})
+	end
+
+	miningListWidget:SetInnerWidget(updateMiningListWidget())
+
+
+	return ui:Expand():SetInnerWidget(
+		ui:VBox(20):PackEnd({
+			ui:Label((t('Located {distance}km from the centre of {name}:')):interp({
+														-- convert to kilometres
+														distance = string.format('%6.2f',distance/1000),
+														name = name										})),
+			ui:Grid(2,1)
+				:SetColumn(0, {
+					ui:VBox():PackEnd({
+						ui:Label(t('Circular orbit speed:')),
+						ui:Label(t('Escape speed:')),
+						ui:Label(t('Descent-to-ground speed:')),
+					})
+				})
+				:SetColumn(1, {
+					ui:VBox():PackEnd({
+						-- convert to kilometres per second
+						ui:Label(string.format('%6.2fkm/s',vCircular/1000)),
+						ui:Label(string.format('%6.2fkm/s',vEscape/1000)),
+						ui:Label(string.format('%6.2fkm/s',vDescent/1000)),
+					})
+				}),
+				miningListWidget,
+				navbutton
+			--ui:MultiLineText((t('ORBITAL_ANALYSIS_NOTES')):interp({name = name}))
+		})
+	)
+end
+
 local orbitalAnalysis = function ()
 	local orbitalBody -- What we, or our space station, are orbiting
 	local frameBody = Game.player.frameBody
@@ -739,7 +845,7 @@ ui.templates.InfoView = function (args)
 	tabGroup:AddTab({ id = "econTrade",       title = t("Economy & Trade"),      icon = "Cart",      template = econTrade,       })
 	tabGroup:AddTab({ id = "missions",        title = t("MISSIONS"),             icon = "Star",      template = missions,        })
 	tabGroup:AddTab({ id = "crew",            title = t("Crew Roster"),          icon = "Agenda",    template = crewRoster,      })
-	--tabGroup:AddTab({ id = "orbitalAnalysis", title = t("Orbital Analysis"),     icon = "Planet",    template = orbitalAnalysis, })
+	tabGroup:AddTab({ id = "miningScreen", 	  title = t("Mining"),     	     icon = "Planet",    template = miningScreen,    })
 
 	return tabGroup.widget
 end
