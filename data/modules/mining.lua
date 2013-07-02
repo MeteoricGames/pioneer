@@ -11,13 +11,13 @@ local onJettison = function (ship, cargo)
 		local miner = nil
 		Timer:CallAt(Game.time+4, function ()
 
-			local cargos = Space.GetBodies(function (body) return body:isa("CargoBody") and body:DistanceTo(Game.player)<1000 and body.type=='MINING_DRONE' end)
+			local cargos = Space.GetBodies(function (body) return body:isa("CargoBody") and body:DistanceTo(Game.player)<100000 and body.type=='MINING_DRONE' end)
 
 			if #cargos>0 then 
 				miner = Space.SpawnShipNear('mining_drone', cargos[1], 0.00001, 0.00001)
-					cargos[1]:Remove()
-					cargos[1]=nil
-				miner:AddEquip('PULSECANNON_4MW')
+				cargos[1]:Remove()
+				cargos[1]=nil
+				miner:AddEquip('MININGCANNON_17MW')
 				miner:AddEquip('LASER_COOLING_BOOSTER')
 				miner:AddEquip('ATMOSPHERIC_SHIELDING')
 			else 
@@ -34,7 +34,7 @@ local onJettison = function (ship, cargo)
 			if check(miningrobot) then 
 				miningrobot:AIFlyToClose(Game.player.frameBody,100)
 				miningrobot:SetLabel('[mining drone]')
-				Timer:CallEvery(1, function()
+				Timer:CallEvery(4, function()
 					if check(miningrobot) and  miners[miner].status == 'hold' then miningrobot:AIFire(miningrobot) end
 				end)
 			end
@@ -50,6 +50,7 @@ local onAICompleted = function (ship, ai_error)
 
 	print('Miner status :'..miner.status)
 
+	--drop it 2 seconds so it faces the correct way.
 	Timer:CallAt(Game.time+2, function () 
 	if check(miner.miner) and miner.status == 'mining' then
 		miner.miner:AIHoldPos(miner.target)
