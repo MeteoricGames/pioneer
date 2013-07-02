@@ -34,8 +34,16 @@ local onJettison = function (ship, cargo)
 			if check(miningrobot) then 
 				miningrobot:AIFlyToClose(Game.player.frameBody,100)
 				miningrobot:SetLabel('[mining drone]')
-				Timer:CallEvery(4, function()
-					if check(miningrobot) and  miners[miner].status == 'hold' then miningrobot:AIFire(miningrobot) end
+				Timer:CallEvery(15, function()
+					if check(miningrobot) and  miners[miner].status == 'hold' then 
+						miningrobot:AIFire(miningrobot) 
+						local ore = Space.GetBodies(function (body) return body:isa("CargoBody") and body:DistanceTo(Game.player)<100000 and body.type~='MINING_DRONE' end)
+						if #ore>0 then
+							--XXX collect stuff..
+						end
+
+					
+					end
 				end)
 			end
 		end)
