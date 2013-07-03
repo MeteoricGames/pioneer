@@ -47,24 +47,24 @@ local onJettison = function (ship, cargo)
 				miner:AddEquip('MININGCANNON_17MW')
 				miner:AddEquip('LASER_COOLING_BOOSTER')
 				miner:AddEquip('ATMOSPHERIC_SHIELDING')
+
+				-- set status
+				miners[miner] = {
+					status		= 'mining',
+					miner		= miner,
+					target		= Game.player.frameBody,
+					targetname	= Game.player.frameBody.path,
+					ore		= '',
+					system		= Game.system.path,
+					spawnat		= Game.player:DistanceTo(Game.player.frameBody),
+					started		= Game.time,
+					metallicity	= Game.player.frameBody.path:GetSystemBodyMetallicity()
+				}
+				local miningrobot = miners[miner].miner
+				doCollectOrMine(miningrobot)
 			else 
 				return
 			end
-
-			-- set status
-			miners[miner] = {
-				status		= 'mining',
-				miner		= miner,
-				target		= Game.player.frameBody,
-				targetname	= Game.player.frameBody.path,
-				ore		= '',
-				system		= Game.system.path,
-				spawnat		= Game.player:DistanceTo(Game.player.frameBody),
-				started		= Game.time,
-				metallicity	= Game.player.frameBody.path:GetSystemBodyMetallicity()
-			}
-			local miningrobot = miners[miner].miner
-			doCollectOrMine(miningrobot)
 		end)
 	end	
 end
@@ -196,7 +196,7 @@ local onLeaveSystem = function (ship)
 	miners = { }
 end
 
-local serialize = function ()
+--[[local serialize = function ()
 	onLeaveSystem(Game.player)
 	return miners_remote
 end
@@ -205,7 +205,7 @@ local unserialize = function (data)
 	miners = { }
 	miners_remote=data
 	onEnterSystem(Game.player)
-end
+end --]]
 
 local onGameEnd = function ()
 	-- drop the references for our data so Lua can free them
@@ -225,7 +225,7 @@ Event.Register("onEnterSystem", onEnterSystem)
 --
 --GetSystemBodyMetallicity()  -- Game.player.frameBody.path:GetSystemBodyMetallicity()
 --
-Serializer:Register("Miners", serialize, unserialize)
+--Serializer:Register("Miners", serialize, unserialize)
 --
 --
 --
