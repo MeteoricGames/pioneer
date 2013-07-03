@@ -165,7 +165,7 @@ local miningScreen = function ()
 		-- Function returns a UI with which to populate the cargo list widget
 		return
 			ui:VBox(4):PackEnd({
-				ui:Label(t("DRONES")):SetFont("HEADING_LARGE"),
+				ui:Label(t("DRONES AVAILABLE")):SetFont("HEADING_LARGE"),
 				ui:Scroller():SetInnerWidget(
 					ui:Grid(3,1)
 						:SetColumn(0, { ui:VBox():PackEnd(cargoNameColumn) })
