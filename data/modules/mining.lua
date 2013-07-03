@@ -11,7 +11,7 @@ end
 local doCollectOrMine = function(miningrobot)
 		if check(miningrobot) then 
 			-- descend to 100m
-			miningrobot:AIFlyToClose(Game.player.frameBody,100)
+			miningrobot:AIFlyToClose(miners[miningrobot].target,100)
 			miningrobot:SetLabel('[mining drone]')
 			Timer:CallEvery(2, function()
 				if check(miningrobot) and  miners[miningrobot].status == 'hold' then  
@@ -26,7 +26,6 @@ local doCollectOrMine = function(miningrobot)
 						-- mine
 						miningrobot:AIFire(miningrobot)
 					end
-					
 				end
 			end)
 		end
@@ -71,6 +70,7 @@ end
 Event.Register("onJettison", onJettison)
 
 local onAICompleted = function (ship, ai_error)
+	if miners==nil then return end
 	if miners[ship]==nil then return end
 	
 	local miner = miners[ship]
@@ -94,6 +94,12 @@ local onAICompleted = function (ship, ai_error)
 		miner.miner:AIFlyToClose(miner.target,200)
 	--goto mining altitude
 	elseif check(miner.miner) and miner.status 	== 'mining_prepare' 
+	then
+		miners[miner.miner].status = 'mining_prepare2'
+		miner.miner:CancelAI()
+		miners[miner.miner].miner:AIFlyToClose(miner.target,150)
+	--goto mining altitude
+	elseif check(miner.miner) and miner.status 	== 'mining_prepare2' 
 	then
 		miners[miner.miner].status = 'mining'
 		miner.miner:CancelAI()
@@ -119,22 +125,40 @@ end
 local onEnterSystem = function (ship)
 	if ship~=Game.player then return end
 	
-	if miners~=nil then
-		for k,v in pairs(miners) do
+	if miners_remote~=nil then
+		for k,v in pairs(miners_remote) do
 			if v.system==Game.system.path then 
-				print "Fant en her"
-				miners[k].target = Space.GetBody(v.targetname:GetSystemBody().index)
-				miners[k].miner = Space.SpawnShipNear('mining_drone',miners[k].target,v.spawnat/1000,v.spawnat/1000)
-				miners[k].status = 'mining_prepare'
-				miners[k].miner:AddEquip('MININGCANNON_17MW')
-				miners[k].miner:AddEquip('LASER_COOLING_BOOSTER')
-				miners[k].miner:AddEquip('ATMOSPHERIC_SHIELDING')
-				miners[k].miner:SetLabel('[mining drone]')
-				Game.player:SetCombatTarget(miners[k].miner)
-				miners[k].miner:AIFlyToClose(miners[k].target,200)
-				miners[miners[k].miner] = miners[k]
-				doCollectOrMine(miners[k].miner)
-				miners[k] = nil
+				print (v.started.."  - Fant en her - "..v.spawnat)
+
+				local newtarget = Space.GetBody(v.targetname:GetSystemBody().index)
+				local newminer 	= Space.SpawnShipNear('mining_drone',newtarget,v.spawnat/1000,v.spawnat/1000)
+				
+				newminer:AddEquip('MININGCANNON_17MW')
+				newminer:AddEquip('LASER_COOLING_BOOSTER')
+				newminer:AddEquip('ATMOSPHERIC_SHIELDING')
+				newminer:SetLabel('[mining drone]')
+
+				miners[newminer] = {
+					status		= 'mining_prepare',
+					miner		= newminer,
+					target		= newtarget,
+					targetname	= v.targetname,
+					ore 		= '',
+					system		= v.system,
+					spawnat		= v.spawnat,
+					started		= v.started
+				}
+
+				Game.player:SetCombatTarget(miners[newminer].miner)
+				Game.player:SetNavTarget(miners[newminer].target)
+				miners[newminer].miner:AIFlyToClose(newtarget,200)
+				
+			--	table.insert(miners,
+			--	miners[miners[k].miner] = miners[k]
+
+				doCollectOrMine(miners[newminer].miner)
+
+				miners_remote[v.miner]=nil
 			end
 		end
 	end
@@ -142,8 +166,29 @@ end
 
 local onLeaveSystem = function (ship)
 	if ship~=Game.player then return end
+	if miners==nil then return end
+	for k,v in pairs(miners) do miners_remote[k] = v end
+	miners = { }
 end
 
+local serialize = function ()
+	onLeaveSystem(Game.player)
+	return miners_remote
+end
+
+local unserialize = function (data)
+	miners = { }
+	miners_remote=data
+	onEnterSystem(Game.player)
+end
+
+local onGameEnd = function ()
+	-- drop the references for our data so Lua can free them
+	-- and so we can start fresh if the player starts another game
+	miners,miners_remote=nil,nil
+end
+
+Event.Register("onGameEnd", onGameEnd)
 Event.Register("onAICompleted", onAICompleted)
 Event.Register("onLeaveSystem", onLeaveSystem)
 Event.Register("onEnterSystem", onEnterSystem)
@@ -152,6 +197,8 @@ Event.Register("onEnterSystem", onEnterSystem)
 --
 --a=Game.player.frameBody.path:GetSystemBody()
 --b=Space.GetBody(a.index)
+--
+Serializer:Register("Miners", serialize, unserialize)
 --
 --
 --
