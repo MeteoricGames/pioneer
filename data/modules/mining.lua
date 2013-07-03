@@ -58,9 +58,10 @@ local onJettison = function (ship, cargo)
 				target		= Game.player.frameBody,
 				targetname	= Game.player.frameBody.path,
 				ore		= '',
-				system		= Game.system.path,  
+				system		= Game.system.path,
 				spawnat		= Game.player:DistanceTo(Game.player.frameBody),
-				started		= Game.time
+				started		= Game.time,
+				metallicity	= Game.player.frameBody.path:GetSystemBodyMetallicity()
 			}
 			local miningrobot = miners[miner].miner
 			doCollectOrMine(miningrobot)
@@ -74,8 +75,6 @@ local onAICompleted = function (ship, ai_error)
 	if miners[ship]==nil then return end
 	
 	local miner = miners[ship]
-
-	print('Miner status :'..miner.status)
 
 	--drop it 2 seconds so it faces the correct way.
 	Timer:CallAt(Game.time+2, function () 
@@ -116,9 +115,11 @@ local onAICompleted = function (ship, ai_error)
 			ore 		= '',
 			system		= miner.system,
 			spawnat		= miner.spawnat,
-			started		= miner.started
+			started		= miner.started,
+			metallicity	= miner.metallicity
 		}
 	end
+	print('Miner status :'..miner.status)
 	end)
 end
 
@@ -146,12 +147,36 @@ local onEnterSystem = function (ship)
 					ore 		= '',
 					system		= v.system,
 					spawnat		= v.spawnat,
-					started		= v.started
+					started		= v.started,
+					metallicity	= v.metallicity
 				}
 
 				Game.player:SetCombatTarget(miners[newminer].miner)
 				Game.player:SetNavTarget(miners[newminer].target)
 				miners[newminer].miner:AIFlyToClose(newtarget,200)
+
+				-- you were not here so we have to generate mined stuff..
+				for x=1,Game.time-miners[newminer].started,30 do
+					local x = Engine.rand:Integer(1,100)
+					local m = miners[newminer].metallicity*100
+					if 	20*x < m then
+							miners[newminer].miner:AddEquip('PRECIOUS_METALS')
+							print "Added Prscious metals"
+					elseif 	8*x < m then
+							miners[newminer].miner:AddEquip('METAL_ALLOYS')
+							print "Added metal alloys"
+					elseif	x < m then
+							miners[newminer].miner:AddEquip('METAL_ORE')
+							print "Added metal ore"
+					elseif	x < m*2 then
+							miners[newminer].miner:AddEquip('WATER')
+							print "Added water"
+					else
+							miners[newminer].miner:AddEquip('RUBBISH')
+							print "Added rubbish"
+					end
+				end
+
 				
 			--	table.insert(miners,
 			--	miners[miners[k].miner] = miners[k]
@@ -195,8 +220,10 @@ Event.Register("onEnterSystem", onEnterSystem)
 
 --Space.GetBody(Game.system.path.systemIndex)
 --
---a=Game.player.frameBody.path:GetSystemBody()
+--a=Game.player.frameBody.path:GetSystemBody()	
 --b=Space.GetBody(a.index)
+--
+--GetSystemBodyMetallicity()  -- Game.player.frameBody.path:GetSystemBodyMetallicity()
 --
 Serializer:Register("Miners", serialize, unserialize)
 --
