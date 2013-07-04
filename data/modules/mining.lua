@@ -7,7 +7,6 @@ local check = function(object)
 	return false
 end
 
-
 local doCollectOrMine = function(miningrobot)
 		if check(miningrobot) then 
 			-- descend to 100m
@@ -42,6 +41,9 @@ local onJettison = function (ship, cargo)
 			if #cargos>0 then 
 			-- acivate miner
 				miner = Space.SpawnShipNear('mining_drone', cargos[1], 0.00001, 0.00001)
+
+				if not check(miner) then return end
+
 				cargos[1]:Remove()
 				cargos[1]=nil
 				miner:AddEquip('MININGCANNON_17MW')
