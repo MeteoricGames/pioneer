@@ -92,7 +92,7 @@ local doLawAndOrder = function (ship)
 	if ship:IsPlayer() then
 
 		starport = getMyStarport(Game.player)
-		if Game.player:DistanceTo(starport)<400000 then
+		if starport~=nil and Game.player:DistanceTo(starport)<400000 then
 			spawnPolice()
 		else
 			deletePolice(Game.player)
