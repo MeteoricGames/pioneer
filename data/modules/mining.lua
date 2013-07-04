@@ -49,6 +49,7 @@ local onJettison = function (ship, cargo)
 				miner:AddEquip('ATMOSPHERIC_SHIELDING')
 
 				-- set status
+				local x,y,z = Game.player:GetPos()
 				miners[miner] = {
 					status		= 'mining',
 					miner		= miner,
@@ -58,7 +59,10 @@ local onJettison = function (ship, cargo)
 					system		= Game.system.path,
 					spawnat		= Game.player:DistanceTo(Game.player.frameBody),
 					started		= Game.time,
-					metallicity	= Game.player.frameBody.path:GetSystemBodyMetallicity()
+					metallicity	= Game.player.frameBody.path:GetSystemBodyMetallicity(),
+					px		= x,
+					py		= y,
+					pz		= z
 				}
 				local miningrobot = miners[miner].miner
 				doCollectOrMine(miningrobot)
@@ -116,7 +120,10 @@ local onAICompleted = function (ship, ai_error)
 			system		= miner.system,
 			spawnat		= miner.spawnat,
 			started		= miner.started,
-			metallicity	= miner.metallicity
+			metallicity	= miner.metallicity,
+			px		= miner.px,
+			py		= miner.py,
+			pz		= miner.pz
 		}
 	end
 	print('Miner status :'..miner.status)
@@ -132,8 +139,9 @@ local onEnterSystem = function (ship)
 				print (v.started.."  - Fant en her - "..v.spawnat)
 
 				local newtarget = Space.GetBody(v.targetname:GetSystemBody().index)
-				local newminer 	= Space.SpawnShipNear('mining_drone',newtarget,v.spawnat/1000,v.spawnat/1000)
-				
+				--local newminer 	= Space.SpawnShipNear('mining_drone',newtarget,v.spawnat/1000,v.spawnat/1000)
+				local newminer 	= Space.SpawnShipAtPos('mining_drone',newtarget,v.px,v.py,v.pz)
+
 				newminer:AddEquip('MININGCANNON_17MW')
 				newminer:AddEquip('LASER_COOLING_BOOSTER')
 				newminer:AddEquip('ATMOSPHERIC_SHIELDING')
@@ -148,7 +156,10 @@ local onEnterSystem = function (ship)
 					system		= v.system,
 					spawnat		= v.spawnat,
 					started		= v.started,
-					metallicity	= v.metallicity
+					metallicity	= v.metallicity,
+					px		= v.px,
+					py		= v.py,
+					pz		= v.pz
 				}
 
 				Game.player:SetCombatTarget(miners[newminer].miner)
