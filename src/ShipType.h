@@ -33,6 +33,7 @@ struct ShipType {
 		TAG_NONE,
 		TAG_SHIP,
 		TAG_STATIC_SHIP,
+		TAG_DRONE,
 		TAG_MISSILE,
 		TAG_MAX // <enum skip>
 	};
@@ -71,6 +72,7 @@ struct ShipType {
 	static std::map<Id, ShipType> types;
 	static std::vector<Id> player_ships;
 	static std::vector<Id> static_ships;
+	static std::vector<Id> drone_ships;
 	static std::vector<Id> missile_ships;
 
 	static std::vector<Id> playable_atmospheric_ships;

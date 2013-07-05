@@ -226,6 +226,7 @@ const struct EnumItem ENUM_ShipTypeTag[] = {
 	{ "NONE", ShipType::TAG_NONE },
 	{ "SHIP", ShipType::TAG_SHIP },
 	{ "STATIC_SHIP", ShipType::TAG_STATIC_SHIP },
+	{ "DRONE", ShipType::TAG_DRONE },
 	{ "MISSILE", ShipType::TAG_MISSILE },
 	{ 0, 0 },
 };
