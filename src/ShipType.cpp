@@ -17,6 +17,7 @@ std::map<ShipType::Id, ShipType> ShipType::types;
 
 std::vector<ShipType::Id> ShipType::player_ships;
 std::vector<ShipType::Id> ShipType::static_ships;
+std::vector<ShipType::Id> ShipType::drone_ships;
 std::vector<ShipType::Id> ShipType::missile_ships;
 
 std::vector<ShipType::Id> ShipType::playable_atmospheric_ships;
@@ -183,6 +184,11 @@ int define_static_ship(lua_State *L)
 	return _define_ship(L, ShipType::TAG_STATIC_SHIP, &ShipType::static_ships);
 }
 
+int define_drone(lua_State *L)
+{
+	return _define_ship(L, ShipType::TAG_DRONE, &ShipType::drone_ships);
+}
+
 int define_missile(lua_State *L)
 {
 	return _define_ship(L, ShipType::TAG_MISSILE, &ShipType::missile_ships);
@@ -219,6 +225,7 @@ void ShipType::Init()
 	// register ship definition functions
 	lua_register(l, "define_ship", define_ship);
 	lua_register(l, "define_static_ship", define_static_ship);
+	lua_register(l, "define_drone", define_drone);
 	lua_register(l, "define_missile", define_missile);
 
 	LUA_DEBUG_CHECK(l, 0);
