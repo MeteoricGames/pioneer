@@ -85,8 +85,40 @@ local onAICompleted = function (ship, ai_error)
 	--drop it 2 seconds so it faces the correct way.
 	Timer:CallAt(Game.time+2, function () 
 
+	-- Are we full?
+	if miner.miner:GetStats().freeCapacity == 0 and miner.status~='pickup' and miner.status~='pickup_ok' then
+		miners[miner.miner].status = 'full'
+		Comms.ImportantMessage('MINER: status cargo full, ready for pickup.', miner.miner.label)
+	end
+
+	if check(miner.miner) and miner.status 		== 'full' 
+	then
+		miner.miner:CancelAI()
+		miner.miner:AIFlyToClose(miner.target,10000)
+		miners[miner.miner].status = 'pickup'
+
+	elseif check(miner.miner) and miner.status 	== 'pickup'
+	then
+		local m = Space.GetBodies(function (body) return body:isa("Ship") and body:DistanceTo(Game.player)<20000 and body~=Game.player end)
+
+		if m~=nil and m[1] == miner.miner then
+			miner.miner:CancelAI()
+			miner.miner:AIFlyToClose(Game.player,50)
+			miners[miner.miner].status = 'pickup_ok'
+			Comms.ImportantMessage('MINER: inbound of cargo transfer.', miner.miner.label)
+		else
+			miner.miner:CancelAI()
+			miner.miner:AIFlyToClose(miner.target,5000)
+			miners[miner.miner].status = 'full'
+		end
+
+	elseif check(miner.miner) and miner.status 	== 'pickup_ok'
+	then
+		--transfer stuff
+		--and go mining...
+		
 	--collect the ore, add to cargobay
-	if check(miner.miner) and miner.status 		== 'collect' 
+	elseif check(miner.miner) and miner.status 	== 'collect' 
 	then
 		if miners[miner.miner].ore:exists() 
 		then
@@ -128,6 +160,7 @@ local onAICompleted = function (ship, ai_error)
 			pz		= miner.pz
 		}
 	end
+
 	print('Miner status :'..miner.status)
 	end)
 end
