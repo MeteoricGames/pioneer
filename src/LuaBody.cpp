@@ -253,7 +253,7 @@ static int l_body_is_dynamic(lua_State *l)
 //XXX docs
 static int l_body_remove(lua_State *l)
 {
-	CargoBody *s = LuaObject<CargoBody>::CheckFromLua(1);
+	Body *s = LuaObject<Body>::CheckFromLua(1);
 	//const std::string label(luaL_checkstring(l, 2));
 	Pi::game->GetSpace()->KillBody(s);
 	return 0;
