@@ -407,6 +407,9 @@ void LuaConstants::Register(lua_State *l)
 	 *               are used for mission specific functions (large supply
 	 *               ships, warships, etc)
 	 * DRONE  Drones for alot of things
+	 * WRECK_SHIP - Shipwrecks or dismantled ships or other debris
+	 * WEAPON_SHIP - mines, turrets or other weapon based shiptypes.
+	 * NPC_SHIP - NPC non purchable ship.
 	 * MISSILE - missiles. Correspond directly to the <EquipType> constants of
 	 *           the same name.
 	 *
