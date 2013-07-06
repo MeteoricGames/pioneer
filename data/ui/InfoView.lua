@@ -125,9 +125,18 @@ local miningScreen = function ()
 	local vEscape = math.sqrt((2 * G * mass)/distance)
 	local vDescent = math.sqrt(G * mass * ((2 / distance) - (2 / (distance + radius))))
 
-	local navbutton = UI.SmallLabeledButton.New(t("Nav close to surface"))
+	local navbutton = UI.SmallLabeledButton.New(t("AUTOPILOT: Decend to drop altitude."))
 	navbutton.button.onClick:Connect(function ()
 		Game.player:AIFlyToClose(Game.player.frameBody,1000)
+	end)
+	local recbutton = UI.SmallLabeledButton.New(t("RECALL   : Recall drone within 50km"))
+	recbutton.button.onClick:Connect(function ()
+		local drones = Space.GetBodies(function (body) return body:isa("Ship") and body:DistanceTo(Game.player)<50000 end)
+		if #drones>0 then
+			for k,v in pairs(drones) do
+
+			end
+		end
 	end)
 
 	-- Make a cargo list widget that we can revisit and update
@@ -201,7 +210,8 @@ local miningScreen = function ()
 					})
 				}),
 				miningListWidget,
-				navbutton
+				navbutton,
+				recbutton
 			--ui:MultiLineText((t('ORBITAL_ANALYSIS_NOTES')):interp({name = name}))
 		})
 	)
