@@ -99,13 +99,13 @@ local onAICompleted = function (ship, ai_error)
 
 	elseif check(miner.miner) and miner.status 	== 'pickup'
 	then
-		local m = Space.GetBodies(function (body) return body:isa("Ship") and body:DistanceTo(Game.player)<20000 and body~=Game.player end)
+		local m = Space.GetBodies(function (body) return body:isa("Ship") and body:DistanceTo(Game.player)<20000 and body~=Game.player and body==miner.miner end)
 
-		if m~=nil and m[1] == miner.miner then
+		if check(m[1]) then
 			miner.miner:CancelAI()
 			miner.miner:AIFlyToClose(Game.player,50)
 			miners[miner.miner].status = 'pickup_ok'
-			Comms.ImportantMessage('MINER: inbound of cargo transfer.', miner.miner.label)
+			Comms.ImportantMessage('MINER: inbound for cargo transfer.', miner.miner.label)
 		else
 			miner.miner:CancelAI()
 			miner.miner:AIFlyToClose(miner.target,5000)
@@ -114,8 +114,29 @@ local onAICompleted = function (ship, ai_error)
 
 	elseif check(miner.miner) and miner.status 	== 'pickup_ok'
 	then
-		--transfer stuff
-		--and go mining...
+		for i=0, miner.miner:GetEquipCount('CARGO', 'RUBBISH'),1 do
+			Game.player:AddEquip('RUBBISH')
+			miner.miner:RemoveEquip('RUBBISH')
+		end
+		for i=0, miner.miner:GetEquipCount('CARGO', 'WATER'),1 do
+			Game.player:AddEquip('WATER')
+			miner.miner:RemoveEquip('WATER')
+		end
+		for i=0, miner.miner:GetEquipCount('CARGO', 'METAL_ORE'),1 do
+			Game.player:AddEquip('METAL_ORE')
+			miner.miner:RemoveEquip('METAL_ORE')
+		end
+		for i=0, miner.miner:GetEquipCount('CARGO', 'METAL_ALLOYS'),1 do
+			Game.player:AddEquip('METAL_ALLOYS')
+			miner.miner:RemoveEquip('METAL_ALLOYS')
+		end
+		for i=0, miner.miner:GetEquipCount('CARGO', 'PRECIOUS_METALS'),1 do
+			Game.player:AddEquip('PRECIOUS_METALS')
+			miner.miner:RemoveEquip('PRECIOUS_METALS')
+		end
+		miners[miner.miner].status = 'mining_prepare'
+		miner.miner:AIFlyToClose(miner.target,200)
+		Comms.ImportantMessage('MINER: cargo transfer complete, start mining.', miner.miner.label)
 		
 	--collect the ore, add to cargobay
 	elseif check(miner.miner) and miner.status 	== 'collect' 
