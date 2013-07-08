@@ -9,6 +9,7 @@
 #include "FileSystem.h"
 #include "utils.h"
 #include "Lang.h"
+#include <algorithm>
 
 const char *ShipType::gunmountNames[GUNMOUNT_MAX] = {
 	Lang::FRONT, Lang::REAR };
@@ -17,6 +18,9 @@ std::map<ShipType::Id, ShipType> ShipType::types;
 
 std::vector<ShipType::Id> ShipType::player_ships;
 std::vector<ShipType::Id> ShipType::static_ships;
+std::vector<ShipType::Id> ShipType::wreck_ships;
+std::vector<ShipType::Id> ShipType::weapon_ships;
+std::vector<ShipType::Id> ShipType::npc_ships;
 std::vector<ShipType::Id> ShipType::missile_ships;
 
 std::vector<ShipType::Id> ShipType::playable_atmospheric_ships;
@@ -31,6 +35,12 @@ std::string ShipType::MISSILE_UNGUIDED		= "missile_unguided";
 static double GetEffectiveExhaustVelocity(double fuelTankMass, double thrusterFuelUse, double forwardThrust) {
 	double denominator = fuelTankMass * thrusterFuelUse * 10;
 	return fabs(denominator > 0 ? forwardThrust/denominator : 1e9);
+}
+
+static bool ShipIsUnbuyable(const ShipType::Id &id)
+{
+	const ShipType &t = ShipType::types[id];
+	return (t.baseprice == 0);
 }
 
 static std::string s_currentShipFile;
@@ -183,6 +193,21 @@ int define_static_ship(lua_State *L)
 	return _define_ship(L, ShipType::TAG_STATIC_SHIP, &ShipType::static_ships);
 }
 
+int define_wreck_ship(lua_State *L)
+{
+	return _define_ship(L, ShipType::TAG_WRECK_SHIP, &ShipType::wreck_ships);
+}
+
+int define_weapon_ship(lua_State *L)
+{
+	return _define_ship(L, ShipType::TAG_WEAPON_SHIP, &ShipType::weapon_ships);
+}
+
+int define_npc_ship(lua_State *L)
+{
+	return _define_ship(L, ShipType::TAG_NPC_SHIP, &ShipType::npc_ships);
+}
+
 int define_missile(lua_State *L)
 {
 	return _define_ship(L, ShipType::TAG_MISSILE, &ShipType::missile_ships);
@@ -219,6 +244,9 @@ void ShipType::Init()
 	// register ship definition functions
 	lua_register(l, "define_ship", define_ship);
 	lua_register(l, "define_static_ship", define_static_ship);
+	lua_register(l, "define_wreck_ship", define_wreck_ship);
+	lua_register(l, "define_weapon_ship", define_weapon_ship);
+	lua_register(l, "define_npc_ship", define_npc_ship);
 	lua_register(l, "define_missile", define_missile);
 
 	LUA_DEBUG_CHECK(l, 0);
@@ -239,6 +267,11 @@ void ShipType::Init()
 	LUA_DEBUG_END(l, 0);
 
 	lua_close(l);
+
+	//remove unbuyable ships from player ship list
+	ShipType::player_ships.erase(
+		std::remove_if(ShipType::player_ships.begin(), ShipType::player_ships.end(), ShipIsUnbuyable),
+		ShipType::player_ships.end());
 
 	if (ShipType::player_ships.empty())
 		Error("No playable ships have been defined! The game cannot run.");
