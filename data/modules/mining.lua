@@ -1,6 +1,7 @@
 
 local miners = { }
 local miners_remote = { }
+local loaded=false
 
 local check = function(object)
 	if object~=nil and object:exists() then return true end
@@ -263,16 +264,34 @@ local onLeaveSystem = function (ship)
 	miners = { }
 end
 
---[[local serialize = function ()
-	onLeaveSystem(Game.player)
-	return miners_remote
+local serialize = function ()
+	return { miners_remote,miners }
 end
 
 local unserialize = function (data)
-	miners = { }
-	miners_remote=data
-	onEnterSystem(Game.player)
-end --]]
+	loaded = true
+	miners_remote,miners = data[1],data[2]
+	print "userialize"
+end 
+
+
+local onGameStart = function ()
+	print "ongame start"
+	if miners~=nil then
+		print "loaded var true"
+		for k,v in pairs(miners) do
+			print "fant en miner....."
+			miners[v.miner].status = 'mining_prepare'
+			v.miner:CancelAI()
+			miners[v.miner].miner:AIFlyToClose(miners[v.miner].target,200)
+			doCollectOrMine(miners[v.miner].miner)
+		end
+	else
+		miners_remote = { }
+		miners = { }
+	end
+end
+Event.Register("onGameStart", onGameStart)
 
 local onGameEnd = function ()
 	-- drop the references for our data so Lua can free them
@@ -292,7 +311,7 @@ Event.Register("onEnterSystem", onEnterSystem)
 --
 --GetSystemBodyMetallicity()  -- Game.player.frameBody.path:GetSystemBodyMetallicity()
 --
---Serializer:Register("Miners", serialize, unserialize)
+Serializer:Register("Miners", serialize, unserialize)
 --
 --
 --
