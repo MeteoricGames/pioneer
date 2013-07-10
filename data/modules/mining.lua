@@ -311,7 +311,7 @@ Event.Register("onEnterSystem", onEnterSystem)
 --
 --GetSystemBodyMetallicity()  -- Game.player.frameBody.path:GetSystemBodyMetallicity()
 --
-Serializer:Register("Miners", serialize, unserialize)
+Serializer:Register("MiningDrones", serialize, unserialize)
 --
 --
 --
