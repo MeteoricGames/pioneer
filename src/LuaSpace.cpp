@@ -236,6 +236,57 @@ static int l_space_spawn_ship_near(lua_State *l)
 	return 1;
 }
 
+//XXX docs
+static int l_space_spawn_ship_at_pos(lua_State *l)
+{
+	if (!Pi::game)
+		luaL_error(l, "Game is not started");
+
+	LUA_DEBUG_START(l);
+
+	const char *type = luaL_checkstring(l, 1);
+	if (! ShipType::Get(type))
+		luaL_error(l, "Unknown ship type '%s'", type);
+
+	Body *nearbody = LuaObject<Body>::CheckFromLua(2);
+	float x = luaL_checknumber(l, 3);
+	float y = luaL_checknumber(l, 4);
+	float z = luaL_checknumber(l, 5);
+
+	SystemPath *path = 0;
+	double due = -1;
+	_unpack_hyperspace_args(l, 6, path, due);
+
+	Ship *ship = new Ship(type);
+	assert(ship);
+
+	Body *thing = _maybe_wrap_ship_with_cloud(ship, path, due);
+
+	// XXX protect against spawning inside the body
+	Frame * newframe = nearbody->GetFrame();
+	//const vector3d newPosition = (MathUtil::RandomPointOnSphere(min_dist, max_dist)* 1000.0) + nearbody->GetPosition();
+	const vector3d newPosition = vector3d(x,y,z);
+
+	// If the frame is rotating and the chosen position is too far, use non-rotating parent.
+	// Otherwise the ship will be given a massive initial velocity when it's bumped out of the
+	// rotating frame in the next update
+	/*if (newframe->IsRotFrame() && newframe->GetRadius() < newPosition.Length()) {
+		assert(newframe->GetParent());
+		newframe = newframe->GetParent();
+	}*/
+
+	thing->SetFrame(newframe);;
+	thing->SetPosition(newPosition);
+	thing->SetVelocity(vector3d(0,0,0));
+	Pi::game->GetSpace()->AddBody(thing);
+
+	LuaObject<Ship>::PushToLua(ship);
+
+	LUA_DEBUG_END(l, 1);
+
+	return 1;
+}
+
 /*
  * Function: SpawnShipDocked
  *
@@ -754,6 +805,7 @@ void LuaSpace::Register()
 	static const luaL_Reg methods[] = {
 		{ "SpawnShip",       l_space_spawn_ship        },
 		{ "SpawnShipNear",   l_space_spawn_ship_near   },
+		{ "SpawnShipAtPos",  l_space_spawn_ship_at_pos },
 		{ "SpawnShipDocked", l_space_spawn_ship_docked },
 		{ "SpawnShipParked", l_space_spawn_ship_parked },
 		{ "SpawnShipLanded", l_space_spawn_ship_landed },

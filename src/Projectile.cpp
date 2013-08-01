@@ -231,11 +231,11 @@ void Projectile::StaticUpdate(const float timeStep)
 			double terrainHeight = planet->GetTerrainHeight(pos.Normalized());
 			if (terrainHeight > pos.Length()) {
 				// hit the fucker
-				if (b->type == SystemBody::TYPE_PLANET_ASTEROID) {
+				//if (b->type == SystemBody::TYPE_PLANET_ASTEROID) {
 					vector3d n = GetPosition().Normalized();
 					MiningLaserSpawnTastyStuff(planet->GetFrame(), b, n*terrainHeight + 5.0*n);
 					Sfx::Add(this, Sfx::TYPE_EXPLOSION);
-				}
+				//}
 				Pi::game->GetSpace()->KillBody(this);
 			}
 		}

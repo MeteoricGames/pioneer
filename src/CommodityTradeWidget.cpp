@@ -38,6 +38,7 @@ static const icon_map_t icon_names[] = {
 	{ Equip::INDUSTRIAL_MACHINERY,  "Industrial_machinery"  },
 	{ Equip::FARM_MACHINERY,        "Farm_machinery"        },
 	{ Equip::MINING_MACHINERY,      "Mining_machinery"      },
+	{ Equip::MINING_DRONE,			"Mining_Drone"			},
 	{ Equip::AIR_PROCESSORS,        "Air_processors"        },
 	{ Equip::SLAVES,                "Slaves"                },
 	{ Equip::HAND_WEAPONS,          "Hand_weapons"          },
