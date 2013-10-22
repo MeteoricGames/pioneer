@@ -1,5 +1,16 @@
 -- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+--
+
+local Engine = import("Engine")
+local Game = import("Game")
+local Space = import("Space")
+local Comms = import("Comms")
+local Timer = import("Timer")
+local Event = import("Event")
+local Serializer = import("Serializer")
+local ShipDef = import("ShipDef")
+local utils = import("utils")
 
 local police = { }
 local starports
@@ -42,8 +53,6 @@ local spawnPolice = function()
 	end
 
 	if starport~=nil then
-
-		if Game.player:DistanceTo(starport)>400000 then return end
 
 		-- XXX number should be some combination of population, lawlessness,
 		-- proximity to shipping lanes, etc
@@ -92,7 +101,7 @@ local doLawAndOrder = function (ship)
 	if ship:IsPlayer() then
 
 		starport = getMyStarport(Game.player)
-		if Game.player:DistanceTo(starport)<400000 then
+		if starport~=nil and Game.player:DistanceTo(starport)<400000 then
 			spawnPolice()
 		else
 			deletePolice(Game.player)

@@ -111,12 +111,13 @@ private:
 	void OnPlayerChangeFlightControlState();
 	void SelectBody(Body *, bool reselectIsDeselect);
 	Body* PickBody(const double screenX, const double screenY) const;
-	void MouseButtonDown(int button, int x, int y);
+	void MouseWheel(bool up);
 
 	NavTunnelWidget *m_navTunnel;
 
 	Gui::ImageButton *m_hyperspaceButton;
 
+	Gui::Label *m_pauseText;
 	Gui::Label *m_showCameraName;
 	Gui::Fixed *m_commsOptions;
 	Gui::VBox *m_commsNavOptions;
@@ -144,7 +145,7 @@ private:
 	sigc::connection m_onHyperspaceTargetChangedCon;
 	sigc::connection m_onPlayerChangeTargetCon;
 	sigc::connection m_onChangeFlightControlStateCon;
-	sigc::connection m_onMouseButtonDown;
+	sigc::connection m_onMouseWheelCon;
 
 	Gui::LabelSet *m_bodyLabels;
 	std::map<Body*,vector3d> m_projectedPos;

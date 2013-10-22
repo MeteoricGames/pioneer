@@ -147,6 +147,8 @@ AC_ARG_WITH([extra-version], AS_HELP_STRING([--with-extra-version], [Additional 
 
 EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -DPIONEER_VERSION=\\\"$PIONEER_VERSION\\\" -DPIONEER_EXTRAVERSION=\\\"$PIONEER_EXTRAVERSION\\\""
 
+EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -DGLEW_STATIC"
+
 
 dnl Compiler warning options
 AC_ARG_WITH([extra-warnings], AS_HELP_STRING([--without-extra-warnings], [Disable lots of extra compiler warnings]), [], [with_extra_warnings=yes])
@@ -227,7 +229,7 @@ dnl Check for sigc++
 PKG_CHECK_MODULES([SIGC], [sigc++-2.0])
 
 dnl Check for SDL
-PKG_CHECK_MODULES([SDL], [sdl SDL_image])
+PKG_CHECK_MODULES([SDL2], [sdl2 SDL2_image])
 
 dnl Check for Freetype
 PKG_CHECK_MODULES([FREETYPE], [freetype2])
@@ -297,14 +299,8 @@ dnl Check for OpenGL libs
 if test "x$MXE_CROSS" = "xyes" ; then
 	AC_SUBST([GL_CFLAGS], [])
 	AC_SUBST([GL_LIBS], [-lopengl32])
-	AC_SUBST([GLU_CFLAGS], [])
-	AC_SUBST([GLU_LIBS], [-lglu32])
-	AC_SUBST([GLEW_CFLAGS], [-DGLEW_BUILD])
-	AC_SUBST([GLEW_LIBS], [-lglew32s])
 else
 	PIONEER_CHECK_LIB([GL],   [gl],   [GL],   [glBegin])
-	PIONEER_CHECK_LIB([GLU],  [glu],  [GLU],  [gluSphere])
-	PIONEER_CHECK_LIB([GLEW], [glew], [GLEW], [glewInit])
 fi
 
 dnl ###########################################################################
@@ -380,8 +376,10 @@ AC_CONFIG_FILES([
 	contrib/lua/Makefile
 	contrib/miniz/Makefile
 	contrib/jenkins/Makefile
+	contrib/json/Makefile
 	contrib/PicoDDS/Makefile
 	contrib/vcacheopt/Makefile
+	contrib/glew/Makefile
 	osx/Makefile
 	win32/Makefile])
 AC_OUTPUT

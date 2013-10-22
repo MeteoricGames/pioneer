@@ -23,18 +23,22 @@ namespace GL2 {
 	class MultiMaterial;
 	class LitMultiMaterial;
 	class Program;
+	class RenderTarget;
 	class RingMaterial;
+	class FresnelColourMaterial;
 }
 
 class RendererGL2 : public RendererLegacy
 {
 public:
-	RendererGL2(const Graphics::Settings &vs);
+	RendererGL2(WindowSDL *window, const Graphics::Settings &vs);
 	virtual ~RendererGL2();
 
 	virtual const char* GetName() const { return "GL2 renderer"; }
 
 	virtual bool BeginFrame();
+
+	virtual bool SetRenderTarget(RenderTarget*);
 
 	virtual bool SetPerspectiveProjection(float fov, float aspect, float near, float far);
 
@@ -44,6 +48,7 @@ public:
 	virtual bool DrawLines(int vertCount, const vector3f *vertices, const Color &color, LineType type=LINE_SINGLE);
 
 	virtual Material *CreateMaterial(const MaterialDescriptor &descriptor);
+	virtual RenderTarget *CreateRenderTarget(const RenderTargetDesc &);
 
 	virtual bool ReloadShaders();
 
@@ -54,8 +59,10 @@ private:
 	friend class GL2::MultiMaterial;
 	friend class GL2::LitMultiMaterial;
 	friend class GL2::RingMaterial;
+	friend class GL2::FresnelColourMaterial;
 	std::vector<std::pair<MaterialDescriptor, GL2::Program*> > m_programs;
 	float m_invLogZfarPlus1;
+	GL2::RenderTarget *m_activeRenderTarget;
 };
 
 }

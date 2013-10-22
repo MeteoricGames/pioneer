@@ -17,6 +17,7 @@
 #include "ui/Expand.h"
 #include "ui/Gradient.h"
 #include "ui/Margin.h"
+#include "ui/NumberLabel.h"
 #include "ui/Widget.h"
 
 const struct EnumItem ENUM_EquipSlot[] = {
@@ -225,6 +226,9 @@ const struct EnumItem ENUM_ShipTypeTag[] = {
 	{ "NONE", ShipType::TAG_NONE },
 	{ "SHIP", ShipType::TAG_SHIP },
 	{ "STATIC_SHIP", ShipType::TAG_STATIC_SHIP },
+	{ "WRECK_SHIP", ShipType::TAG_WRECK_SHIP },
+	{ "WEAPON_SHIP", ShipType::TAG_WEAPON_SHIP },
+	{ "NPC_SHIP", ShipType::TAG_NPC_SHIP },
 	{ "MISSILE", ShipType::TAG_MISSILE },
 	{ 0, 0 },
 };
@@ -314,6 +318,7 @@ const struct EnumItem ENUM_UIAlignDirection[] = {
 
 const struct EnumItem ENUM_UIEventType[] = {
 	{ "KEYBOARD", UI::Event::KEYBOARD },
+	{ "TEXT_INPUT", UI::Event::TEXT_INPUT },
 	{ "MOUSE_BUTTON", UI::Event::MOUSE_BUTTON },
 	{ "MOUSE_MOTION", UI::Event::MOUSE_MOTION },
 	{ "MOUSE_WHEEL", UI::Event::MOUSE_WHEEL },
@@ -323,7 +328,6 @@ const struct EnumItem ENUM_UIEventType[] = {
 const struct EnumItem ENUM_UIKeyboardAction[] = {
 	{ "DOWN", UI::KeyboardEvent::KEY_DOWN },
 	{ "UP", UI::KeyboardEvent::KEY_UP },
-	{ "PRESS", UI::KeyboardEvent::KEY_PRESS },
 	{ 0, 0 },
 };
 
@@ -367,6 +371,15 @@ const struct EnumItem ENUM_UIMarginDirection[] = {
 	{ "RIGHT", UI::Margin::RIGHT },
 	{ "TOP", UI::Margin::TOP },
 	{ "BOTTOM", UI::Margin::BOTTOM },
+	{ 0, 0 },
+};
+
+const struct EnumItem ENUM_UINumberLabelFormat[] = {
+	{ "NUMBER", UI::NumberLabel::FORMAT_NUMBER },
+	{ "NUMBER_2DP", UI::NumberLabel::FORMAT_NUMBER_2DP },
+	{ "INTEGER", UI::NumberLabel::FORMAT_INTEGER },
+	{ "PERCENT", UI::NumberLabel::FORMAT_PERCENT },
+	{ "PERCENT_INTEGER", UI::NumberLabel::FORMAT_PERCENT_INTEGER },
 	{ 0, 0 },
 };
 
@@ -422,6 +435,7 @@ const struct EnumTable ENUM_TABLES[] = {
 	{ "UIExpandDirection", ENUM_UIExpandDirection },
 	{ "UIGradientDirection", ENUM_UIGradientDirection },
 	{ "UIMarginDirection", ENUM_UIMarginDirection },
+	{ "UINumberLabelFormat", ENUM_UINumberLabelFormat },
 	{ "UISizeControl", ENUM_UISizeControl },
 	{ "UIFont", ENUM_UIFont },
 	{ 0, 0 },

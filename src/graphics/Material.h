@@ -31,7 +31,8 @@ enum EffectType {
 	EFFECT_GEOSPHERE_TERRAIN,
 	EFFECT_GEOSPHERE_TERRAIN_WITH_LAVA,
 	EFFECT_GEOSPHERE_TERRAIN_WITH_WATER,
-	EFFECT_GEOSPHERE_SKY
+	EFFECT_GEOSPHERE_SKY,
+	EFFECT_FRESNEL_SPHERE
 };
 
 // Renderer creates a material that best matches these requirements.
@@ -41,15 +42,15 @@ public:
 	MaterialDescriptor();
 	EffectType effect;
 	bool alphaTest;
-	bool atmosphere;
 	bool glowMap;
 	bool lighting;
 	bool specularMap;
 	bool twoSided;
 	bool usePatterns; //pattern/color system
 	bool vertexColors;
-	int textures; //texture count
-	unsigned int dirLights; //set by rendererGL2 if lighting == true
+	Sint32 textures; //texture count
+	Uint32 dirLights; //set by rendererGL2 if lighting == true
+	Uint32 quality; // see: Graphics::GL2::AtmosphereQuality in GeoSphereMaterial.h
 
 	friend bool operator==(const MaterialDescriptor &a, const MaterialDescriptor &b);
 };

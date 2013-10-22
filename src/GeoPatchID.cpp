@@ -1,11 +1,12 @@
-// Copyright © 2008-2012 Pioneer Developers. See AUTHORS.txt for details
+// Copyright Â© 2008-2012 Pioneer Developers. See AUTHORS.txt for details
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include <cassert>
 
 #include "GeoPatchID.h"
 
-static const uint32_t MAX_PATCH_DEPTH = 30;
+static const int MAX_PATCH_DEPTH = 30;
+
 uint64_t GeoPatchID::NextPatchID(const int depth, const int idx) const
 {
 	assert(idx>=0 && idx<4);

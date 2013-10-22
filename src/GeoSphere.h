@@ -33,9 +33,9 @@ public:
 	~GeoSphere();
 
 	void Update();
-	void Render(Graphics::Renderer *renderer, vector3d campos, const float radius, const float scale, const std::vector<Camera::Shadow> &shadows);
+	void Render(Graphics::Renderer *renderer, const matrix4x4d &modelView, vector3d campos, const float radius, const float scale, const std::vector<Camera::Shadow> &shadows);
 
-	inline double GetHeight(vector3d p) const {
+	inline double GetHeight(const vector3d &p) const {
 		const double h = m_terrain->GetHeight(p);
 		s_vtxGenCount++;
 #ifdef DEBUG
@@ -79,7 +79,7 @@ private:
 	const SystemBody *m_sbody;
 
 	// all variables for GetHeight(), GetColor()
-	ScopedPtr<Terrain> m_terrain;
+	RefCountedPtr<Terrain> m_terrain;
 
 	static const uint32_t MAX_SPLIT_OPERATIONS = 128;
 	std::deque<SQuadSplitResult*> mQuadSplitResults;
@@ -100,8 +100,13 @@ private:
 	static RefCountedPtr<GeoPatchContext> s_patchContext;
 
 	void SetUpMaterials();
-	ScopedPtr<Graphics::Material> m_surfaceMaterial;
-	ScopedPtr<Graphics::Material> m_atmosphereMaterial;
+	enum EclipseState {
+		ECLIPSE_ENABLED,
+		ECLIPSE_DISABLED,
+		ECLIPSE_MAX
+	};
+	ScopedPtr<Graphics::Material> m_surfaceMaterial[ECLIPSE_MAX];
+	ScopedPtr<Graphics::Material> m_atmosphereMaterial[ECLIPSE_MAX];
 	//special parameters for shaders
 	MaterialParameters m_materialParameters;
 

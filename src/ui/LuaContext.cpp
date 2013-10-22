@@ -12,10 +12,20 @@ public:
 
 	static inline UI::Widget *_get_implicit_widget(lua_State *l)
 	{
-		// context is always the first arg, don't reuse it
+		UI::Context *c = LuaObject<UI::Context>::GetFromLua(1);
+		assert(c);
+
 		const int top = lua_gettop(l);
-		if (top == 1) return 0;
-		return UI::Lua::GetWidget(l, top);
+		if (top == 1) return 0; // no extra args
+
+		return UI::Lua::GetWidget(c, l, top);
+	}
+
+	static inline void _implicit_set_inner_widget(lua_State *l, UI::Layer *layer)
+	{
+		UI::Widget *w = _get_implicit_widget(l);
+		if (!w) return;
+		layer->SetInnerWidget(w);
 	}
 
 	static inline void _implicit_set_inner_widget(lua_State *l, UI::Single *s)
@@ -87,6 +97,12 @@ public:
 			colSpec = UI::CellSpec(luaL_checkinteger(l, 3));
 
 		LuaObject<UI::Grid>::PushToLua(c->Grid(rowSpec, colSpec));
+		return 1;
+	}
+
+	static int l_table(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		LuaObject<UI::Table>::PushToLua(c->Table());
 		return 1;
 	}
 
@@ -184,6 +200,15 @@ public:
 		return 1;
 	}
 
+	static int l_numberlabel(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		UI::NumberLabel::Format format = UI::NumberLabel::FORMAT_NUMBER;
+		if (lua_gettop(l) > 1)
+			format = static_cast<UI::NumberLabel::Format>(LuaConstants::GetConstantFromArg(l, "UINumberLabelFormat", 2));
+		LuaObject<UI::NumberLabel>::PushToLua(c->NumberLabel(format));
+		return 1;
+	}
+
 	static int l_multilinetext(lua_State *l) {
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		LuaObject<UI::MultiLineText>::PushToLua(c->MultiLineText(luaL_checkstring(l, 2)));
@@ -234,6 +259,12 @@ public:
 		return 1;
 	}
 
+	static int l_gauge(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		LuaObject<UI::Gauge>::PushToLua(c->Gauge());
+		return 1;
+	}
+
 	static int l_textentry(lua_State *l) {
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		std::string text;
@@ -248,6 +279,26 @@ public:
 		c->GetTemplateStore().PushCopyToStack();
 		return 1;
 	}
+
+	static int l_new_layer(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		Layer *layer = c->NewLayer();
+		_implicit_set_inner_widget(l, layer);
+		LuaObject<UI::Layer>::PushToLua(layer);
+		return 1;
+	}
+
+	static int l_drop_layer(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		c->DropLayer();
+		return 1;
+	}
+
+	static int l_attr_layer(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		LuaObject<UI::Layer>::PushToLua(c->GetTopLayer());
+		return 1;
+	}
 };
 
 }
@@ -258,12 +309,13 @@ template <> const char *LuaObject<UI::Context>::s_type = "UI.Context";
 
 template <> void LuaObject<UI::Context>::RegisterClass()
 {
-	static const char *l_parent = "UI.Single";
+	static const char *l_parent = "UI.Container";
 
 	static const luaL_Reg l_methods[] = {
 		{ "HBox",            LuaContext::l_hbox            },
 		{ "VBox",            LuaContext::l_vbox            },
 		{ "Grid",            LuaContext::l_grid            },
+		{ "Table",           LuaContext::l_table           },
 		{ "Background",      LuaContext::l_background      },
 		{ "ColorBackground", LuaContext::l_colorbackground },
 		{ "Gradient",        LuaContext::l_gradient        },
@@ -275,6 +327,7 @@ template <> void LuaObject<UI::Context>::RegisterClass()
 		{ "Image",           LuaContext::l_image           },
 		{ "Label",           LuaContext::l_label           },
 		{ "MultiLineText",   LuaContext::l_multilinetext   },
+		{ "NumberLabel",     LuaContext::l_numberlabel     },
 		{ "Button",          LuaContext::l_button          },
 		{ "CheckBox",        LuaContext::l_checkbox        },
 		{ "SmallButton",     LuaContext::l_smallbutton     },
@@ -282,12 +335,17 @@ template <> void LuaObject<UI::Context>::RegisterClass()
 		{ "VSlider",         LuaContext::l_vslider         },
 		{ "List",            LuaContext::l_list            },
 		{ "DropDown",        LuaContext::l_dropdown        },
+		{ "Gauge",           LuaContext::l_gauge           },
 		{ "TextEntry",       LuaContext::l_textentry       },
+
+		{ "NewLayer",        LuaContext::l_new_layer       },
+		{ "DropLayer",       LuaContext::l_drop_layer      },
 		{ 0, 0 }
 	};
 
 	static const luaL_Reg l_attrs[] = {
 		{ "templates", LuaContext::l_attr_templates },
+		{ "layer",     LuaContext::l_attr_layer     },
 		{ 0, 0 }
 	};
 

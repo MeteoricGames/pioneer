@@ -1,6 +1,10 @@
 -- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
+local Translate = import("Translate")
+local Engine = import("Engine")
+local FileSystem = import("FileSystem")
+
 local ui = Engine.ui
 local t = Translate:GetTranslator()
 
@@ -28,16 +32,18 @@ ui.templates.FileDialog = function (args)
 	cancelButton.onClick:Connect(onCancel)
 
 	local dialog =
-		ui:Grid({1,3,1}, {1,3,1})
-			:SetCell(1,1,
-				ui:VBox(10)
-					:PackEnd(ui:Background(ui:Label(title):SetFont("HEADING_NORMAL")))
-					:PackEnd(ui:Expand("BOTH", ui:Scroller():SetInnerWidget(list)))
-					:PackEnd(ui:Grid(2,1):SetRow(0, {
-						ui:Align("LEFT", selectButton),
-						ui:Align("RIGHT", cancelButton),
-					}))
-			)
+		ui:ColorBackground(0,0,0,0.5,
+			ui:Grid({1,3,1}, {1,3,1})
+				:SetCell(1,1,
+					ui:VBox(10)
+						:PackEnd(ui:Background(ui:Label(title):SetFont("HEADING_NORMAL")))
+						:PackEnd(ui:Expand("BOTH", ui:Scroller():SetInnerWidget(list)))
+						:PackEnd(ui:Grid(2,1):SetRow(0, {
+							ui:Align("LEFT", selectButton),
+							ui:Align("RIGHT", cancelButton),
+						}))
+				)
+		)
 
 	return dialog
 end

@@ -1,4 +1,4 @@
-﻿# General
+# General
 SUGGESTED_RESPONSES
     Posibles respuestas:
 CASH
@@ -702,10 +702,6 @@ NOT_FOUND_BEST_MATCH_X
     Sin resultados, mejor correspondencia: %system
 NOT_FOUND
     Sin resultados
-NUMBER_SECONDS
-    %seconds{f.1} sec
-NUMBER_MINUTES
-    %minutes{f.1} min
 NUMBER_HOURS
     %hours{f.1} hrs
 NUMBER_DAYS
@@ -975,7 +971,7 @@ MASS
 N_WHATEVER_MASSES
     %mass{f.3} masa %units
 N_WHATEVER_RADII
-    %radius{f.3} radios %units 
+    %radius{f.3} radios %units (%radkm{f.0} km) 
 SOLAR
     Solar
 EARTH
@@ -1149,7 +1145,9 @@ IN_TRANSIT_TO_N_X_X_X
 PROBABILITY_OF_ARRIVAL_X_PERCENT
     Probabilidad de llegada: %probability%%
 ALT_IN_METRES
-    Alt: %altitude{f.0}m
+    Alt: %altitude{f.0}m (%vspeed{f.1}m/s)
+ALT_IN_KM
+    Alt: %altitude{f.0}km (%vspeed{f.1}km/s)
 PRESSURE_N_ATMOSPHERES
     P: %pressure{f.2} atm
 NO_HYPERDRIVE
@@ -1198,8 +1196,6 @@ AUTOPILOT_ENTER_MEDIUM_ORBIT_AROUND
     Piloto automático: Establecer órbita media alrededor de %target
 AUTOPILOT_ENTER_HIGH_ORBIT_AROUND
     Piloto automático: Establecer órbita alta alrededor de %target
-AUTOPILOT_ENTER_SCOOP_ORBIT_AROUND
-    Autopilot: Enter scoop orbit around %target
 SET_HYPERSPACE_TARGET_TO_FOLLOW_THIS_DEPARTURE
     Analizador de nube hiperespacial: Fijar objetivo hiperespacial del viaje
 FAILED
@@ -1250,3 +1246,5 @@ MONTH_DEC
     Dic
 MISCELLANEOUS
     Misceláneos
+PAUSED
+    EN PAUSA

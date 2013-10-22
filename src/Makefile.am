@@ -28,10 +28,8 @@ noinst_HEADERS = \
 	CityOnPlanet.h \
 	Color.h \
 	CommodityTradeWidget.h \
-	CoreCount.h \
 	Cutscene.h \
 	CRC32.h \
-	DeadVideoLink.h \
 	DeathView.h \
 	DeleteEmitter.h \
 	DynamicBody.h \
@@ -39,6 +37,7 @@ noinst_HEADERS = \
 	EnumStrings.h \
 	EquipSet.h \
 	EquipType.h \
+	FaceGenManager.h \
 	FaceVideoLink.h \
 	Factions.h \
 	FileSelectorWidget.h \
@@ -174,13 +173,12 @@ pioneer_SOURCES	= \
 	ChatForm.cpp \
 	CityOnPlanet.cpp \
 	CommodityTradeWidget.cpp \
-	CoreCount.cpp \
 	CRC32.cpp \
-	DeadVideoLink.cpp \
 	DeathView.cpp \
 	DynamicBody.cpp \
 	EnumStrings.cpp \
 	EquipType.cpp \
+	FaceGenManager.cpp \
 	FaceVideoLink.cpp \
 	Factions.cpp \
 	FileSelectorWidget.cpp \
@@ -313,13 +311,14 @@ pioneer_LDADD = \
 	terrain/libterrain.a \
 	ui/libui.a \
 	gameui/libgameui.a \
-	../contrib/miniz/libminiz.a \
 	../contrib/PicoDDS/libpicodds.a \
-	../contrib/jenkins/libjenkins.a
+	../contrib/jenkins/libjenkins.a \
+	../contrib/json/libjson.a \
+	../contrib/glew/libglew.a
 
 pioneer_LDADD += \
-	$(FREETYPE_LIBS) $(GLEW_LIBS) $(GLU_LIBS) $(GL_LIBS) \
-	$(SDL_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(VORBIS_LIBS) \
+	$(FREETYPE_LIBS) $(GL_LIBS) \
+	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(VORBIS_LIBS) \
 	$(PNG_LIBS) $(ASSIMP_LIBS) $(EXTRA_LIBS)
 
 if BUILD_WIN32
@@ -358,7 +357,6 @@ tests_LDADD = \
 	graphics/libgraphics.a \
 	terrain/libterrain.a \
     posix/libposix.a \
-	../contrib/miniz/libminiz.a \
 	../contrib/PicoDDS/libpicodds.a \
 	../contrib/jenkins/libjenkins.a \
 	$(SIGC_LIBS)
@@ -378,8 +376,10 @@ uitest_SOURCES = \
 	LuaObject.cpp \
 	LuaConstants.cpp \
 	LuaRef.cpp \
+	LuaPropertiedObject.cpp \
 	PngWriter.cpp \
 	EnumStrings.cpp \
+	PropertyMap.cpp \
 	enum_table.cpp \
 	utils.cpp
 uitest_LDADD = \
@@ -389,11 +389,12 @@ uitest_LDADD = \
 	graphics/libgraphics.a \
 	posix/libposix.a \
 	../contrib/jenkins/libjenkins.a \
-	../contrib/PicoDDS/libpicodds.a
+	../contrib/PicoDDS/libpicodds.a \
+	../contrib/glew/libglew.a
 
 uitest_LDADD += \
-	$(FREETYPE_LIBS) $(GLEW_LIBS) $(GLU_LIBS) $(GL_LIBS) \
-	$(SDL_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
+	$(FREETYPE_LIBS) $(GL_LIBS) \
+	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
 
 if !HAVE_LUA
 uitest_LDADD += ../contrib/lua/liblua.a
@@ -415,11 +416,12 @@ textstress_LDADD = \
 	text/libtext.a \
 	graphics/libgraphics.a \
 	posix/libposix.a \
-	../contrib/PicoDDS/libpicodds.a
+	../contrib/PicoDDS/libpicodds.a \
+	../contrib/glew/libglew.a
 
 textstress_LDADD += \
-	$(FREETYPE_LIBS) $(GLEW_LIBS) $(GLU_LIBS) $(GL_LIBS) \
-	$(SDL_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
+	$(FREETYPE_LIBS) $(GL_LIBS) \
+	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
 
 if !HAVE_LUA
 textstress_LDADD += ../contrib/lua/liblua.a

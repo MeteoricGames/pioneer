@@ -5,10 +5,25 @@
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 #include "Lua.h"
+#include "PropertiedObject.h"
+#include "OS.h"
 #include <typeinfo>
 
 static const int WIDTH  = 1024;
 static const int HEIGHT = 768;
+
+#if 0
+class Thing : public PropertiedObject {
+public:
+	Thing(LuaManager *lua) : PropertiedObject(lua) {
+		Update();
+	}
+
+	void Update() {
+		time_t t = time(0);
+		Properties().Set("time", asctime(localtime(&t)));
+	}
+};
 
 static bool toggle_disabled_handler(UI::Widget *w)
 {
@@ -16,6 +31,7 @@ static bool toggle_disabled_handler(UI::Widget *w)
 	printf("toggle disabled: %p %s now %s\n", w, typeid(*w).name(), w->IsDisabled() ? "DISABLED" : "ENABLED");
 	return true;
 }
+#endif
 
 static bool click_handler(UI::Widget *w)
 {
@@ -23,11 +39,13 @@ static bool click_handler(UI::Widget *w)
 	return true;
 }
 
+#if 0
 static bool move_handler(const UI::MouseMotionEvent &event, UI::Widget *w)
 {
 	printf("move: %p %s %d,%d\n", w, typeid(*w).name(), event.pos.x, event.pos.y);
 	return true;
 }
+#endif
 
 static bool over_handler(UI::Widget *w)
 {
@@ -41,6 +59,7 @@ static bool out_handler(UI::Widget *w)
 	return true;
 }
 
+#if 0
 static void colour_change(float v, UI::ColorBackground *back, UI::Slider *r, UI::Slider *g, UI::Slider *b)
 {
 	back->SetColor(Color(r->GetValue(), g->GetValue(), b->GetValue()));
@@ -85,6 +104,7 @@ static bool remove_floating_widget(UI::Context *c, UI::Widget *widget)
 	c->RemoveFloatingWidget(widget);
 	return true;
 }
+#endif
 
 int main(int argc, char **argv)
 {
@@ -95,38 +115,6 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	SDL_EnableUNICODE(1);
-
-    const SDL_VideoInfo *info = SDL_GetVideoInfo();
-    switch (info->vfmt->BitsPerPixel) {
-        case 16:
-            SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-            SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
-            SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-            break;
-        case 24:
-        case 32:
-            SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-            SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-            SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-            break;
-        default:
-            fprintf(stderr, "invalid pixel depth: %d bpp\n", info->vfmt->BitsPerPixel);
-            exit(-1);
-    }
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-
-	SDL_Surface *surface = SDL_SetVideoMode(WIDTH, HEIGHT, info->vfmt->BitsPerPixel, SDL_OPENGL);
-	if (!surface) {
-		fprintf(stderr, "sdl video mode init failed: %s\n", SDL_GetError());
-		SDL_Quit();
-		exit(-1);
-	}
-
-	SDL_WM_SetCaption("uitest", "uitest");
-
 	Graphics::Settings videoSettings;
 	videoSettings.width = WIDTH;
 	videoSettings.height = HEIGHT;
@@ -135,6 +123,10 @@ int main(int argc, char **argv)
 	videoSettings.requestedSamples = 0;
 	videoSettings.vsync = false;
 	videoSettings.useTextureCompression = false;
+	videoSettings.enableDebugMessages = false;
+	videoSettings.iconFile = OS::GetIconFilename();
+	videoSettings.title = "uitest";
+
 	Graphics::Renderer *r = Graphics::Init(videoSettings);
 
 	Lua::Init();
@@ -142,7 +134,23 @@ int main(int argc, char **argv)
 	RefCountedPtr<UI::Context> c(new UI::Context(Lua::manager, r, WIDTH, HEIGHT, "English"));
 
 #if 0
-	c->SetInnerWidget(
+	UI::Gauge *gauge;
+	c->GetTopLayer()->SetInnerWidget(c->HBox()->PackEnd(gauge = c->Gauge()));
+	gauge->SetWarningLevel(0.4f);
+	gauge->SetCriticalLevel(0.2f);
+	gauge->SetLevelAscending(false);
+#endif
+
+#if 0
+	Thing thing(Lua::manager);
+
+	UI::Label *l = c->Label("label");
+	c->GetTopLayer()->SetInnerWidget(l);
+
+	l->Bind("text", &thing, "time");
+
+
+	c->GetTopLayer()->SetInnerWidget(
 		c->VBox(10)->PackEnd(UI::WidgetSet(
 			c->Background()->SetInnerWidget(
 				c->HBox(5)->PackEnd(UI::WidgetSet(
@@ -163,7 +171,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::Button *toggle;
 	UI::CheckBox *target;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->HBox(10)->PackEnd(UI::WidgetSet(
 			(toggle = c->Button()),
 			(target = static_cast<UI::CheckBox*>(c->CheckBox()))
@@ -177,7 +185,7 @@ int main(int argc, char **argv)
 #endif
 
 #if 0
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->ColorBackground(Color(0.4f, 0.2f, 0.4f, 1.0f))->SetInnerWidget(
 			c->HBox()->PackEnd(UI::WidgetSet(
 				c->Icon("Agenda"),
@@ -192,14 +200,14 @@ int main(int argc, char **argv)
 #endif
 
 #if 0
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->Margin(0)->SetInnerWidget(c->Gradient(Color(1.0f,0,0,1.0f), Color(0,0,1.0f,1.0f), UI::Gradient::HORIZONTAL))
 	);
 #endif
 
 #if 0
 	UI::Button *b1, *b2, *b3;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->VBox()->PackEnd(UI::WidgetSet(
 			c->Margin(10.0f)->SetInnerWidget(
 				(b1 = c->Button())
@@ -230,7 +238,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::Image *image;
 	UI::Slider *slider;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->ColorBackground(Color(0.4f, 0.2f, 0.4f, 1.0f))->SetInnerWidget(
 			c->Margin(10.0f)->SetInnerWidget(
 				c->ColorBackground(Color(0.1f, 0.4f, 0.4f, 1.0f))->SetInnerWidget(
@@ -262,7 +270,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::Slider *red, *green, *blue;
 	UI::ColorBackground *back;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->VBox(5.0f)->PackEnd(UI::WidgetSet(
 			c->HBox(5.0f)->PackEnd(c->Label("Red"))->PackEnd(red = c->HSlider()),
 			c->HBox(5.0f)->PackEnd(c->Label("Green"))->PackEnd(green = c->HSlider()),
@@ -276,7 +284,7 @@ int main(int argc, char **argv)
 #endif
 
 #if 0
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		//c->Grid(UI::CellSpec(0.2f,0.8f), UI::CellSpec(0.7f,0.3f))
 		c->Grid(3,3)
 			->SetRow(0, UI::WidgetSet(
@@ -293,7 +301,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::ColorBackground *back[4];
 	UI::Button *button[5];
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->Grid(2,2)
 			->SetRow(0, UI::WidgetSet(
 				(back[0] = c->ColorBackground(Color(0.8f,0.2f,0.2f))),
@@ -332,7 +340,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::DropDown *dropdown;
 	UI::List *list;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->VBox()->PackEnd(UI::WidgetSet(
 			c->HBox()->PackEnd(
 				(dropdown = c->DropDown()
@@ -359,7 +367,8 @@ int main(int argc, char **argv)
 	list->onOptionSelected.connect(sigc::ptr_fun(&option_selected));
 #endif
 
-	c->SetInnerWidget(
+#if 0
+	c->GetTopLayer()->SetInnerWidget(
 		c->Scroller()->SetInnerWidget(
 			c->MultiLineText(
 	"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus consectetur risus augue. Aenean porttitor enim dolor, vitae iaculis mi. Etiam a nibh at massa dictum blandit. Etiam sed varius quam. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent facilisis tortor nisi. Maecenas ut enim nulla, pharetra elementum dolor. Vivamus condimentum semper magna laoreet gravida. Proin vulputate odio eget metus tristique tristique. Donec viverra augue quis velit lacinia vel dapibus diam volutpat. Fusce laoreet dui sit amet magna sagittis porttitor. Fusce sodales nulla id eros vehicula at pulvinar nisl facilisis. In ut neque lorem, ut vehicula tellus. Donec a posuere quam.\n\n"
@@ -385,11 +394,12 @@ int main(int argc, char **argv)
 			)
 		)
 	);
+#endif
 
 #if 0
 	UI::Label *label;
 	UI::Slider *slider;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->HBox(5.0f)->PackEnd(label = c->Label(""))->PackEnd(slider = c->HSlider()),
 	);
 	slider->onValueChanged.connect(sigc::bind(sigc::ptr_fun(&fill_label), label));
@@ -398,7 +408,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::DropDown *dropdown;
 	UI::Button *add, *clear;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->Margin(10.0f)->SetInnerWidget(
 			c->VBox()->PackEnd(UI::WidgetSet(
 				c->HBox()->PackEnd(UI::WidgetSet(
@@ -418,7 +428,7 @@ int main(int argc, char **argv)
 #endif
 
 #if 0
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->VBox()->PackEnd(UI::WidgetSet(
 			c->Label("through three cheese trees three freezy fleas flew")->SetFont(UI::Widget::FONT_XSMALL),
 			c->Label("through three cheese trees three freezy fleas flew")->SetFont(UI::Widget::FONT_SMALL),
@@ -432,7 +442,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::VBox *box;
 	UI::Button *b1, *b2, *b3, *b4;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		(box = c->VBox())->PackEnd(UI::WidgetSet(
 			(b1 = c->Button())->SetInnerWidget(c->Label("remove other")),
 			(b2 = c->Button())->SetInnerWidget(c->Label("other")),
@@ -457,7 +467,7 @@ int main(int argc, char **argv)
 #endif
 
 #if 0
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->Grid(3,3)
 			->SetRow(0, UI::WidgetSet(
 				c->ColorBackground(Color(0.8f,0.2f,0.2f))->SetInnerWidget(c->Align(UI::Align::TOP_LEFT)->SetInnerWidget(c->Image("icons/object_star_m.png"))),
@@ -476,7 +486,7 @@ int main(int argc, char **argv)
 #endif
 
 #if 0
-    c->SetInnerWidget(
+    c->GetTopLayer()->SetInnerWidget(
         c->VBox()->PackEnd(
             c->Grid(2,2)
                 ->SetRow(0, UI::WidgetSet(c->Label("one"), c->Label("two")))
@@ -487,7 +497,7 @@ int main(int argc, char **argv)
 
 #if 0
 	UI::MultiLineText *text;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		c->Scroller()->SetInnerWidget(
 			(text = c->MultiLineText(""))
 		)
@@ -497,7 +507,7 @@ int main(int argc, char **argv)
 #if 0
 	UI::VBox *box;
 	UI::Button *b1, *b2, *b3, *b4;
-	c->SetInnerWidget(
+	c->GetTopLayer()->SetInnerWidget(
 		(box = c->VBox())->PackEnd(UI::WidgetSet(
 			(b1 = c->Button())->SetInnerWidget(c->Label("1")),
 			(b2 = c->Button())->SetInnerWidget(c->Label("2")),
@@ -515,6 +525,51 @@ int main(int argc, char **argv)
 	b3->AddShortcut(UI::KeySym::FromString("alt+3"));
 	b4->AddShortcut(UI::KeySym::FromString("ctrl+shift+4"));
 #endif
+
+#if 0
+	UI::Table *table;
+	table = c->Table();
+	table->SetFont(UI::Widget::FONT_LARGE);
+	table->SetHeadingRow(UI::WidgetSet(
+		c->Label("three"),
+		c->Label("ten"),
+		c->Label("twenty")
+	));
+	for (char ch = 'a'; ch <= 'z'; ch++) {
+		static char buf[32];
+		memset(buf, ch, sizeof(buf));
+		UI::Label *l1, *l2, *l3;
+		buf[20] = '\0';
+		l3 = c->Label(buf);
+		buf[10] = '\0';
+		l2 = c->Label(buf);
+		buf[3] = '\0';
+		l1 = c->Label(buf);
+		table->AddRow(UI::WidgetSet(l1, l2, l3));
+	}
+	c->GetTopLayer()->SetInnerWidget(c->Grid(2,1)->SetCell(0,0,table));
+#endif
+
+	UI::DropDown *d1, *d2;
+	c->GetTopLayer()->SetInnerWidget(
+		c->VBox()->PackEnd(UI::WidgetSet(
+			(d1 = c->DropDown()
+				->AddOption("watermelon")
+				->AddOption("banana")
+				->AddOption("ox tongue")
+			),
+			(d2 = c->DropDown()
+				->AddOption("coffee")
+				->AddOption("beer")
+				->AddOption("a single plum floating in perfume served in a man's hat")
+			)
+		))
+	);
+	c->onClick.connect(sigc::bind(sigc::ptr_fun(&click_handler), c.Get()));
+	d1->onMouseOver.connect(sigc::bind(sigc::ptr_fun(&over_handler), d1));
+	d1->onMouseOut.connect(sigc::bind(sigc::ptr_fun(&out_handler), d1));
+	d2->onMouseOver.connect(sigc::bind(sigc::ptr_fun(&over_handler), d2));
+	d2->onMouseOut.connect(sigc::bind(sigc::ptr_fun(&out_handler), d2));
 
 	//int count = 0;
 
@@ -538,7 +593,10 @@ int main(int argc, char **argv)
 		c->Draw();
 		r->SwapBuffers();
 
+//		thing.Update();
+
 //		slider->SetValue(slider->GetValue() + 0.01);
+//		gauge->SetValue(gauge->GetValue() + 0.001);
 
 #if 0
 		if (++count == 400) {

@@ -1,11 +1,17 @@
 -- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
+local Translate = import("Translate")
+local Engine = import("Engine")
+local Game = import("Game")
+local SystemPath = import("SystemPath")
+local ErrorScreen = import("ErrorScreen")
+
 local ui = Engine.ui
 local t = Translate:GetTranslator()
 
 local setupPlayerWave = function ()
-	Game.player:SetShipType("passenger_shuttle")
+	Game.player:SetShipType("personal_skiff")
 	Game.player:AddEquip("PULSECANNON_1MW")
 	Game.player:AddEquip("ATMOSPHERIC_SHIELDING")
 	Game.player:AddEquip("AUTOPILOT")
@@ -15,20 +21,27 @@ local setupPlayerWave = function ()
 	Game.player:SetMoney(100)
 end
 
+local loadGame = function (path)
+	local ok, err = pcall(Game.LoadGame, path)
+	if not ok then
+		ErrorScreen.ShowError(t('Could not load game: ') .. err)
+	end
+end
+
 local doLoadDialog = function ()
-	ui:SetInnerWidget(
+	ui:NewLayer(
 		ui.templates.FileDialog({
 			title       = t("Select game to load..."),
 			path        = "savefiles",
 			selectLabel = t("Load game"),
-			onSelect    = function (filename) Game.LoadGame(filename) end,
-			onCancel    = function () ui:SetInnerWidget(ui.templates.MainMenu()) end
+			onSelect    = loadGame,
+			onCancel    = function () ui:DropLayer() end
 		})
 	)
 end
 
 local buttonDefs = {
-	{ t("New Game"),    function () Game.StartGame(SystemPath.New(0,0,0,0,9))   setupPlayerWave() end },
+	{ t("Start at FireDrake"), function () Game.StartGame(SystemPath.New(1,-1,-1,0,4)) setupPlayerWave() end },
 	{ t("Load game"),         doLoadDialog },
 	{ t("Options"),           function () Engine.SettingsView() end },
 	{ t("Quit"),              function () Engine.Quit() end },
@@ -51,7 +64,7 @@ local menu =
 			ui:Grid({ 0.1, 0.8, 0.1 }, 1)
 				:SetCell(1, 0,
 					ui:Align("LEFT",
-						ui:Label("Paragon"):SetFont("HEADING_XLARGE")
+						ui:Label("Pioneer"):SetFont("HEADING_XLARGE")
 					)
 				)
 		})

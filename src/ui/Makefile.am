@@ -24,23 +24,26 @@ noinst_HEADERS = \
 	Event.h \
 	EventDispatcher.h \
 	Expand.h \
-	FloatContainer.h \
+	Gauge.h \
 	Gradient.h \
 	Grid.h \
 	Icon.h \
 	Image.h \
 	Label.h \
+	Layer.h \
 	List.h \
 	Lua.h \
 	LuaSignal.h \
 	Margin.h \
 	MultiLineText.h \
+	NumberLabel.h \
 	Point.h \
 	Scroller.h \
 	Single.h \
 	Skin.h \
 	Slider.h \
 	SmallButton.h \
+	Table.h \
 	TextEntry.h \
 	TextLayout.h \
 	Widget.h \
@@ -60,20 +63,23 @@ libui_a_SOURCES = \
 	Event.cpp \
 	EventDispatcher.cpp \
 	Expand.cpp \
-	FloatContainer.cpp \
+	Gauge.cpp \
 	Gradient.cpp \
 	Grid.cpp \
 	Icon.cpp \
 	Image.cpp \
 	Label.cpp \
+	Layer.cpp \
 	List.cpp \
 	Margin.cpp \
 	MultiLineText.cpp \
+	NumberLabel.cpp \
 	Scroller.cpp \
 	Single.cpp \
 	Skin.cpp \
 	Slider.cpp \
 	SmallButton.cpp \
+	Table.cpp \
 	TextEntry.cpp \
 	TextLayout.cpp \
 	Widget.cpp \
@@ -89,16 +95,20 @@ libui_a_SOURCES = \
 	LuaDropDown.cpp \
 	LuaGradient.cpp \
 	LuaExpand.cpp \
+	LuaGauge.cpp \
 	LuaGrid.cpp \
 	LuaIcon.cpp \
 	LuaImage.cpp \
 	LuaLabel.cpp \
+	LuaLayer.cpp \
 	LuaList.cpp \
 	LuaMargin.cpp \
 	LuaMultiLineText.cpp \
+	LuaNumberLabel.cpp \
 	LuaScroller.cpp \
 	LuaSingle.cpp \
 	LuaSlider.cpp \
 	LuaSmallButton.cpp \
+	LuaTable.cpp \
 	LuaTextEntry.cpp \
 	LuaWidget.cpp

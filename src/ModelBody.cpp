@@ -159,7 +159,7 @@ void ModelBody::SetFrame(Frame *f)
 //    * As suns set the split is biased towards ambient
 void ModelBody::CalcLighting(double &ambient, double &direct, const Camera *camera)
 {
-	const double minAmbient = 0.05;
+	const double minAmbient = 0.20;
 	ambient = minAmbient;
 	direct = 1.0;
 	Body *astro = GetFrame()->GetBody();
@@ -301,7 +301,8 @@ void ModelBody::RenderModel(Graphics::Renderer *r, const Camera *camera, const v
 	matrix4x4d m2 = GetInterpOrient();
 	m2.SetTranslate(GetInterpPosition());
 	matrix4x4d t = viewTransform * m2;
-	glPushMatrix();				// Otherwise newmodels leave a dirty matrix
+
+	//double to float matrix
 	matrix4x4f trans;
 	for (int i=0; i<12; i++) trans[i] = float(t[i]);
 	trans[12] = viewCoords.x;
@@ -310,7 +311,6 @@ void ModelBody::RenderModel(Graphics::Renderer *r, const Camera *camera, const v
 	trans[15] = 1.0f;
 
 	m_model->Render(trans);
-	glPopMatrix();
 
 	if (setLighting)
 		ResetLighting(r, oldLights, oldAmbient);

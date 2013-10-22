@@ -9,6 +9,7 @@
 #include "Event.h"
 #include "RefCounted.h"
 #include "WidgetSet.h"
+#include "PropertiedObject.h"
 #include <climits>
 #include <set>
 
@@ -83,6 +84,7 @@ namespace UI {
 
 class Context;
 class Container;
+class Layer;
 
 class Widget : public RefCounted {
 protected:
@@ -145,11 +147,13 @@ public:
 		return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x+m_activeArea.x && point.y < pos.y+m_activeArea.y);
 	}
 
+	// calculate layout contribution based on preferred size and flags
+	Point CalcLayoutContribution();
+	// calculate size based on available space, preferred size and flags
+	Point CalcSize(const Point &avail);
+
 	// fast way to determine if the widget is a container
 	virtual bool IsContainer() const { return false; }
-
-	// are we floating
-	bool IsFloating() const { return m_floating; }
 
 	// selectable widgets may receive keyboard focus
 	virtual bool IsSelectable() const { return false; }
@@ -197,6 +201,9 @@ public:
 	const std::string &GetId() const { return m_id; }
 	Widget *SetId(const std::string &id) { m_id = id; return this; }
 
+	// bind an object property to a widget bind point
+	void Bind(const std::string &bindName, PropertiedObject *object, const std::string &propertyName);
+
 
 	// this sigc accumulator calls all the handlers for an event. if any of
 	// them return true, it returns true (indicating the event was handled),
@@ -217,8 +224,8 @@ public:
 	sigc::signal<bool,const KeyboardEvent &>::accumulated<EventHandlerResultAccumulator> onKeyDown;
 	sigc::signal<bool,const KeyboardEvent &>::accumulated<EventHandlerResultAccumulator> onKeyUp;
 
-	// synthesised for non-control keys. repeats when key is held down
-	sigc::signal<bool,const KeyboardEvent &>::accumulated<EventHandlerResultAccumulator> onKeyPress;
+	// text input, full unicode codepoint
+	sigc::signal<bool,const TextInputEvent &>::accumulated<EventHandlerResultAccumulator> onTextInput;
 
 	// mouse button presses
 	sigc::signal<bool,const MouseButtonEvent &>::accumulated<EventHandlerResultAccumulator> onMouseDown;
@@ -290,9 +297,8 @@ protected:
 	virtual void HandleMouseActivate() {}
 	virtual void HandleMouseDeactivate() {}
 
-	// synthesized event. like KeyDown except you get multiple events if the
-	// key is held down
-	virtual void HandleKeyPress(const KeyboardEvent &event) {}
+	// text input event, a full unicode codepoint
+	virtual void HandleTextInput(const TextInputEvent &event) {}
 
 	// internal synthesized events fired when a widget is selected or
 	// deselected. on mousedown, a widget becomes the selected widget unless
@@ -301,6 +307,7 @@ protected:
 	virtual void HandleSelect() {}
 	virtual void HandleDeselect() {}
 
+	void RegisterBindPoint(const std::string &bindName, sigc::slot<void,PropertyMap &,const std::string &> method);
 
 private:
 
@@ -318,6 +325,7 @@ private:
 	// long as the signals continue to return false (unhandled).
 	bool TriggerKeyDown(const KeyboardEvent &event, bool emit = true);
 	bool TriggerKeyUp(const KeyboardEvent &event, bool emit = true);
+	bool TriggerTextInput(const TextInputEvent &event, bool emit = true);
 	bool TriggerMouseDown(const MouseButtonEvent &event, bool emit = true);
 	bool TriggerMouseUp(const MouseButtonEvent &event, bool emit = true);
 	bool TriggerMouseMove(const MouseMotionEvent &event, bool emit = true);
@@ -331,8 +339,6 @@ private:
 
 	void TriggerMouseActivate();
 	void TriggerMouseDeactivate();
-
-	bool TriggerKeyPress(const KeyboardEvent &event, bool emit = true);
 
 	void TriggerSelect();
 	void TriggerDeselect();
@@ -357,12 +363,6 @@ private:
 	friend class Context;
 	void SetSize(const Point &size) { m_size = size; SetActiveArea(size); }
 
-
-	// FloatContainer needs to change floating state
-	friend class FloatContainer;
-	void SetFloating(bool floating) { m_floating = floating; }
-
-
 	Context *m_context;
 	Container *m_container;
 
@@ -378,8 +378,6 @@ private:
 
 	Font m_font;
 
-	bool m_floating;
-
 	bool m_disabled;
 
 	bool m_mouseOver;
@@ -389,6 +387,9 @@ private:
 	std::set<KeySym> m_shortcuts;
 
 	std::string m_id;
+
+	std::map< std::string,sigc::slot<void,PropertyMap &,const std::string &> > m_bindPoints;
+	std::map< std::string,sigc::connection > m_binds;
 };
 
 }
