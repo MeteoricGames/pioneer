@@ -17,6 +17,7 @@ inline GLint GLInternalFormat(TextureFormat format) {
 		case TEXTURE_INTENSITY_8:  return GL_INTENSITY;
 		case TEXTURE_DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		case TEXTURE_DXT1:  return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		case TEXTURE_DEPTH: return GL_DEPTH_COMPONENT;
 		default: assert(0); return 0;
 	}
 }
@@ -43,6 +44,7 @@ inline GLint GLImageFormat(TextureFormat format) {
 		case TEXTURE_INTENSITY_8:  return GL_LUMINANCE;
 		case TEXTURE_DXT5: return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		case TEXTURE_DXT1:  return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		case TEXTURE_DEPTH: return GL_DEPTH_COMPONENT;
 		default: assert(0); return 0;
 	}
 }

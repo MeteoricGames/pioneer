@@ -99,6 +99,11 @@ bool RendererLegacy::EndFrame()
 	return true;
 }
 
+bool RendererLegacy::PostProcessFrame()
+{
+	return true;
+}
+
 static std::string glerr_to_string(GLenum err)
 {
 	switch (err)

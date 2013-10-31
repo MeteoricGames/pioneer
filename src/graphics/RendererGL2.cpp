@@ -16,6 +16,7 @@
 #include "gl2/RingMaterial.h"
 #include "gl2/StarfieldMaterial.h"
 #include "gl2/FresnelColourMaterial.h"
+#include "gl2/TexturedFullscreenQuad.h"
 
 namespace Graphics {
 
@@ -24,6 +25,10 @@ typedef std::vector<std::pair<MaterialDescriptor, GL2::Program*> >::const_iterat
 // for material-less line and point drawing
 GL2::MultiProgram *vtxColorProg;
 GL2::MultiProgram *flatColorProg;
+
+// for post-processing
+Material* texFullscreenQuadMtrl = nullptr;
+RenderTarget* scenePassRT = nullptr;
 
 RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 : RendererLegacy(window, vs)
@@ -42,17 +47,80 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	desc.vertexColors = true;
 	vtxColorProg = new GL2::MultiProgram(desc);
 	m_programs.push_back(std::make_pair(desc, vtxColorProg));
+
+	// Init bloom effect
+	MaterialDescriptor tfquad_mtrl_desc;
+	tfquad_mtrl_desc.effect = EFFECT_TEXTURED_FULLSCREEN_QUAD;
+	texFullscreenQuadMtrl = CreateMaterial(tfquad_mtrl_desc);
+
+	// Init render target
+	RenderTargetDesc scene_rt_desc(
+		window->GetWidth(), window->GetHeight(), 
+		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_DEPTH,
+		true);
+	scenePassRT = CreateRenderTarget(scene_rt_desc);
 }
 
 RendererGL2::~RendererGL2()
 {
 	while (!m_programs.empty()) delete m_programs.back().second, m_programs.pop_back();
+	if(texFullscreenQuadMtrl) {
+		delete texFullscreenQuadMtrl;
+	}
+	if(scenePassRT) {
+		delete scenePassRT;
+	}
 }
 
 bool RendererGL2::BeginFrame()
 {
 	glClearColor(0,0,0,0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+
+	SetRenderTarget(scenePassRT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	return true;
+}
+
+bool RendererGL2::EndFrame()
+{
+	SetRenderTarget(0);
+	return true;
+}
+
+bool RendererGL2::PostProcessFrame()
+{
+	const float screenquad_vertices [] = {
+		-1.0f,	-1.0f, 0.0f,
+		-1.0f,	 1.0f, 0.0f,
+		 1.0f,	-1.0f, 0.0f,
+		 1.0f,	-1.0f, 0.0f,
+		-1.0f,   1.0f, 0.0f,
+		 1.0f,	 1.0f, 0.0f
+	};
+	const float screenquad_texcoords [] = {
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f
+	};
+
+	glDisable(GL_CULL_FACE);	
+	texFullscreenQuadMtrl->texture0 = scenePassRT->GetColorTexture();
+	texFullscreenQuadMtrl->Apply();
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, screenquad_vertices);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, screenquad_texcoords);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	texFullscreenQuadMtrl->Unapply();
+	glEnable(GL_CULL_FACE);
+
 	return true;
 }
 
@@ -146,6 +214,9 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 		break;
 	case EFFECT_FRESNEL_SPHERE:
 		mat = new GL2::FresnelColourMaterial();
+		break;
+	case EFFECT_TEXTURED_FULLSCREEN_QUAD:
+		mat = new GL2::TexturedFullscreenQuad();
 		break;
 	default:
 		if (desc.lighting)

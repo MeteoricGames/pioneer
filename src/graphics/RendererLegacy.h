@@ -24,6 +24,7 @@ public:
 
 	virtual bool BeginFrame();
 	virtual bool EndFrame();
+	virtual bool PostProcessFrame();
 	virtual bool SwapBuffers();
 
 	virtual bool ClearScreen();

@@ -88,6 +88,7 @@ public:
 
 	virtual bool BeginFrame() = 0;
 	virtual bool EndFrame() = 0;
+	virtual bool PostProcessFrame() = 0;
 	//traditionally gui happens between endframe and swapbuffers
 	virtual bool SwapBuffers() = 0;
 

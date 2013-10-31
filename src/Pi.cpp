@@ -811,7 +811,8 @@ void Pi::TombStoneLoop()
 		Pi::renderer->GetWindow()->SetGrab(false);
 		Pi::renderer->BeginFrame();
 		tombstone->Draw(_time);
-		Pi::renderer->EndFrame();
+		Pi::renderer->EndFrame();		
+		Pi::renderer->PostProcessFrame();
 		Gui::Draw();
 		Pi::renderer->SwapBuffers();
 
@@ -904,6 +905,7 @@ void Pi::Start()
 		Pi::renderer->BeginFrame();
 		intro->Draw(_time);
 		Pi::renderer->EndFrame();
+		Pi::renderer->PostProcessFrame();
 
 		ui->Update();
 		ui->Draw();
@@ -1045,6 +1047,8 @@ void Pi::MainLoop()
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
 		Pi::renderer->EndFrame();
+		Pi::renderer->PostProcessFrame();
+
 		if( DrawGUI ) {
 			Gui::Draw();
 		} else if (game && game->IsNormalSpace()) {

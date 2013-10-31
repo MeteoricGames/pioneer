@@ -26,6 +26,7 @@ namespace GL2 {
 	class RenderTarget;
 	class RingMaterial;
 	class FresnelColourMaterial;
+	class TexturedFullscreenQuad;
 }
 
 class RendererGL2 : public RendererLegacy
@@ -37,6 +38,8 @@ public:
 	virtual const char* GetName() const { return "GL2 renderer"; }
 
 	virtual bool BeginFrame();
+	virtual bool EndFrame();
+	virtual bool PostProcessFrame();
 
 	virtual bool SetRenderTarget(RenderTarget*);
 
@@ -60,6 +63,7 @@ private:
 	friend class GL2::LitMultiMaterial;
 	friend class GL2::RingMaterial;
 	friend class GL2::FresnelColourMaterial;
+	friend class GL2::TexturedFullscreenQuad;
 	std::vector<std::pair<MaterialDescriptor, GL2::Program*> > m_programs;
 	float m_invLogZfarPlus1;
 	GL2::RenderTarget *m_activeRenderTarget;
