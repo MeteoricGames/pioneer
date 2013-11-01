@@ -1,23 +1,22 @@
-#ifndef _GL2_TEXTURED_FULLSCREEN_QUAD_H_
-#define _GL2_TEXTURED_FULLSCREEN_QUAD_H_
+#ifndef _GL2_HORIZONTAL_BLUR_MATERIAL_H_
+#define _GL2_HORIZONTAL_BLUR_MATERIAL_H_
 
 /*
- * Textured fullscreen quad.
- * A simple shader to draw a fullscreen textured quad, useful for multipass effects.
+ * Performs a gaussian horizontal blur on a fullscreen quad.
  */
 #include "libs.h"
 #include "Program.h"
 
 namespace Graphics {
 	namespace GL2 {
-		class TexturedFullscreenQuad : public Material {
+		class HorizontalBlurMaterial : public Material {
 		public:
-			TexturedFullscreenQuad() {
+			HorizontalBlurMaterial() {
 				texture0 = nullptr;
 			}
 
 			Program *CreateProgram(const MaterialDescriptor &) {
-				return new Program("pp_textured_fullscreen_quad", "");
+				return new Program("pp_hblur", "");
 			}
 
 			virtual void Apply() {

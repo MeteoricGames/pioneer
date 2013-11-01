@@ -27,6 +27,9 @@ namespace GL2 {
 	class RingMaterial;
 	class FresnelColourMaterial;
 	class TexturedFullscreenQuad;
+	class HorizontalBlurMaterial;
+	class VerticalBlurMaterial;
+	class BloomCompositorMaterial;
 }
 
 class RendererGL2 : public RendererLegacy
@@ -64,6 +67,9 @@ private:
 	friend class GL2::RingMaterial;
 	friend class GL2::FresnelColourMaterial;
 	friend class GL2::TexturedFullscreenQuad;
+	friend class GL2::HorizontalBlurMaterial;
+	friend class GL2::VerticalBlurMaterial;
+	friend class GL2::BloomCompositorMaterial;
 	std::vector<std::pair<MaterialDescriptor, GL2::Program*> > m_programs;
 	float m_invLogZfarPlus1;
 	GL2::RenderTarget *m_activeRenderTarget;

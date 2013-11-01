@@ -98,6 +98,15 @@
     <ClInclude Include="..\..\..\src\graphics\gl2\TexturedFullscreenQuad.h">
       <Filter>gl2</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\HorizontalBlurMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\VerticalBlurMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="win32">

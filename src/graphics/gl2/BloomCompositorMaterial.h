@@ -1,29 +1,32 @@
-#ifndef _GL2_TEXTURED_FULLSCREEN_QUAD_H_
-#define _GL2_TEXTURED_FULLSCREEN_QUAD_H_
+#ifndef _GL2_BLOOM_COMPOSITOR_MATERIAL_QUAD_H_
+#define _GL2_BLOOM_COMPOSITOR_MATERIAL_H_
 
 /*
- * Textured fullscreen quad.
- * A simple shader to draw a fullscreen textured quad, useful for multipass effects.
+ * Combines scene with gaussian blurred copy to perform bloom effect.
  */
 #include "libs.h"
 #include "Program.h"
 
 namespace Graphics {
 	namespace GL2 {
-		class TexturedFullscreenQuad : public Material {
+		class BloomCompositorMaterial : public Material {
 		public:
-			TexturedFullscreenQuad() {
+			BloomCompositorMaterial() {
 				texture0 = nullptr;
+				texture1 = nullptr;
 			}
 
 			Program *CreateProgram(const MaterialDescriptor &) {
-				return new Program("pp_textured_fullscreen_quad", "");
+				return new Program("pp_compositor", "");
 			}
 
 			virtual void Apply() {
 				m_program->Use();
 				if(texture0) {
 					m_program->texture0.Set(texture0, 0);
+				}
+				if(texture1) {
+					m_program->texture1.Set(texture1, 1);
 				}
 			}
 

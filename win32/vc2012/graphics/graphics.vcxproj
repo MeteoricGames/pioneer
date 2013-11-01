@@ -126,16 +126,19 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
     <ClInclude Include="..\..\..\src\graphics\Frustum.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\FresnelColourMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\GeoSphereMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\GL2Material.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\GL2RenderTarget.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\HorizontalBlurMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\MultiMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\Program.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\RingMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\StarfieldMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\TexturedFullscreenQuad.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\Uniform.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\VerticalBlurMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\Graphics.h" />
     <ClInclude Include="..\..\..\src\graphics\Light.h" />
     <ClInclude Include="..\..\..\src\graphics\Material.h" />

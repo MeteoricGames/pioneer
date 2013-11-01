@@ -17,6 +17,9 @@
 #include "gl2/StarfieldMaterial.h"
 #include "gl2/FresnelColourMaterial.h"
 #include "gl2/TexturedFullscreenQuad.h"
+#include "gl2/HorizontalBlurMaterial.h"
+#include "gl2/VerticalBlurMaterial.h"
+#include "gl2/BloomCompositorMaterial.h"
 
 namespace Graphics {
 
@@ -28,7 +31,12 @@ GL2::MultiProgram *flatColorProg;
 
 // for post-processing
 Material* texFullscreenQuadMtrl = nullptr;
+Material* hblurMtrl = nullptr;
+Material* vblurMtrl = nullptr;
+Material* bloomMtrl = nullptr;
 RenderTarget* scenePassRT = nullptr;
+RenderTarget* hblurPassRT = nullptr;
+RenderTarget* vblurPassRT = nullptr;
 
 RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 : RendererLegacy(window, vs)
@@ -48,17 +56,36 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	vtxColorProg = new GL2::MultiProgram(desc);
 	m_programs.push_back(std::make_pair(desc, vtxColorProg));
 
-	// Init bloom effect
+	// Init postprocessing materials
 	MaterialDescriptor tfquad_mtrl_desc;
 	tfquad_mtrl_desc.effect = EFFECT_TEXTURED_FULLSCREEN_QUAD;
 	texFullscreenQuadMtrl = CreateMaterial(tfquad_mtrl_desc);
+	MaterialDescriptor hblur_mtrl_desc;
+	hblur_mtrl_desc.effect = EFFECT_HORIZONTAL_BLUR;
+	hblurMtrl = CreateMaterial(hblur_mtrl_desc);
+	MaterialDescriptor vblur_mtrl_desc;
+	vblur_mtrl_desc.effect = EFFECT_VERTICAL_BLUR;
+	vblurMtrl = CreateMaterial(vblur_mtrl_desc);
+	MaterialDescriptor bloom_mtrl_desc;
+	bloom_mtrl_desc.effect = EFFECT_BLOOM_COMPOSITOR;
+	bloomMtrl = CreateMaterial(bloom_mtrl_desc);
 
-	// Init render target
+	// Init render targets
 	RenderTargetDesc scene_rt_desc(
 		window->GetWidth(), window->GetHeight(), 
-		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_DEPTH,
+		TextureFormat::TEXTURE_RGBA_8888, TextureFormat::TEXTURE_DEPTH,
 		true);
 	scenePassRT = CreateRenderTarget(scene_rt_desc);
+	RenderTargetDesc hblur_rt_desc(
+		window->GetWidth(), window->GetHeight(),
+		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_NONE,
+		false);
+	hblurPassRT = CreateRenderTarget(hblur_rt_desc);
+	RenderTargetDesc vblur_rt_desc(
+		window->GetWidth(), window->GetHeight(),
+		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_NONE,
+		false);
+	vblurPassRT = CreateRenderTarget(vblur_rt_desc);
 }
 
 RendererGL2::~RendererGL2()
@@ -67,8 +94,23 @@ RendererGL2::~RendererGL2()
 	if(texFullscreenQuadMtrl) {
 		delete texFullscreenQuadMtrl;
 	}
+	if(hblurMtrl) {
+		delete hblurMtrl;
+	}
+	if(vblurMtrl) {
+		delete vblurMtrl;
+	}
+	if(bloomMtrl) {
+		delete bloomMtrl;
+	}
 	if(scenePassRT) {
 		delete scenePassRT;
+	}
+	if(hblurPassRT) {
+		delete hblurPassRT;
+	}
+	if(vblurPassRT) {
+		delete vblurPassRT;
 	}
 }
 
@@ -93,43 +135,49 @@ bool RendererGL2::PostProcessFrame()
 {
 	const float screenquad_vertices [] = {
 		-1.0f,	-1.0f, 0.0f,
+		 1.0f,	-1.0f, 0.0f,
 		-1.0f,	 1.0f, 0.0f,
 		 1.0f,	-1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		-1.0f,   1.0f, 0.0f,
-		 1.0f,	 1.0f, 0.0f
-	};
-	const float screenquad_texcoords [] = {
-		0.0f, 0.0f,
-		0.0f, 1.0f,
-		1.0f, 0.0f,
-		1.0f, 0.0f,
-		0.0f, 1.0f,
-		1.0f, 1.0f
+		 1.0f,	 1.0f, 0.0f,
+		-1.0f,   1.0f, 0.0f
 	};
 
-	glDisable(GL_CULL_FACE);	
-	texFullscreenQuadMtrl->texture0 = scenePassRT->GetColorTexture();
-	texFullscreenQuadMtrl->Apply();
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, screenquad_vertices);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, screenquad_texcoords);
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+
+	// HBlur pass
+	SetRenderTarget(hblurPassRT);
+	glClear(GL_COLOR_BUFFER_BIT);
+	hblurMtrl->texture0 = scenePassRT->GetColorTexture();
+	hblurMtrl->Apply();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+	hblurMtrl->Unapply();
+	// VBlur pass
+	SetRenderTarget(vblurPassRT);
+	glClear(GL_COLOR_BUFFER_BIT);
+	vblurMtrl->texture0 = hblurPassRT->GetColorTexture();
+	vblurMtrl->Apply();
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	vblurMtrl->Unapply();
+	// Combine pass
+	SetRenderTarget(0);
+	bloomMtrl->texture0 = scenePassRT->GetColorTexture();
+	bloomMtrl->texture1 = vblurPassRT->GetColorTexture();
+	bloomMtrl->Apply();
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	bloomMtrl->Unapply();
+	//
 	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	texFullscreenQuadMtrl->Unapply();
-	glEnable(GL_CULL_FACE);
 
 	return true;
 }
 
 bool RendererGL2::SetRenderTarget(RenderTarget *rt)
 {
+	if (m_activeRenderTarget && rt != m_activeRenderTarget)
+		m_activeRenderTarget->Unbind();
 	if (rt)
 		static_cast<GL2::RenderTarget*>(rt)->Bind();
-	else if (m_activeRenderTarget)
-		m_activeRenderTarget->Unbind();
 
 	m_activeRenderTarget = static_cast<GL2::RenderTarget*>(rt);
 
@@ -217,6 +265,15 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 		break;
 	case EFFECT_TEXTURED_FULLSCREEN_QUAD:
 		mat = new GL2::TexturedFullscreenQuad();
+		break;
+	case EFFECT_HORIZONTAL_BLUR:
+		mat = new GL2::HorizontalBlurMaterial();
+		break;
+	case EFFECT_VERTICAL_BLUR:
+		mat = new GL2::VerticalBlurMaterial();
+		break;
+	case EFFECT_BLOOM_COMPOSITOR:
+		mat = new GL2::BloomCompositorMaterial();
 		break;
 	default:
 		if (desc.lighting)
