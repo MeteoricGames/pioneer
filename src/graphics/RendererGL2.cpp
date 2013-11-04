@@ -37,6 +37,7 @@ Material* bloomMtrl = nullptr;
 RenderTarget* scenePassRT = nullptr;
 RenderTarget* hblurPassRT = nullptr;
 RenderTarget* vblurPassRT = nullptr;
+GLuint uScreenQuadBufferId = 0;
 
 RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 : RendererLegacy(window, vs)
@@ -55,6 +56,20 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	desc.vertexColors = true;
 	vtxColorProg = new GL2::MultiProgram(desc);
 	m_programs.push_back(std::make_pair(desc, vtxColorProg));
+
+	// Init quad used for rendering
+	const float screenquad_vertices [] = {
+		-1.0f,	-1.0f, 0.0f,
+		 1.0f,	-1.0f, 0.0f,
+		-1.0f,	 1.0f, 0.0f,
+		 1.0f,	-1.0f, 0.0f,
+		 1.0f,	 1.0f, 0.0f,
+		-1.0f,   1.0f, 0.0f
+	};
+	glGenBuffers(1, &uScreenQuadBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
+	glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(float), screenquad_vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// Init postprocessing materials
 	MaterialDescriptor tfquad_mtrl_desc;
@@ -94,6 +109,8 @@ RendererGL2::~RendererGL2()
 	if(texFullscreenQuadMtrl) {
 		delete texFullscreenQuadMtrl;
 	}
+	
+	glDeleteBuffers(1, &uScreenQuadBufferId);
 	if(hblurMtrl) {
 		delete hblurMtrl;
 	}
@@ -133,17 +150,9 @@ bool RendererGL2::EndFrame()
 
 bool RendererGL2::PostProcessFrame()
 {
-	const float screenquad_vertices [] = {
-		-1.0f,	-1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		-1.0f,	 1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		 1.0f,	 1.0f, 0.0f,
-		-1.0f,   1.0f, 0.0f
-	};
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, screenquad_vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	// HBlur pass
 	SetRenderTarget(hblurPassRT);
@@ -166,8 +175,9 @@ bool RendererGL2::PostProcessFrame()
 	bloomMtrl->Apply();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	bloomMtrl->Unapply();
-	//
+
 	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return true;
 }
