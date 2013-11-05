@@ -1,3 +1,140 @@
+November 2013
+
+   * New features
+     * Translations now managed via Transifex (#2521)
+
+   * Internal changes
+     * Build fixes for MSVC
+
+October 2013
+
+   * New features
+     * New ship "Xylophis Short Range Shuttle" (#2442, #2515)
+     * New ship "Kanara Interceptor" (civilian version) (#2454, #2461)
+     * New ship "Nerodia" (#2505)
+     * New ship "Sinonatrix" (#2503)
+     * New settings screens (#2490, #2512)
+     * Vertical speed is shown with altitude, up to 10000 km or half the
+       planet's radius (#2446)
+     * Ship acceleration and delta-V is shown in the Ship Info View (#2518, #2211)
+     * The random face system now supports multiple species (#2440)
+     * The eclipse effect can now be disabled in the config file
+       (#2439, #2497, #2176, #2190)
+     * Allow up to two keys to be bound to a single input (#2222)
+
+   * Minor changes and tweaks
+     * Improved ship textures (#2450)
+     * Resized DSMiner
+     * Updated the Deneb to use new camera and gun tag-points (#2460)
+     * Set Speed mode is now initialised with the ship's forward speed (#2469)
+     * Cleaned up translation files (#2490)
+
+   * Script and UI API changes
+     * UI now uses a stack of layers instead of floating widgets (#2475, #2478)
+     * Multiline text widgets now default to 75 chars width (#2488)
+     * New UI methods and extended Lua interfaces (#2490)
+       * Checkbox: Toggle, SetState, IsChecked, onValueChanged
+       * List: GetSelectedIndex, SetSelectedIndex, NumItems, IsEmpty
+       * DropDown: GetSelectedIndex, SetSelectedIndex, NumItems, IsEmpty
+       * TextEntry: SetText
+       * Slider: GetRange, SetRange
+       * Basic joystick event support
+     * FileDialog now has a way to enter a new filename (#2490)
+     * Expose game settings, languages settings and keybindings to Lua (#2490)
+     * Models can now supply an "idle" animation that plays continuously (#2514)
+     * Models can now have multiple collidable parts that move with their
+       animations (#2493)
+     * ShipDef now has fields effectiveExhaustVelocity and thrusterFuelUse
+       (#2492, #2492)
+
+   * Fixes
+     * Modelviewer now correctly reloads tag-points when switching models
+       (#2451, #2456)
+     * Correctly setup UI sizing from window size (#2455, #2453)
+     * Fix TradeShips hang when trying to add cargo to almost-full ship
+       (#2459, #2432)
+     * Fix window/GL setup when multisampled antialiasing is requested but not
+       available (#2425)
+     * Fix a thread shutdown race condition that caused crashes at game exit
+       (#2464)
+     * Fix crash when game load fails (#2467, #2466)
+     * Fixed model spinner view distance (#2481)
+     * Stopped mouse movement when grabbed (#2485)
+     * Fixed UI::Margin sizing with non-ALL direction (#2490)
+     * Fix UI::Margin being created with an incorrect inner widget (#2513, #2511)
+     * Fix FileDialog not handling empty list and text entry (#2510, #2494)
+
+   * Model changes
+     * Pattern textures can now have alpha channels (#2449)
+
+   * Internal changes
+     * Enable C++11 (#2330)
+     * Lua blobs will now be correctly serialized (#2463)
+     * Removed many unnecessary uses of reinterpret_cast (#2465)
+     * Fix some problems reported by valgrind (#2472)
+     * Miscellaneous code improvements (#2474)
+     * Better Unicode handling in scan_enums (#2479)
+     * Cleaned up, fixed and documented LuaTable and LuaPushPull (#2332)
+     * Replace use of ScopedPtr with std::unique_ptr (#2519)
+
+September 2013
+
+   * New features
+     * New ship "Kanara Police Interceptor" (#2441)
+
+   * Minor changes and tweaks
+     * Improve thruster rendering (#2426, #1960)
+     * Added OpenGL debug output. Set EnableGLDebug in config.ini to enable
+       it (#2413)
+     * System Info View now shows orbital info for binary pairs (#2423)
+     * System Info View now shows body radius in kilometres (#2423)
+
+   * Fixes
+     * Fix SmartTable scrolling (#2349)
+     * Fix huge memory consumption on heightmapped terrains (#2418, 2405)
+     * Partially fix terrain collision failures (#2429, #2337)
+     * Allow an arbitrary number of navlight tags (#2427, #2438))
+
+   * Script and UI API changes
+     * A new module import system is now in place. Each dependency now needs
+       to be declared explicitly. See the Pull Request discussion for more
+       details (#1499)
+     * Lua scripts now run in individual sandboxes, with their own global
+       table. Interaction between modules needs to be done via explicit APIs
+       and imports. PersistentCharacters has been moved to
+       Character.persistent (#2417)
+     * Removed deprecated ShipType interface
+     * Rand.New now checks the type of its optional seed argument (#2445)
+
+   * Model changes
+     * Camera and gunmounts are now specified using tag points in the model.
+       Ship definition fields "camera_offset" and "gum_mounts" are now
+       deprecated (#2422)
+
+   * Internal changes
+     * Converted to SDL 2.0 (#2433, #2448)
+     * Remove GLU dependency (#2414)
+     * Bundle GLEW 1.10 (#2415)
+     * Upgrade miniz and force inline/static use (#2444)
+
+August 2013
+
+   * New features
+     * New ship "Amphiesma" (#2396)
+     * The Sector View now displays a sphere to show the hyperspace reach (#2378)
+     * New start point: Barnard's Star (#2240, #2402)
+
+   * Minor changes and tweaks
+     * Rescaled Wave model (#2400)
+     * Fix greenhouse gas calculations during planet generation (#2398)
+
+   * Internal changes
+     * Cleanup heightmap loader (#2392)
+
+   * Build system
+     * Early support for VS 2013 (#2391)
+     * Bundled jsoncpp library (#2406)
+
 July 2013
 
    * New features

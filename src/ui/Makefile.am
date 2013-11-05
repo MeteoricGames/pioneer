@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.common
 
 AM_CFLAGS += $(WARN_CFLAGS)
 AM_CPPFLAGS += $(WARN_CPPFLAGS)
-AM_CXXFLAGS += $(WARN_CXXFLAGS)
+AM_CXXFLAGS += $(STD_CXXFLAGS) $(WARN_CXXFLAGS)
 
 INCLUDES = -isystem $(top_srcdir)/contrib -I$(srcdir)/..
 if !HAVE_LUA
@@ -24,13 +24,13 @@ noinst_HEADERS = \
 	Event.h \
 	EventDispatcher.h \
 	Expand.h \
-	FloatContainer.h \
 	Gauge.h \
 	Gradient.h \
 	Grid.h \
 	Icon.h \
 	Image.h \
 	Label.h \
+	Layer.h \
 	List.h \
 	Lua.h \
 	LuaSignal.h \
@@ -63,13 +63,13 @@ libui_a_SOURCES = \
 	Event.cpp \
 	EventDispatcher.cpp \
 	Expand.cpp \
-	FloatContainer.cpp \
 	Gauge.cpp \
 	Gradient.cpp \
 	Grid.cpp \
 	Icon.cpp \
 	Image.cpp \
 	Label.cpp \
+	Layer.cpp \
 	List.cpp \
 	Margin.cpp \
 	MultiLineText.cpp \
@@ -100,6 +100,7 @@ libui_a_SOURCES = \
 	LuaIcon.cpp \
 	LuaImage.cpp \
 	LuaLabel.cpp \
+	LuaLayer.cpp \
 	LuaList.cpp \
 	LuaMargin.cpp \
 	LuaMultiLineText.cpp \

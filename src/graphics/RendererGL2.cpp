@@ -15,6 +15,7 @@
 #include "gl2/Program.h"
 #include "gl2/RingMaterial.h"
 #include "gl2/StarfieldMaterial.h"
+#include "gl2/FresnelColourMaterial.h"
 
 namespace Graphics {
 
@@ -24,8 +25,8 @@ typedef std::vector<std::pair<MaterialDescriptor, GL2::Program*> >::const_iterat
 GL2::MultiProgram *vtxColorProg;
 GL2::MultiProgram *flatColorProg;
 
-RendererGL2::RendererGL2(const Graphics::Settings &vs)
-: RendererLegacy(vs)
+RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
+: RendererLegacy(window, vs)
 , m_invLogZfarPlus1(0.f)
 , m_activeRenderTarget(0)
 {
@@ -142,6 +143,9 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 		break;
 	case EFFECT_GEOSPHERE_SKY:
 		mat = new GL2::GeoSphereSkyMaterial();
+		break;
+	case EFFECT_FRESNEL_SPHERE:
+		mat = new GL2::FresnelColourMaterial();
 		break;
 	default:
 		if (desc.lighting)

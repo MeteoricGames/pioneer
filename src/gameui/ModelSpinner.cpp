@@ -16,8 +16,8 @@ ModelSpinner::ModelSpinner(Context *context, SceneGraph::Model *model, const Sce
 	m_rotX(0), m_rotY(0),
 	m_rightMouseButton(false)
 {
-	m_model.Reset(model->MakeInstance());
-	m_skin.Apply(m_model.Get());
+	m_model.reset(model->MakeInstance());
+	m_skin.Apply(m_model.get());
 
 	Color lc(1.f);
 	m_light.SetDiffuse(lc);
@@ -48,7 +48,8 @@ void ModelSpinner::Draw()
 
 	Graphics::Renderer::StateTicket ticket(r);
 
-	r->SetPerspectiveProjection(45.f, 1.f, 1.f, 10000.f);
+	const float fov = 45.f;
+	r->SetPerspectiveProjection(fov, 1.f, 1.f, 10000.f);
 	r->SetTransform(matrix4x4f::Identity());
 
 	r->SetDepthTest(true);
@@ -63,7 +64,8 @@ void ModelSpinner::Draw()
 
 	matrix4x4f rot = matrix4x4f::RotateXMatrix(m_rotX);
 	rot.RotateY(m_rotY);
-	rot[14] = -1.5f * m_model->GetDrawClipRadius();
+	const float dist = m_model->GetDrawClipRadius() / sinf(DEG2RAD(fov*0.5f));
+	rot[14] = -dist;
 	m_model->Render(rot);
 }
 

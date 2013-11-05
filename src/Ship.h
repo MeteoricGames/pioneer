@@ -227,7 +227,7 @@ public:
 	float GetPercentShields() const;
 	float GetPercentHull() const;
 	void SetPercentHull(float);
-	float GetGunTemperature(int idx) const { return m_gunTemperature[idx]; }
+	float GetGunTemperature(int idx) const { return m_gun[idx].temperature; }
 
 	enum FuelState { // <enum scope='Ship' name=ShipFuelStatus prefix=FUEL_ public>
 		FUEL_OK,
@@ -242,8 +242,7 @@ public:
 	double GetFuelReserve() const { return m_reserveFuel; }
 	void SetFuelReserve(const double f) { m_reserveFuel = Clamp(f, 0.0, 1.0); }
 
-	// percentage (ie, 0--100) of tank used per second at full thrust
-	double GetFuelUseRate() const;
+	// available delta-V given the ship's current fuel state
 	double GetSpeedReachedWithFuel() const;
 
 	void EnterSystem();
@@ -271,9 +270,16 @@ protected:
 
 	SpaceStation *m_dockedWith;
 	int m_dockedWithPort;
-	Uint32 m_gunState[ShipType::GUNMOUNT_MAX];
-	float m_gunRecharge[ShipType::GUNMOUNT_MAX];
-	float m_gunTemperature[ShipType::GUNMOUNT_MAX];
+
+	struct Gun {
+		vector3f pos;
+		vector3f dir;
+		Uint32 state;
+		float recharge;
+		float temperature;
+	};
+	Gun m_gun[ShipType::GUNMOUNT_MAX];
+
 	float m_ecmRecharge;
 
 	ShipController *m_controller;
@@ -290,6 +296,7 @@ private:
     void SetShipId(const ShipType::Id &shipId);
 	void OnEquipmentChange(Equip::Type e);
 	void EnterHyperspace();
+	void InitGun(const char *tag, int num);
 
 	shipstats_t m_stats;
 	const ShipType *m_type;
@@ -328,7 +335,7 @@ private:
 	int m_dockedWithIndex; // deserialisation
 
 	SceneGraph::Animation *m_landingGearAnimation;
-	ScopedPtr<NavLights> m_navLights;
+	std::unique_ptr<NavLights> m_navLights;
 };
 
 

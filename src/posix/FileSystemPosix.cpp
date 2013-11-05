@@ -27,8 +27,8 @@ namespace FileSystem {
 		if (!path.empty() && path[0] == '/') { return path; }
 		else {
 			const size_t bufsize = 512;
-			ScopedMalloc<char> buf(std::malloc(bufsize));
-			char *cwd = getcwd(buf.Get(), bufsize);
+			std::unique_ptr<char, FreeDeleter> buf(static_cast<char*>(std::malloc(bufsize)));
+			char *cwd = getcwd(buf.get(), bufsize);
 			if (!cwd) {
 				fprintf(stderr, "failed to get current working directory\n");
 				abort();
@@ -128,7 +128,7 @@ namespace FileSystem {
 			fseek(fl, 0, SEEK_END);
 			long sz = ftell(fl);
 			fseek(fl, 0, SEEK_SET);
-			char *data = reinterpret_cast<char*>(std::malloc(sz));
+			char *data = static_cast<char*>(std::malloc(sz));
 			if (!data) {
 				// XXX handling memory allocation failure gracefully is too hard right now
 				fprintf(stderr, "failed when allocating buffer for '%s'\n", fullpath.c_str());

@@ -84,6 +84,7 @@ namespace UI {
 
 class Context;
 class Container;
+class Layer;
 
 class Widget : public RefCounted {
 protected:
@@ -154,9 +155,6 @@ public:
 	// fast way to determine if the widget is a container
 	virtual bool IsContainer() const { return false; }
 
-	// are we floating
-	bool IsFloating() const { return m_floating; }
-
 	// selectable widgets may receive keyboard focus
 	virtual bool IsSelectable() const { return false; }
 
@@ -164,6 +162,8 @@ public:
 	virtual void Disable();
 	virtual void Enable();
 	bool IsDisabled() const { return m_disabled; }
+
+	bool IsMouseOver() const { return m_mouseOver; }
 
 	// register a key that, when pressed and not handled by any other widget,
 	// will cause a click event to be sent to this widget
@@ -206,7 +206,6 @@ public:
 	// bind an object property to a widget bind point
 	void Bind(const std::string &bindName, PropertiedObject *object, const std::string &propertyName);
 
-
 	// this sigc accumulator calls all the handlers for an event. if any of
 	// them return true, it returns true (indicating the event was handled),
 	// otherwise it returns false
@@ -226,8 +225,8 @@ public:
 	sigc::signal<bool,const KeyboardEvent &>::accumulated<EventHandlerResultAccumulator> onKeyDown;
 	sigc::signal<bool,const KeyboardEvent &>::accumulated<EventHandlerResultAccumulator> onKeyUp;
 
-	// synthesised for non-control keys. repeats when key is held down
-	sigc::signal<bool,const KeyboardEvent &>::accumulated<EventHandlerResultAccumulator> onKeyPress;
+	// text input, full unicode codepoint
+	sigc::signal<bool,const TextInputEvent &>::accumulated<EventHandlerResultAccumulator> onTextInput;
 
 	// mouse button presses
 	sigc::signal<bool,const MouseButtonEvent &>::accumulated<EventHandlerResultAccumulator> onMouseDown;
@@ -238,6 +237,12 @@ public:
 
 	// mouse wheel moving
 	sigc::signal<bool,const MouseWheelEvent &>::accumulated<EventHandlerResultAccumulator> onMouseWheel;
+
+	// joystick events
+	sigc::signal<bool,const JoystickAxisMotionEvent &>::accumulated<EventHandlerResultAccumulator> onJoystickAxisMove;
+	sigc::signal<bool,const JoystickHatMotionEvent &>::accumulated<EventHandlerResultAccumulator> onJoystickHatMove;
+	sigc::signal<bool,const JoystickButtonEvent &>::accumulated<EventHandlerResultAccumulator> onJoystickButtonDown;
+	sigc::signal<bool,const JoystickButtonEvent &>::accumulated<EventHandlerResultAccumulator> onJoystickButtonUp;
 
 	// mouse entering or exiting widget area
 	sigc::signal<bool>::accumulated<EventHandlerResultAccumulator> onMouseOver;
@@ -265,11 +270,15 @@ protected:
 
 	// mouse active. if a widget is mouse-active, it receives all mouse events
 	// regardless of mouse position
-	bool IsMouseActive() const { return m_mouseActive; }
+	bool IsMouseActive() const;
 
-	bool IsMouseOver() const { return m_mouseOver; }
+	bool IsSelected() const;
 
-	bool IsSelected() const { return m_selected; }
+	Point GetMousePos() const;
+
+	// indicates whether the widget is part of the visible tree of widgets
+	// (ie, its chain of parents links to a Context)
+	bool IsVisible() const { return m_visible; }
 
 	void SetDisabled(bool disabled) { m_disabled = disabled; }
 
@@ -286,6 +295,10 @@ protected:
 	virtual void HandleMouseUp(const MouseButtonEvent &event) {}
 	virtual void HandleMouseMove(const MouseMotionEvent &event) {}
 	virtual void HandleMouseWheel(const MouseWheelEvent &event) {}
+	virtual void HandleJoystickAxisMove(const JoystickAxisMotionEvent &event) {}
+	virtual void HandleJoystickHatMove(const JoystickHatMotionEvent &event) {}
+	virtual void HandleJoystickButtonDown(const JoystickButtonEvent &event) {}
+	virtual void HandleJoystickButtonUp(const JoystickButtonEvent &event) {}
 
 	virtual void HandleClick() {}
 
@@ -299,9 +312,8 @@ protected:
 	virtual void HandleMouseActivate() {}
 	virtual void HandleMouseDeactivate() {}
 
-	// synthesized event. like KeyDown except you get multiple events if the
-	// key is held down
-	virtual void HandleKeyPress(const KeyboardEvent &event) {}
+	// text input event, a full unicode codepoint
+	virtual void HandleTextInput(const TextInputEvent &event) {}
 
 	// internal synthesized events fired when a widget is selected or
 	// deselected. on mousedown, a widget becomes the selected widget unless
@@ -309,6 +321,9 @@ protected:
 	// (if there was one) gets deselected
 	virtual void HandleSelect() {}
 	virtual void HandleDeselect() {}
+
+	virtual void HandleVisible() {}
+	virtual void HandleInvisible() {}
 
 	void RegisterBindPoint(const std::string &bindName, sigc::slot<void,PropertyMap &,const std::string &> method);
 
@@ -328,10 +343,16 @@ private:
 	// long as the signals continue to return false (unhandled).
 	bool TriggerKeyDown(const KeyboardEvent &event, bool emit = true);
 	bool TriggerKeyUp(const KeyboardEvent &event, bool emit = true);
+	bool TriggerTextInput(const TextInputEvent &event, bool emit = true);
 	bool TriggerMouseDown(const MouseButtonEvent &event, bool emit = true);
 	bool TriggerMouseUp(const MouseButtonEvent &event, bool emit = true);
 	bool TriggerMouseMove(const MouseMotionEvent &event, bool emit = true);
 	bool TriggerMouseWheel(const MouseWheelEvent &event, bool emit = true);
+
+	bool TriggerJoystickButtonDown(const JoystickButtonEvent &event, bool emit = true);
+	bool TriggerJoystickButtonUp(const JoystickButtonEvent &event, bool emit = true);
+	bool TriggerJoystickAxisMove(const JoystickAxisMotionEvent &event, bool emit = true);
+	bool TriggerJoystickHatMove(const JoystickHatMotionEvent &event, bool emit = true);
 
 	bool TriggerClick(bool emit = true);
 
@@ -341,8 +362,6 @@ private:
 
 	void TriggerMouseActivate();
 	void TriggerMouseDeactivate();
-
-	bool TriggerKeyPress(const KeyboardEvent &event, bool emit = true);
 
 	void TriggerSelect();
 	void TriggerDeselect();
@@ -357,6 +376,7 @@ private:
 	void Attach(Container *container);
 	void Detach();
 	void SetDimensions(const Point &position, const Point &size);
+	virtual void NotifyVisible(bool visible);
 
 	// called by Container::CollectShortcuts
 	const std::set<KeySym> &GetShortcuts() const { return m_shortcuts; }
@@ -366,12 +386,6 @@ private:
 	// and size directly
 	friend class Context;
 	void SetSize(const Point &size) { m_size = size; SetActiveArea(size); }
-
-
-	// FloatContainer needs to change floating state
-	friend class FloatContainer;
-	void SetFloating(bool floating) { m_floating = floating; }
-
 
 	Context *m_context;
 	Container *m_container;
@@ -388,13 +402,10 @@ private:
 
 	Font m_font;
 
-	bool m_floating;
-
 	bool m_disabled;
 
 	bool m_mouseOver;
-	bool m_mouseActive;
-	bool m_selected;
+	bool m_visible;
 
 	std::set<KeySym> m_shortcuts;
 

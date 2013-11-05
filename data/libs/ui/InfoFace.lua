@@ -1,5 +1,11 @@
+-- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
+-- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
+local Engine = import("Engine")
+
+local Face = import("UI.Game.Face")
+
 local ui = Engine.ui
-local t = Translate:GetTranslator()
 
 local testCharacter = function (character)
 	if not (character and (type(character)=='table') and (getmetatable(character).class == 'Character'))
@@ -15,7 +21,7 @@ local setFaceInfo = function (face, character)
 				ui:Gradient({r=0.1,g=0.1,b=0.1,a=0.8}, {r=0.0,g=0.0,b=0.1,a=0.0}, "HORIZONTAL"):SetInnerWidget(
 					ui:Margin(20):SetInnerWidget(ui:VBox():PackEnd({
 						ui:Label(character.name):SetFont("HEADING_NORMAL"),
-						ui:Label((t(character.title) or '')):SetFont("HEADING_SMALL"),
+						ui:Label(character.title):SetFont("HEADING_SMALL"),
 					}))
 				)
 			)
@@ -23,9 +29,9 @@ local setFaceInfo = function (face, character)
 	)
 end
 
-UI.InfoFace = {
+local InfoFace = {}
 
-New = function (character)
+function InfoFace.New (character)
 	testCharacter(character)
 
 	local faceFlags = {
@@ -34,22 +40,22 @@ New = function (character)
 	}
 
 	local self = {
-		widget = UI.Game.Face.New(ui, faceFlags, character.seed)
+		widget = Face.New(ui, faceFlags, character.seed)
 	}
 
 	setFaceInfo(self.widget, character)
 
 	setmetatable(self, {
-		__index = UI.InfoFace,
+		__index = InfoFace,
 		class = "UI.InfoFace",
 	})
 
 	return self
-end,
+end
 
-UpdateInfo = function (self, character)
+function InfoFace.UpdateInfo (self, character)
 	testCharacter(character)
 	setFaceInfo(self.widget, character)
-end,
+end
 
-}
+return InfoFace

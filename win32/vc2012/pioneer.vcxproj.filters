@@ -45,9 +45,6 @@
     <ClCompile Include="..\..\src\GameConfig.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\GameMenuView.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\GeoSphere.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -291,9 +288,6 @@
     <ClCompile Include="..\..\src\Color.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\FileSelectorWidget.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Game.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -447,6 +441,9 @@
     <ClCompile Include="..\..\contrib\PicoDDS\PicoDDS.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\FaceGenManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Aabb.h">
@@ -503,9 +500,6 @@
     <ClInclude Include="..\..\src\gameconsts.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\GameMenuView.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\GeoSphere.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -522,9 +516,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\LuaEquipDef.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\LuaCargoBody.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\LuaChatForm.h">
@@ -609,9 +600,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\RefCounted.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\RefList.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\SectorView.h">
@@ -756,9 +744,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\MathUtil.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\FileSelectorWidget.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Game.h">
@@ -908,11 +893,12 @@
     <ClInclude Include="..\..\contrib\PicoDDS\PicoDDS.h">
       <Filter>src</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\Makefile.am">
+    <ClInclude Include="..\..\src\FaceGenManager.h">
       <Filter>src</Filter>
-    </None>
+    </ClInclude>
+    <ClInclude Include="..\..\..\pioneer\src\EquipSet.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\win32\pioneer.rc">

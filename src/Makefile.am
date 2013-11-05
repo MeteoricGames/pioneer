@@ -11,7 +11,7 @@ include $(top_srcdir)/Makefile.common
 
 AM_CFLAGS += $(WARN_CFLAGS)
 AM_CPPFLAGS += $(WARN_CPPFLAGS)
-AM_CXXFLAGS += $(WARN_CXXFLAGS)
+AM_CXXFLAGS += $(STD_CXXFLAGS) $(WARN_CXXFLAGS)
 
 bin_PROGRAMS = pioneer
 noinst_HEADERS = \
@@ -37,9 +37,9 @@ noinst_HEADERS = \
 	EnumStrings.h \
 	EquipSet.h \
 	EquipType.h \
+	FaceGenManager.h \
 	FaceVideoLink.h \
 	Factions.h \
-	FileSelectorWidget.h \
 	FileSystem.h \
 	FontCache.h \
 	Form.h \
@@ -47,7 +47,6 @@ noinst_HEADERS = \
 	Frame.h \
 	GalacticView.h \
 	Game.h \
-	GameMenuView.h \
 	GeoSphere.h \
 	HyperspaceCloud.h \
 	IniConfig.h \
@@ -177,9 +176,9 @@ pioneer_SOURCES	= \
 	DynamicBody.cpp \
 	EnumStrings.cpp \
 	EquipType.cpp \
+	FaceGenManager.cpp \
 	FaceVideoLink.cpp \
 	Factions.cpp \
-	FileSelectorWidget.cpp \
 	FileSourceZip.cpp \
 	FileSystem.cpp \
 	FontCache.cpp \
@@ -187,7 +186,6 @@ pioneer_SOURCES	= \
 	Frame.cpp \
 	GalacticView.cpp \
 	Game.cpp \
-	GameMenuView.cpp \
 	GeoPatch.cpp \
 	GeoPatchContext.cpp \
 	GeoPatchID.cpp \
@@ -309,13 +307,14 @@ pioneer_LDADD = \
 	terrain/libterrain.a \
 	ui/libui.a \
 	gameui/libgameui.a \
-	../contrib/miniz/libminiz.a \
 	../contrib/PicoDDS/libpicodds.a \
-	../contrib/jenkins/libjenkins.a
+	../contrib/jenkins/libjenkins.a \
+	../contrib/json/libjson.a \
+	../contrib/glew/libglew.a
 
 pioneer_LDADD += \
-	$(FREETYPE_LIBS) $(GLEW_LIBS) $(GLU_LIBS) $(GL_LIBS) \
-	$(SDL_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(VORBIS_LIBS) \
+	$(FREETYPE_LIBS) $(GL_LIBS) \
+	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(VORBIS_LIBS) \
 	$(PNG_LIBS) $(ASSIMP_LIBS) $(EXTRA_LIBS)
 
 if BUILD_WIN32
@@ -354,7 +353,6 @@ tests_LDADD = \
 	graphics/libgraphics.a \
 	terrain/libterrain.a \
     posix/libposix.a \
-	../contrib/miniz/libminiz.a \
 	../contrib/PicoDDS/libpicodds.a \
 	../contrib/jenkins/libjenkins.a \
 	$(SIGC_LIBS)
@@ -387,11 +385,12 @@ uitest_LDADD = \
 	graphics/libgraphics.a \
 	posix/libposix.a \
 	../contrib/jenkins/libjenkins.a \
-	../contrib/PicoDDS/libpicodds.a
+	../contrib/PicoDDS/libpicodds.a \
+	../contrib/glew/libglew.a
 
 uitest_LDADD += \
-	$(FREETYPE_LIBS) $(GLEW_LIBS) $(GLU_LIBS) $(GL_LIBS) \
-	$(SDL_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
+	$(FREETYPE_LIBS) $(GL_LIBS) \
+	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
 
 if !HAVE_LUA
 uitest_LDADD += ../contrib/lua/liblua.a
@@ -413,11 +412,12 @@ textstress_LDADD = \
 	text/libtext.a \
 	graphics/libgraphics.a \
 	posix/libposix.a \
-	../contrib/PicoDDS/libpicodds.a
+	../contrib/PicoDDS/libpicodds.a \
+	../contrib/glew/libglew.a
 
 textstress_LDADD += \
-	$(FREETYPE_LIBS) $(GLEW_LIBS) $(GLU_LIBS) $(GL_LIBS) \
-	$(SDL_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
+	$(FREETYPE_LIBS) $(GL_LIBS) \
+	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(PNG_LIBS)
 
 if !HAVE_LUA
 textstress_LDADD += ../contrib/lua/liblua.a
