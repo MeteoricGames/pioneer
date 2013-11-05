@@ -179,7 +179,7 @@ void Ship::InitGun(const char *tag, int num)
 
 void Ship::Init()
 {
-	m_navLights.Reset(new NavLights(GetModel()));
+	m_navLights.reset(new NavLights(GetModel()));
 	m_navLights->SetEnabled(true);
 
 	SetMassDistributionFromModel();

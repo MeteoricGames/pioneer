@@ -1,3 +1,11 @@
+November 2013
+
+   * New features
+     * Translations now managed via Transifex (#2521)
+
+   * Internal changes
+     * Build fixes for MSVC
+
 October 2013
 
    * New features
@@ -8,9 +16,11 @@ October 2013
      * New settings screens (#2490, #2512)
      * Vertical speed is shown with altitude, up to 10000 km or half the
        planet's radius (#2446)
+     * Ship acceleration and delta-V is shown in the Ship Info View (#2518, #2211)
      * The random face system now supports multiple species (#2440)
      * The eclipse effect can now be disabled in the config file
        (#2439, #2497, #2176, #2190)
+     * Allow up to two keys to be bound to a single input (#2222)
 
    * Minor changes and tweaks
      * Improved ship textures (#2450)
@@ -65,6 +75,7 @@ October 2013
      * Miscellaneous code improvements (#2474)
      * Better Unicode handling in scan_enums (#2479)
      * Cleaned up, fixed and documented LuaTable and LuaPushPull (#2332)
+     * Replace use of ScopedPtr with std::unique_ptr (#2519)
 
 September 2013
 
