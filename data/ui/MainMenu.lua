@@ -11,7 +11,7 @@ local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
 
 local setupPlayerWave = function ()
-	Game.player:SetShipType("wave")
+	Game.player:SetShipType("personal_skiff")
 	Game.player:AddEquip("PULSECANNON_1MW")
 	Game.player:AddEquip("ATMOSPHERIC_SHIELDING")
 	Game.player:AddEquip("AUTOPILOT")
