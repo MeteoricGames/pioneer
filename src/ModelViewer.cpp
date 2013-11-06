@@ -114,7 +114,7 @@ ModelViewer::~ModelViewer()
 
 void ModelViewer::Run(const std::string &modelName)
 {
-	ScopedPtr<GameConfig> config(new GameConfig);
+	std::unique_ptr<GameConfig> config(new GameConfig);
 
 	Graphics::Renderer *renderer;
 	ModelViewer *viewer;
@@ -206,11 +206,11 @@ bool ModelViewer::OnToggleGrid(UI::Widget *)
 
 bool ModelViewer::OnToggleGuns(UI::CheckBox *w)
 {
-	if (!m_gunModel.Valid()) {
+	if (!m_gunModel) {
 		CreateTestResources();
 	}
 
-	if (!m_gunModel.Valid()) {
+	if (!m_gunModel) {
 		AddLog("test_gun.model not available");
 		return false;
 	}
@@ -223,8 +223,8 @@ bool ModelViewer::OnToggleGuns(UI::CheckBox *w)
 		return false;
 	}
 	if (m_options.attachGuns) {
-		tagL->AddChild(new SceneGraph::ModelNode(m_gunModel.Get()));
-		tagR->AddChild(new SceneGraph::ModelNode(m_gunModel.Get()));
+		tagL->AddChild(new SceneGraph::ModelNode(m_gunModel.get()));
+		tagR->AddChild(new SceneGraph::ModelNode(m_gunModel.get()));
 	} else { //detach
 		//we know there's nothing else
 		tagL->RemoveChildAt(0);
@@ -295,8 +295,8 @@ void ModelViewer::ClearLog()
 void ModelViewer::ClearModel()
 {
 	delete m_model; m_model = 0;
-	m_gunModel.Reset();
-	m_scaleModel.Reset();
+	m_gunModel.reset();
+	m_scaleModel.reset();
 }
 
 void ModelViewer::CreateTestResources()
@@ -306,10 +306,10 @@ void ModelViewer::CreateTestResources()
 	SceneGraph::Loader loader(m_renderer);
 	try {
 		SceneGraph::Model *m = loader.LoadModel("test_gun");
-		m_gunModel.Reset(m);
+		m_gunModel.reset(m);
 
 		m = loader.LoadModel("scale");
-		m_scaleModel.Reset(m);
+		m_scaleModel.reset(m);
 	} catch (SceneGraph::LoadingError &) {
 		AddLog("Could not load test_gun model");
 	}
@@ -384,18 +384,21 @@ void ModelViewer::DrawTags()
 void ModelViewer::DrawCollisionMesh()
 {
 	RefCountedPtr<CollMesh> mesh = m_model->GetCollisionMesh();
-	if (!mesh.Valid()) return;
+	if (!mesh) return;
 
-	const std::vector<vector3f> &vertices = mesh->m_vertices;
-	const std::vector<int> &indices = mesh->m_indices;
-	Graphics::VertexArray va(Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE, indices.size() * 3);
+	const vector3f *vertices = reinterpret_cast<const vector3f*>(mesh->GetGeomTree()->GetVertices());
+	const Uint16 *indices = mesh->GetGeomTree()->GetIndices();
+	const unsigned int *triFlags = mesh->GetGeomTree()->GetTriFlags();
+	const unsigned int numIndices = mesh->GetGeomTree()->GetNumTris() * 3;
+
+	Graphics::VertexArray va(Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE, numIndices * 3);
 	int trindex = -1;
-	for(unsigned int i=0; i<indices.size(); i++) {
+	for(unsigned int i = 0; i < numIndices; i++) {
 		if (i % 3 == 0)
 			trindex++;
-		unsigned int flag = mesh->m_flags[trindex];
+		const unsigned int flag = triFlags[trindex];
 		//show special geomflags in red
-		va.Add(vertices.at(indices.at(i)), flag > 0 ? Color::RED : Color::WHITE);
+		va.Add(vertices[indices[i]], flag > 0 ? Color::RED : Color::WHITE);
 	}
 
 	//might want to add some offset
@@ -496,7 +499,7 @@ void ModelViewer::DrawModel()
 		m_renderer->SetWireFrameMode(true);
 	m_model->Render(mv);
 	if (m_options.showLandingPad) {
-		if (!m_scaleModel.Valid()) CreateTestResources();
+		if (!m_scaleModel) CreateTestResources();
 		const float landingPadOffset = m_model->GetCollisionMesh()->GetAabb().min.y;
 		m_scaleModel->Render(mv * matrix4x4f::Translation(0.f, landingPadOffset, 0.f));
 	}
@@ -793,7 +796,7 @@ void ModelViewer::SetModel(const std::string &filename, bool resetCamera /* true
 		AddLog(d.GetModelStatistics());
 
 		//note: stations won't demonstrate full docking light logic in MV
-		m_navLights.Reset(new NavLights(m_model));
+		m_navLights.reset(new NavLights(m_model));
 		m_navLights->SetEnabled(true);
 
 		{
@@ -811,7 +814,6 @@ void ModelViewer::SetModel(const std::string &filename, bool resetCamera /* true
 			m_model->FindTagsByStartOfName("tag_", mts);
 			AddAxisIndicators(mts, m_tagPoints);
 		}
-
 	} catch (SceneGraph::LoadingError &err) {
 		// report the error and show model picker.
 		m_model = 0;

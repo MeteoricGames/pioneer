@@ -98,6 +98,9 @@
     <ClInclude Include="..\..\..\src\graphics\gl2\TexturedFullscreenQuad.h">
       <Filter>gl2</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\SkyboxMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\gl2\HorizontalBlurMaterial.h">
       <Filter>gl2</Filter>
     </ClInclude>
