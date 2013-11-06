@@ -27,6 +27,20 @@ namespace Background
 		RefCountedPtr<Graphics::Material> m_material;
 	};
 
+	class UniverseBox : public BackgroundElement
+	{
+	public:
+		UniverseBox(Graphics::Renderer *r);
+		~UniverseBox();
+
+		void Draw(Graphics::Renderer *r);
+
+	private:
+		void Init(Graphics::Renderer *);
+		Graphics::StaticMesh *m_model;
+		Graphics::Texture* m_cubemap;
+	};
+
 	class Starfield : public BackgroundElement
 	{
 	public:
@@ -76,6 +90,7 @@ namespace Background
 	private:
 		MilkyWay m_milkyWay;
 		Starfield m_starField;
+		UniverseBox m_universeBox;
 	};
 
 } //namespace Background

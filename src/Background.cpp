@@ -15,6 +15,7 @@
 #include "graphics/StaticMesh.h"
 #include "graphics/Surface.h"
 #include "graphics/VertexArray.h"
+#include "graphics/TextureBuilder.h"
 
 using namespace Graphics;
 
@@ -24,6 +25,80 @@ namespace Background
 void BackgroundElement::SetIntensity(float intensity)
 {
 	m_material->emissive = Color(intensity);
+}
+
+UniverseBox::UniverseBox(Graphics::Renderer *r)
+{
+	Init(r);
+}
+
+UniverseBox::~UniverseBox()
+{
+	delete m_model;
+}
+
+void UniverseBox::Init(Graphics::Renderer *r)
+{
+	// Load cubemap
+	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/Mars.dds");
+	m_cubemap = texture_builder.CreateTexture(r);
+
+	// Create skybox geometry
+	VertexArray *box = new VertexArray(ATTRIB_POSITION | ATTRIB_UV0, 36);
+	const float vp = 100.0f;
+	// Top +Y
+	box->Add(vector3f(-vp,  vp,  vp), vector2f(0.0f, 0.0f));
+	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp,  vp, -vp), vector2f(1.0f, 1.0f));
+	// Bottom -Y
+	box->Add(vector3f(-vp, -vp, -vp), vector2f(0.0f, 0.0f));
+	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp, -vp, -vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f( vp, -vp, -vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp, -vp,  vp), vector2f(1.0f, 1.0f));
+	// Front -Z
+	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 0.0f));
+	box->Add(vector3f(-vp, -vp, -vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp,  vp, -vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f( vp,  vp, -vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f(-vp, -vp, -vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp, -vp, -vp), vector2f(1.0f, 1.0f));
+	// Back +Z
+	box->Add(vector3f( vp,  vp,  vp), vector2f(0.0f, 0.0f));
+	box->Add(vector3f( vp, -vp,  vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f(-vp,  vp,  vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f(-vp,  vp,  vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f( vp, -vp,  vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f(-vp, -vp,  vp), vector2f(1.0f, 1.0f));
+	// Right +X
+	box->Add(vector3f( vp,  vp, -vp), vector2f(0.0f, 0.0f));
+	box->Add(vector3f( vp, -vp, -vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f( vp, -vp, -vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f( vp, -vp,  vp), vector2f(1.0f, 1.0f));
+	// Left -X
+	box->Add(vector3f(-vp,  vp,  vp), vector2f(0.0f, 0.0f));
+	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f(-vp,  vp, -vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f(-vp,  vp, -vp), vector2f(1.0f, 0.0f));
+	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
+	box->Add(vector3f(-vp, -vp, -vp), vector2f(1.0f, 1.0f));
+	m_model = new StaticMesh(TRIANGLES);
+	Graphics::MaterialDescriptor desc;
+	desc.effect = EFFECT_SKYBOX;
+	m_material.Reset(r->CreateMaterial(desc));
+	m_material->texture0 = m_cubemap;
+	m_model->AddSurface(RefCountedPtr<Surface>(new Surface(TRIANGLES, box, m_material)));
+}
+
+void UniverseBox::Draw(Graphics::Renderer *r)
+{
+	r->DrawStaticMesh(m_model);
 }
 
 Starfield::Starfield(Graphics::Renderer *r)
@@ -193,12 +268,14 @@ void MilkyWay::Draw(Graphics::Renderer *renderer)
 Container::Container(Graphics::Renderer *r)
 : m_milkyWay(r)
 , m_starField(r)
+, m_universeBox(r)
 {
 }
 
 Container::Container(Graphics::Renderer *r, Uint32 seed)
 : m_milkyWay(r)
 , m_starField(r)
+, m_universeBox(r)
 {
 	Refresh(seed);
 };
@@ -215,7 +292,8 @@ void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform) 
 	renderer->SetBlendMode(BLEND_SOLID);
 	renderer->SetDepthTest(false);
 	renderer->SetTransform(transform);
-	const_cast<MilkyWay&>(m_milkyWay).Draw(renderer);
+	const_cast<UniverseBox&>(m_universeBox).Draw(renderer);
+	//const_cast<MilkyWay&>(m_milkyWay).Draw(renderer);
 	// squeeze the starfield a bit to get more density near horizon
 	matrix4x4d starTrans = transform * matrix4x4d::ScaleMatrix(1.0, 0.4, 1.0);
 	renderer->SetTransform(starTrans);
