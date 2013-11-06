@@ -1074,6 +1074,19 @@ static void autopilot_orbit(Body *b, double alt)
 	Pi::player->AIOrbit(b, alt);
 }
 
+static void autopilot_flytoclose(Body *b, double alt)
+{
+	Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_AUTOPILOT);
+	Pi::player->AIFlyToClose(b, alt);
+}
+
+/*static void deploy_miningrobot(Body *b, double alt)
+{
+	Pi::player->m_equipment.Remove(Equip::MINING_DRONE,1);
+	CargoBody * c_body = new CargoBody(static_cast<Equip::Type>(Equip::MINING_DRONE));
+	Pi::player->SpawnCargo(c_body);
+}*/
+
 static void player_target_hypercloud(HyperspaceCloud *cloud)
 {
 	Pi::sectorView->SetHyperspaceTarget(cloud->GetShip()->GetHyperspaceDest());
@@ -1152,6 +1165,68 @@ void WorldView::UpdateCommsOptions()
 					if (navtarget->GetSystemBody()->IsScoopable() && navtarget->GetSystemBody()->GetMass() < EARTH_MASS*150.0) {
 						button = AddCommsOption(stringf(Lang::AUTOPILOT_ENTER_SCOOP_ORBIT_AROUND, formatarg("target", navtarget->GetLabel())), ypos, optnum++);
 						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_orbit), navtarget, 0.99998));
+						ypos += 32;
+					}
+				}
+				if (navtarget->IsType(Object::PLANET)) {			  
+					// altitude
+					double altitude=0.0;
+					const Frame* frame = Pi::player->GetFrame();
+					if (frame->GetBody() && frame->GetBody()->IsType(Object::SPACESTATION))
+						frame = frame->GetParent();
+					if (frame && frame->GetBody() && frame->GetBody()->IsType(Object::TERRAINBODY) &&
+							(frame->HasRotFrame() || frame->IsRotFrame())) {
+						Body *astro = frame->GetBody();
+						//(GetFrame()->m_sbody->GetSuperType() == SUPERTYPE_ROCKY_PLANET)) {
+						assert(astro->IsType(Object::TERRAINBODY));
+						TerrainBody* terrain = static_cast<TerrainBody*>(astro);
+						if (!frame->IsRotFrame())
+							frame = frame->GetRotFrame();
+						vector3d pos = (frame == Pi::player->GetFrame() ? Pi::player->GetPosition() : Pi::player->GetPositionRelTo(frame));
+						double center_dist = pos.Length();
+						// Avoid calculating terrain if we are too far anyway.
+						// This should rather be 1.5 * max_radius, but due to quirkses in terrain generation we must be generous.
+						if (center_dist <= 3.0 * terrain->GetMaxFeatureRadius()) {
+							vector3d surface_pos = pos.Normalized();
+							double radius = terrain->GetTerrainHeight(surface_pos);
+							altitude = center_dist - radius;
+						}
+					}
+
+					if (altitude > 25000.0) {
+						button = AddCommsOption(stringf("Decend to 25km", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 25000));
+						ypos += 32;
+					}
+					if (altitude > 10000.0) {
+						button = AddCommsOption(stringf("Decend to 10km", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 10000));
+						ypos += 32;
+					}
+					if (altitude > 1000.0) {
+						button = AddCommsOption(stringf("Decend to 1km", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 1000));
+						ypos += 32;
+					}
+					if (altitude <= 1000.0 && altitude > 500) {
+						button = AddCommsOption(stringf("Decend to 500 metres", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 500));
+						ypos += 32;
+					}
+					if (altitude <= 1000.0 && altitude > 200) {
+						button = AddCommsOption(stringf("Decend to 200 metres", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 200));
+						ypos += 32;
+					}
+					if (altitude <= 1000.0 && altitude > 50) {
+						button = AddCommsOption(stringf("Decend to 50 metres", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 50));
+						ypos += 32;
+					}
+
+					if (navtarget->GetSystemBody()->GetMass() < EARTH_MASS*10.0 && Pi::player->m_equipment.Count(Equip::SLOT_CARGO, Equip::MINING_DRONE) > 0) {
+						button = AddCommsOption(stringf("Enter Mining Altitude", formatarg("target", navtarget->GetLabel())), ypos, optnum++);
+						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flytoclose), navtarget, 500));
 						ypos += 32;
 					}
 				}
