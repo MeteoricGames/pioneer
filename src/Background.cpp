@@ -40,7 +40,7 @@ UniverseBox::~UniverseBox()
 void UniverseBox::Init(Graphics::Renderer *r)
 {
 	// Load cubemap
-	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/Mars.dds");
+	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/purple-nebula-complex.dds");
 	m_cubemap = texture_builder.CreateTexture(r);
 
 	// Create skybox geometry
