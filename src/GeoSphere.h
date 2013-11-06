@@ -75,7 +75,7 @@ public:
 
 private:
 	void BuildFirstPatches();
-	ScopedPtr<GeoPatch> m_patches[6];
+	std::unique_ptr<GeoPatch> m_patches[6];
 	const SystemBody *m_sbody;
 
 	// all variables for GetHeight(), GetColor()
@@ -100,13 +100,8 @@ private:
 	static RefCountedPtr<GeoPatchContext> s_patchContext;
 
 	void SetUpMaterials();
-	enum EclipseState {
-		ECLIPSE_ENABLED,
-		ECLIPSE_DISABLED,
-		ECLIPSE_MAX
-	};
-	ScopedPtr<Graphics::Material> m_surfaceMaterial[ECLIPSE_MAX];
-	ScopedPtr<Graphics::Material> m_atmosphereMaterial[ECLIPSE_MAX];
+	std::unique_ptr<Graphics::Material> m_surfaceMaterial;
+	std::unique_ptr<Graphics::Material> m_atmosphereMaterial;
 	//special parameters for shaders
 	MaterialParameters m_materialParameters;
 

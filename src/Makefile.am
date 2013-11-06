@@ -11,7 +11,7 @@ include $(top_srcdir)/Makefile.common
 
 AM_CFLAGS += $(WARN_CFLAGS)
 AM_CPPFLAGS += $(WARN_CPPFLAGS)
-AM_CXXFLAGS += $(WARN_CXXFLAGS)
+AM_CXXFLAGS += $(STD_CXXFLAGS) $(WARN_CXXFLAGS)
 
 bin_PROGRAMS = pioneer
 noinst_HEADERS = \
@@ -40,7 +40,6 @@ noinst_HEADERS = \
 	FaceGenManager.h \
 	FaceVideoLink.h \
 	Factions.h \
-	FileSelectorWidget.h \
 	FileSystem.h \
 	FontCache.h \
 	Form.h \
@@ -48,7 +47,6 @@ noinst_HEADERS = \
 	Frame.h \
 	GalacticView.h \
 	Game.h \
-	GameMenuView.h \
 	GeoSphere.h \
 	HyperspaceCloud.h \
 	IniConfig.h \
@@ -181,7 +179,6 @@ pioneer_SOURCES	= \
 	FaceGenManager.cpp \
 	FaceVideoLink.cpp \
 	Factions.cpp \
-	FileSelectorWidget.cpp \
 	FileSourceZip.cpp \
 	FileSystem.cpp \
 	FontCache.cpp \
@@ -189,7 +186,6 @@ pioneer_SOURCES	= \
 	Frame.cpp \
 	GalacticView.cpp \
 	Game.cpp \
-	GameMenuView.cpp \
 	GeoPatch.cpp \
 	GeoPatchContext.cpp \
 	GeoPatchID.cpp \
