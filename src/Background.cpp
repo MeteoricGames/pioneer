@@ -45,7 +45,7 @@ void UniverseBox::Init(Graphics::Renderer *r)
 
 	// Create skybox geometry
 	VertexArray *box = new VertexArray(ATTRIB_POSITION | ATTRIB_UV0, 36);
-	const float vp = 100.0f;
+	const float vp = 1000.0f;
 	// Top +Y
 	box->Add(vector3f(-vp,  vp,  vp), vector2f(0.0f, 0.0f));
 	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 1.0f));
