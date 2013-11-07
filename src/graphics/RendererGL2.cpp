@@ -88,14 +88,16 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	// Init render targets
 	RenderTargetDesc scene_rt_desc(
 		window->GetWidth(), window->GetHeight(), 
-		TextureFormat::TEXTURE_RGBA_8888, TextureFormat::TEXTURE_DEPTH,
+		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_DEPTH,
 		true);
 	scenePassRT = CreateRenderTarget(scene_rt_desc);
+	//
 	RenderTargetDesc hblur_rt_desc(
 		window->GetWidth(), window->GetHeight(),
 		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_NONE,
 		false);
 	hblurPassRT = CreateRenderTarget(hblur_rt_desc);
+	//
 	RenderTargetDesc vblur_rt_desc(
 		window->GetWidth(), window->GetHeight(),
 		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_NONE,
@@ -240,6 +242,39 @@ bool RendererGL2::DrawLines(int count, const vector3f *v, const Color &c, LineTy
 	flatColorProg->Unuse();
 
 	return true;
+}
+
+bool RendererGL2::DrawLines2D(int count, const vector2f *v, const Color &c, LineType t)
+{
+	if (count < 2 || !v) return false;
+
+	flatColorProg->Use();
+	flatColorProg->diffuse.Set(c);
+	flatColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(2, GL_FLOAT, sizeof(vector2f), v);
+	glDrawArrays(t, 0, count);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	flatColorProg->Unuse();
+
+	return true;
+}
+
+bool RendererGL2::DrawPoints(int count, const vector3f *p, const Color *c, float pointSize)
+{
+	if (count < 1 || !p || !c) return false;
+
+	glPointSize(pointSize);
+	vtxColorProg->Use();
+	vtxColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(3, GL_FLOAT, sizeof(vector3f), p);
+	glColorPointer(4, GL_FLOAT, sizeof(Color), c);
+	glDrawArrays(GL_POINTS, 0, count);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	vtxColorProg->Unuse();
 }
 
 Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)

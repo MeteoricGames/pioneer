@@ -52,6 +52,8 @@ public:
 
 	virtual bool DrawLines(int vertCount, const vector3f *vertices, const Color *colors, LineType type=LINE_SINGLE);
 	virtual bool DrawLines(int vertCount, const vector3f *vertices, const Color &color, LineType type=LINE_SINGLE);
+	virtual bool DrawLines2D(int vertCount, const vector2f *vertices, const Color &color, LineType type=LINE_SINGLE);
+	virtual bool DrawPoints(int count, const vector3f *points, const Color *colors, float pointSize=1.f);
 
 	virtual Material *CreateMaterial(const MaterialDescriptor &descriptor);
 	virtual RenderTarget *CreateRenderTarget(const RenderTargetDesc &);
