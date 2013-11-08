@@ -1,10 +1,10 @@
 {
     "PIONEERING_PILOTS_GUILD": {
-        "message": "Confederación interestelar de pilotos PIONEER",
+        "message": "Pioneering Pilots' Guild",
         "description": ""
     },
     "WELL_DONE_COMMANDER_YOUR_COMBAT_RATING_HAS_IMPROVED": {
-        "message": "¡Buen trabajo Capitán! ¡Su clasificación de combate ha mejorado!",
+        "message": "Parabéns comandante! A sua classificação de combate melhorou!",
         "description": ""
     }
 }

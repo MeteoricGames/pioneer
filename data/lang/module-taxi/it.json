@@ -40,7 +40,7 @@
         "description": ""
     },
     "FLAVOUR_INTROTEXT_8": {
-        "message": "Il mio nome è {name}. Mi serve un passaggio celere per {system} ({sectorx}, {sectory}, {sectorz}), alla distanza di {dist} AL. Pagherò {cash}.",
+        "message": "Il mio nome è {name}. Mi serve un passaggio veloce per {system} ({sectorx}, {sectory}, {sectorz}), alla distanza di {dist} AL. Pagherò {cash}.",
         "description": ""
     },
     "FLAVOUR_INTROTEXT_7": {
@@ -80,7 +80,7 @@
         "description": ""
     },
     "FLAVOUR_DANGER_11": {
-        "message": "Talvolta alla gente non piace essere perquisita.",
+        "message": "Talvolta alla gente non piace non piacciono le ispezioni.",
         "description": ""
     },
     "FLAVOUR_DANGER_12": {
@@ -108,7 +108,7 @@
         "description": ""
     },
     "WHY_SO_MUCH_MONEY": {
-        "message": "Perché tutti quei crediti?",
+        "message": "Perché così tanti crediti?",
         "description": ""
     },
     "FLAVOUR_SUCCESSMSG_1": {
@@ -124,7 +124,7 @@
         "description": ""
     },
     "FLAVOUR_SUCCESSMSG_6": {
-        "message": "Grazie per il buon viaggio. Ecco la sua paga completa.",
+        "message": "Grazie per il bel viaggio. Ecco la paga concordata.",
         "description": ""
     },
     "FLAVOUR_SUCCESSMSG_5": {
@@ -144,7 +144,7 @@
         "description": ""
     },
     "WE_WANT_TO_BE_THERE_BEFORE": {
-        "message": "Vogliamo essere là prima di",
+        "message": "Vogliamo essere là prima delle ",
         "description": ""
     },
     "FLAVOUR_FAILUREMSG_10": {
@@ -176,7 +176,7 @@
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_12": {
-        "message": "Devo dei soldi a qualcuno, e mi stanno cercando.",
+        "message": "Devo dei soldi a qualcuno. Mi stanno cercando.",
         "description": ""
     },
     "GROUP_DETAILS": {
@@ -216,7 +216,7 @@
         "description": ""
     },
     "I_MUST_BE_THERE_BEFORE": {
-        "message": "Devo arrivare prima del",
+        "message": "Devo arrivare prima delle ",
         "description": ""
     },
     "CORPORATIONS_8": {
@@ -240,7 +240,7 @@
         "description": ""
     },
     "CORPORATIONS_5": {
-        "message": "Roccaforte",
+        "message": "Rockforth",
         "description": ""
     },
     "CORPORATIONS_2": {
@@ -272,7 +272,7 @@
         "description": ""
     },
     "FLAVOUR_DANGER_3": {
-        "message": "Penso ci sia un assassino sulle mie tracce, e potrebbe venire a cercarti.",
+        "message": "Penso ci sia un assassino sulle mie tracce. Potrebbe venire a cercarti.",
         "description": ""
     },
     "FLAVOUR_DANGER_0": {
@@ -304,7 +304,7 @@
         "description": ""
     },
     "FLAVOUR_INTROTEXT_1": {
-        "message": "Ossequi, il mio nome è {name} ed necessito di un passaggio per un piccolo gruppo di persone verso il sistema {system} ({sectorx}, {sectory}, {sectorz}), che dista {dist} AL. La pagheremo {cash}.",
+        "message": "Ossequi, il mio nome è {name} e necessito di un passaggio per un piccolo gruppo di persone verso il sistema {system} ({sectorx}, {sectory}, {sectorz}), che dista {dist} AL. La pagheremo {cash}.",
         "description": ""
     },
     "CORPORATIONS_10": {
@@ -364,11 +364,11 @@
         "description": ""
     },
     "FLAVOUR_FAILUREMSG_6": {
-        "message": "Oltraggioso! Ci ha messo troppo. Non le pagherò un solo credito.",
+        "message": "Oltraggioso! Ci hai messo troppo. Non ti pagherò nemmeno un credito.",
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_9": {
-        "message": "La polizia vuole che li aiuti nelle loro indagini.",
+        "message": "La polizia vorrebbe che li aiutassi in certe loro indagini.",
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_8": {
@@ -384,7 +384,7 @@
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_1": {
-        "message": "Lavoriamo per la corporazione {corp} e loro pagano bene.",
+        "message": "Lavoriamo per la corporazione {corp}, e loro pagano bene.",
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_0": {
@@ -400,7 +400,7 @@
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_5": {
-        "message": "Non lo sa? Sono una famosa star.",
+        "message": "Non lo sa? Sono una molto nota celebrità.",
         "description": ""
     },
     "FLAVOUR_WHYSOMUCH_4": {
@@ -504,15 +504,15 @@
         "description": ""
     },
     "HOW_SOON_YOU_MUST_BE_THERE": {
-        "message": "Quanto presto dovete arrivate?",
+        "message": "Quando dovete arrivate?",
         "description": ""
     },
     "FLAVOUR_WHEREAREWE_8": {
-        "message": "Ma dove siamo? Non dovremmo essere qua - ci lasci al più presto alla stazione più vicina!",
+        "message": "Ma dove siamo? Non dovremmo essere qua - mi lasci al più presto alla stazione più vicina!",
         "description": ""
     },
     "FLAVOUR_WHEREAREWE_9": {
-        "message": "Dove ci ha portato? Siamo stufi di aspettare - ci lasci subito alla stazione più vicina!",
+        "message": "Dove ci ha portato? Sono stufo di aspettare - mi lasci subito alla stazione più vicina!",
         "description": ""
     },
     "FLAVOUR_FAILUREMSG_0": {
@@ -520,7 +520,7 @@
         "description": ""
     },
     "FLAVOUR_FAILUREMSG_8": {
-        "message": "Inaccettabile! Ci hai messo un'eternità. Non ti pagherò.",
+        "message": "Inaccettabile! Ci ha messo un'eternità. Non la pagherò.",
         "description": ""
     },
     "FLAVOUR_WHEREAREWE_11": {
@@ -544,7 +544,7 @@
         "description": ""
     },
     "FLAVOUR_WHEREAREWE_6": {
-        "message": "In che posto ci ha portato? Dovevamo essere già arrivati - ci lasci immediatamente alla prossima stazione!",
+        "message": "In che posto mi hai portato? Dovevamo essere già arrivati. Lasciami immediatamente alla  stazione più vicina!",
         "description": ""
     },
     "FLAVOUR_WHEREAREWE_7": {
