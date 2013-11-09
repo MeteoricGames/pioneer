@@ -132,6 +132,13 @@ void WorldView::InitObject()
 	m_hyperspaceButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_hyperspaceButton, 66, 2);
 
+	m_commButton = new Gui::ImageButton("icons/comms_f4_on.png");
+	m_commButton->SetShortcut(SDLK_SPACE, KMOD_NONE);
+	m_commButton->SetToolTip(Lang::HYPERSPACE_JUMP);
+	m_commButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickHyperspace));
+	m_commButton->SetRenderDimensions(30.0f, 22.0f);
+	Add(m_commButton, Gui::Screen::GetHeight()/2, Gui::Screen::GetHeight() - 104.0f);
+
 	m_launchButton = new Gui::ImageButton("icons/blastoff.png");
 	m_launchButton->SetShortcut(SDLK_F5, KMOD_NONE);
 	m_launchButton->SetToolTip(Lang::TAKEOFF);
@@ -429,6 +436,13 @@ void WorldView::RefreshHyperspaceButton() {
 		m_hyperspaceButton->Hide();
 }
 
+void WorldView::RefreshCommsButton() {
+	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget()))
+		m_hyperspaceButton->Show();
+	else
+		m_hyperspaceButton->Hide();
+}
+
 void WorldView::RefreshButtonStateAndVisibility()
 {
 	assert(Pi::game);
@@ -452,6 +466,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 	m_wheelsButton->SetActiveState(int(Pi::player->GetWheelState()) || Pi::player->GetWheelTransition() == 1);
 
 	RefreshHyperspaceButton();
+	RefreshCommsButton();
 
 	switch(Pi::player->GetFlightState()) {
 		case Ship::LANDED:

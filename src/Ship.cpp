@@ -75,6 +75,7 @@ void Ship::Save(Serializer::Writer &wr, Space *space)
 	wr.Double(m_lastFiringAlert);
 	wr.Double(m_juice);
 	wr.Int32(m_transitstate);
+	wr.Int32(m_commstate);
 
 	// XXX make sure all hyperspace attrs and the cloud get saved
 	m_hyperspace.dest.Serialize(wr);
@@ -123,6 +124,7 @@ void Ship::Load(Serializer::Reader &rd, Space *space)
 	m_lastFiringAlert = rd.Double();
 	m_juice = rd.Double();
 	m_transitstate = rd.Int32();
+	m_commstate = rd.Int32();
 
 	m_hyperspace.dest = SystemPath::Unserialize(rd);
 	m_hyperspace.countdown = rd.Float();
@@ -235,6 +237,7 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_curAICmd = 0;
 	m_juice = 20.0;
 	m_transitstate = 0;
+	m_commstate = 0;
 	m_aiMessage = AIERROR_NONE;
 	m_decelerating = false;
 	m_equipment.onChange.connect(sigc::mem_fun(this, &Ship::OnEquipmentChange));

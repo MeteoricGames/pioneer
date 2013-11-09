@@ -55,6 +55,7 @@ private:
 	void InitObject();
 
 	void RefreshHyperspaceButton();
+	void RefreshCommsButton();
 	void RefreshButtonStateAndVisibility();
 	void UpdateCommsOptions();
 
@@ -116,6 +117,7 @@ private:
 	NavTunnelWidget *m_navTunnel;
 
 	Gui::ImageButton *m_hyperspaceButton;
+	Gui::ImageButton *m_commButton;
 
 	Gui::Label *m_pauseText;
 	Gui::Label *m_showCameraName;
