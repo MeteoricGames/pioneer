@@ -409,6 +409,28 @@ void Ship::SetThrusterState(const vector3d &levels)
 	}
 }
 
+void Ship::SetThrusterState(int axis, double level) 
+{
+	if (m_thrusterFuel <= 0.f) level = 0.0;
+	m_thrusters[axis] = Clamp(level, -1.0, 1.0);
+}
+
+// Effectively applies speed limit set in maxManeuverVelocity (max_maneuver_velocity in ship info)
+//   Issues:
+//     1. This might apply to any flight mode not only MANEUVER
+//     2. Somehow thrusting forward and upward bypasses this limiter
+void Ship::ApplyThrusterLimits()
+{
+	vector3d current_velocity = GetVelocity();
+	double current_magnitude = current_velocity.Length();
+	if(current_magnitude >= GetShipType()->maxManeuverVelocity) {
+		vector3d current_normal = current_velocity / current_magnitude;
+		if(current_normal.Dot(m_thrusters) > 0.0) {
+			m_thrusters = (current_normal - m_thrusters).Normalized();
+		}
+	}
+}
+
 void Ship::SetAngThrusterState(const vector3d &levels)
 {
 	m_angThrusters.x = Clamp(levels.x, -1.0, 1.0);
@@ -770,6 +792,7 @@ void Ship::TimeStepUpdate(const float timeStep)
 	vector3d maxThrust = GetMaxThrust(m_thrusters);
 	vector3d thrust = vector3d(maxThrust.x*m_thrusters.x, maxThrust.y*m_thrusters.y,
 		maxThrust.z*m_thrusters.z);
+
 	AddRelForce(thrust);
 	AddRelTorque(GetShipType()->angThrust * m_angThrusters);
 

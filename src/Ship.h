@@ -69,10 +69,7 @@ public:
 
 	virtual void Render(Graphics::Renderer *r, const Camera *camera, const vector3d &viewCoords, const matrix4x4d &viewTransform);
 
-	void SetThrusterState(int axis, double level) {
-		if (m_thrusterFuel <= 0.f) level = 0.0;
-		m_thrusters[axis] = Clamp(level, -1.0, 1.0);
-	}
+	void SetThrusterState(int axis, double level);
 	void SetThrusterState(const vector3d &levels);
 	vector3d GetThrusterState() const { return m_thrusters; }
 	void SetAngThrusterState(int axis, double level) { m_angThrusters[axis] = Clamp(level, -1.0, 1.0); }
@@ -260,7 +257,8 @@ protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
 	void RenderLaserfire();
-
+	void ApplyThrusterLimits();
+		
 	bool AITimeStep(float timeStep); // Called by controller. Returns true if complete
 
 	virtual void SetAlertState(AlertState as);
