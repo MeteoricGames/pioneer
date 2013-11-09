@@ -125,6 +125,9 @@ int _define_ship(lua_State *L, ShipType::Tag tag, std::vector<ShipType::Id> *lis
 			printf("Warning: Both thruster_fuel_use and effective_exhaust_velocity defined for %s, using effective_exhaust_velocity.\n", s.modelName.c_str());
 	}
 
+	// Paragon Flight Mode
+	s.maxManeuverVelocity = t.Get("max_maneuver_velocity", 25000.0f);
+
 	s.baseprice = t.Get("price", 0);
 	s.baseprice *= 100; // in hundredths of credits
 

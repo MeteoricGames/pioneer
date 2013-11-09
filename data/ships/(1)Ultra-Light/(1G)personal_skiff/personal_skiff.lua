@@ -28,4 +28,6 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 81103e3,
 	price = 40000,
+        -- Paragon Flight System
+        max_maneuver_velocity = 10e3,
 }
