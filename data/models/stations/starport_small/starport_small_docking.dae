@@ -26,10 +26,10 @@
                 Save 3ds Max Profile: Yes;
                 Formatted Arrays: Yes;
             </comments>
-            <source_data>file:///C:/Users/rivalin/Creative/Personal%20Work/Paragon/Paragon/PARAGON3DEV4/data/models/stations/starport_small/starport_small_docking.dae</source_data>
+            <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/stations/starport_small/starport_small_docking.dae</source_data>
         </contributor>
-        <created>2013-07-10T21:19:41Z</created>
-        <modified>2013-07-10T21:19:41Z</modified>
+        <created>2013-11-10T18:59:15Z</created>
+        <modified>2013-11-10T18:59:15Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -284,41 +284,41 @@
             <node id="polyRender020" name="Render" type="NODE">
                 <instance_light url="#Light-polyRender020" />
             </node>
-            <node id="locator030Node" name="approach_stage2_bay4" type="NODE">
-                <translate sid="translation039">-148 45 0</translate>
+            <node id="approach_stage2_bay4Node" name="approach_stage2_bay4" type="NODE">
+                <translate sid="translation001">-148 50 0</translate>
             </node>
-            <node id="locator029Node" name="docking_stage1_bay2" type="NODE">
-                <translate sid="translation040">147 45 0</translate>
+            <node id="docking_stage1_bay2Node" name="docking_stage1_bay2" type="NODE">
+                <translate sid="translation002">147 50 0</translate>
             </node>
-            <node id="locator036Node" name="approach_stage1_bay2" type="NODE">
-                <translate sid="translation041">147 495 0</translate>
+            <node id="approach_stage1_bay2Node" name="approach_stage1_bay2" type="NODE">
+                <translate sid="translation003">147 500 0</translate>
             </node>
-            <node id="locator035Node" name="approach_stage1_bay3" type="NODE">
-                <translate sid="translation042">0 495 148</translate>
+            <node id="approach_stage1_bay3Node" name="approach_stage1_bay3" type="NODE">
+                <translate sid="translation004">0 500 148</translate>
             </node>
-            <node id="locator038Node" name="approach_stage1_bay1" type="NODE">
-                <translate sid="translation043">0 495 -145</translate>
+            <node id="approach_stage1_bay1Node" name="approach_stage1_bay1" type="NODE">
+                <translate sid="translation005">0 500 -145</translate>
             </node>
-            <node id="locator027Node" name="docking_stage1_bay4" type="NODE">
-                <translate sid="translation044">-148 45 0</translate>
+            <node id="docking_stage1_bay4Node" name="docking_stage1_bay4" type="NODE">
+                <translate sid="translation006">-148 50 0</translate>
             </node>
-            <node id="locator032Node" name="approach_stage2_bay2" type="NODE">
-                <translate sid="translation045">147 45 0</translate>
+            <node id="approach_stage2_bay2Node" name="approach_stage2_bay2" type="NODE">
+                <translate sid="translation007">147 50 0</translate>
             </node>
-            <node id="locator033Node" name="docking_stage1_bay1" type="NODE">
-                <translate sid="translation046">0 45 -145</translate>
+            <node id="docking_stage1_bay1Node" name="docking_stage1_bay1" type="NODE">
+                <translate sid="translation008">0 50 -145</translate>
             </node>
-            <node id="locator034Node" name="approach_stage2_bay1" type="NODE">
-                <translate sid="translation047">0 45 -145</translate>
+            <node id="approach_stage2_bay1Node" name="approach_stage2_bay1" type="NODE">
+                <translate sid="translation009">0 50 -145</translate>
             </node>
-            <node id="locator031Node" name="approach_stage2_bay3" type="NODE">
-                <translate sid="translation048">0 45 148</translate>
+            <node id="approach_stage2_bay3Node" name="approach_stage2_bay3" type="NODE">
+                <translate sid="translation010">0 50 148</translate>
             </node>
-            <node id="locator028Node" name="docking_stage1_bay3" type="NODE">
-                <translate sid="translation049">0 45 148</translate>
+            <node id="docking_stage1_bay3Node" name="docking_stage1_bay3" type="NODE">
+                <translate sid="translation011">0 50 148</translate>
             </node>
-            <node id="locator037Node" name="approach_stage1_bay4" type="NODE">
-                <translate sid="translation050">-148 495 0</translate>
+            <node id="approach_stage1_bay4Node" name="approach_stage1_bay4" type="NODE">
+                <translate sid="translation012">-148 500 0</translate>
             </node>
             <node id="Geometry-PlaneNode" name="Plane" type="NODE">
                 <translate sid="translation013">0 10 0</translate>
