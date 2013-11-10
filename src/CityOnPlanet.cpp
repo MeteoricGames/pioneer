@@ -293,17 +293,21 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 	const vector3d p = station->GetPosition();
 
 	vector3d p1, p2, p3, p4;
-	double sizex = START_SEG_SIZE;// + rand.Int32((int)START_SEG_SIZE);
-	double sizez = START_SEG_SIZE;// + rand.Int32((int)START_SEG_SIZE);
+
+	const float rad = planet->GetSystemBody()->GetRadius();
+	double seg = 5000.0;
+	if (planet->GetSystemBody()->HasAtmosphere())
+		seg=Clamp(rad/1000.0,100.0,5000.0);
+	else
+		seg=Clamp(rad/10000.0,150.0,500.0);
+
+	double sizex = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);
+	double sizez = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);
 
 	// always have random shipyard buildings around the space station
 	cityflavour[0].buildingListIdx = 0;//2;
 	cityflavour[0].center = p;
-	if (planet->GetSystemBody()->HasAtmosphere())
-		cityflavour[0].size = Clamp(planet->GetSystemBody()->GetRadius()/1000.0,100.0,5000.0);
-	else
-		cityflavour[0].size = Clamp(planet->GetSystemBody()->GetRadius()/100000.0,10.0,50.0);
-
+	cityflavour[0].size = seg;
 
 	for (unsigned int i = 1; i < CITYFLAVOURS; i++) {
 		cityflavour[i].buildingListIdx =
