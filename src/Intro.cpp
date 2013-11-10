@@ -23,7 +23,7 @@ Intro::Intro(Graphics::Renderer *r, int width, int height)
 {
 	using Graphics::Light;
 
-	m_background.Reset(new Background::Container(r, UNIVERSE_SEED));
+	m_background.reset(new Background::Container(r, UNIVERSE_SEED));
 	m_ambientColor = Color(0.f);
 
 	const Color one = Color::WHITE;
@@ -95,6 +95,9 @@ void Intro::Draw(float _time)
 
 	m_renderer->SetPerspectiveProjection(75, m_aspectRatio, 1.f, 10000.f);
 	m_renderer->SetTransform(matrix4x4f::Identity());
+
+	m_renderer->SetDepthTest(true);
+	m_renderer->SetDepthWrite(true);
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS & (~GL_POINT_BIT));
 

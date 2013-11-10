@@ -179,8 +179,8 @@ void GeoSphere::Reset()
 
 	for (int p=0; p<NUM_PATCHES; p++) {
 		// delete patches
-		if (m_patches[p].Valid()) {
-			m_patches[p].Reset();
+		if (m_patches[p]) {
+			m_patches[p].reset();
 		}
 	}
 
@@ -295,8 +295,8 @@ void GeoSphere::ProcessSplitResults()
 
 void GeoSphere::BuildFirstPatches()
 {
-	assert(!m_patches[0].Valid());
-	if(m_patches[0].Valid())
+	assert(!m_patches[0]);
+	if(m_patches[0])
 		return;
 
 	// generate root face patches of the cube/sphere
@@ -311,15 +311,15 @@ void GeoSphere::BuildFirstPatches()
 
 	const uint64_t maxShiftDepth = GeoPatchID::MAX_SHIFT_DEPTH;
 
-	m_patches[0].Reset(new GeoPatch(s_patchContext, this, p1, p2, p3, p4, 0, (0ULL << maxShiftDepth)));
-	m_patches[1].Reset(new GeoPatch(s_patchContext, this, p4, p3, p7, p8, 0, (1ULL << maxShiftDepth)));
-	m_patches[2].Reset(new GeoPatch(s_patchContext, this, p1, p4, p8, p5, 0, (2ULL << maxShiftDepth)));
-	m_patches[3].Reset(new GeoPatch(s_patchContext, this, p2, p1, p5, p6, 0, (3ULL << maxShiftDepth)));
-	m_patches[4].Reset(new GeoPatch(s_patchContext, this, p3, p2, p6, p7, 0, (4ULL << maxShiftDepth)));
-	m_patches[5].Reset(new GeoPatch(s_patchContext, this, p8, p7, p6, p5, 0, (5ULL << maxShiftDepth)));
+	m_patches[0].reset(new GeoPatch(s_patchContext, this, p1, p2, p3, p4, 0, (0ULL << maxShiftDepth)));
+	m_patches[1].reset(new GeoPatch(s_patchContext, this, p4, p3, p7, p8, 0, (1ULL << maxShiftDepth)));
+	m_patches[2].reset(new GeoPatch(s_patchContext, this, p1, p4, p8, p5, 0, (2ULL << maxShiftDepth)));
+	m_patches[3].reset(new GeoPatch(s_patchContext, this, p2, p1, p5, p6, 0, (3ULL << maxShiftDepth)));
+	m_patches[4].reset(new GeoPatch(s_patchContext, this, p3, p2, p6, p7, 0, (4ULL << maxShiftDepth)));
+	m_patches[5].reset(new GeoPatch(s_patchContext, this, p8, p7, p6, p5, 0, (5ULL << maxShiftDepth)));
 	for (int i=0; i<NUM_PATCHES; i++) {
 		for (int j=0; j<4; j++) {
-			m_patches[i]->edgeFriend[j] = m_patches[geo_sphere_edge_friends[i][j]].Get();
+			m_patches[i]->edgeFriend[j] = m_patches[geo_sphere_edge_friends[i][j]].get();
 		}
 	}
 
@@ -397,7 +397,7 @@ void GeoSphere::Update()
 			ProcessSplitResults();
 			uint8_t numValidPatches = 0;
 			for (int i=0; i<NUM_PATCHES; i++) {
-				if(m_patches[i]->heights.Valid()) {
+				if(m_patches[i]->heights) {
 					++numValidPatches;
 				}
 			}
@@ -438,10 +438,8 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 	// no frustum test of entire geosphere, since Space::Render does this
 	// for each body using its GetBoundingRadius() value
 
-	const EclipseState es = (Pi::config->Int("DisableEclipse") == 0) ? ECLIPSE_ENABLED : ECLIPSE_DISABLED;
-
 	//First draw - create materials (they do not change afterwards)
-	if (!m_surfaceMaterial[es].Valid())
+	if (!m_surfaceMaterial)
 		SetUpMaterials();
 
 	if (Graphics::AreShadersEnabled()) {
@@ -454,24 +452,24 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 
 		m_materialParameters.shadows = shadows;
 
-		m_surfaceMaterial[es]->specialParameter0 = &m_materialParameters;
+		m_surfaceMaterial->specialParameter0 = &m_materialParameters;
 
 		if (m_materialParameters.atmosphere.atmosDensity > 0.0) {
-			m_atmosphereMaterial[es]->specialParameter0 = &m_materialParameters;
+			m_atmosphereMaterial->specialParameter0 = &m_materialParameters;
 
 			renderer->SetBlendMode(Graphics::BLEND_ALPHA_ONE);
 			renderer->SetDepthWrite(false);
 			// make atmosphere sphere slightly bigger than required so
 			// that the edges of the pixel shader atmosphere jizz doesn't
 			// show ugly polygonal angles
-			DrawAtmosphereSurface(renderer, trans, campos, m_materialParameters.atmosphere.atmosRadius*1.01, m_atmosphereMaterial[es].Get());
+			DrawAtmosphereSurface(renderer, trans, campos, m_materialParameters.atmosphere.atmosRadius*1.01, m_atmosphereMaterial.get());
 			renderer->SetDepthWrite(true);
 			renderer->SetBlendMode(Graphics::BLEND_SOLID);
 		}
 	}
 
 	Color ambient;
-	Color &emission = m_surfaceMaterial[es]->emissive;
+	Color &emission = m_surfaceMaterial->emissive;
 
 	// save old global ambient
 	const Color oldAmbient = renderer->GetAmbientColor();
@@ -504,7 +502,7 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 #endif
 	// this is pretty much the only place where a non-renderer is allowed to call Apply()
 	// to be removed when someone rewrites terrain
-	m_surfaceMaterial[es]->Apply();
+	m_surfaceMaterial->Apply();
 
 	renderer->SetTransform(modelView);
 
@@ -523,7 +521,7 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	m_surfaceMaterial[es]->Unapply();
+	m_surfaceMaterial->Unapply();
 
 	renderer->SetAmbientColor(oldAmbient);
 #ifdef USE_WIREFRAME
@@ -564,17 +562,21 @@ void GeoSphere::SetUpMaterials()
 			surfDesc.quality &= ~Graphics::GL2::HAS_ATMOSPHERE;
 		}
 	}
-	m_surfaceMaterial[ECLIPSE_DISABLED].Reset(Pi::renderer->CreateMaterial(surfDesc));
-	surfDesc.quality |= Graphics::GL2::HAS_ECLIPSES;
-	m_surfaceMaterial[ECLIPSE_ENABLED].Reset(Pi::renderer->CreateMaterial(surfDesc));
+
+	const bool bEnableEclipse = (Pi::config->Int("DisableEclipse") == 0);
+	if (bEnableEclipse) {
+		surfDesc.quality |= Graphics::GL2::HAS_ECLIPSES;
+	}
+	m_surfaceMaterial.reset(Pi::renderer->CreateMaterial(surfDesc));
 
 	//Shader-less atmosphere is drawn in Planet
 	if (Graphics::AreShadersEnabled()) {
 		Graphics::MaterialDescriptor skyDesc;
 		skyDesc.effect = Graphics::EFFECT_GEOSPHERE_SKY;
 		skyDesc.lighting = true;
-		m_atmosphereMaterial[ECLIPSE_DISABLED].Reset(Pi::renderer->CreateMaterial(skyDesc));
-		skyDesc.quality |= Graphics::GL2::HAS_ECLIPSES;
-		m_atmosphereMaterial[ECLIPSE_ENABLED].Reset(Pi::renderer->CreateMaterial(skyDesc));
+		if (bEnableEclipse) {
+			skyDesc.quality |= Graphics::GL2::HAS_ECLIPSES;
+		}
+		m_atmosphereMaterial.reset(Pi::renderer->CreateMaterial(skyDesc));
 	}
 }
