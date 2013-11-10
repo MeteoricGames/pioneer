@@ -3,6 +3,7 @@
 
 #include "List.h"
 #include "Context.h"
+#include <algorithm>
 
 namespace UI {
 
@@ -26,7 +27,6 @@ void List::Layout() {
 List *List::AddOption(const std::string &text)
 {
 	m_options.push_back(text);
-	if (m_selected < 0) m_selected = 0;
 
 	Context *c = GetContext();
 
@@ -48,12 +48,53 @@ List *List::AddOption(const std::string &text)
 	return this;
 }
 
-const std::string &List::GetSelectedOption()
+const std::string &List::GetSelectedOption() const
 {
 	static const std::string empty;
 	if (m_selected < 0)
 		return empty;
 	return m_options[m_selected];
+}
+
+bool List::SetSelectedOption(const std::string &option)
+{
+	std::vector<std::string>::const_iterator it = std::find(m_options.begin(), m_options.end(), option);
+	if (it != m_options.end()) {
+		SetSelectedIndex(it - m_options.begin());
+		return true;
+	} else {
+		return false;
+	}
+}
+
+int List::GetSelectedIndex() const
+{
+	return m_selected;
+}
+
+void List::SetSelectedIndex(const int index)
+{
+	assert(!m_options.empty() || index < 0);
+	assert(index < int(m_options.size()));
+
+	if (m_selected != index) {
+		if (m_selected >= 0) {
+			ColorBackground * const from = m_optionBackgrounds[m_selected];
+			from->SetColor(Color(0,0,0, from->IsMouseOver()
+						? GetContext()->GetSkin().ListAlphaHover()
+						: GetContext()->GetSkin().ListAlphaNormal()));
+		}
+
+		if (index >= 0) {
+			ColorBackground * const to = m_optionBackgrounds[index];
+			if (!to->IsMouseOver()) {
+				to->SetColor(Color(0,0,0, GetContext()->GetSkin().ListAlphaSelect()));
+			}
+		}
+
+		m_selected = index;
+		onOptionSelected.emit(index, index >= 0 ? m_options[index] : "");
+	}
 }
 
 void List::Clear()
@@ -80,13 +121,10 @@ bool List::HandleOptionMouseOut(int index)
 
 bool List::HandleOptionClick(int index)
 {
-	if (m_selected != index) {
-		if (m_selected >= 0)
-			m_optionBackgrounds[m_selected]->SetColor(Color(0,0,0, GetContext()->GetSkin().ListAlphaNormal()));
-		m_selected = index;
-		onOptionSelected.emit(index, m_options[index]);
-	}
-
+	if ((index != m_selected) && (m_selected >= 0))
+		m_optionBackgrounds[m_selected]->SetColor(Color(0,0,0, GetContext()->GetSkin().ListAlphaNormal()));
+	m_selected = index;
+	onOptionSelected.emit(index, m_options[index]);
 	return false;
 }
 

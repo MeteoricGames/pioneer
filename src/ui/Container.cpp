@@ -16,7 +16,11 @@ Container::~Container()
 
 void Container::Update()
 {
-	for (std::vector< RefCountedPtr<Widget> >::iterator i = m_widgets.begin(); i != m_widgets.end(); ++i)
+	// widgets can add/remove other widgets during Update. that screws up the
+	// iterators when traversing the widget list.  rather than try and detect
+	// it, we just take a copy of the list
+	std::vector< RefCountedPtr<Widget> > widgets = m_widgets;
+	for (std::vector< RefCountedPtr<Widget> >::iterator i = widgets.begin(); i != widgets.end(); ++i)
 		(*i)->Update();
 }
 
@@ -89,13 +93,27 @@ void Container::Enable()
 	Widget::Enable();
 }
 
+void Container::NotifyVisible(bool visible)
+{
+	if (m_visible != visible) {
+		m_visible = visible;
+		if (m_visible) { HandleVisible(); } else { HandleInvisible(); }
+
+		for (std::vector< RefCountedPtr<Widget> >::iterator i = m_widgets.begin(); i != m_widgets.end(); ++i) {
+			Widget *w = (*i).Get();
+			w->NotifyVisible(visible);
+		}
+	}
+}
+
 void Container::DisableChildren()
 {
 	for (std::vector< RefCountedPtr<Widget> >::iterator i = m_widgets.begin(); i != m_widgets.end(); ++i) {
 		Widget *w = (*i).Get();
 		w->SetDisabled(true);
-		Container *c = dynamic_cast<Container*>(w);
-		if (c) c->DisableChildren();
+		if (w->IsContainer()) {
+			static_cast<Container*>(w)->DisableChildren();
+		}
 	}
 }
 
@@ -104,45 +122,10 @@ void Container::EnableChildren()
 	for (std::vector< RefCountedPtr<Widget> >::iterator i = m_widgets.begin(); i != m_widgets.end(); ++i) {
 		Widget *w = (*i).Get();
 		w->SetDisabled(false);
-		Container *c = dynamic_cast<Container*>(w);
-		if (c) c->EnableChildren();
+		if (w->IsContainer()) {
+			static_cast<Container*>(w)->EnableChildren();
+		}
 	}
-}
-
-Point Container::CalcLayoutContribution(Widget *w)
-{
-	Point preferredSize = w->PreferredSize();
-	const Uint32 flags = w->GetSizeControlFlags();
-
-	if (flags & NO_WIDTH)
-		preferredSize.x = 0;
-	if (flags & NO_HEIGHT)
-		preferredSize.y = 0;
-
-	if (flags & EXPAND_WIDTH)
-		preferredSize.x = SIZE_EXPAND;
-	if (flags & EXPAND_HEIGHT)
-		preferredSize.y = SIZE_EXPAND;
-
-	return preferredSize;
-}
-
-Point Container::CalcSize(Widget *w, const Point &avail)
-{
-	if (!(w->GetSizeControlFlags() & PRESERVE_ASPECT))
-		return avail;
-
-	const Point preferredSize = w->PreferredSize();
-
-	float wantRatio = float(preferredSize.x) / float(preferredSize.y);
-
-	// more room on X than Y, use full X, scale Y
-	if (avail.x > avail.y)
-		return Point(float(avail.y) * wantRatio, avail.y);
-
-	// more room on Y than X, use full Y, scale X
-	else
-		return Point(avail.x, float(avail.x) / wantRatio);
 }
 
 void Container::SetWidgetDimensions(Widget *widget, const Point &position, const Point &size)

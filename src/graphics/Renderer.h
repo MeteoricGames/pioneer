@@ -4,8 +4,10 @@
 #ifndef _RENDERER_H
 #define _RENDERER_H
 
+#include "WindowSDL.h"
 #include "libs.h"
 #include <map>
+#include <memory>
 
 namespace Graphics {
 
@@ -74,10 +76,14 @@ enum BlendMode {
 class Renderer
 {
 public:
-	Renderer(int width, int height);
+	Renderer(WindowSDL *win, int width, int height);
 	virtual ~Renderer();
 
 	virtual const char* GetName() const = 0;
+
+	WindowSDL *GetWindow() const { return m_window.get(); }
+	float GetDisplayAspect() const { return static_cast<float>(m_width) / static_cast<float>(m_height); }
+
 	//get supported minimum for z near and maximum for z far values
 	virtual bool GetNearFarRange(float &near, float &far) const = 0;
 
@@ -175,6 +181,7 @@ private:
 	typedef std::map<TextureCacheKey,RefCountedPtr<Texture>*> TextureCacheMap;
 	TextureCacheMap m_textures;
 
+	std::unique_ptr<WindowSDL> m_window;
 };
 
 // subclass this to store renderer specific information
@@ -188,13 +195,13 @@ struct RenderInfo {
 // can store renderer-specific data in it (RenderInfo)
 struct Renderable : public RefCounted {
 public:
-	Renderable(): m_renderInfo(0) {}
+	Renderable(): m_renderInfo(nullptr) {}
 
-	RenderInfo *GetRenderInfo() const { return m_renderInfo.Get(); }
-	void SetRenderInfo(RenderInfo *renderInfo) { m_renderInfo.Reset(renderInfo); }
+	RenderInfo *GetRenderInfo() const { return m_renderInfo.get(); }
+	void SetRenderInfo(RenderInfo *renderInfo) { m_renderInfo.reset(renderInfo); }
 
 private:
-	ScopedPtr<RenderInfo> m_renderInfo;
+	std::unique_ptr<RenderInfo> m_renderInfo;
 };
 
 }

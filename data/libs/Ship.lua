@@ -1,3 +1,15 @@
+-- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
+-- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
+local Ship = import_core("Ship")
+local Event = import("Event")
+local Serializer = import("Serializer")
+local ShipDef = import("ShipDef")
+local Timer = import("Timer")
+local Lang = import("Lang")
+
+local l = Lang.GetResource("ui-core")
+
 -- Temporary mapping while waiting for new-equipment to embed this information.
 local missile_names = {
 	MISSILE_UNGUIDED="missile_unguided",
@@ -114,10 +126,9 @@ end
 --   experimental
 --
 Ship.Refuel = function (self,amount)
-	local t = Translate:GetTranslator()
     local currentFuel = self.fuel
     if currentFuel == 100 then
-		Comms.Message(t('Fuel tank full.'))
+        Comms.Message(l.FUEL_TANK_FULL) -- XXX don't translate in libs
         return 0
     end
     local ship_stats = self:GetStats()
@@ -165,9 +176,9 @@ Ship.Jettison = function (self,equip)
 		self:SpawnCargo(equip)
 		Event.Queue("onJettison", self, equip)
 	elseif self.flightState == "DOCKED" then
-		Event.Queue("onCargoUnload", self, equip)
-	else -- LANDED
-		Event.Queue("onCargoUnload", self, equip)
+		Event.Queue("onCargoUnload", self:GetDockedWith(), equip)
+	elseif self.flightState == "LANDED" then
+		Event.Queue("onCargoUnload", self.frameBody, equip)
 	end
 end
 
@@ -218,7 +229,7 @@ Ship.Enroll = function (self,newCrewMember)
 		error("Ship:Enroll: newCrewMember must be a Character object")
 	end
 	if not CrewRoster[self] then CrewRoster[self] = {} end
-	if #CrewRoster[self] < ShipType.GetShipType(self.shipId).maxCrew
+	if #CrewRoster[self] < ShipDef[self.shipId].maxCrew
 	and isNotAlreadyEnrolled(newCrewMember)
 	then
 		newCrewMember:CheckOut() -- Don't want other scripts using our crew for missions etc
@@ -298,7 +309,7 @@ end
 --
 Ship.GenerateCrew = function (self)
 	if CrewRoster[self] then return end -- Bottle out if there's ever been a crew
-	for i = 1, ShipType.GetShipType(self.shipId).maxCrew do
+	for i = 1, ShipDef[self.shipId].maxCrew do
 		local newCrew = Character.New()
 		newCrew:RollNew(true)
 		self:Enroll(newCrew)
@@ -356,8 +367,8 @@ end
 --
 Ship.HasCorrectCrew = function (self)
 	return (CrewRoster[self] and (
-		#CrewRoster[self] >= ShipType.GetShipType(self.shipId).minCrew and
-		#CrewRoster[self] <= ShipType.GetShipType(self.shipId).maxCrew
+		#CrewRoster[self] >= ShipDef[self.shipId].minCrew and
+		#CrewRoster[self] <= ShipDef[self.shipId].maxCrew
 	))
 end
 
@@ -414,3 +425,5 @@ Event.Register("onEnterSystem", onEnterSystem)
 Event.Register("onShipDestroyed", onShipDestroyed)
 Event.Register("onGameStart", onGameStart)
 Serializer:Register("ShipClass", serialize, unserialize)
+
+return Ship

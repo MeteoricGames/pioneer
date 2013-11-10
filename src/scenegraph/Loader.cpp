@@ -22,7 +22,6 @@
 #include <assimp/material.h>
 
 namespace {
-
 	class AssimpFileReadStream : public Assimp::IOStream
 	{
 	public:
@@ -113,11 +112,9 @@ namespace {
 	private:
 		FileSystem::FileSource &m_fs;
 	};
-
 } // anonymous namespace
 
 namespace SceneGraph {
-
 Loader::Loader(Graphics::Renderer *r, bool logWarnings)
 : m_renderer(r)
 , m_model(0)
@@ -174,7 +171,6 @@ Model *Loader::LoadModel(const std::string &shortname, const std::string &basepa
 				return CreateModel(modelDefinition);
 			}
 		}
-
 	}
 	throw (LoadingError("File not found"));
 }
@@ -733,13 +729,13 @@ void Loader::CreateLabel(Group *parent, const matrix4x4f &m)
 	parent->AddChild(trans);
 }
 
-void Loader::CreateThruster(const std::string &name, const matrix4x4f &m, const matrix4x4f& accum)
+void Loader::CreateThruster(const std::string &name, const matrix4x4f &m)
 {
 	if (!m_mostDetailedLod) return AddLog("Thruster outside highest LOD, ignored");
 
 	const bool linear = starts_with(name, "thruster_linear");
 
-	matrix4x4f transform = accum * m;
+	matrix4x4f transform = m;
 
 	MatrixTransform *trans = new MatrixTransform(m_renderer, transform);
 
@@ -757,14 +753,14 @@ void Loader::CreateThruster(const std::string &name, const matrix4x4f &m, const 
 	m_thrustersRoot->AddChild(trans);
 }
 
-void Loader::CreateNavlight(const std::string &name, const matrix4x4f &m, const matrix4x4f& accum)
+void Loader::CreateNavlight(const std::string &name, const matrix4x4f &m)
 {
 	if (!m_mostDetailedLod) return AddLog("Navlight outside highest LOD, ignored");
 
 	//Create a MT, lights are attached by client
 	//we only really need the final position, so this is
 	//a waste of transform
-	const matrix4x4f lightPos = matrix4x4f::Translation(accum * m.GetTranslate());
+	const matrix4x4f lightPos = matrix4x4f::Translation(m.GetTranslate());
 	MatrixTransform *lightPoint = new MatrixTransform(m_renderer, lightPos);
 	lightPoint->SetNodeMask(0x0); //don't render
 	lightPoint->SetName(name);
@@ -782,15 +778,13 @@ void Loader::ConvertNodes(aiNode *node, Group *_parent, std::vector<RefCountedPt
 	//lights, and possibly other special nodes should be leaf nodes (without meshes)
 	if (node->mNumChildren == 0 && node->mNumMeshes == 0) {
 		if (starts_with(nodename, "navlight_")) {
-			CreateNavlight(nodename, m, accum);
+			CreateNavlight(nodename, accum*m);
 		} else if (starts_with(nodename, "thruster_")) {
-			CreateThruster(nodename, m, accum);
+			CreateThruster(nodename, accum*m);
 		} else if (starts_with(nodename, "label_")) {
 			CreateLabel(parent, m);
 		} else if (starts_with(nodename, "tag_")) {
-			vector3f tagpos = accum * m.GetTranslate();
-			MatrixTransform *tagMt = new MatrixTransform(m_renderer, matrix4x4f::Translation(tagpos));
-			m_model->AddTag(nodename, tagMt);
+			m_model->AddTag(nodename, new MatrixTransform(m_renderer, accum*m));
 		} else if (starts_with(nodename, "docking_")) {
 			m_model->AddTag(nodename, new MatrixTransform(m_renderer, m));
 		} else if (starts_with(nodename, "leaving_")) {
@@ -813,6 +807,7 @@ void Loader::ConvertNodes(aiNode *node, Group *_parent, std::vector<RefCountedPt
 		RefCountedPtr<Graphics::Surface> surf = geoms.at(node->mMeshes[0])->GetMesh(0)->GetSurface(0);
 		RefCountedPtr<CollisionGeometry> cgeom(new CollisionGeometry(m_renderer, surf.Get(), collflag));
 		cgeom->SetName(nodename + "_cgeom");
+		cgeom->SetDynamic(starts_with(nodename, "collision_d"));
 		parent->AddChild(cgeom.Get());
 		return;
 	}
@@ -909,14 +904,18 @@ void Loader::LoadCollision(const std::string &filename)
 
 unsigned int Loader::GetGeomFlagForNodeName(const std::string &nodename)
 {
-	if (nodename.length() >= 14) {
-		const std::string pad = nodename.substr(13);
-		const int padID = atoi(pad.c_str())-1;
-		if(padID<240) {
-			return 0x10 + padID;
+	//special names after collision_
+	if (nodename.length() > 10) {
+		//landing pads
+		if (nodename.length() >= 14 && nodename.substr(10,3) == "pad") {
+			const std::string pad = nodename.substr(13);
+			const int padID = atoi(pad.c_str())-1;
+			if(padID<240) {
+				return 0x10 + padID;
+			}
 		}
 	}
+	//anything else is static collision
 	return 0x0;
 }
-
 }

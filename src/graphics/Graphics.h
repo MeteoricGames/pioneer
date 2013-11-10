@@ -20,10 +20,13 @@ namespace Graphics {
 		bool fullscreen;
 		bool shaders;
 		bool useTextureCompression;
+		bool enableDebugMessages;
 		int vsync;
 		int requestedSamples;
 		int height;
 		int width;
+		const char *iconFile;
+		const char *title;
 	};
 
 	//for querying available modes
@@ -39,7 +42,6 @@ namespace Graphics {
 	extern bool shadersEnabled;
 	extern Material *vtxColorMaterial;
 
-	extern Settings settings;
 	int GetScreenWidth();
 	int GetScreenHeight();
 

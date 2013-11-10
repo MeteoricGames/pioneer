@@ -14,6 +14,7 @@
 #include "Texture.h"
 #include "TextureGL.h"
 #include "VertexArray.h"
+#include "GLDebug.h"
 #include <stddef.h> //for offsetof
 #include <ostream>
 #include <sstream>
@@ -46,8 +47,8 @@ struct SurfaceRenderInfo : public RenderInfo {
 	int glAmount; //index count OR vertex amount
 };
 
-RendererLegacy::RendererLegacy(const Graphics::Settings &vs)
-: Renderer(vs.width, vs.height)
+RendererLegacy::RendererLegacy(WindowSDL *window, const Graphics::Settings &vs)
+: Renderer(window, window->GetWidth(), window->GetHeight())
 , m_numDirLights(0)
 , m_minZNear(10.f)
 , m_maxZFar(1000000.0f)
@@ -70,6 +71,9 @@ RendererLegacy::RendererLegacy(const Graphics::Settings &vs)
 
 	SetClearColor(Color(0.f));
 	SetViewport(0, 0, m_width, m_height);
+
+	if (vs.enableDebugMessages)
+		GLDebug::Enable();
 }
 
 RendererLegacy::~RendererLegacy()
@@ -137,7 +141,7 @@ bool RendererLegacy::SwapBuffers()
 	}
 #endif
 
-	SDL_GL_SwapBuffers();
+	GetWindow()->SwapBuffers();
 	return true;
 }
 
@@ -588,7 +592,7 @@ bool RendererLegacy::BufferStaticMesh(StaticMesh *mesh)
 
 		int offset = 0;
 		if (model) {
-			ScopedArray<ModelVertex> vts(new ModelVertex[numsverts]);
+			std::unique_ptr<ModelVertex[]> vts(new ModelVertex[numsverts]);
 			for(int j=0; j<numsverts; j++) {
 				vts[j].position = va->position[j];
 				vts[j].normal = va->normal[j];
@@ -598,9 +602,9 @@ bool RendererLegacy::BufferStaticMesh(StaticMesh *mesh)
 			if (!buf)
 				buf = new VertexBuffer(totalVertices);
 			buf->Bind();
-			buf->BufferData<ModelVertex>(numsverts, vts.Get());
+			buf->BufferData<ModelVertex>(numsverts, vts.get());
 		} else if (background) {
-			ScopedArray<UnlitVertex> vts(new UnlitVertex[numsverts]);
+			std::unique_ptr<UnlitVertex[]> vts(new UnlitVertex[numsverts]);
 			for(int j=0; j<numsverts; j++) {
 				vts[j].position = va->position[j];
 				vts[j].color = va->diffuse[j];
@@ -609,7 +613,7 @@ bool RendererLegacy::BufferStaticMesh(StaticMesh *mesh)
 			if (!buf)
 				buf= new UnlitVertexBuffer(totalVertices);
 			buf->Bind();
-			offset = buf->BufferData<UnlitVertex>(numsverts, vts.Get());
+			offset = buf->BufferData<UnlitVertex>(numsverts, vts.get());
 		}
 
 		SurfaceRenderInfo *surfaceInfo = new SurfaceRenderInfo();
@@ -721,6 +725,8 @@ bool RendererLegacy::PrintDebugInfo(std::ostream &out)
 	out << "OpenGL version " << glGetString(GL_VERSION);
 	out << ", running on " << glGetString(GL_VENDOR);
 	out << " " << glGetString(GL_RENDERER) << "\n";
+
+	out << "GLEW version " << glewGetString(GLEW_VERSION) << "\n";
 
 	if (glewIsSupported("GL_VERSION_2_0"))
 		out << "Shading language version: " <<  glGetString(GL_SHADING_LANGUAGE_VERSION_ARB) << "\n";

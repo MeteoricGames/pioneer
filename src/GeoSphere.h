@@ -35,7 +35,7 @@ public:
 	void Update();
 	void Render(Graphics::Renderer *renderer, const matrix4x4d &modelView, vector3d campos, const float radius, const float scale, const std::vector<Camera::Shadow> &shadows);
 
-	inline double GetHeight(vector3d p) const {
+	inline double GetHeight(const vector3d &p) const {
 		const double h = m_terrain->GetHeight(p);
 		s_vtxGenCount++;
 #ifdef DEBUG
@@ -75,11 +75,11 @@ public:
 
 private:
 	void BuildFirstPatches();
-	ScopedPtr<GeoPatch> m_patches[6];
+	std::unique_ptr<GeoPatch> m_patches[6];
 	const SystemBody *m_sbody;
 
 	// all variables for GetHeight(), GetColor()
-	ScopedPtr<Terrain> m_terrain;
+	RefCountedPtr<Terrain> m_terrain;
 
 	static const uint32_t MAX_SPLIT_OPERATIONS = 128;
 	std::deque<SQuadSplitResult*> mQuadSplitResults;
@@ -100,8 +100,8 @@ private:
 	static RefCountedPtr<GeoPatchContext> s_patchContext;
 
 	void SetUpMaterials();
-	ScopedPtr<Graphics::Material> m_surfaceMaterial;
-	ScopedPtr<Graphics::Material> m_atmosphereMaterial;
+	std::unique_ptr<Graphics::Material> m_surfaceMaterial;
+	std::unique_ptr<Graphics::Material> m_atmosphereMaterial;
 	//special parameters for shaders
 	MaterialParameters m_materialParameters;
 

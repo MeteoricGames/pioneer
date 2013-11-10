@@ -1,0 +1,16 @@
+material material1
+
+tex_diff diff.dds
+tex_spec spec.dds
+tex_glow glow.dds
+diffuse 1.0 1.0 1.0
+
+specular 1.0 1.0 1.0
+
+shininess 80
+
+mesh cargo_megafreighter.dae
+collision cargo_megafreighter_collision.obj
+
+lod 10
+mesh cargo_megafreighter_lod.obj

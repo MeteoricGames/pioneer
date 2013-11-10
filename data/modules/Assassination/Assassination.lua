@@ -1,13 +1,44 @@
 -- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
--- Get the translator function
-local t = Translate:GetTranslator()
+local Engine = import("Engine")
+local Lang = import("Lang")
+local Game = import("Game")
+local Space = import("Space")
+local Comms = import("Comms")
+local Timer = import("Timer")
+local Event = import("Event")
+local Mission = import("Mission")
+local Rand = import("Rand")
+local NameGen = import("NameGen")
+local Character = import("Character")
+local Format = import("Format")
+local Serializer = import("Serializer")
+local EquipDef = import("EquipDef")
+local ShipDef = import("ShipDef")
+local utils = import("utils")
+
+local InfoFace = import("ui/InfoFace")
+
+local l = Lang.GetResource("module-assassination")
+
 -- Get the UI class
 local ui = Engine.ui
 
 -- don't produce missions for further than this many light years away
 local max_ass_dist = 30
+
+local flavours = {}
+for i = 0,5 do
+	table.insert(flavours, {
+		adtext      = l["FLAVOUR_ADTEXT_"..i],
+		introtext   = l["FLAVOUR_INTROTEXT_"..i],
+		successmsg  = l["FLAVOUR_SUCCESSMSG_"..i],
+		failuremsg  = l["FLAVOUR_FAILUREMSG_"..i],
+		failuremsg2 = l["FLAVOUR_FAILUREMSG2_"..i],
+	})
+end
+local num_titles = 25
 
 local ads = {}
 local missions = {}
@@ -17,7 +48,6 @@ local onDelete = function (ref)
 end
 
 local onChat = function (form, ref, option)
-	local ass_flavours = Translate:GetFlavours('Assassination')
 	local ad = ads[ref]
 
 	form:Clear()
@@ -29,7 +59,7 @@ local onChat = function (form, ref, option)
 		form:SetFace(ad.client)
 		local sys = ad.location:GetStarSystem()
 
-		local introtext = string.interp(ass_flavours[ad.flavour].introtext, {
+		local introtext = string.interp(flavours[ad.flavour].introtext, {
 			name	= ad.client.name,
 			cash	= Format.Money(ad.reward),
 			target	= ad.target,
@@ -41,7 +71,7 @@ local onChat = function (form, ref, option)
 		local sys = ad.location:GetStarSystem()
 		local sbody = ad.location:GetSystemBody()
 
-		form:SetMessage(string.interp(t("{target} will be leaving {spaceport} in the {system} system ({sectorX}, {sectorY}, {sectorZ}), distance {dist} ly, at {date}. The ship is {shipname} and has registration id {shipregid}."), {
+		form:SetMessage(string.interp(l.X_WILL_BE_LEAVING, {
 		  target    = ad.target,
 		  spaceport = sbody.name,
 		  system    = sys.name,
@@ -58,7 +88,7 @@ local onChat = function (form, ref, option)
 	elseif option == 2 then
 		local sbody = ad.location:GetSystemBody()
 
-		form:SetMessage(string.interp(t("It must be done after {target} leaves {spaceport}. Do not miss this opportunity."), {
+		form:SetMessage(string.interp(l.IT_MUST_BE_DONE_AFTER, {
 		  target    = ad.target,
 		  spaceport = sbody.name,
       })
@@ -89,19 +119,19 @@ local onChat = function (form, ref, option)
 
 		table.insert(missions,Mission.New(mission))
 
-		form:SetMessage(t("Excellent."))
-		form:AddOption(t('HANG_UP'), -1)
+		form:SetMessage(l.EXCELLENT)
+		form:AddOption(l.HANG_UP, -1)
 
 		return
 	elseif option == 4 then
-		form:SetMessage(t("Return here on the completion of the contract and you will be paid."))
+		form:SetMessage(l.RETURN_HERE_ON_THE_COMPLETION_OF_THE_CONTRACT_AND_YOU_WILL_BE_PAID)
 	end
-	form:AddOption(string.interp(t("Where can I find {target}?"), {target = ad.target}), 1);
-	form:AddOption(t("Could you repeat the original request?"), 0);
-	form:AddOption(t("How soon must it be done?"), 2);
-	form:AddOption(t("How will I be paid?"), 4);
-	form:AddOption(t("Ok, agreed."), 3);
-	form:AddOption(t('HANG_UP'), -1);
+	form:AddOption(string.interp(l.WHERE_CAN_I_FIND_X, {target = ad.target}), 1);
+	form:AddOption(l.COULD_YOU_REPEAT_THE_ORIGINAL_REQUEST, 0);
+	form:AddOption(l.HOW_SOON_MUST_IT_BE_DONE, 2);
+	form:AddOption(l.HOW_WILL_I_BE_PAID, 4);
+	form:AddOption(l.OK_AGREED, 3);
+	form:AddOption(l.HANG_UP, -1);
 end
 
 local RandomShipRegId = function ()
@@ -113,15 +143,14 @@ end
 
 local nearbysystems
 local makeAdvert = function (station)
-	local ass_flavours = Translate:GetFlavours('Assassination')
 	if nearbysystems == nil then
 		nearbysystems = Game.system:GetNearbySystems(max_ass_dist, function (s) return #s:GetStationPaths() > 0 end)
 	end
 	if #nearbysystems == 0 then return end
 	local client = Character.New()
 	local targetIsfemale = Engine.rand:Integer(1) == 1
-	local target = t('TITLE')[Engine.rand:Integer(1, #t('TITLE'))] .. " " .. NameGen.FullName(targetIsfemale)
-	local flavour = Engine.rand:Integer(1, #ass_flavours)
+	local target = l["TITLE_"..Engine.rand:Integer(1, num_titles)-1] .. " " .. NameGen.FullName(targetIsfemale)
+	local flavour = Engine.rand:Integer(1, #flavours)
 	local nearbysystem = nearbysystems[Engine.rand:Integer(1,#nearbysystems)]
 	local nearbystations = nearbysystem:GetStationPaths()
 	local location = nearbystations[Engine.rand:Integer(1,#nearbystations)]
@@ -132,8 +161,8 @@ local makeAdvert = function (station)
 	local reward = Engine.rand:Number(2100, 7000) * danger
 
 	-- XXX hull mass is a bad way to determine suitability for role
-	--local shipdefs = build_array(filter(function (k,def) return def.tag == 'SHIP' and def.hullMass >= (danger * 17) and def.equipSlotCapacity.ATMOSHIELD > 0 end, pairs(ShipDef)))
-	local shipdefs = build_array(filter(function (k,def) return def.tag == 'SHIP' and def.defaultHyperdrive ~= 'NONE' and def.equipSlotCapacity.ATMOSHIELD > 0 end, pairs(ShipDef)))
+	--local shipdefs = utils.build_array(utils.filter(function (k,def) return def.tag == 'SHIP' and def.hullMass >= (danger * 17) and def.equipSlotCapacity.ATMOSHIELD > 0 end, pairs(ShipDef)))
+	local shipdefs = utils.build_array(utils.filter(function (k,def) return def.tag == 'SHIP' and def.defaultHyperdrive ~= 'NONE' and def.equipSlotCapacity.ATMOSHIELD > 0 end, pairs(ShipDef)))
 	local shipdef = shipdefs[Engine.rand:Integer(1,#shipdefs)]
 	local shipid = shipdef.id
 	local shipname = shipdef.name
@@ -155,7 +184,7 @@ local makeAdvert = function (station)
 		target = target,
 	}
 
-	ad.desc = string.interp(ass_flavours[ad.flavour].adtext, {
+	ad.desc = string.interp(flavours[ad.flavour].adtext, {
 		target	= ad.target,
 		system	= nearbysystem.name,
 	})
@@ -227,7 +256,7 @@ local onEnterSystem = function (ship)
 						local station = Space.GetBody(mission.location.bodyIndex)
 						local shiptype = ShipDef[mission.shipid]
 						local default_drive = shiptype.defaultHyperdrive
-						local laserdefs = build_array(filter(function (k,def) return def.slot == 'LASER' end, pairs(EquipDef)))
+						local laserdefs = utils.build_array(utils.filter(function (k,def) return def.slot == 'LASER' end, pairs(EquipDef)))
 						local laserdef = laserdefs[mission.danger]
 						local count = tonumber(string.sub(default_drive, -1)) ^ 2
 
@@ -277,8 +306,7 @@ local onShipDocked = function (ship, station)
 		if ship:IsPlayer() then
 			if mission.status == 'COMPLETED' and
 			   mission.backstation == station.path then
-				local ass_flavours = Translate:GetFlavours('Assassination')
-				local text = string.interp(ass_flavours[mission.flavour].successmsg, {
+				local text = string.interp(flavours[mission.flavour].successmsg, {
 					target	= mission.target,
 					cash	= Format.Money(mission.reward),
 				})
@@ -287,14 +315,13 @@ local onShipDocked = function (ship, station)
 				mission:Remove()
 				missions[ref] = nil
 			elseif mission.status == 'FAILED' then
-				local ass_flavours = Translate:GetFlavours('Assassination')
 				local text
 				if mission.notplayer == 'TRUE' then
-					text = string.interp(ass_flavours[mission.flavour].failuremsg2, {
+					text = string.interp(flavours[mission.flavour].failuremsg2, {
 						target	= mission.target,
 					})
 				else
-					text = string.interp(ass_flavours[mission.flavour].failuremsg, {
+					text = string.interp(flavours[mission.flavour].failuremsg, {
 						target	= mission.target,
 					})
 				end
@@ -407,10 +434,9 @@ local onGameEnd = function ()
 end
 
 local onClick = function (mission)
-	local ass_flavours = Translate:GetFlavours('Assassination')
 	local dist = Game.system and string.format("%.2f", Game.system:DistanceTo(mission.location)) or "???"
 	return ui:Grid(2,1)
-		:SetColumn(0,{ui:VBox(10):PackEnd({ui:MultiLineText((ass_flavours[mission.flavour].introtext):interp({
+		:SetColumn(0,{ui:VBox(10):PackEnd({ui:MultiLineText((flavours[mission.flavour].introtext):interp({
 														name   = mission.client.name,
 														target = mission.target,
 														system = mission.location:GetStarSystem().name,
@@ -421,7 +447,7 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:Label(t("Target name:"))
+													ui:Label(l.TARGET_NAME)
 												})
 											})
 											:SetColumn(1, {
@@ -432,7 +458,7 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:Label(t("Spaceport:"))
+													ui:Label(l.SPACEPORT)
 												})
 											})
 											:SetColumn(1, {
@@ -443,7 +469,7 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:Label(t("System:"))
+													ui:Label(l.SYSTEM)
 												})
 											})
 											:SetColumn(1, {
@@ -454,7 +480,7 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:Label(t("Ship:"))
+													ui:Label(l.SHIP)
 												})
 											})
 											:SetColumn(1, {
@@ -465,7 +491,7 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:Label(t("Ship ID:"))
+													ui:Label(l.SHIP_ID)
 												})
 											})
 											:SetColumn(1, {
@@ -476,7 +502,7 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:MultiLineText(t("Target will be leaving spaceport at:"))
+													ui:MultiLineText(l.TARGET_WILL_BE_LEAVING_SPACEPORT_AT)
 												})
 											})
 											:SetColumn(1, {
@@ -488,17 +514,17 @@ local onClick = function (mission)
 										ui:Grid(2,1)
 											:SetColumn(0, {
 												ui:VBox():PackEnd({
-													ui:Label(t("Distance:"))
+													ui:Label(l.DISTANCE)
 												})
 											})
 											:SetColumn(1, {
 												ui:VBox():PackEnd({
-													ui:Label(dist.." "..t("ly"))
+													ui:Label(dist.." "..l.LY)
 												})
 											}),
 		})})
 		:SetColumn(1, {
-			ui:VBox(10):PackEnd(UI.InfoFace.New(mission.client))
+			ui:VBox(10):PackEnd(InfoFace.New(mission.client))
 		})
 end
 
@@ -530,6 +556,6 @@ Event.Register("onShipHit", onShipHit)
 Event.Register("onUpdateBB", onUpdateBB)
 Event.Register("onGameEnd", onGameEnd)
 
-Mission.RegisterType('Assassination','Assassination',onClick)
+Mission.RegisterType('Assassination',l.ASSASSINATION,onClick)
 
 Serializer:Register("Assassination", serialize, unserialize)

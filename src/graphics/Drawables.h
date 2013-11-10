@@ -51,13 +51,14 @@ private:
 class Disk : public Drawable {
 public:
 	Disk(Graphics::Renderer *r, const Color &c, float radius);
+	Disk(RefCountedPtr<Material> material, const int numEdges=72, const float radius=1.0f);
 	virtual ~Disk() { }
 	virtual void Draw(Graphics::Renderer *r);
 
 	void SetColor(const Color&);
 
 private:
-	ScopedPtr<Graphics::VertexArray> m_vertices;
+	std::unique_ptr<Graphics::VertexArray> m_vertices;
 	RefCountedPtr<Material> m_material;
 };
 
@@ -88,7 +89,7 @@ public:
 	RefCountedPtr<Material> GetMaterial() const { return m_surface->GetMaterial(); }
 
 private:
-	ScopedPtr<Surface> m_surface;
+	std::unique_ptr<Surface> m_surface;
 	//add a new vertex, return the index
 	int AddVertex(const vector3f &v, const vector3f &n);
 	//add three vertex indices to form a triangle

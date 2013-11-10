@@ -6,18 +6,19 @@
 #include "utils.h"
 #include <SDL_image.h>
 #include <SDL_rwops.h>
-
 #include <algorithm>
+
+// XXX SDL2 can all this be replaced with SDL_GL_BindTexture?
 
 namespace Graphics {
 
 TextureBuilder::TextureBuilder(const SDLSurfacePtr &surface, TextureSampleMode sampleMode, bool generateMipmaps, bool potExtend, bool forceRGBA, bool compressTextures) :
-    m_surface(surface), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_prepared(false)
+    m_surface(surface), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_prepared(false), m_textureType(TEXTURE_2D)
 {
 }
 
-TextureBuilder::TextureBuilder(const std::string &filename, TextureSampleMode sampleMode, bool generateMipmaps, bool potExtend, bool forceRGBA, bool compressTextures) :
-    m_filename(filename), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_prepared(false)
+TextureBuilder::TextureBuilder(const std::string &filename, TextureSampleMode sampleMode, bool generateMipmaps, bool potExtend, bool forceRGBA, bool compressTextures, TextureType textureType) :
+    m_filename(filename), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_prepared(false), m_textureType(textureType)
 {
 }
 
@@ -31,23 +32,27 @@ TextureBuilder::~TextureBuilder()
 #error "SDL surface pixel formats are endian-specific"
 #endif
 static SDL_PixelFormat pixelFormatRGBA = {
+	0,                                  // format#
 	0,                                  // palette
 	32,                                 // bits per pixel
 	4,                                  // bytes per pixel
+	{ 0, 0 },                           // padding
+	0xff, 0xff00, 0xff0000, 0xff000000, // RGBA mask
 	0, 0, 0, 0,                         // RGBA loss
 	24, 16, 8, 0,                       // RGBA shift
-	0xff, 0xff00, 0xff0000, 0xff000000, // RGBA mask
 	0,                                  // colour key
 	0                                   // alpha
 };
 
 static SDL_PixelFormat pixelFormatRGB = {
+	0,                                  // format#
 	0,                                  // palette
 	24,                                 // bits per pixel
 	3,                                  // bytes per pixel
+	{ 0, 0 },                           // padding
+	0xff, 0xff00, 0xff0000, 0,          // RGBA mask
 	0, 0, 0, 0,                         // RGBA loss
 	16, 8, 0, 0,                        // RGBA shift
-	0xff, 0xff00, 0xff0000, 0,          // RGBA mask
 	0,                                  // colour key
 	0                                   // alpha
 };
@@ -94,7 +99,7 @@ void TextureBuilder::PrepareSurface()
 	}
 
 	TextureFormat targetTextureFormat;
-	unsigned int virtualWidth, actualWidth, virtualHeight, actualHeight, numberOfMipMaps = 0;
+	unsigned int virtualWidth, actualWidth, virtualHeight, actualHeight, numberOfMipMaps = 0, numberOfImages = 1;
 	if( m_surface ) {
 		SDL_PixelFormat *targetPixelFormat;
 		bool needConvert = !GetTargetFormat(m_surface->format, &targetTextureFormat, &targetPixelFormat, m_forceRGBA);
@@ -114,9 +119,7 @@ void TextureBuilder::PrepareSurface()
 			if (actualWidth != virtualWidth || actualHeight != virtualHeight) {
 				SDL_Surface *s = SDL_CreateRGBSurface(SDL_SWSURFACE, actualWidth, actualHeight, targetPixelFormat->BitsPerPixel,
 					targetPixelFormat->Rmask, targetPixelFormat->Gmask, targetPixelFormat->Bmask, targetPixelFormat->Amask);
-
-				SDL_SetAlpha(m_surface.Get(), 0, 0);
-				SDL_SetAlpha(s, 0, 0);
+				SDL_SetSurfaceBlendMode(m_surface.Get(), SDL_BLENDMODE_NONE);
 				SDL_BlitSurface(m_surface.Get(), 0, s, 0);
 
 				m_surface = SDLSurfacePtr::WrapNew(s);
@@ -143,13 +146,18 @@ void TextureBuilder::PrepareSurface()
 		virtualWidth = actualWidth = m_dds.imgdata_.width;
 		virtualHeight = actualHeight = m_dds.imgdata_.height;
 		numberOfMipMaps = m_dds.imgdata_.numMipMaps;
+		numberOfImages = m_dds.imgdata_.numImages;
+		if(m_textureType == TEXTURE_CUBE_MAP) {
+			// Cube map must be fully defined (6 images) to be used correctly
+			assert(numberOfImages == 6);
+		}
 	}
 
 	m_descriptor = TextureDescriptor(
 		targetTextureFormat,
 		vector2f(actualWidth,actualHeight),
 		vector2f(float(virtualWidth)/float(actualWidth),float(virtualHeight)/float(actualHeight)),
-		m_sampleMode, m_generateMipmaps, m_compressTextures, numberOfMipMaps);
+		m_sampleMode, m_generateMipmaps, m_compressTextures, numberOfMipMaps, m_textureType);
 
 	m_prepared = true;
 }
@@ -159,6 +167,7 @@ static size_t LoadDDSFromFile(const std::string &filename, PicoDDS::DDSImage& dd
 	RefCountedPtr<FileSystem::FileData> filedata = FileSystem::gameDataFiles.ReadFile(filename);
 	if (!filedata) {
 		fprintf(stderr, "LoadDDSFromFile: %s: could not read file\n", filename.c_str());
+		assert(0);
 		return 0;
 	}
 
@@ -170,6 +179,11 @@ static size_t LoadDDSFromFile(const std::string &filename, PicoDDS::DDSImage& dd
 void TextureBuilder::LoadSurface()
 {
 	assert(!m_surface);
+	// SDL surfaces only support 2D textures for now
+	assert(m_textureType == TEXTURE_2D);
+
+	// SAL: a multi-file cube map could be supported here by automatically loading 6 image files:
+	//      filename_px.ext, filename_nx.ext, ...etc
 
 	SDLSurfacePtr s = LoadSurfaceFromFile(m_filename);
 	if (! s) { s = LoadSurfaceFromFile("textures/unknown.png"); }
@@ -192,11 +206,29 @@ void TextureBuilder::LoadDDS()
 void TextureBuilder::UpdateTexture(Texture *texture)
 {
 	if( m_surface ) {
+		assert(texture->GetDescriptor().type == TEXTURE_2D);
 		texture->Update(m_surface->pixels, vector2f(m_surface->w,m_surface->h), m_descriptor.format, 0);
 	} else {
 		assert(m_dds.headerdone_);
 		assert(m_descriptor.format == TEXTURE_DXT1 || m_descriptor.format == TEXTURE_DXT5);
-		texture->Update(m_dds.imgdata_.imgData, vector2f(m_dds.imgdata_.width,m_dds.imgdata_.height), m_descriptor.format, m_dds.imgdata_.numMipMaps);
+		if(texture->GetDescriptor().type == TEXTURE_2D && m_textureType == TEXTURE_2D) {
+			texture->Update(m_dds.imgdata_.imgData, vector2f(m_dds.imgdata_.width,m_dds.imgdata_.height), m_descriptor.format, m_dds.imgdata_.numMipMaps);
+		} else if(texture->GetDescriptor().type == TEXTURE_CUBE_MAP && m_textureType == TEXTURE_CUBE_MAP) {
+			TextureCubeData tcd;
+			// Size in bytes of each cube map face
+			size_t face_size = m_dds.imgdata_.size / m_dds.imgdata_.numImages;
+			// Sequence of cube map face storage: +X -X +Y -Y +Z -Z
+			tcd.posX = static_cast<void*>(m_dds.imgdata_.imgData + (0 * face_size));
+			tcd.negX = static_cast<void*>(m_dds.imgdata_.imgData + (1 * face_size));
+			tcd.posY = static_cast<void*>(m_dds.imgdata_.imgData + (2 * face_size));
+			tcd.negY = static_cast<void*>(m_dds.imgdata_.imgData + (3 * face_size));
+			tcd.posZ = static_cast<void*>(m_dds.imgdata_.imgData + (4 * face_size));
+			tcd.negZ = static_cast<void*>(m_dds.imgdata_.imgData + (5 * face_size));
+			texture->Update(tcd, vector2f(m_dds.imgdata_.width, m_dds.imgdata_.height), m_descriptor.format, m_dds.imgdata_.numMipMaps);
+		} else {
+			// Given texture and current texture don't have the same type!
+			assert(0);
+		}
 	}
 }
 

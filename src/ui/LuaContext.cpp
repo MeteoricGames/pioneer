@@ -10,24 +10,32 @@ namespace UI {
 class LuaContext {
 public:
 
-	static inline UI::Widget *_get_implicit_widget(lua_State *l)
+	static inline UI::Widget *_get_implicit_widget(lua_State *l, int idx)
 	{
-		// context is always the first arg, don't reuse it
-		const int top = lua_gettop(l);
-		if (top == 1) return 0;
-		return UI::Lua::GetWidget(l, top);
+		UI::Context *c = LuaObject<UI::Context>::GetFromLua(1);
+		assert(c);
+
+		if (lua_isnoneornil(l, idx)) return 0;
+		return UI::Lua::GetWidget(c, l, idx);
 	}
 
-	static inline void _implicit_set_inner_widget(lua_State *l, UI::Single *s)
+	static inline void _implicit_set_inner_widget(lua_State *l, UI::Layer *layer, int idx)
 	{
-		UI::Widget *w = _get_implicit_widget(l);
+		UI::Widget *w = _get_implicit_widget(l, idx);
+		if (!w) return;
+		layer->SetInnerWidget(w);
+	}
+
+	static inline void _implicit_set_inner_widget(lua_State *l, UI::Single *s, int idx)
+	{
+		UI::Widget *w = _get_implicit_widget(l, idx);
 		if (!w) return;
 		s->SetInnerWidget(w);
 	}
 
-	static inline void _implicit_set_inner_widget(lua_State *l, UI::Scroller *s)
+	static inline void _implicit_set_inner_widget(lua_State *l, UI::Scroller *s, int idx)
 	{
-		UI::Widget *w = _get_implicit_widget(l);
+		UI::Widget *w = _get_implicit_widget(l, idx);
 		if (!w) return;
 		s->SetInnerWidget(w);
 	}
@@ -90,10 +98,16 @@ public:
 		return 1;
 	}
 
+	static int l_table(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		LuaObject<UI::Table>::PushToLua(c->Table());
+		return 1;
+	}
+
 	static int l_background(lua_State *l) {
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		UI::Background *b = c->Background();
-		_implicit_set_inner_widget(l, b);
+		_implicit_set_inner_widget(l, b, 2);
 		LuaObject<UI::Background>::PushToLua(b);
 		return 1;
 	}
@@ -104,10 +118,13 @@ public:
 		float g = luaL_checknumber(l, 3);
 		float b = luaL_checknumber(l, 4);
 		float a = 1.0f;
-		if (lua_gettop(l) > 4)
+		int implicit = 5;
+		if (lua_gettop(l) > 4) {
 			a = luaL_checknumber(l, 5);
+			implicit = 6;
+		}
 		UI::ColorBackground *cb = c->ColorBackground(Color(r,g,b,a));
-		_implicit_set_inner_widget(l, cb);
+		_implicit_set_inner_widget(l, cb, implicit);
 		LuaObject<UI::ColorBackground>::PushToLua(cb);
 		return 1;
 	}
@@ -118,7 +135,7 @@ public:
 		Color endColor = Color::FromLuaTable(l, 3);
 		UI::Gradient::Direction direction = static_cast<UI::Gradient::Direction>(LuaConstants::GetConstantFromArg(l, "UIGradientDirection", 4));
 		UI::Gradient *g = c->Gradient(beginColor, endColor, direction);
-		_implicit_set_inner_widget(l, g);
+		_implicit_set_inner_widget(l, g, 4);
 		LuaObject<UI::Gradient>::PushToLua(g);
 		return 1;
 	}
@@ -129,7 +146,7 @@ public:
 		if (lua_gettop(l) > 1)
 			direction = static_cast<UI::Expand::Direction>(LuaConstants::GetConstantFromArg(l, "UIExpandDirection", 2));
 		UI::Expand *e = c->Expand(direction);
-		_implicit_set_inner_widget(l, e);
+		_implicit_set_inner_widget(l, e, 3);
 		LuaObject<UI::Expand>::PushToLua(e);
 		return 1;
 	}
@@ -141,7 +158,7 @@ public:
 		if (lua_gettop(l) > 2)
 			dir = static_cast<UI::Margin::Direction>(LuaConstants::GetConstantFromArg(l, "UIMarginDirection", 3));
 		UI::Margin *m = c->Margin(margin, dir);
-		_implicit_set_inner_widget(l, m);
+		_implicit_set_inner_widget(l, m, 4);
 		LuaObject<UI::Margin>::PushToLua(m);
 		return 1;
 	}
@@ -150,7 +167,7 @@ public:
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		UI::Align::Direction dir = static_cast<UI::Align::Direction>(LuaConstants::GetConstantFromArg(l, "UIAlignDirection", 2));
 		UI::Align *a = c->Align(dir);
-		_implicit_set_inner_widget(l, a);
+		_implicit_set_inner_widget(l, a, 3);
 		LuaObject<UI::Align>::PushToLua(a);
 		return 1;
 	}
@@ -158,7 +175,7 @@ public:
 	static int l_scroller(lua_State *l) {
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		UI::Scroller *s = c->Scroller();
-		_implicit_set_inner_widget(l, s);
+		_implicit_set_inner_widget(l, s, 2);
 		LuaObject<UI::Scroller>::PushToLua(s);
 		return 1;
 	}
@@ -202,7 +219,7 @@ public:
 	static int l_button(lua_State *l) {
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		UI::Button *b = c->Button();
-		_implicit_set_inner_widget(l, b);
+		_implicit_set_inner_widget(l, b, 2);
 		LuaObject<UI::Button>::PushToLua(b);
 		return 1;
 	}
@@ -263,6 +280,26 @@ public:
 		c->GetTemplateStore().PushCopyToStack();
 		return 1;
 	}
+
+	static int l_new_layer(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		Layer *layer = c->NewLayer();
+		_implicit_set_inner_widget(l, layer, 2);
+		LuaObject<UI::Layer>::PushToLua(layer);
+		return 1;
+	}
+
+	static int l_drop_layer(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		c->DropLayer();
+		return 1;
+	}
+
+	static int l_attr_layer(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		LuaObject<UI::Layer>::PushToLua(c->GetTopLayer());
+		return 1;
+	}
 };
 
 }
@@ -273,12 +310,13 @@ template <> const char *LuaObject<UI::Context>::s_type = "UI.Context";
 
 template <> void LuaObject<UI::Context>::RegisterClass()
 {
-	static const char *l_parent = "UI.Single";
+	static const char *l_parent = "UI.Container";
 
 	static const luaL_Reg l_methods[] = {
 		{ "HBox",            LuaContext::l_hbox            },
 		{ "VBox",            LuaContext::l_vbox            },
 		{ "Grid",            LuaContext::l_grid            },
+		{ "Table",           LuaContext::l_table           },
 		{ "Background",      LuaContext::l_background      },
 		{ "ColorBackground", LuaContext::l_colorbackground },
 		{ "Gradient",        LuaContext::l_gradient        },
@@ -300,11 +338,15 @@ template <> void LuaObject<UI::Context>::RegisterClass()
 		{ "DropDown",        LuaContext::l_dropdown        },
 		{ "Gauge",           LuaContext::l_gauge           },
 		{ "TextEntry",       LuaContext::l_textentry       },
+
+		{ "NewLayer",        LuaContext::l_new_layer       },
+		{ "DropLayer",       LuaContext::l_drop_layer      },
 		{ 0, 0 }
 	};
 
 	static const luaL_Reg l_attrs[] = {
 		{ "templates", LuaContext::l_attr_templates },
+		{ "layer",     LuaContext::l_attr_layer     },
 		{ 0, 0 }
 	};
 

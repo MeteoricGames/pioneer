@@ -11,6 +11,7 @@
 #include "NavLights.h"
 #include "graphics/Renderer.h"
 #include "graphics/Texture.h"
+#include "graphics/Drawables.h"
 #include "scenegraph/SceneGraph.h"
 #include "ui/Context.h"
 
@@ -29,11 +30,12 @@ private:
 	bool OnToggleGrid(UI::Widget*);
 	bool OnToggleGuns(UI::CheckBox*);
 	void AddLog(const std::string &line);
-	void ChangeCameraPreset(SDLKey, SDLMod);
+	void ChangeCameraPreset(SDL_Keycode, SDL_Keymod);
 	void ClearLog();
 	void ClearModel();
 	void CreateTestResources();
 	void DrawBackground();
+	void DrawTags();
 	void DrawDockingLocators();
 	void DrawCollisionMesh();
 	void DrawGrid(const matrix4x4f &trans, float radius);
@@ -58,10 +60,12 @@ private:
 	void UpdateCamera();
 	void UpdateLights();
 	void UpdatePatternList();
+	void AddAxisIndicator(const SceneGraph::Model::TVecMT &mts, std::vector<Graphics::Drawables::Line3D> &lines);
 
 	//toggleable options
 	struct Options {
 		bool attachGuns;
+		bool showTags;
 		bool showDockingLocators;
 		bool showCollMesh;
 		bool showGrid;
@@ -84,16 +88,16 @@ private:
 	SceneGraph::Animation *m_currentAnimation;
 	SceneGraph::Model *m_model;
 	Options m_options;
-	ScopedPtr<NavLights> m_navLights;
-	ScopedPtr<SceneGraph::Model> m_gunModel;
-	ScopedPtr<SceneGraph::Model> m_scaleModel;
+	std::unique_ptr<NavLights> m_navLights;
+	std::unique_ptr<SceneGraph::Model> m_gunModel;
+	std::unique_ptr<SceneGraph::Model> m_scaleModel;
 	std::string m_modelName;
 	RefCountedPtr<UI::Context> m_ui;
 
 	//undecided on this input stuff
 	//updating the states of all inputs during PollEvents
-	bool m_keyStates[SDLK_LAST];
-	bool m_mouseButton[SDL_BUTTON_WHEELDOWN + 1]; //buttons + scroll start at 1
+	std::map<SDL_Keycode,bool> m_keyStates;
+	bool m_mouseButton[SDL_BUTTON_RIGHT + 1]; //buttons start at 1
 	int m_mouseMotion[2];
 	bool m_mouseWheelUp, m_mouseWheelDown;
 
@@ -111,6 +115,9 @@ private:
 	UI::Slider *thrustSliders[2*3]; //thruster sliders 2*xyz (linear & angular)
 
 	sigc::signal<void> onModelChanged;
+
+	std::vector<Graphics::Drawables::Line3D> m_dockingPoints;
+	std::vector<Graphics::Drawables::Line3D> m_tagPoints;
 };
 
 #endif
