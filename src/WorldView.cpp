@@ -1175,47 +1175,60 @@ void WorldView::UpdateCommsOptions()
 		}
 	}
 
+	//To player
+	const int	NO_COMM_OR_REJECT	=0;
+	const int	BEING_HALED			=1;  //Being haled (if accept set OPEN_COMM, else set NO_COMM_OR_REJECT)
+	const int	OPEN_COMM			=2;  //Accepted commchannel, haler asks and sets ACCEPTED_COMM
+	const int	ACCEPTED_COMM		=3;  //Varous responses
 
-	//player
+	//From player respionse
+	const int	AGREED				=20;
+	const int	HALF_CARGO			=21;
+	const int	ALL_CARGO			=22;
+	const int	NO_DESTROY			=23;
+	const int	NOTIFY_POLICE		=24;
 
-	//0 nothing or reject
-	//1 Being haled (if accept set 2, else set 0)
-	//2 Accepted commchannel, haler asks and sets 3
-	//3 Varous responses
-
+	//From player broadcast
+	const int	BROADCAST_ATTACK	=100;
+	const int	BROADCAST_PROTECT	=101;
+	const int	BROADCAST_SURRENDER	=102;
+	const int	BROADCAST_JETTISON	=103;
+	const int	BROADCAST_TENSECONDS=104;
+	
 	if (Pi::player->GetHaleState()==1)
 	{
 		m_commsOptions->Add(new Gui::Label("#fff"+std::string("Response")), 16, float(ypos));
 		ypos += 32;
 		button = AddCommsOption(stringf("Open comm channel"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 2));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, OPEN_COMM));
 		ypos += 32;
 		button = AddCommsOption(stringf("Reject!"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 0));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, NO_COMM_OR_REJECT));
 		ypos += 32;
 	}
 
-	if (Pi::player->GetHaleState()==3)
+	if (Pi::player->GetHaleState()==ACCEPTED_COMM)
 	{
 		m_commsOptions->Add(new Gui::Label("#fff"+std::string("Response")), 16, float(ypos));
 		ypos += 32;
 		button = AddCommsOption(stringf("Agreed"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 4));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, AGREED));
 		ypos += 32;
 
 		button = AddCommsOption(stringf("Let me go and you can have half my cargo"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 5));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, HALF_CARGO));
 		ypos += 32;
 		button = AddCommsOption(stringf("Let me go and you can have all my cargo"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 6));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, ALL_CARGO));
 		ypos += 32;
 		button = AddCommsOption(stringf("No! Prepare to be destroyed!"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 8));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, NO_DESTROY));
 		ypos += 32;
 		button = AddCommsOption(stringf("No! I will notify the authorites about this!"), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, 9));
+		button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), Pi::player, NOTIFY_POLICE));
 		ypos += 32;
 	}
+
 
 	if (comtarget && hasAutopilot) {
 		m_commsOptions->Add(new Gui::Label("#f00"+comtarget->GetLabel()), 16, float(ypos));
@@ -1238,23 +1251,23 @@ void WorldView::UpdateCommsOptions()
 			if (s->GetHaleState()>=1) {
 
 				button = AddCommsOption(stringf("Brodcast to %target: Help I'm being attacked", formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, 3));
+				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, BROADCAST_ATTACK));
 				ypos += 32;
 
 				button = AddCommsOption(stringf("Brodcast to %target: Could you protect me?, I will pay you well!", formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, 4));
+				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, BROADCAST_PROTECT));
 				ypos += 32;
 
 				button = AddCommsOption(stringf("Brodcast to %target: Surrender or die!", formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, 5));
+				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, BROADCAST_SURRENDER));
 				ypos += 32;
 
 				button = AddCommsOption(stringf("Brodcast to %target: Jettison your cargo or face certain death!", formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, 6));
+				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, BROADCAST_JETTISON));
 				ypos += 32;
 
 				button = AddCommsOption(stringf("Brodcast to %target: You got 10 seconds to jump or you'll be dead!", formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, 7));
+				button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, BROADCAST_TENSECONDS));
 				ypos += 32;
 			}
 		}
