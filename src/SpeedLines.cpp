@@ -42,19 +42,23 @@ void SpeedLines::Update(float time)
 
 	//slow lines down at higher speeds
 	float mult;
-	if (absVel > 100000.f)
+	float maxl;
+	if (absVel > 500000.f)
 		mult = 0.001f;
-	else if (absVel > 10000.f)
+	else if (absVel > 50000.f)
 		mult = 0.01f;
 	else if (absVel > 5000.f)
 		mult = 0.1f;
 	else
 		mult = 1.f;
 
+	//Line lenght based on speed.
+	maxl = Clamp(absVel/5000.0,10.0,100.0);
+
 	//rate of change (incl. time acceleration)
 	float d = absVel * time * mult;
 
-	m_lineLength = Clamp(absVel * 0.1f, 2.f, 100.f);
+	m_lineLength = Clamp(absVel * 0.1f, 2.f, maxl);
 	m_dir = vel.Normalized();
 
 	vel = vel * time * mult;
