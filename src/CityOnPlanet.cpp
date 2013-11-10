@@ -280,6 +280,7 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 		}
 	}
 
+
 	const Aabb &aabb = station->GetAabb();
 	matrix4x4d m = station->GetOrient();
 
@@ -298,7 +299,11 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 	// always have random shipyard buildings around the space station
 	cityflavour[0].buildingListIdx = 0;//2;
 	cityflavour[0].center = p;
-	cityflavour[0].size = 500;
+	if (planet->GetSystemBody()->HasAtmosphere())
+		cityflavour[0].size = Clamp(planet->GetSystemBody()->GetRadius()/1000.0,100.0,5000.0);
+	else
+		cityflavour[0].size = Clamp(planet->GetSystemBody()->GetRadius()/100000.0,10.0,50.0);
+
 
 	for (unsigned int i = 1; i < CITYFLAVOURS; i++) {
 		cityflavour[i].buildingListIdx =
