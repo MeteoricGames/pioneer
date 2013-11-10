@@ -1189,6 +1189,7 @@ void WorldView::UpdateCommsOptions()
 	const int	NOTIFY_POLICE		=24;
 
 	//From player broadcast
+	const int   HALE_A_SHIP			=200;
 	const int	BROADCAST_ATTACK	=100;
 	const int	BROADCAST_PROTECT	=101;
 	const int	BROADCAST_SURRENDER	=102;
@@ -1240,7 +1241,7 @@ void WorldView::UpdateCommsOptions()
 		if (comtarget->IsType(Object::SHIP)) {
 			Ship *s = static_cast<Ship*>(comtarget);
 			button = AddCommsOption(stringf("Comm: Channel request on all frequencies to %target", formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-			button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, 1));
+			button->onClick.connect(sigc::bind(sigc::ptr_fun(hale_ship), s, HALE_A_SHIP));
 			ypos += 32;
 		}
 

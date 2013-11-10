@@ -13,6 +13,7 @@ local utils = import("utils")
 local EquipDef = import("EquipDef")
 
 local aship
+local timelimit=0
 local playerhaled=false
 
 local 	NO_COMM_OR_REJECT	=0;
@@ -26,6 +27,7 @@ local 	ALL_CARGO		=22;
 local 	NO_DESTROY		=23;
 local 	NOTIFY_POLICE		=24;
 
+local 	HALE_A_SHIP		=200;
 local 	BROADCAST_ATTACK	=100;
 local 	BROADCAST_PROTECT	=101;
 local 	BROADCAST_SURRENDER	=102;
@@ -36,52 +38,58 @@ local onFrameChanged = function (ship)
 end
 
 local onAICompleted = function (ship, ai_error)
-	if aship~=nil and aship:exits() and ship==aship then
-		aship:AIHoldPos()
+	if ship~=nil and ship:exists() and ship==aship then
+	--	aship:AIHoldPos()
 	end
 end
 
 local CommLogic = function (ship)
+
 	if Game.player:GetHale()==OPEN_COMM and ship:exists() then 
-		Comms.ImportantMessage(Game.player.label..', Leave your ship now!!', ship.label)
-		Game.player:SetHale(ACCEPTED_COMM)
+		Comms.ImportantMessage(Game.player.label..', Surrender your cargo, now, Respond!', ship.label)
 		Game.player:SetCombatTarget(ship)
+		Game.player:SetHale(ACCEPTED_COMM)
+		ship:AIFlyTo(Game.player)
+		playerhaled=true
 	end
 
-	if Game.player:GetHale()==NO_DESTROY or Game.player:GetHale()==NOTIFY_POLICE and aship:exists() then 
-		aship:CancelAI()
-		Game.player:SetHale(NO_COMM_OR_REJECT)
+	if Game.time>timelimit and timelimit>0 then
+		Game.player:SetHale(NO_DESTROY)
+		timelimit=0
+	end
+
+	if Game.player:GetHale()==NO_DESTROY or Game.player:GetHale()==NOTIFY_POLICE and ship:exists() then 
 		Game.player:SetCombatTarget(ship)
 		playerhaled=false
-		Comms.ImportantMessage(Game.player.label..', Ok die then!', aship.label)
-		aship:AIKill(Game.player)
+		Comms.ImportantMessage(Game.player.label..', You will die!', ship.label)
+		ship:AIKill(Game.player)
 	end
 
-	if Game.player:GetHale()==AGREED and aship:exists() then 
-		aship:CancelAI()
-		Game.player:SetHale(NO_COMM_OR_REJECT)
+	if Game.player:GetHale()==AGREED and ship:exists() then 
+		if timelimit==0 then timelimit=Game.time+60 end
+		Game.player:SetHale(AGREED)
 		Game.player:SetCombatTarget(ship)
 		playerhaled=true
-		Comms.ImportantMessage(Game.player.label..', Come to a complete stop now!', aship.label)
-		aship:AIFlyToClose(Game.player,200)
+		Comms.ImportantMessage(Game.player.label..', Come to a complete stop now!', ship.label)
+		ship:AIFlyToClose(Game.player,100)
 	end
 
-	if Game.player:GetHale()==HALF_CARGO and aship:exists() then 
-		aship:CancelAI()
-		Game.player:SetHale(NO_COMM_OR_REJECT)
+	if Game.player:GetHale()==HALF_CARGO and ship:exists() then 
+		if timelimit==0 then timelimit=Game.time+60 end
+		Game.player:SetHale(HALF_CARGO)
 		Game.player:SetCombatTarget(ship)
 		playerhaled=true
-		Comms.ImportantMessage(Game.player.label..', Come to a complete stop now and jettison half your cargo!, You have 60 seconds!', aship.label)
-		aship:AIFlyToClose(Game.player,200)
+		Comms.ImportantMessage(Game.player.label..', Come to a complete stop and jettison half your cargo!, You have '..math.floor(timelimit-Game.time)..' seconds!', ship.label)
+		ship:AIFlyToClose(Game.player,100)
 	end
 
-	if Game.player:GetHale()==ALL_CARGO and aship:exists() then 
-		aship:CancelAI()
-		Game.player:SetHale(NO_COMM_OR_REJECT)
+	if Game.player:GetHale()==ALL_CARGO and ship:exists() then 
+		if timelimit==0 then timelimit=Game.time+60 end
+		Game.player:SetHale(ALL_CARGO)
 		Game.player:SetCombatTarget(ship)
 		playerhaled=true
-		Comms.ImportantMessage(Game.player.label..', Come to a complete stop now and jettison all your cargo!, You have 60 seconds!', aship.label)
-		aship:AIFlyToClose(Game.player,200)
+		Comms.ImportantMessage(Game.player.label..', Come to a complete now and jettison all your cargo!, You have '..math.floor(timelimit-Game.time)..' seconds!', ship.label)
+		ship:AIFlyToClose(Game.player,100)
 	end
 end
 
@@ -117,7 +125,6 @@ Timer:CallEvery(10, function ()
 
 		if not Game.player:GetCombatTarget() then Game.player:SetCombatTarget(aship) end
 		Game.player:SetHale(BEING_HALED)
-		playerhaled=true
 	end
 end)
 end
