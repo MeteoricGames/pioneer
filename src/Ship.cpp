@@ -415,18 +415,29 @@ void Ship::SetThrusterState(int axis, double level)
 	m_thrusters[axis] = Clamp(level, -1.0, 1.0);
 }
 
-// Effectively applies speed limit set in maxManeuverVelocity (max_maneuver_velocity in ship info)
+// Effectively applies speed limit set in maxManeuverSpeed (max_maneuver_speed in ship info)
 //   Issues:
 //     1. This might apply to any flight mode not only MANEUVER
-//     2. Somehow thrusting forward and upward bypasses this limiter
 void Ship::ApplyThrusterLimits()
 {
-	vector3d current_velocity = GetVelocity();
-	double current_magnitude = current_velocity.Length();
-	if(current_magnitude >= GetShipType()->maxManeuverVelocity) {
-		vector3d current_normal = current_velocity / current_magnitude;
-		if(current_normal.Dot(m_thrusters) > 0.0) {
-			m_thrusters = (current_normal - m_thrusters).Normalized();
+	float max_maneuver_speed = GetShipType()->maxManeuverSpeed;
+	// If no max maneuver speed is set it will be considred unlimited
+	if(max_maneuver_speed > 0.0) {
+		vector3d current_velocity = GetVelocity() * GetOrient();
+		double current_magnitude = current_velocity.Length();
+		if(current_magnitude >= max_maneuver_speed) {
+			vector3d current_normal = current_velocity / current_magnitude;
+			vector3d thrusters_normal = m_thrusters.Normalized();
+			double dot = current_normal.Dot(thrusters_normal);
+			if(dot > 0.0) {
+				if(dot <= 0.999999) {
+					// Apply thrusters only if they deviate from current velocity vector (otherwise may cause jitter)
+					m_thrusters = (thrusters_normal - current_normal).Normalized();
+				} else {
+					// Thrusters and current velocity have the same direction, no need to thrust
+					m_thrusters = vector3d(0.0, 0.0, 0.0);
+				}
+			}
 		}
 	}
 }
@@ -1040,6 +1051,8 @@ void Ship::StaticUpdate(const float timeStep)
 		Explode();
 
 	UpdateAlertState();
+
+	ApplyThrusterLimits();
 
 	/* FUEL SCOOPING!!!!!!!!! */
 	if ((m_flightState == FLYING) && (m_equipment.Get(Equip::SLOT_FUELSCOOP) != Equip::NONE)) {

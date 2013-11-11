@@ -126,7 +126,7 @@ int _define_ship(lua_State *L, ShipType::Tag tag, std::vector<ShipType::Id> *lis
 	}
 
 	// Paragon Flight Mode
-	s.maxManeuverVelocity = t.Get("max_maneuver_velocity", 25000.0f);
+	s.maxManeuverSpeed = t.Get("max_maneuver_speed", -1.0f);
 
 	s.baseprice = t.Get("price", 0);
 	s.baseprice *= 100; // in hundredths of credits

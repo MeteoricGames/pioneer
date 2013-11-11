@@ -273,8 +273,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		}
 
 		if (m_mouseActive) m_ship->AIFaceDirection(m_mouseDir);
-		
-		m_ship->ApplyThrusterLimits();
+
 	}
 }
 

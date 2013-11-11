@@ -64,7 +64,7 @@ struct ShipType {
 	vector3d cameraOffset;
 	int minCrew, maxCrew; // XXX really only for Lua, but needs to be declared in the ship def
 	// Paragon Flight System
-	float maxManeuverVelocity;
+	float maxManeuverSpeed;
 	///////
 
 	// percentage (ie, 0--100) of tank used per second at full thrust
