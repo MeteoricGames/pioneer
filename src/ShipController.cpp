@@ -31,7 +31,7 @@ PlayerShipController::PlayerShipController() :
 	m_mouseX(0.0),
 	m_mouseY(0.0),
 	m_setSpeed(0.0),
-	m_flightControlState(CONTROL_MANUAL),
+	m_flightControlState(CONTROL_FIXSPEED),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
 	m_mouseDir(0.0)
 {
@@ -123,14 +123,13 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 //			AIMatchVel(vector3d(0.0));			// just in case autopilot doesn't...
 						// actually this breaks last timestep slightly in non-relative target cases
 			m_ship->AIMatchAngVelObjSpace(vector3d(0.0));
-			if (m_ship->GetFrame()->IsRotFrame()) SetFlightControlState(CONTROL_FIXSPEED);
-			else SetFlightControlState(CONTROL_MANUAL);
+			SetFlightControlState(CONTROL_FIXSPEED);
 			m_setSpeed = 0.0;
 			break;
 		default: assert(0); break;
 		}
 	}
-	else SetFlightControlState(CONTROL_MANUAL);
+	else SetFlightControlState(CONTROL_FIXSPEED);
 
 	//call autopilot AI, if active (also applies to set speed and heading lock modes)
 	OS::EnableFPE();
