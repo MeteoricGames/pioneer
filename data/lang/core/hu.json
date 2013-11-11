@@ -1571,6 +1571,30 @@
         "message": "Kézi irányítás",
         "description": ""
     },
+	"MANEUVER_CONTROL" : {
+	  "description" : "",
+	  "message" : "Maneuver control (hu)"
+	},
+	"MANEUVER_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Maneuver control mode (hu)"
+	},
+	"TRANSIT_CONTROL" : {
+	  "description" : "",
+	  "message" : "Transit control (hu)"
+	},
+	"TRANSIT_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Transit control mode (hu)"
+	},
+	"JUMP_CONTROL" : {
+	  "description" : "",
+	  "message" : "Jump control (hu)"
+	},
+	"JUMP_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Jump control mode (hu)"
+	},
     "ECONOMY_TYPE": {
         "message": "Gazdaság:",
         "description": ""

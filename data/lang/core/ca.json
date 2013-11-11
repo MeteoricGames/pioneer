@@ -1571,6 +1571,30 @@
         "message": "Control Manual",
         "description": ""
     },
+	"MANEUVER_CONTROL" : {
+	  "description" : "",
+	  "message" : "Maneuver control (ca)"
+	},
+	"MANEUVER_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Maneuver control mode (ca)"
+	},
+	"TRANSIT_CONTROL" : {
+	  "description" : "",
+	  "message" : "Transit control (ca)"
+	},
+	"TRANSIT_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Transit control mode (ca)"
+	},
+	"JUMP_CONTROL" : {
+	  "description" : "",
+	  "message" : "Jump control (ca)"
+	},
+	"JUMP_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Jump control mode (ca)"
+	},
     "ECONOMY_TYPE": {
         "message": "Tipus d'economia:",
         "description": ""

@@ -1571,6 +1571,30 @@
         "message": "Contrôle manuel",
         "description": ""
     },
+	"MANEUVER_CONTROL" : {
+	  "description" : "",
+	  "message" : "Maneuver control (fr)"
+	},
+	"MANEUVER_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Maneuver control mode (fr)"
+	},
+	"TRANSIT_CONTROL" : {
+	  "description" : "",
+	  "message" : "Transit control (fr)"
+	},
+	"TRANSIT_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Transit control mode (fr)"
+	},
+	"JUMP_CONTROL" : {
+	  "description" : "",
+	  "message" : "Jump control (fr)"
+	},
+	"JUMP_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Jump control mode (fr)"
+	},
     "ECONOMY_TYPE": {
         "message": "Type d'économie :",
         "description": ""

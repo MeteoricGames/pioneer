@@ -885,11 +885,35 @@
    },
    "MANUAL_CONTROL" : {
       "description" : "",
-      "message" : "Manual control"
+	  "message" : "Manual control"
    },
    "MANUAL_CONTROL_MODE" : {
       "description" : "",
-      "message" : "Manual control mode"
+	  "message" : "Manual control mode"
+   },
+   "MANEUVER_CONTROL" : {
+      "description" : "",
+	  "message" : "Maneuver control"
+   },
+   "MANEUVER_CONTROL_MODE" : {
+      "description" : "",
+	  "message" : "Maneuver control mode"
+   },
+   "TRANSIT_CONTROL" : {
+      "description" : "",
+	  "message" : "Transit control"
+   },
+   "TRANSIT_CONTROL_MODE" : {
+      "description" : "",
+	  "message" : "Transit control mode"
+   },
+   "JUMP_CONTROL" : {
+      "description" : "",
+	  "message" : "Jump control"
+   },
+   "JUMP_CONTROL_MODE" : {
+      "description" : "",
+	  "message" : "Jump control mode"
    },
    "MASS" : {
       "description" : "",

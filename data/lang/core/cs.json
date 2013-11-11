@@ -1571,6 +1571,30 @@
         "message": "Manuální ovládání",
         "description": ""
     },
+	"MANEUVER_CONTROL" : {
+	  "description" : "",
+	  "message" : "Maneuver control (cs)"
+	},
+	"MANEUVER_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Maneuver control mode (cs)"
+	},
+	"TRANSIT_CONTROL" : {
+	  "description" : "",
+	  "message" : "Transit control (cs)"
+	},
+	"TRANSIT_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Transit control mode (cs)"
+	},
+	"JUMP_CONTROL" : {
+	  "description" : "",
+	  "message" : "Jump control (cs)"
+	},
+	"JUMP_CONTROL_MODE" : {
+	  "description" : "",
+	  "message" : "Jump control mode (cs)"
+	},
     "ECONOMY_TYPE": {
         "message": "Druh ekonomiky:",
         "description": ""
