@@ -99,6 +99,11 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 				v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
 			}
 			m_ship->AIMatchVel(v);
+
+			// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
+			if(m_ship->GetVelocity().Length() >= m_ship->GetShipType()->maxManeuverSpeed) {
+				v = vector3d(0.0, 0.0, 0.0);
+			}
 			break;
 		case CONTROL_FIXHEADING_FORWARD:
 		case CONTROL_FIXHEADING_BACKWARD:
@@ -216,6 +221,8 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 					m_setSpeed += std::max(fabs(m_setSpeed)*0.05, 1.0);
 				if (KeyBindings::decreaseSpeed.IsActive())
 					m_setSpeed -= std::max(fabs(m_setSpeed)*0.05, 1.0);
+				// Limit set speed mode to maximum maneuver speed
+				m_setSpeed = std::min<double>(m_setSpeed, m_ship->GetShipType()->maxManeuverSpeed);
 				if ( ((oldSpeed < 0.0) && (m_setSpeed >= 0.0)) ||
 						((oldSpeed > 0.0) && (m_setSpeed <= 0.0)) ) {
 					// flipped from going forward to backwards. make the speed 'stick' at zero

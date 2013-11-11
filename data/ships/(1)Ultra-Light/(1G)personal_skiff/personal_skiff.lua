@@ -29,5 +29,5 @@ define_ship {
 	effective_exhaust_velocity = 81103e3,
 	price = 40000,
         -- Paragon Flight System
-        max_maneuver_speed = 10e3,
+        max_maneuver_speed = 10100,
 }
