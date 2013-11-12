@@ -142,7 +142,7 @@ void WorldView::InitObject()
 	m_flightControlButton = new Gui::MultiStateImageButton();
 	m_flightControlButton->SetShortcut(SDLK_F5, KMOD_NONE);
 	// these states must match Player::FlightControlState (so that the enum values match)
-	m_flightControlButton->AddState(CONTROL_FIXSPEED, "icons/manual_control.png", Lang::COMPUTER_SPEED_CONTROL);
+	m_flightControlButton->AddState(CONTROL_MANEUVER, "icons/maneuver_on.png", Lang::MANEUVER_CONTROL);
 	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/manual_control.png", Lang::MANUAL_CONTROL);
 	m_flightControlButton->AddState(CONTROL_AUTOPILOT, "icons/autopilot.png", Lang::AUTOPILOT_ON);
 	m_flightControlButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeFlightState));
@@ -331,10 +331,8 @@ void WorldView::OnChangeFlightState(Gui::MultiStateImageButton *b)
 	int newState = b->GetState();
 	// skip certain states
 	switch (newState) {
-		case CONTROL_MANEUVER: 
-			newState = CONTROL_FIXSPEED; break;
 		case CONTROL_AUTOPILOT: 
-			newState = CONTROL_MANUAL; break;
+			newState = CONTROL_MANEUVER; break;
 		default: 
 			break;
 	}
@@ -476,7 +474,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 				case CONTROL_MANUAL:
 					m_flightStatus->SetText(Lang::MANUAL_CONTROL); break;
 
-				case CONTROL_FIXSPEED: {
+				case CONTROL_MANEUVER: {
 					std::string msg;
 					const double setspeed = Pi::player->GetPlayerController()->GetSetSpeed();
 					if (setspeed > 1000 || setspeed < -1000) {

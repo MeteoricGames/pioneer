@@ -31,7 +31,7 @@ PlayerShipController::PlayerShipController() :
 	m_mouseX(0.0),
 	m_mouseY(0.0),
 	m_setSpeed(0.0),
-	m_flightControlState(CONTROL_FIXSPEED),
+	m_flightControlState(CONTROL_MANEUVER),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
 	m_mouseDir(0.0)
 {
@@ -91,7 +91,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 
 	if (m_ship->GetFlightState() == Ship::FLYING) {
 		switch (m_flightControlState) {
-		case CONTROL_FIXSPEED:
+		case CONTROL_MANEUVER:
 			PollControls(timeStep, true);
 			if (IsAnyLinearThrusterKeyDown()) break;
 			v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
@@ -114,13 +114,13 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 //			AIMatchVel(vector3d(0.0));			// just in case autopilot doesn't...
 						// actually this breaks last timestep slightly in non-relative target cases
 			m_ship->AIMatchAngVelObjSpace(vector3d(0.0));
-			SetFlightControlState(CONTROL_FIXSPEED);
+			SetFlightControlState(CONTROL_MANEUVER);
 			m_setSpeed = 0.0;
 			break;
 		default: assert(0); break;
 		}
 	}
-	else SetFlightControlState(CONTROL_FIXSPEED);
+	else SetFlightControlState(CONTROL_MANEUVER);
 
 	//call autopilot AI, if active (also applies to set speed and heading lock modes)
 	OS::EnableFPE();
@@ -198,7 +198,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		}
 		else m_mouseActive = false;
 
-		if (m_flightControlState == CONTROL_FIXSPEED) {
+		if (m_flightControlState == CONTROL_MANEUVER) {
 			double oldSpeed = m_setSpeed;
 			if (stickySpeedKey) {
 				if (!(KeyBindings::increaseSpeed.IsActive() || KeyBindings::decreaseSpeed.IsActive())) {
@@ -306,7 +306,7 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 		m_flightControlState = s;
 		m_ship->AIClearInstructions();
 		//set desired velocity to current actual
-		if (m_flightControlState == CONTROL_FIXSPEED) {
+		if (m_flightControlState == CONTROL_MANEUVER) {
 			// Speed is set to the projection of the velocity onto the target.
 
 			vector3d shipVel = m_setSpeedTarget ?

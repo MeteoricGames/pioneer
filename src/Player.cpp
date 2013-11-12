@@ -178,14 +178,14 @@ void Player::OnEnterHyperspace()
 	SetCombatTarget(0);
 
 	Pi::worldView->HideTargetActions(); // hide the comms menu
-	m_controller->SetFlightControlState(CONTROL_FIXSPEED); //could set CONTROL_HYPERDRIVE
+	m_controller->SetFlightControlState(CONTROL_MANEUVER); //could set CONTROL_HYPERDRIVE
 	ClearThrusterState();
 	Pi::game->WantHyperspace();
 }
 
 void Player::OnEnterSystem()
 {
-	m_controller->SetFlightControlState(CONTROL_FIXSPEED);
+	m_controller->SetFlightControlState(CONTROL_MANEUVER);
 	//XXX don't call sectorview from here, use signals instead
 	Pi::sectorView->ResetHyperspaceTarget();
 }
