@@ -142,10 +142,8 @@ void WorldView::InitObject()
 	m_flightControlButton = new Gui::MultiStateImageButton();
 	m_flightControlButton->SetShortcut(SDLK_F5, KMOD_NONE);
 	// these states must match Player::FlightControlState (so that the enum values match)
-	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/manual_control.png", Lang::MANUAL_CONTROL);
 	m_flightControlButton->AddState(CONTROL_FIXSPEED, "icons/manual_control.png", Lang::COMPUTER_SPEED_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXHEADING_FORWARD, "icons/manual_control.png", Lang::COMPUTER_HEADING_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXHEADING_BACKWARD, "icons/manual_control.png", Lang::COMPUTER_HEADING_CONTROL);
+	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/manual_control.png", Lang::MANUAL_CONTROL);
 	m_flightControlButton->AddState(CONTROL_AUTOPILOT, "icons/autopilot.png", Lang::AUTOPILOT_ON);
 	m_flightControlButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeFlightState));
 	m_flightControlButton->SetRenderDimensions(30.0f, 22.0f);
@@ -331,21 +329,14 @@ void WorldView::OnChangeFlightState(Gui::MultiStateImageButton *b)
 {
 	Pi::BoinkNoise();
 	int newState = b->GetState();
-	if (Pi::KeyState(SDLK_LCTRL) || Pi::KeyState(SDLK_RCTRL)) {
-		// skip certain states
-		switch (newState) {
-			case CONTROL_FIXSPEED: newState = CONTROL_FIXHEADING_FORWARD; break;
-			case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
-			default: break;
-		}
-	} else {
-		// skip certain states
-		switch (newState) {
-			case CONTROL_FIXHEADING_FORWARD: // fallthrough
-			case CONTROL_FIXHEADING_BACKWARD: newState = CONTROL_MANUAL; break;
-			case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
-			default: break;
-		}
+	// skip certain states
+	switch (newState) {
+		case CONTROL_MANEUVER: 
+			newState = CONTROL_FIXSPEED; break;
+		case CONTROL_AUTOPILOT: 
+			newState = CONTROL_MANUAL; break;
+		default: 
+			break;
 	}
 	b->SetActiveState(newState);
 	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
@@ -488,7 +479,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 				case CONTROL_FIXSPEED: {
 					std::string msg;
 					const double setspeed = Pi::player->GetPlayerController()->GetSetSpeed();
-					if (setspeed > 1000) {
+					if (setspeed > 1000 || setspeed < -1000) {
 						msg = stringf(Lang::SET_SPEED_KM_S, formatarg("speed", setspeed*0.001));
 					} else {
 						msg = stringf(Lang::SET_SPEED_M_S, formatarg("speed", setspeed));
@@ -496,13 +487,6 @@ void WorldView::RefreshButtonStateAndVisibility()
 					m_flightStatus->SetText(msg);
 					break;
 				}
-
-				case CONTROL_FIXHEADING_FORWARD:
-					m_flightStatus->SetText(Lang::HEADING_LOCK_FORWARD);
-					break;
-				case CONTROL_FIXHEADING_BACKWARD:
-					m_flightStatus->SetText(Lang::HEADING_LOCK_BACKWARD);
-					break;
 
 				case CONTROL_AUTOPILOT:
 					m_flightStatus->SetText(Lang::AUTOPILOT);
