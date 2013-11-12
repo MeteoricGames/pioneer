@@ -1571,29 +1571,41 @@
         "message": "Manuální ovládání",
         "description": ""
     },
-	"MANEUVER_CONTROL" : {
+		"MANEUVER_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Maneuver control (cs)"
+	  "message" : "Maneuver mode disabled (cs)"
 	},
-	"MANEUVER_CONTROL_MODE" : {
+	"MANEUVER_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Maneuver control mode (cs)"
+	  "message" : "Maneuver mode off (cs)"
 	},
-	"TRANSIT_CONTROL" : {
+	"MANEUVER_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Transit control (cs)"
+	  "message" : "Maneuver mode on (cs)"
 	},
-	"TRANSIT_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Transit control mode (cs)"
+	  "message" : "Transit mode disabled (cs)"
 	},
-	"JUMP_CONTROL" : {
+	"TRANSIT_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Jump control (cs)"
+	  "message" : "Transit mode off (cs)"
 	},
-	"JUMP_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Jump control mode (cs)"
+	  "message" : "Transit mode on (cs)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (cs)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (cs)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (cs)"
 	},
     "ECONOMY_TYPE": {
         "message": "Druh ekonomiky:",

@@ -1571,29 +1571,41 @@
         "message": "Пилотирование.",
         "description": ""
     },
-	"MANEUVER_CONTROL" : {
+	"MANEUVER_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Maneuver control (ru)"
+	  "message" : "Maneuver mode disabled (ru)"
 	},
-	"MANEUVER_CONTROL_MODE" : {
+	"MANEUVER_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Maneuver control mode (ru)"
+	  "message" : "Maneuver mode off (ru)"
 	},
-	"TRANSIT_CONTROL" : {
+	"MANEUVER_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Transit control (ru)"
+	  "message" : "Maneuver mode on (ru)"
 	},
-	"TRANSIT_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Transit control mode (ru)"
+	  "message" : "Transit mode disabled (ru)"
 	},
-	"JUMP_CONTROL" : {
+	"TRANSIT_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Jump control (ru)"
+	  "message" : "Transit mode off (ru)"
 	},
-	"JUMP_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Jump control mode (ru)"
+	  "message" : "Transit mode on (ru)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (ru)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (ru)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (ru)"
 	},
     "ECONOMY_TYPE": {
         "message": "Экономика:",

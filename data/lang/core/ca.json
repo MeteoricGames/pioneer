@@ -1571,29 +1571,41 @@
         "message": "Control Manual",
         "description": ""
     },
-	"MANEUVER_CONTROL" : {
+	"MANEUVER_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Maneuver control (ca)"
+	  "message" : "Maneuver mode disabled (ca)"
 	},
-	"MANEUVER_CONTROL_MODE" : {
+	"MANEUVER_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Maneuver control mode (ca)"
+	  "message" : "Maneuver mode off (ca)"
 	},
-	"TRANSIT_CONTROL" : {
+	"MANEUVER_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Transit control (ca)"
+	  "message" : "Maneuver mode on (ca)"
 	},
-	"TRANSIT_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Transit control mode (ca)"
+	  "message" : "Transit mode disabled (ca)"
 	},
-	"JUMP_CONTROL" : {
+	"TRANSIT_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Jump control (ca)"
+	  "message" : "Transit mode off (ca)"
 	},
-	"JUMP_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Jump control mode (ca)"
+	  "message" : "Transit mode on (ca)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (ca)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (ca)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (ca)"
 	},
     "ECONOMY_TYPE": {
         "message": "Tipus d'economia:",

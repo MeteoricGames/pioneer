@@ -1571,29 +1571,41 @@
         "message": "Ručno upravljanje",
         "description": ""
     },
-	"MANEUVER_CONTROL" : {
+	"MANEUVER_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Maneuver control (hr)"
+	  "message" : "Maneuver mode disabled (hr)"
 	},
-	"MANEUVER_CONTROL_MODE" : {
+	"MANEUVER_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Maneuver control mode (hr)"
+	  "message" : "Maneuver mode off (hr)"
 	},
-	"TRANSIT_CONTROL" : {
+	"MANEUVER_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Transit control (hr)"
+	  "message" : "Maneuver mode on (hr)"
 	},
-	"TRANSIT_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
 	  "description" : "",
-	  "message" : "Transit control mode (hr)"
+	  "message" : "Transit mode disabled (hr)"
 	},
-	"JUMP_CONTROL" : {
+	"TRANSIT_CONTROL_OFF" : {
 	  "description" : "",
-	  "message" : "Jump control (hr)"
+	  "message" : "Transit mode off (hr)"
 	},
-	"JUMP_CONTROL_MODE" : {
+	"TRANSIT_CONTROL_ON" : {
 	  "description" : "",
-	  "message" : "Jump control mode (hr)"
+	  "message" : "Transit mode on (hr)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (hr)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (hr)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (hr)"
 	},
     "ECONOMY_TYPE": {
         "message": "Tip ekonomije:",

@@ -23,6 +23,12 @@ enum FlightControlState {
 	CONTROL_STATE_COUNT
 };
 
+enum FlightButtonStatus {
+	FLIGHT_BUTTON_UNAVAILABLE	= 0,
+	FLIGHT_BUTTON_OFF			= 1,
+	FLIGHT_BUTTON_ON			= 2,
+};
+
 // only AI
 class ShipController
 {
