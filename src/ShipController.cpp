@@ -88,6 +88,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 {
 	vector3d v;
 	matrix4x4d m;
+	float current_velocity;
 
 	if (m_ship->GetFlightState() == Ship::FLYING) {
 		switch (m_flightControlState) {
@@ -101,7 +102,9 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 			m_ship->AIMatchVel(v);
 
 			// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
-			if(m_ship->GetVelocity().Length() >= m_ship->GetShipType()->maxManeuverSpeed) {
+			current_velocity = m_ship->GetVelocity().Length();
+			if(current_velocity >= m_ship->GetShipType()->maxManeuverSpeed ||
+				current_velocity <= -m_ship->GetShipType()->maxManeuverSpeed) {
 				v = vector3d(0.0, 0.0, 0.0);
 			}
 			break;
