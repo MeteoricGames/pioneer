@@ -413,7 +413,6 @@ void WorldView::OnClickManeuverButton(Gui::MultiStateImageButton *b)
 		case FLIGHT_BUTTON_OFF:
 			newState = CONTROL_MANUAL;
 			break;
-
 		
 		case FLIGHT_BUTTON_ON:
 			newState = CONTROL_MANEUVER;

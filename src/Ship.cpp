@@ -74,7 +74,7 @@ void Ship::Save(Serializer::Writer &wr, Space *space)
 	wr.Int32(int(m_alertState));
 	wr.Double(m_lastFiringAlert);
 	wr.Double(m_juice);
-	wr.Int32(m_transitstate);
+	wr.Int32(int(m_transitstate));
 
 	// XXX make sure all hyperspace attrs and the cloud get saved
 	m_hyperspace.dest.Serialize(wr);
@@ -122,7 +122,7 @@ void Ship::Load(Serializer::Reader &rd, Space *space)
 	Properties().Set("alertStatus", EnumStrings::GetString("ShipAlertStatus", m_alertState));
 	m_lastFiringAlert = rd.Double();
 	m_juice = rd.Double();
-	m_transitstate = rd.Int32();
+	m_transitstate = static_cast<TransitState>(rd.Int32());
 
 	m_hyperspace.dest = SystemPath::Unserialize(rd);
 	m_hyperspace.countdown = rd.Float();
@@ -234,7 +234,7 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_ecmRecharge = 0;
 	m_curAICmd = 0;
 	m_juice = 20.0;
-	m_transitstate = 0;
+	m_transitstate = TRANSIT_DRIVE_OFF;
 	m_aiMessage = AIERROR_NONE;
 	m_decelerating = false;
 	m_equipment.onChange.connect(sigc::mem_fun(this, &Ship::OnEquipmentChange));
@@ -462,6 +462,11 @@ vector3d Ship::GetMaxThrust(const vector3d &dir) const
 	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return maxThrust*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return maxThrust*m_juice;
 	return maxThrust;
+}
+
+float Ship::GetMaxManeuverSpeed() const
+{
+	return GetShipType()->maxManeuverSpeed;
 }
 
 double Ship::GetAccelMin() const
@@ -854,7 +859,7 @@ void Ship::DoThrusterSounds() const
 
 	//transit
 	float transitVol[2] = { 0.f, 0.f };
-	if (m_transitstate>0 && IsType(Object::PLAYER)) {
+	if (m_transitstate == TRANSIT_DRIVE_ON && IsType(Object::PLAYER)) {
 		transitVol[0] = targetVol[0];
 		transitVol[1] = targetVol[1];
 	}
@@ -1180,14 +1185,14 @@ void Ship::StaticUpdate(const float timeStep)
 	}
 
 	//play start transit drive
-	if (m_transitstate==-5 && IsType(Object::PLAYER)) {
+	if (m_transitstate == TRANSIT_DRIVE_START && IsType(Object::PLAYER)) {
 		Sound::PlaySfx("Transit_Start", 0.25f, 0.25f, false);
-		m_transitstate=-3;
+		m_transitstate = TRANSIT_DRIVE_READY;
 	}
 	//play stop transit drive
-	if (m_transitstate==-4 && IsType(Object::PLAYER) ) {
+	if (m_transitstate == TRANSIT_DRIVE_STOP && IsType(Object::PLAYER) ) {
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
-		m_transitstate=-6;
+		m_transitstate = TRANSIT_DRIVE_FINISHED;
 	}
 }
 
