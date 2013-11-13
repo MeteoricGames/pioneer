@@ -38,6 +38,11 @@ static const float WHEEL_SENSITIVITY = .05f;	// Should be a variable in user set
 static const float HUD_CROSSHAIR_SIZE = 24.0f;
 static const float HUD_ALPHA          = 0.34f;
 
+static void autopilot_flyto(Body *b);
+static void autopilot_dock(Body *b);
+static void autopilot_orbit(Body *b, double alt);
+static void player_target_hypercloud(HyperspaceCloud *cloud);
+
 WorldView::WorldView(): View()
 {
 	m_camType = CAM_INTERNAL;
@@ -377,13 +382,26 @@ void WorldView::OnChangeWheelsState(Gui::MultiStateImageButton *b)
 void WorldView::OnClickAutopilotButton(Gui::MultiStateImageButton *b)
 {
 	int newState = b->GetState();
-	// Autopilot can only be clicked when autopilot is engaged, in which case it'll be set to unavailable (0)
-	assert(newState == FLIGHT_BUTTON_UNAVAILABLE);
 	Pi::BoinkNoise();
-	newState = FLIGHT_BUTTON_OFF;
-	b->SetActiveState(newState);
-	m_flightAutopilotButton->SetEnabled(false);
-	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(CONTROL_MANEUVER));
+	if(newState == FLIGHT_BUTTON_UNAVAILABLE) {		// Autopilot is being turned off
+		newState = FLIGHT_BUTTON_OFF;
+		b->SetActiveState(newState);
+		m_flightAutopilotButton->SetEnabled(false);
+		Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(CONTROL_MANEUVER));
+	} else if(newState == FLIGHT_BUTTON_ON) {		// Autopilot is being turned on
+		Body* const navtarget = Pi::player->GetNavTarget();
+		Body* const comtarget = Pi::player->GetCombatTarget();
+		if(navtarget || comtarget) {
+			b->SetActiveState(newState);
+			m_flightAutopilotButton->SetEnabled(true);
+			autopilot_flyto(navtarget? navtarget : comtarget);
+		} else {
+			assert(0); // The autopilot button should've been disabled, no targets are found
+		}
+	} else {
+		// previous state was FLIGHT_BUTTON_UNAVAILABLE before click, which means autopilot button should have been disabled
+		assert(0);
+	}
 }
 
 void WorldView::OnClickManeuverButton(Gui::MultiStateImageButton *b)
@@ -401,7 +419,6 @@ void WorldView::OnClickManeuverButton(Gui::MultiStateImageButton *b)
 			newState = CONTROL_MANEUVER;
 			break;
 	}
-	m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
 	b->SetActiveState(newState);
 	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
 }
@@ -587,11 +604,20 @@ void WorldView::RefreshButtonStateAndVisibility()
 		case Ship::FLYING:
 		default:
 			const FlightControlState fstate = Pi::player->GetPlayerController()->GetFlightControlState();
+			Body * const navtarget = Pi::player->GetNavTarget();
+			Body * const comtarget = Pi::player->GetCombatTarget();
 			switch (fstate) {
 				case CONTROL_MANUAL:
 					m_flightStatus->SetText(Lang::MANUAL_CONTROL); 
 					m_flightManeuverButton->SetEnabled(true);
-					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);					
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					if(!navtarget && !comtarget) { 
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+						m_flightAutopilotButton->SetEnabled(false);
+					} else {
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+						m_flightAutopilotButton->SetEnabled(true);
+					}
 					break;
 
 				case CONTROL_MANEUVER: {
@@ -604,7 +630,14 @@ void WorldView::RefreshButtonStateAndVisibility()
 					}
 					m_flightStatus->SetText(msg);
 					m_flightManeuverButton->SetEnabled(true);
-					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_ON);					
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_ON);	
+					if(!navtarget && !comtarget) { 
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+						m_flightAutopilotButton->SetEnabled(false);
+					} else {
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+						m_flightAutopilotButton->SetEnabled(true);
+					}
 					break;
 				}
 
