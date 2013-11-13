@@ -56,18 +56,21 @@ local spawnPolice = function()
 
 		-- XXX number should be some combination of population, lawlessness,
 		-- proximity to shipping lanes, etc
-		local max_police = 3
-		while max_police > 0 do --and Engine.rand:Number(1) < lawlessness do
+		local max_police = 2
+		local lawlessness = Game.system.lawlessness
+		while max_police > 0 and lawlessness < 0.5 do
 			max_police = max_police-1
 
 			local ship = Space.SpawnShipDocked("kanara", starport)
-			ship:AddEquip('PULSECANNON_DUAL_1MW')
-			ship:AddEquip('LASER_COOLING_BOOSTER')
-			ship:AddEquip('ATMOSPHERIC_SHIELDING')
-			ship:SetLabel('POLICE')
-			police[ship] = {
-				ship	= ship,
-			}
+			if ship~=nil then
+				ship:AddEquip('PULSECANNON_DUAL_1MW')
+				ship:AddEquip('LASER_COOLING_BOOSTER')
+				ship:AddEquip('ATMOSPHERIC_SHIELDING')
+				ship:SetLabel('POLICE')
+				police[ship] = {
+					ship	= ship,
+				}
+			end
 		end
 	end
 

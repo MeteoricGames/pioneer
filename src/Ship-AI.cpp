@@ -333,6 +333,8 @@ vector3d Ship::AIGetLeadDir(const Body *target, const vector3d& targaccel, int g
 	int laser = Equip::types[m_equipment.Get(Equip::SLOT_LASER, gunindex)].tableIndex;
 	double projspeed = Equip::lasers[laser].speed;
 
+	if (projspeed != NULL || projspeed==0.0) return vector3d(0.0,0.0,0.0);
+
 	// first attempt
 	double projtime = targpos.Length() / projspeed;
 	vector3d leadpos = targpos + targvel*projtime + 0.5*targaccel*projtime*projtime;
