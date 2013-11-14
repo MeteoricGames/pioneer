@@ -1194,6 +1194,12 @@ void Ship::StaticUpdate(const float timeStep)
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
 		m_transitstate = TRANSIT_DRIVE_FINISHED;
 	}
+	if(AIIsActive() && m_transitstate == TRANSIT_DRIVE_OFF && IsType(Object::PLAYER)) {
+		if(m_curAICmd->GetCommandName() == AICommand::CMD_FLYTO) {
+			Pi::BoinkNoise();
+			AIClearInstructions();
+		}
+	}
 }
 
 void Ship::NotifyRemoved(const Body* const removedBody)

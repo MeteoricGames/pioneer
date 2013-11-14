@@ -233,6 +233,13 @@ bool AICmdKamikaze::TimeStepUpdate()
 	return false;
 }
 
+AICmdFlyTo::~AICmdFlyTo()
+{
+	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
+		m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
+	}
+}
+
 bool AICmdKill::TimeStepUpdate()
 {
 	if (!ProcessChild()) return false;
@@ -747,8 +754,8 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetFlightState() == Ship::FLYING
 			) {
 				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) m_ship->SetTransitState(TRANSIT_DRIVE_START);
-		}
-
+		} 
+		
 		if ( //start transit drive now..
 			m_ship->GetPositionRelTo(m_targframe).Length()>target_radii &&
 			m_ship->GetVelocity().Length() > transit_start_speed && 
@@ -771,7 +778,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			//m_ship->GetVelocity().Length()>=550000
 			)
 		{
-			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
+			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -99000));
 			m_ship->SetJuice(20.0);
 			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			return false;
