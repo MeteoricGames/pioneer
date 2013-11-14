@@ -1876,12 +1876,12 @@ void SystemBody::PickPlanetType(Random &rand)
 	if (parent->type <= TYPE_STAR_MAX)
 		// get it from the table now rather than setting it on stars/gravpoints as
 		// currently nothing else needs them to have metallicity
-		m_metallicity = StarSystem::starMetallicities[parent->type] * rand.Fixed();
+		m_metallicity = StarSystem::starMetallicities[parent->type] * rand.Fixed()*2.0;
 	else
 		// this assumes the parent's parent is a star/gravpoint, which is currently always true
-		m_metallicity = StarSystem::starMetallicities[parent->parent->type] * rand.Fixed();
+		m_metallicity = StarSystem::starMetallicities[parent->parent->type] * rand.Fixed()*2.0;
 	// harder to be volcanic when you are tiny (you cool down)
-	m_volcanicity = std::min(fixed(1,1), mass) * rand.Fixed();
+	m_volcanicity = std::min(fixed(1,1), mass*2.0) * rand.Fixed();
 	m_atmosOxidizing = rand.Fixed();
 	m_life = fixed(0);
 	m_volatileGas = fixed(0);
@@ -1935,7 +1935,7 @@ void SystemBody::PickPlanetType(Random &rand)
 
 		averageTemp = CalcSurfaceTemp(star, averageDistToStar, albedo, greenhouse);
 
-		const fixed proportion_gas = averageTemp / (fixed(100,1) + averageTemp);
+		const fixed proportion_gas = averageTemp / (fixed(10,1) + averageTemp);
 		m_volatileGas = proportion_gas * amount_volatiles;
 
 		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(50,1) + averageTemp));
@@ -1948,8 +1948,8 @@ void SystemBody::PickPlanetType(Random &rand)
 		//		proportion_liquid.ToFloat(), proportion_ices.ToFloat());
 
 		if ((m_volatileLiquid > fixed(0)) &&
-		    (averageTemp > CELSIUS-60) &&
-		    (averageTemp < CELSIUS+200)) {
+		    (averageTemp > CELSIUS-400) &&
+		    (averageTemp < CELSIUS+300)) {
 			// try for life
 			int minTemp = CalcSurfaceTemp(star, maxDistToStar, albedo, greenhouse);
 			int maxTemp = CalcSurfaceTemp(star, minDistToStar, albedo, greenhouse);
