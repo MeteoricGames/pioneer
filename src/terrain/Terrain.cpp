@@ -595,8 +595,8 @@ Terrain::Terrain(const SystemBody *body) : m_body(body), m_seed(body->seed), m_r
 	for (int i=0; i<int(COUNTOF(m_entropy)); i++) m_entropy[i] = m_rand.Double();
 	for (int i=0; i<int(COUNTOF(m_gglightColor)); i++) {
 		double r,g,b;
-		r = m_rand.Double(0.0, 0.5);
-		g = m_rand.Double(0.0, 0.5);
+		r = m_rand.Double(0.0, 0.6);
+		g = m_rand.Double(0.0, 0.6);
 		b = m_rand.Double(0.0, 0.5);
 		m_gglightColor[i] = vector3d(r, g, b);
 	}
@@ -604,8 +604,8 @@ Terrain::Terrain(const SystemBody *body) : m_body(body), m_seed(body->seed), m_r
 	for (int i=0; i<int(COUNTOF(m_entropy)); i++) m_entropy[i] = m_rand.Double();
 	for (int i=0; i<int(COUNTOF(m_ggdarkColor)); i++) {
 		double r,g,b;
-		r = m_rand.Double(0.0, 0.3);
-		g = m_rand.Double(0.0, r);
+		r = m_rand.Double(0.2, 0.45);
+		g = m_rand.Double(0.2, r);
 		b = m_rand.Double(0.0, std::min(r, g));
 		m_ggdarkColor[i] = vector3d(r, g, b);
 	}
