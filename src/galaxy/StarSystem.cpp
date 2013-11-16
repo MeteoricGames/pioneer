@@ -1938,7 +1938,7 @@ void SystemBody::PickPlanetType(Random &rand)
 		const fixed proportion_gas = averageTemp / (fixed(10,1) + averageTemp);
 		m_volatileGas = proportion_gas * amount_volatiles;
 
-		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(50,1) + averageTemp));
+		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(5,1) + averageTemp));
 		m_volatileLiquid = proportion_liquid * amount_volatiles;
 
 		const fixed proportion_ices = fixed(1,1) - (proportion_gas + proportion_liquid);
