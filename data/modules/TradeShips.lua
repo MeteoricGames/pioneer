@@ -906,6 +906,7 @@ local onShipDestroyed = function (ship, attacker)
 	if trade_ships[ship] ~= nil then
 		local trader = trade_ships[ship]
 
+		if trader.starport.label==nil then return end
 		print(ship.label..' destroyed by '..attacker.label..', status:'..trader.status..' ship:'..trader.ship_name..', starport:'..trader.starport.label)
 		trade_ships[ship] = nil
 
