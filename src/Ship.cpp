@@ -1187,18 +1187,12 @@ void Ship::StaticUpdate(const float timeStep)
 	//play start transit drive
 	if (m_transitstate == TRANSIT_DRIVE_START && IsType(Object::PLAYER)) {
 		Sound::PlaySfx("Transit_Start", 0.25f, 0.25f, false);
-		m_transitstate = TRANSIT_DRIVE_READY;
+		SetTransitState(TRANSIT_DRIVE_READY);
 	}
 	//play stop transit drive
 	if (m_transitstate == TRANSIT_DRIVE_STOP && IsType(Object::PLAYER) ) {
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
-		m_transitstate = TRANSIT_DRIVE_FINISHED;
-	}
-	if(AIIsActive() && m_transitstate == TRANSIT_DRIVE_OFF && IsType(Object::PLAYER)) {
-		if(m_curAICmd->GetCommandName() == AICommand::CMD_FLYTO) {
-			Pi::BoinkNoise();
-			AIClearInstructions();
-		}
+		SetTransitState(TRANSIT_DRIVE_FINISHED);
 	}
 }
 

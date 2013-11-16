@@ -736,9 +736,8 @@ bool AICmdFlyTo::TimeStepUpdate()
 	int hyperclass = Equip::types[t].pval;
 	// Required speed for transit to kick in and accelerate ship
 	const float transit_start_speed = m_ship->GetMaxManeuverSpeed() < 100000.0f? m_ship->GetMaxManeuverSpeed() : 100000.0f;
-	// Required speed for transit ready state (plays a sound)
-	// WARNING: may cause an issue if max maneuver speed is set to something less than 10000?
-	const float transit_ready_speed = std::min<float>(0.0f, transit_start_speed - 5000.0f);
+	// Required speed for transit ready state (plays a sound), may cause an issue if max maneuver speed is set to something less than 10000?
+	const float transit_ready_speed = std::max<float>(0.0f, transit_start_speed - 5000.0f);
 
 	if (m_targframe && m_ship && !m_child){   //orbit order planet. dock planet
 		double cspeed = m_ship->GetVelocity().Length();
@@ -776,12 +775,13 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetPositionRelTo(m_targframe).Length()<=target_radii &&
 			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice()==80.0
 			//m_ship->GetVelocity().Length()>=550000
-			)
+			) 
 		{
-			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -99000));
+			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -transit_start_speed));
+			//m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -99000));
 			m_ship->SetJuice(20.0);
 			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
-			return false;
+			return true;
 		}
 	}
 	else if (m_target && m_ship && !m_child){   //vincinty only...  /dock orbiting station    ...vincinity ship.
@@ -833,11 +833,12 @@ bool AICmdFlyTo::TimeStepUpdate()
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
 			else {
-				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
+				//m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
+				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
 				m_ship->SetJuice(20.0);
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
-			return false;
+			return true;
 		}
 	}
 
