@@ -161,6 +161,7 @@ public:
 	};
 
 	AtmosphereParameters CalcAtmosphereParams() const;
+	fixed GetPop() const { return m_population; }
 
 
 	bool IsScoopable() const;
