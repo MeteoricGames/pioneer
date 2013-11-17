@@ -881,25 +881,30 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 		}
 
 		// Show systems with large population
-		if (i->population>1.0) {
+		if (i->population>fixed(1,1)) {
 			glDepthRange(0.15,1.0);
 			m_disk->SetColor(Color(0.f, 1.f, 0.f));
 			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.2f,1.0+i->population.ToFloat(),0.2f));
 			m_disk->Draw(m_renderer);
 		}
-		else if (i->population>0.1) {
+		else if (i->population>fixed(1,10)) {
 			glDepthRange(0.15,1.0);
 			m_disk->SetColor(Color(1.f, 1.f, 0.f));
 			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.15f,1.0+i->population.ToFloat()*10.0,0.2f));
 			m_disk->Draw(m_renderer);
 		}
-		else if (i->population>0.01) {
+		else if (i->population>fixed(1,100)) {
 			glDepthRange(0.15,1.0);
 			m_disk->SetColor(Color(1.f, 0.f, 0.f));
-			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.15f,1.0+i->population.ToFloat()*10000.0,0.2f));
+			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.15f,1.0+i->population.ToFloat()*100.0,0.2f));
 			m_disk->Draw(m_renderer);
 		}
-
+		else if (i->population>fixed(1,1000)) {
+			glDepthRange(0.15,1.0);
+			m_disk->SetColor(Color(0.f, 0.f, 1.f));
+			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.15f,1.0+i->population.ToFloat()*1000.0,0.2f));
+			m_disk->Draw(m_renderer);
+		}
 
 		// selected indicator
 		if (bIsCurrentSystem) {
