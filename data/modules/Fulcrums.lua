@@ -33,11 +33,11 @@ local spawnShips = function ()
 
 	local station = stations[1]
 	fulcrum = Space.SpawnShipParkedOffset('large_fulcrum', station)
-	fulcrum:SetLabel('[--Fulcrum--]')
-	fulcrum:AddEquip("ECM_ADVANCED")
-
-	playerarrived=true
-	
+	if fulcrum~=nil then
+		fulcrum:SetLabel('[--Fulcrum--]')
+		fulcrum:AddEquip("ECM_ADVANCED")
+		playerarrived=true
+	end
 	return 0
 end
 
