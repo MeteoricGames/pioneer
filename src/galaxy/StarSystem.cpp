@@ -1912,7 +1912,7 @@ void SystemBody::PickPlanetType(Random &rand)
 		fixed amount_volatiles = fixed(2,1)*rand.Fixed();
 		if (rand.Int32(3)) amount_volatiles *= mass;
 		// total atmosphere loss
-		if (rand.Fixed() > mass) amount_volatiles = fixed(0);
+		if (rand.Fixed() > mass*2.0) amount_volatiles = fixed(0);
 
 		//printf("Amount volatiles: %f\n", amount_volatiles.ToFloat());
 		// fudge how much of the volatiles are in which state
@@ -2197,7 +2197,7 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
 //	printf("%s: pop %.3f billion\n", name.c_str(), m_population.ToFloat());
 
-	outTotalPop += m_population;
+	outTotalPop += m_population/(1.0+(std::abs(system->m_path.sectorX)+std::abs(system->m_path.sectorY)+std::abs(system->m_path.sectorZ)*10.0));
 }
 
 static bool check_unique_station_name(const std::string & name, const StarSystem * system) {
@@ -2233,9 +2233,9 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 	RefCountedPtr<Random> namerand(new Random);
 	namerand->seed(_init, 6);
 
-	if (m_population < fixed(1,1000)) return;
+	if (m_population < fixed(1,100)) return;
 
-	fixed pop = m_population + rand.Fixed();
+	fixed pop = m_population*100.0 + rand.Fixed();
 
 	fixed orbMaxS = fixed(1,4)*this->CalcHillRadius();
 	fixed orbMinS = 4 * this->radius * AU_EARTH_RADIUS;
@@ -2282,7 +2282,7 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 		}
 	}
 	// starports - surface
-	pop = m_population + rand.Fixed();
+	pop = m_population*100.0 + rand.Fixed(); 
 	int max = 6;
 	while (max-- > 0) {
 		pop -= rand.Fixed();
