@@ -296,7 +296,7 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 
 	const float rad = planet->GetSystemBody()->GetRadius();
 	double seg = 5000.0;
-	if (planet->GetSystemBody()->HasAtmosphere())
+	if (planet->GetSystemBody()->HasAtmosphere()&&planet->GetSystemBody()->m_population > 0.2)
 		seg=Clamp(rad/1000.0,100.0,5000.0);
 	else
 		seg=Clamp(rad/10000.0,150.0,500.0);
