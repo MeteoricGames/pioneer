@@ -2,7 +2,7 @@
 -- Licensed under the terms of CC-BY-SA 3.0. See licenses/CC-BY-SA-3.0.txt
 
 --Ships not available for purchase (ambient ships)
-define_static_ship {
+define_ship {
 	name='Omni Explorer',
 	model='omni_explorer',
 	forward_thrust = 3200e5,
