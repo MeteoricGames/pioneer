@@ -503,9 +503,9 @@ Terrain::Terrain(const SystemBody *body) : m_body(body), m_seed(body->seed), m_r
 	for (int i=0; i<int(COUNTOF(m_entropy)); i++) m_entropy[i] = m_rand.Double();
 	for (int i=0; i<int(COUNTOF(m_darkrockColor)); i++) {
 		double r,g,b;
-		r = m_rand.Double(0.05, 0.3);
-		g = m_rand.Double(0.05, r);
-		b = m_rand.Double(0.05, g);
+		r = m_rand.Double(0.15, 0.3);
+		g = m_rand.Double(0.15, r);
+		b = m_rand.Double(0.15, g);
 		r = std::max(b, r * m_body->m_metallicity.ToFloat());
 		g = std::max(b, g * m_body->m_metallicity.ToFloat());
 		m_darkrockColor[i] = vector3d(r, g, b);
@@ -537,9 +537,9 @@ Terrain::Terrain(const SystemBody *body) : m_body(body), m_seed(body->seed), m_r
 	for (int i=0; i<int(COUNTOF(m_entropy)); i++) m_entropy[i] = m_rand.Double();
 	for (int i=0; i<int(COUNTOF(m_darkplantColor)); i++) {
 		double r,g,b;
-		g = m_rand.Double(0.05, 0.3);
-		r = m_rand.Double(0.00, g);
-		b = m_rand.Double(0.00, r);
+		g = m_rand.Double(0.15, 0.5);
+		r = m_rand.Double(0.15, g);
+		b = m_rand.Double(0.10, r);
 		g = std::max(r, g * m_body->m_life.ToFloat());
 		b *= (1.0-m_body->m_life.ToFloat());
 		m_darkplantColor[i] = vector3d(r, g, b);
@@ -562,8 +562,8 @@ Terrain::Terrain(const SystemBody *body) : m_body(body), m_seed(body->seed), m_r
 	for (int i=0; i<int(COUNTOF(m_entropy)); i++) m_entropy[i] = m_rand.Double();
 	for (int i=0; i<int(COUNTOF(m_darksandColor)); i++) {
 		double r,g,b;
-		r = m_rand.Double(0.05, 0.6);
-		g = m_rand.Double(0.00, r);
+		r = m_rand.Double(0.3, 0.6);
+		g = m_rand.Double(0.3, r);
 		//b = m_rand.Double(0.00, g/2.0);
 		b = 0;
 		m_darksandColor[i] = vector3d(r, g, b);
@@ -585,8 +585,8 @@ Terrain::Terrain(const SystemBody *body) : m_body(body), m_seed(body->seed), m_r
 	for (int i=0; i<int(COUNTOF(m_entropy)); i++) m_entropy[i] = m_rand.Double();
 	for (int i=0; i<int(COUNTOF(m_darkdirtColor)); i++) {
 		double r,g,b;
-		r = m_rand.Double(0.05, 0.3);
-		g = m_rand.Double(r-0.05, 0.35);
+		r = m_rand.Double(0.15, 0.3);
+		g = m_rand.Double(r-0.15, 0.35);
 		b = m_rand.Double(0.0, r/2.0);
 		m_darkdirtColor[i] = vector3d(r, g, b);
 	}
