@@ -2239,7 +2239,7 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 	RefCountedPtr<Random> namerand(new Random);
 	namerand->seed(_init, 6);
 
-	if (m_population < fixed(1,10000000)) return; 
+	if (m_population < fixed(1,10000000)) return;
 
 	fixed pop = m_population + rand.Fixed();
 
