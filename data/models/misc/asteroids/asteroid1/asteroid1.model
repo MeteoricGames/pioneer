@@ -1,0 +1,17 @@
+material material1
+
+tex_diff diff.dds
+tex_spec spec.dds
+diffuse 1.0 1.0 1.0
+
+specular 1.0 1.0 1.0
+
+shininess 80
+
+
+mesh asteroid1.obj
+
+collision asteroid1_collision.obj
+
+lod 10
+mesh asteroid1_lod.obj
