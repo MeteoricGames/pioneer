@@ -296,10 +296,7 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 
 	const float rad = planet->GetSystemBody()->GetRadius();
 	double seg = 5000.0;
-	if (planet->GetSystemBody()->HasAtmosphere())
-		seg=Clamp(rad/1000.0,100.0,5000.0);
-	else
-		seg=Clamp(rad/10000.0,150.0,500.0);
+	seg=Clamp(planet->GetSystemBody()->GetPop().ToDouble()*1000.0,100.0,5000.0);
 
 	double sizex = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);
 	double sizez = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);
