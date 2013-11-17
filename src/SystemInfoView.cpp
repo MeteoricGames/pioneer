@@ -84,6 +84,7 @@ void SystemInfoView::OnBodyViewed(SystemBody *b)
 	if (b->type != SystemBody::TYPE_STARPORT_ORBITAL) {
 		_add_label_and_value(Lang::SURFACE_TEMPERATURE, stringf(Lang::N_CELSIUS, formatarg("temperature", b->averageTemp-273)));
 		_add_label_and_value(Lang::SURFACE_GRAVITY, stringf("%0{f.3} m/s^2", b->CalcSurfaceGravity()));
+		_add_label_and_value("Planet Population", stringf("%0{f.4} million", b->GetPop()*1000.0));
 	}
 
 	if (b->parent) {
