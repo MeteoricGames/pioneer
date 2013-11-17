@@ -26,10 +26,10 @@
                 Save 3ds Max Profile: Yes;
                 Formatted Arrays: Yes;
             </comments>
-            <source_data>file:///C:/Users/rivalin/Desktop/pioneercurrent/data/models/ships/(3)Medium/(3C)mining_carrier/mining_carrier.dae</source_data>
+            <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/ships/(3)Medium/(3C)mining_carrier/mining_carrier.dae</source_data>
         </contributor>
-        <created>2013-11-15T14:32:40Z</created>
-        <modified>2013-11-15T14:32:41Z</modified>
+        <created>2013-11-17T17:38:28Z</created>
+        <modified>2013-11-17T17:38:28Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -10372,35 +10372,17 @@
             <node id="navlight_green_1Node" name="navlight_green_1" type="NODE">
                 <translate sid="translation012">36.6 0 -27</translate>
             </node>
-            <node id="navlight_green_1__2_Node" name="navlight_green_1__2_" type="NODE">
-                <translate sid="translation013">33.2 9 107.5</translate>
-            </node>
-            <node id="navlight_green_1__3_Node" name="navlight_green_1__3_" type="NODE">
-                <translate sid="translation014">42.1 0 75</translate>
-            </node>
             <node id="navlight_green_1__4_Node" name="navlight_green_1__4_" type="NODE">
                 <translate sid="translation015">36.6 0 -67</translate>
             </node>
-            <node id="navlight_red_1__2_Node" name="navlight_red_1__2_" type="NODE">
-                <translate sid="translation016">-36 -10.5 103.4</translate>
-            </node>
             <node id="navlight_green_1__5_Node" name="navlight_green_1__5_" type="NODE">
                 <translate sid="translation017">28.35 0 -122</translate>
-            </node>
-            <node id="navlight_green_1__6_Node" name="navlight_green_1__6_" type="NODE">
-                <translate sid="translation018">36 -10.5 103.4</translate>
             </node>
             <node id="navlight_red_1__3_Node" name="navlight_red_1__3_" type="NODE">
                 <translate sid="translation019">-36.6 0 -27</translate>
             </node>
             <node id="navlight_red_1__4_Node" name="navlight_red_1__4_" type="NODE">
                 <translate sid="translation020">-33.2 9 125.4</translate>
-            </node>
-            <node id="navlight_red_1__5_Node" name="navlight_red_1__5_" type="NODE">
-                <translate sid="translation021">-33.2 9 107.5</translate>
-            </node>
-            <node id="navlight_red_1__6_Node" name="navlight_red_1__6_" type="NODE">
-                <translate sid="translation022">-42.1 0 75</translate>
             </node>
             <node id="navlight_red_1__7_Node" name="navlight_red_1__7_" type="NODE">
                 <translate sid="translation023">-36.6 0 -67</translate>
@@ -10417,12 +10399,6 @@
             <node id="navlight_green_1__9_Node" name="navlight_green_1__9_" type="NODE">
                 <translate sid="translation027">33.2 9 125.4</translate>
             </node>
-            <node id="navlight_green_1__10_Node" name="navlight_green_1__10_" type="NODE">
-                <translate sid="translation028">36 10.5 96.6</translate>
-            </node>
-            <node id="navlight_green_1__11_Node" name="navlight_green_1__11_" type="NODE">
-                <translate sid="translation029">33.2 -9 107.5</translate>
-            </node>
             <node id="navlight_green_1__12_Node" name="navlight_green_1__12_" type="NODE">
                 <translate sid="translation030">36.6 0 -107</translate>
             </node>
@@ -10435,14 +10411,8 @@
             <node id="navlight_red_1__10_Node" name="navlight_red_1__10_" type="NODE">
                 <translate sid="translation033">-36 12.5 103.4</translate>
             </node>
-            <node id="navlight_red_1__11_Node" name="navlight_red_1__11_" type="NODE">
-                <translate sid="translation034">-36 10.5 96.6</translate>
-            </node>
             <node id="navlight_green_1__14_Node" name="navlight_green_1__14_" type="NODE">
                 <translate sid="translation035">42.1 0 66</translate>
-            </node>
-            <node id="navlight_red_1__12_Node" name="navlight_red_1__12_" type="NODE">
-                <translate sid="translation036">-33.2 -9 107.5</translate>
             </node>
             <node id="navlight_red_1__13_Node" name="navlight_red_1__13_" type="NODE">
                 <translate sid="translation037">-36.6 0 -107</translate>
