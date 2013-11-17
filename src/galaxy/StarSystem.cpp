@@ -788,7 +788,7 @@ static void position_settlement_on_planet(SystemBody *b)
 	// used for orientation on planet surface
 	double r2 = r.Double(); 	// function parameter evaluation order is implementation-dependent
 	double r1 = r.Double();		// can't put two rands in the same expression
-	b->orbit.SetPlane(matrix3x3d::RotateZ(2*M_PI*r1) * matrix3x3d::RotateY(2*M_PI*r2));
+	b->orbit.SetPlane(matrix3x3d::RotateY(2*M_PI*r1) * matrix3x3d::RotateX(2*M_PI*r2));
 
 	// store latitude and longitude to equivalent orbital parameters to
 	// be accessible easier
@@ -2104,7 +2104,7 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
         // orbital starports should carry a small amount of population
         if (type == SystemBody::TYPE_STARPORT_ORBITAL) {
-			m_population = fixed(1,100000);
+			m_population = fixed(1,10000);
 			outTotalPop += m_population;
         }
 
@@ -2113,10 +2113,10 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
 	m_agricultural = fixed(0);
 
-	if (m_life > fixed(9,10)) {
+	if (m_life > fixed(9,10)&&this->HasAtmosphere()) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+25-averageTemp, 40), fixed(0), fixed(1,1));
 		system->m_agricultural += 2*m_agricultural;
-	} else if (m_life > fixed(1,2)) {
+	} else if (m_life > fixed(1,2)&&this->HasAtmosphere()) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+30-averageTemp, 50), fixed(0), fixed(1,1));
 		system->m_agricultural += 1*m_agricultural;
 	} else {
@@ -2124,6 +2124,12 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 		if (m_metallicity < fixed(5,10) &&
 			m_metallicity < (fixed(1,1) - system->m_humanProx)) return;
 	}
+
+		if (!this->HasAtmosphere()) {
+			m_population = fixed(1,1000000)*rand.Fixed()*2.0; //max 20k on these..
+			outTotalPop += m_population;
+			return;
+		}
 
 	const int NUM_CONSUMABLES = 10;
 	const Equip::Type consumables[NUM_CONSUMABLES] = {
@@ -2233,7 +2239,7 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 	RefCountedPtr<Random> namerand(new Random);
 	namerand->seed(_init, 6);
 
-	if (m_population < fixed(1,1000)) return;
+	if (m_population < fixed(1,10000000)) return; 
 
 	fixed pop = m_population + rand.Fixed();
 
@@ -2282,8 +2288,11 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 		}
 	}
 	// starports - surface
-	pop = m_population + rand.Fixed();
-	int max = 6;
+	if (this->HasAtmosphere())
+			pop = m_population + rand.Fixed()*10.0;
+	else
+			pop = m_population*400000.0 + rand.Fixed();
+	int max = 20;
 	while (max-- > 0) {
 		pop -= rand.Fixed();
 		if (pop < 0) break;
