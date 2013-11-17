@@ -2113,10 +2113,10 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
 	m_agricultural = fixed(0);
 
-	if (m_life > fixed(9,10)&&this->HasAtmosphere()) {
+	if (m_life > fixed(9,10)&&this->HasAtmosphere()&&this->m_atmosDensity<2.0 && this->m_atmosDensity>0.8) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+25-averageTemp, 40), fixed(0), fixed(1,1));
 		system->m_agricultural += 2*m_agricultural;
-	} else if (m_life > fixed(1,2)&&this->HasAtmosphere()) {
+	} else if (m_life > fixed(1,2)&&this->HasAtmosphere()&&this->m_atmosDensity<2.0 && this->m_atmosDensity>0.8) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+30-averageTemp, 50), fixed(0), fixed(1,1));
 		system->m_agricultural += 1*m_agricultural;
 	} else {
@@ -2125,11 +2125,11 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 			m_metallicity < (fixed(1,1) - system->m_humanProx)) return;
 	}
 
-		if (!this->HasAtmosphere()) {
-			m_population = fixed(1,1000000)*rand.Fixed()*2.0; //max 20k on these..
-			outTotalPop += m_population;
-			return;
-		}
+	if (!this->HasAtmosphere() || m_atmosDensity>2.0 || m_atmosDensity<0.8 || m_life < 0.2 || averageTemp-273 > 60 || averageTemp-273 < -60 || mass > 3.0 || mass < 0.5) {
+		m_population = fixed(1,1000000)*rand.Fixed()*2.0; //max 20k on these..
+		outTotalPop += m_population;
+		return;
+	}
 
 	const int NUM_CONSUMABLES = 10;
 	const Equip::Type consumables[NUM_CONSUMABLES] = {
@@ -2202,8 +2202,9 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 	m_population = fixed(1,10)*m_population + m_population*m_agricultural;
 
 //	printf("%s: pop %.3f billion\n", name.c_str(), m_population.ToFloat());
+	//m_population/=(1.0+(std::abs(system->m_path.sectorX)+std::abs(system->m_path.sectorY)+std::abs(system->m_path.sectorZ)*10.0));
 
-	outTotalPop += m_population/(1.0+(std::abs(system->m_path.sectorX)+std::abs(system->m_path.sectorY)+std::abs(system->m_path.sectorZ)*10.0));
+	outTotalPop += m_population;
 }
 
 static bool check_unique_station_name(const std::string & name, const StarSystem * system) {
@@ -2288,8 +2289,12 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 		}
 	}
 	// starports - surface
-	if (this->HasAtmosphere())
-			pop = m_population + rand.Fixed()*10.0;
+	if (this->HasAtmosphere()) {
+		if		(m_population > fixed(1,1))		pop = m_population*fixed(3,1) + rand.Fixed();	//above 1 bill, 3+ cities per bill
+		else if (m_population > fixed(1,10))	pop = m_population*fixed(10,1)+rand.Fixed();	//above 100 mill, 1 city per 100 mill
+		else if (m_population > fixed(1,100))	pop = m_population*fixed(100,1)+rand.Fixed();	//above 10 mill, 1 city per 10 mill
+		else								    pop = fixed(1,1)+rand.Fixed();     				//above 1 mill, 1 or 2 cites
+	}
 	else
 			pop = m_population*400000.0 + rand.Fixed();
 	int max = 20;
