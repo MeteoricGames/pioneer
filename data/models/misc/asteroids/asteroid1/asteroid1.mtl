@@ -1,8 +1,15 @@
-# MTL written from C:\Users\rivalin\Desktop\pioneercurrent\data\models\misc\asteroids\asteroid1\asteroid1.obj
+# Wavefront MTL file
+# Creator: Ultimate Unwrap3D Pro v3.41
+# URL: http://www.unwrap3d.com
+# Time: Mon Nov 18 18:12:49 2013
+# num_materials: 1
+
 newmtl material1
-Kd 0.8 0.8 0.8
-Ns 256
-d 1
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.200000 0.200000 0.200000
+d 1.000000
 illum 2
-Ka 0 0 0
-Ks 0.2 0.2 0.2
+Ns 1.000000
+
+# num_materials: 1
