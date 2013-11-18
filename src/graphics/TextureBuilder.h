@@ -62,6 +62,7 @@ public:
 
 private:
 	SDLSurfacePtr m_surface;
+	std::vector<SDLSurfacePtr> m_cubemap;
 	PicoDDS::DDSImage m_dds;
 	std::string m_filename;
 
