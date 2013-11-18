@@ -17,6 +17,9 @@
 #include "graphics/VertexArray.h"
 #include "graphics/TextureBuilder.h"
 
+#include <sstream>
+#include <iostream>
+
 using namespace Graphics;
 
 namespace Background
@@ -34,13 +37,14 @@ UniverseBox::UniverseBox(Graphics::Renderer *r)
 
 UniverseBox::~UniverseBox()
 {
+	delete m_cubemap;
 	delete m_model;
 }
 
 void UniverseBox::Init(Graphics::Renderer *r)
 {
 	// Load cubemap
-	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/purple-nebula-complex.dds");
+	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/ub0/ub0.png");
 	m_cubemap = texture_builder.CreateTexture(r);
 
 	// Create skybox geometry
@@ -98,7 +102,29 @@ void UniverseBox::Init(Graphics::Renderer *r)
 
 void UniverseBox::Draw(Graphics::Renderer *r)
 {
-	r->DrawStaticMesh(m_model);
+	if(m_cubemap) {
+		r->DrawStaticMesh(m_model);
+	}
+}
+
+void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Uint32 seed)
+{
+	Random rand(seed);
+	// Clean old texture
+	delete m_cubemap;
+	m_cubemap = nullptr;
+	// For seed = 0, custom system and no nebula rendered
+	if(seed > 0) {
+		int new_ubox_index = rand.Int32(0, 4);
+		if(new_ubox_index > 0) {
+			// Load new one
+			std::ostringstream os;
+			os << "textures/cube/ub" << new_ubox_index << "/ub" << new_ubox_index << ".png";
+			TextureBuilder texture_builder = TextureBuilder::Cube(os.str().c_str());
+			m_cubemap = texture_builder.CreateTexture(r);
+			m_material->texture0 = m_cubemap;
+		}
+	}
 }
 
 Starfield::Starfield(Graphics::Renderer *r)
@@ -269,6 +295,8 @@ Container::Container(Graphics::Renderer *r)
 : m_milkyWay(r)
 , m_starField(r)
 , m_universeBox(r)
+, m_bLoadNewCubemap(true)
+, m_uSeed(0)
 {
 }
 
@@ -276,6 +304,8 @@ Container::Container(Graphics::Renderer *r, Uint32 seed)
 : m_milkyWay(r)
 , m_starField(r)
 , m_universeBox(r)
+, m_bLoadNewCubemap(false)
+, m_uSeed(seed)
 {
 	Refresh(seed);
 };
@@ -284,11 +314,19 @@ void Container::Refresh(Uint32 seed)
 {
 	// redo starfield, milkyway stays normal for now
 	m_starField.Fill(seed);
+	if(m_uSeed != seed) {
+		m_bLoadNewCubemap = true;
+		m_uSeed = seed;
+	}
 }
 
-void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform) const
+void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 {
-	//XXX not really const - renderer can modify the buffers
+	if(m_bLoadNewCubemap) {
+		m_bLoadNewCubemap = false;
+		m_universeBox.LoadCubeMap(renderer, m_uSeed);
+	}
+
 	renderer->SetBlendMode(BLEND_SOLID);
 	renderer->SetDepthTest(false);
 	renderer->SetTransform(transform);

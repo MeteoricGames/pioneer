@@ -34,6 +34,7 @@ namespace Background
 		~UniverseBox();
 
 		void Draw(Graphics::Renderer *r);
+		void LoadCubeMap(Graphics::Renderer *r, Uint32 seed);
 
 	private:
 		void Init(Graphics::Renderer *);
@@ -82,7 +83,7 @@ namespace Background
 		// default constructor, needs Refresh with proper seed to show starfield
 		Container(Graphics::Renderer*);
 		Container(Graphics::Renderer*, Uint32 seed);
-		void Draw(Graphics::Renderer *r, const matrix4x4d &transform) const;
+		void Draw(Graphics::Renderer *r, const matrix4x4d &transform);
 		void Refresh(Uint32 seed);
 
 		void SetIntensity(float intensity);
@@ -91,6 +92,8 @@ namespace Background
 		MilkyWay m_milkyWay;
 		Starfield m_starField;
 		UniverseBox m_universeBox;
+		bool m_bLoadNewCubemap;
+		Uint32 m_uSeed;
 	};
 
 } //namespace Background

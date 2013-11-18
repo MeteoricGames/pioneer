@@ -553,6 +553,8 @@ CustomSystem::CustomSystem():
 {
 	for (int i = 0; i < 4; ++i)
 		primaryType[i] = SystemBody::TYPE_GRAVPOINT;
+	// Set a random seed by default (otherwise all funcions that require it will get seed as 0 for all custom systems)
+	seed = rand() % 100000;
 }
 
 CustomSystem::~CustomSystem()

@@ -204,8 +204,6 @@ void TextureBuilder::LoadSurface()
 {
 	assert(!m_surface);
 
-	// SAL: a multi-file cube map could be supported here by automatically loading 6 image files:
-	//      filename_px.ext, filename_nx.ext, ...etc
 	SDLSurfacePtr s;
 	if(m_textureType == TEXTURE_2D) {
 		s = LoadSurfaceFromFile(m_filename);
