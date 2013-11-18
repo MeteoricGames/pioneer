@@ -126,6 +126,7 @@ bool Pi::joystickEnabled;
 bool Pi::mouseYInvert;
 std::map<SDL_JoystickID,Pi::JoystickState> Pi::joysticks;
 bool Pi::navTunnelDisplayed;
+bool Pi::speedLinesDisplayed = false;
 Gui::Fixed *Pi::menu;
 bool Pi::DrawGUI = true;
 Graphics::Renderer *Pi::renderer;
@@ -313,6 +314,7 @@ void Pi::Init()
 	mouseYInvert = (config->Int("InvertMouseY")) ? true : false;
 
 	navTunnelDisplayed = (config->Int("DisplayNavTunnel")) ? true : false;
+	speedLinesDisplayed = (config->Int("SpeedLines")) ? true : false;
 
 	EnumStrings::Init();
 
@@ -674,16 +676,17 @@ void Pi::HandleEvents()
 								} else if (KeyState(SDLK_LSHIFT)) {
 									SpaceStation *s = static_cast<SpaceStation*>(Pi::player->GetNavTarget());
 									if (s) {
-										int port = s->GetFreeDockingPort();
+										Ship *ship = new Ship(ShipType::POLICE);
+										int port = s->GetFreeDockingPort(ship);
 										if (port != -1) {
 											printf("Putting ship into station\n");
 											// Make police ship intent on killing the player
-											Ship *ship = new Ship(ShipType::POLICE);
 											ship->AIKill(Pi::player);
 											ship->SetFrame(Pi::player->GetFrame());
 											ship->SetDockedWith(s, port);
 											game->GetSpace()->AddBody(ship);
 										} else {
+											delete ship;
 											printf("No docking ports free dude\n");
 										}
 									} else {

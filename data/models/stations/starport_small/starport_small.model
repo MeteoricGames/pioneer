@@ -1,0 +1,21 @@
+material material1
+
+tex_diff diff.dds
+tex_spec spec.dds
+tex_glow glow.dds
+diffuse 1.0 1.0 1.0
+specular 1.0 1.0 1.0
+shininess 80
+
+
+
+
+
+mesh starport_small.dae
+
+mesh starport_small_docking.dae
+
+
+
+
+collision starport_small_collision.obj
