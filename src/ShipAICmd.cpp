@@ -236,6 +236,11 @@ bool AICmdKamikaze::TimeStepUpdate()
 AICmdFlyTo::~AICmdFlyTo()
 {
 	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
+		// Transit interrupted
+		float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
+			m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
+		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
+		m_ship->SetJuice(20.0);
 		m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 	}
 }
