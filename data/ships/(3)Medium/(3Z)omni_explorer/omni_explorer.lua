@@ -2,7 +2,7 @@
 -- Licensed under the terms of CC-BY-SA 3.0. See licenses/CC-BY-SA-3.0.txt
 
 --Ships not available for purchase (ambient ships)
-define_static_ship {
+define_ship {
 	name='Omni Explorer',
 	model='omni_explorer',
 	forward_thrust = 3200e5,
@@ -24,6 +24,6 @@ define_static_ship {
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 55123e3,
-	price = 3.1e8,
+	price = 100,
 	hyperdrive_class = 10,
 }
