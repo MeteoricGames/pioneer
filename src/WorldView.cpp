@@ -181,7 +181,7 @@ void WorldView::InitObject()
 	m_hyperspaceButton->SetToolTip(Lang::HYPERSPACE_JUMP);
 	m_hyperspaceButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickHyperspace));
 	m_hyperspaceButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_hyperspaceButton, 66, 2);
+	//m_rightButtonBar->Add(m_hyperspaceButton, 66, 2);
 
 	// Launch button
 	m_launchButton = new Gui::ImageButton("icons/blastoff.png");
@@ -428,6 +428,17 @@ void WorldView::OnClickTransitButton(Gui::MultiStateImageButton *b)
 
 void WorldView::OnClickJumpButton(Gui::MultiStateImageButton *b)
 {
+	if (Pi::player->IsHyperspaceActive()) {
+		// Hyperspace countdown in effect.. abort!
+		Pi::player->ResetHyperspaceCountdown();
+		Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_OFF);
+	} else {
+		// Initiate hyperspace drive
+		SystemPath path = Pi::sectorView->GetHyperspaceTarget();
+		Pi::player->StartHyperspaceCountdown(path);
+		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
+	}
 }
 
 void WorldView::ShowParagonFlightButtons()
@@ -541,10 +552,19 @@ static Color get_color_for_warning_meter_bar(float v) {
 }
 
 void WorldView::RefreshHyperspaceButton() {
-	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget()))
+	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget())) {
 		m_hyperspaceButton->Show();
-	else
+		if(Pi::player->IsHyperspaceActive()) {
+			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
+		} else {
+			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_OFF);
+		}
+		m_flightJumpButton->SetEnabled(true);
+	} else {
 		m_hyperspaceButton->Hide();
+		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+		m_flightJumpButton->SetEnabled(false);		
+	}
 }
 
 void WorldView::RefreshButtonStateAndVisibility()
