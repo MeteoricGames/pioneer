@@ -905,6 +905,12 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.15f,1.0+i->population.ToFloat()*1000.0,0.2f));
 			m_disk->Draw(m_renderer);
 		}
+		else if (i->population.ToDouble()>0.000001) {
+			glDepthRange(0.15,1.0);
+			m_disk->SetColor(Color(0.f, 1.f, 1.f));
+			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.15f,1.0+1.0,0.2f));
+			m_disk->Draw(m_renderer);
+		}
 
 		// selected indicator
 		if (bIsCurrentSystem) {
