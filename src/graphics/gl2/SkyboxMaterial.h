@@ -11,7 +11,6 @@ namespace Graphics {
 	namespace GL2 {
 		class SkyboxMaterial : public Material {
 		private:
-			float fSkyboxFactor;
 
 		public:
 			SkyboxMaterial() {
@@ -38,6 +37,9 @@ namespace Graphics {
 				glPopAttrib();
 				m_program->Unuse();
 			}
+			
+			// Skybox multiplier
+			float fSkyboxFactor;
 		};
 	}
 }

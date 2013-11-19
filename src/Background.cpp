@@ -107,15 +107,14 @@ void UniverseBox::Draw(Graphics::Renderer *r)
 	}
 }
 
-void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Uint32 seed)
+void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Random* randomizer)
 {
-	Random rand(seed);
 	// Clean old texture
 	delete m_cubemap;
 	m_cubemap = nullptr;
-	// For seed = 0, custom system and no nebula rendered
-	if(seed > 0) {
-		int new_ubox_index = rand.Int32(0, 4);
+	
+	if(randomizer) {
+		int new_ubox_index = randomizer->Int32(0, 3);
 		if(new_ubox_index > 0) {
 			// Load new one
 			std::ostringstream os;
@@ -304,7 +303,7 @@ Container::Container(Graphics::Renderer *r, Uint32 seed)
 : m_milkyWay(r)
 , m_starField(r)
 , m_universeBox(r)
-, m_bLoadNewCubemap(false)
+, m_bLoadNewCubemap(true)
 , m_uSeed(seed)
 {
 	Refresh(seed);
@@ -316,26 +315,38 @@ void Container::Refresh(Uint32 seed)
 	m_starField.Fill(seed);
 	if(m_uSeed != seed) {
 		m_bLoadNewCubemap = true;
-		m_uSeed = seed;
 	}
+	m_uSeed = seed;
 }
 
 void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 {
 	if(m_bLoadNewCubemap) {
 		m_bLoadNewCubemap = false;
-		m_universeBox.LoadCubeMap(renderer, m_uSeed);
+		if(Pi::player && Pi::game->GetSpace()->GetStarSystem()) {
+			Uint32 seeds [5];
+			const SystemPath& system_path = Pi::game->GetSpace()->GetStarSystem()->GetPath();
+			seeds[0] = system_path.systemIndex + 151;
+			seeds[1] = system_path.sectorX;
+			seeds[2] = system_path.sectorY;
+			seeds[3] = system_path.sectorZ;
+			seeds[4] = UNIVERSE_SEED;
+			Random rand(seeds, 5);
+			m_universeBox.LoadCubeMap(renderer, &rand);
+		} else {
+			Random rand(m_uSeed);
+			m_universeBox.LoadCubeMap(renderer, &rand);
+		}
 	}
-
 	renderer->SetBlendMode(BLEND_SOLID);
 	renderer->SetDepthTest(false);
 	renderer->SetTransform(transform);
-	const_cast<UniverseBox&>(m_universeBox).Draw(renderer);
-	//const_cast<MilkyWay&>(m_milkyWay).Draw(renderer);
+	m_universeBox.Draw(renderer);
+	//m_milkyWay.Draw(renderer);
 	// squeeze the starfield a bit to get more density near horizon
 	matrix4x4d starTrans = transform * matrix4x4d::ScaleMatrix(1.0, 0.4, 1.0);
 	renderer->SetTransform(starTrans);
-	const_cast<Starfield&>(m_starField).Draw(renderer);
+	m_starField.Draw(renderer);
 	renderer->SetDepthTest(true);
 }
 

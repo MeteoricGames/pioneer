@@ -34,10 +34,13 @@ namespace Background
 		~UniverseBox();
 
 		void Draw(Graphics::Renderer *r);
-		void LoadCubeMap(Graphics::Renderer *r, Uint32 seed);
+		void LoadCubeMap(Graphics::Renderer *r, Random* randomizer);
 
 	private:
 		void Init(Graphics::Renderer *);
+		Random createRandom(Uint32 seed);
+		Random createRandom(const SystemPath& system_path);
+
 		Graphics::StaticMesh *m_model;
 		Graphics::Texture* m_cubemap;
 	};
