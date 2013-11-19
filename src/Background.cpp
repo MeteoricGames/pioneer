@@ -114,11 +114,11 @@ void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Random* randomizer)
 	m_cubemap = nullptr;
 	
 	if(randomizer) {
-		int new_ubox_index = randomizer->Int32(0, 3);
+		int new_ubox_index = randomizer->Int32(0, 4);
 		if(new_ubox_index > 0) {
 			// Load new one
 			std::ostringstream os;
-			os << "textures/cube/ub" << new_ubox_index << "/ub" << new_ubox_index << ".png";
+			os << "textures/cube/ub" << (new_ubox_index - 1) << "/ub" << (new_ubox_index - 1) << ".png";
 			TextureBuilder texture_builder = TextureBuilder::Cube(os.str().c_str());
 			m_cubemap = texture_builder.CreateTexture(r);
 			m_material->texture0 = m_cubemap;
@@ -326,7 +326,7 @@ void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 		if(Pi::player && Pi::game->GetSpace()->GetStarSystem()) {
 			Uint32 seeds [5];
 			const SystemPath& system_path = Pi::game->GetSpace()->GetStarSystem()->GetPath();
-			seeds[0] = system_path.systemIndex + 151;
+			seeds[0] = system_path.systemIndex + 41;
 			seeds[1] = system_path.sectorX;
 			seeds[2] = system_path.sectorY;
 			seeds[3] = system_path.sectorZ;
