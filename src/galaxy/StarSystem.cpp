@@ -1936,10 +1936,10 @@ void SystemBody::PickPlanetType(Random &rand)
 
 		averageTemp = CalcSurfaceTemp(star, averageDistToStar, albedo, greenhouse);
 
-		const fixed proportion_gas = averageTemp / (fixed(10,1) + averageTemp);
+		const fixed proportion_gas = averageTemp / (fixed(100,1) + averageTemp);
 		m_volatileGas = proportion_gas * amount_volatiles;
 
-		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(5,1) + averageTemp));
+		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(2,1) + averageTemp));
 		m_volatileLiquid = proportion_liquid * amount_volatiles;
 
 		const fixed proportion_ices = fixed(1,1) - (proportion_gas + proportion_liquid);
@@ -1947,7 +1947,7 @@ void SystemBody::PickPlanetType(Random &rand)
 
 		//printf("temp %dK, gas:liquid:ices %f:%f:%f\n", averageTemp, proportion_gas.ToFloat(),
 		//		proportion_liquid.ToFloat(), proportion_ices.ToFloat());
-		if ((m_volatileLiquid > fixed(0)) &&
+		if ((m_volatileLiquid > fixed(1,10)) &&
 		    (averageTemp > CELSIUS-400) &&
 		    (averageTemp < CELSIUS+300)) {
 			// try for life
@@ -1959,9 +1959,9 @@ void SystemBody::PickPlanetType(Random &rand)
 			if ((star->type != TYPE_BROWN_DWARF) &&
 			    (star->type != TYPE_WHITE_DWARF) &&
 			    (star->type != TYPE_STAR_O) &&
-			    (minTemp > CELSIUS-10) && (minTemp < CELSIUS+90) &&
-			    (maxTemp > CELSIUS-10) && (maxTemp < CELSIUS+90) && m_atmosDensity > 0.7) {
-				m_life = rand.Fixed();
+			    (minTemp > CELSIUS-100) && (minTemp < CELSIUS+90) &&
+			    (maxTemp > CELSIUS-100) && (maxTemp < CELSIUS+90)) {
+				m_life = fixed(1,4)+rand.Fixed();
 				m_atmosOxidizing = fixed(rand.Int32(190,200),200);
 			}
 		}
@@ -2116,10 +2116,10 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
 	m_agricultural = fixed(0);
 
-	if (m_life > fixed(9,10)&&this->HasAtmosphere()&&this->m_atmosDensity<3.0 && this->m_atmosDensity>0.7) {
+	if (m_life > fixed(9,10)&&this->HasAtmosphere()&&this->m_atmosDensity<3.0 && this->m_atmosDensity>0.5) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+25-averageTemp, 40), fixed(0), fixed(1,1));
 		system->m_agricultural += 2*m_agricultural;
-	} else if (m_life > fixed(1,2)&&this->HasAtmosphere()&&this->m_atmosDensity<3.0 && this->m_atmosDensity>0.7) {
+	} else if (m_life > fixed(1,2)&&this->HasAtmosphere()&&this->m_atmosDensity<3.0 && this->m_atmosDensity>0.5) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+30-averageTemp, 50), fixed(0), fixed(1,1));
 		system->m_agricultural += 1*m_agricultural;
 	} else {
@@ -2128,7 +2128,7 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 			m_metallicity < (fixed(1,1) - system->m_humanProx)) return;
 	}
 
-	if (!this->HasAtmosphere() || m_atmosDensity>3.0 || m_atmosDensity<0.7 || m_life < 0.1 || averageTemp-273 > 60 || averageTemp-273 < -60 || mass > 3.0 || mass < 0.2 || m_atmosOxidizing < fixed(7,10)) {
+	if (!this->HasAtmosphere() || m_atmosDensity>3.0 || m_atmosDensity<0.5 || m_life < 0.1 || averageTemp-273 > 90 || averageTemp-273 < -90 || mass > 3.0 || mass < 0.2 || m_atmosOxidizing < fixed(7,10)) {
 		m_population = fixed(1,100000)*rand.Fixed()*2.0; //max 20k on these..
 		outTotalPop += m_population;
 		return;
