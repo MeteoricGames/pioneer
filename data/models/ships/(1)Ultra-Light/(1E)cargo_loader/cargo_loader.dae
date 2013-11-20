@@ -28,8 +28,8 @@
             </comments>
             <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/ships/(1)Ultra-Light/(1E)cargo_loader/cargo_loader.dae</source_data>
         </contributor>
-        <created>2013-09-20T08:45:15Z</created>
-        <modified>2013-09-20T08:45:15Z</modified>
+        <created>2013-11-18T10:28:06Z</created>
+        <modified>2013-11-18T10:28:06Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -295,10 +295,10 @@
                         2.54674 0.99534 13.7279
                         2.54674 -0.32534 13.7279
                         3.65632 -0.32534 9.9553
-                        -1.68934 3.75 0
-                        -1.68934 -3.75 0
-                        1.68934 3.75 0
-                        1.68934 -3.75 0
+                        -1.68934 3.75 2.52358e-016
+                        -1.68934 -3.75 2.22051e-016
+                        1.68934 3.75 -2.22051e-016
+                        1.68934 -3.75 -2.52358e-016
                         -1.68934 2.75 -1
                         -1.68934 -2.75 -1
                         1.68934 2.75 -1
@@ -629,14 +629,14 @@
                         2.79289 -3.5 0.5
                         -2.79289 3.5 0.5
                         2.79289 3.5 0.5
-                        4.5 1.79289 0
-                        4.5 -1.79289 0
-                        -4.5 1.79289 0
-                        -4.5 -1.79289 0
-                        -2.79289 -3.5 0
-                        2.79289 -3.5 0
-                        -2.79289 3.5 0
-                        2.79289 3.5 0
+                        4.5 1.79289 -1.17522e-016
+                        4.5 -1.79289 3.31525e-016
+                        -4.5 1.79289 -3.31525e-016
+                        -4.5 -1.79289 1.17522e-016
+                        -2.79289 -3.5 1.17522e-016
+                        2.79289 -3.5 -8.6596e-017
+                        -2.79289 3.5 8.6596e-017
+                        2.79289 3.5 -1.17522e-016
                         -3.89052 1.14534 9.86783
                         -3.89052 -0.47534 9.86783
                         3.89052 -0.47534 9.86783
@@ -693,34 +693,34 @@
                         5.11967 -4.66967 -2.4
                         -5.11967 4.66967 -2.4
                         -5.11967 -4.66967 -2.4
-                        -1.5 3.5 0
-                        -1.5 -3.5 0
-                        1.5 3.5 0
-                        1.5 -3.5 0
-                        1.5 0 0
-                        -1.5 0 0
-                        4.5 0 0
-                        -4.5 0 0
-                        -2.1 -0.6 0
-                        -2.1 -2.9 0
-                        -2.54436 -2.9 0
-                        -3.9 -1.54437 0
-                        -3.9 -0.6 0
-                        2.1 -0.6 0
-                        3.9 -0.6 0
-                        3.9 -1.54437 0
-                        2.54436 -2.9 0
-                        2.1 -2.9 0
-                        2.1 0.6 0
-                        2.1 2.9 0
-                        2.54436 2.9 0
-                        3.9 1.54437 0
-                        3.9 0.6 0
-                        -2.1 0.6 0
-                        -3.9 0.6 0
-                        -3.9 1.54437 0
-                        -2.54436 2.9 0
-                        -2.1 2.9 0
+                        -1.5 3.5 2.44929e-016
+                        -1.5 -3.5 2.75855e-016
+                        1.5 3.5 -2.75855e-016
+                        1.5 -3.5 -2.44929e-016
+                        1.5 -5.21922e-024 1.83697e-016
+                        -1.5 5.21922e-024 -1.83697e-016
+                        4.5 1.08121e-023 -3.37087e-016
+                        -4.5 -1.08121e-023 3.37087e-016
+                        -2.1 -0.6 -3.30655e-016
+                        -2.1 -2.9 2.75855e-016
+                        -2.54436 -2.9 2.21437e-016
+                        -3.9 -1.54437 2.21435e-016
+                        -3.9 -0.6 3.37087e-016
+                        2.1 -0.6 1.83697e-016
+                        3.9 -0.6 4.04133e-016
+                        3.9 -1.54437 2.88481e-016
+                        2.54436 -2.9 -4.35534e-017
+                        2.1 -2.9 -9.79718e-017
+                        2.1 0.6 3.30655e-016
+                        2.1 2.9 -2.75855e-016
+                        2.54436 2.9 -2.21437e-016
+                        3.9 1.54437 -2.21435e-016
+                        3.9 0.6 -3.37087e-016
+                        -2.1 0.6 -1.83697e-016
+                        -3.9 0.6 -4.04133e-016
+                        -3.9 1.54437 -2.88481e-016
+                        -2.54436 2.9 4.35534e-017
+                        -2.1 2.9 9.79718e-017
                         -2.1 -0.6 0.2
                         -2.1 -2.9 0.2
                         -2.54436 -2.9 0.2
@@ -3005,56 +3005,56 @@
                 </extra>
             </mesh>
         </geometry>
-        <geometry id="Geometry-mesh052" name="decal_01">
+        <geometry id="Geometry-decal_01" name="decal_01">
             <mesh>
-                <source id="Geometry-mesh052-positions" name="positions">
-                    <float_array id="Geometry-mesh052-positions-array" count="12">
+                <source id="Geometry-decal_01-positions" name="positions">
+                    <float_array id="Geometry-decal_01-positions-array" count="12">
                         1.08534 3.3 -5.644
                         -1.08534 3.3 -5.644
                         1.08534 3.3 -7.636
                         -1.08534 3.3 -7.636
                     </float_array>
                     <technique_common>
-                        <accessor count="4" source="#Geometry-mesh052-positions-array" stride="3">
+                        <accessor count="4" source="#Geometry-decal_01-positions-array" stride="3">
                             <param name="X" type="float" />
                             <param name="Y" type="float" />
                             <param name="Z" type="float" />
                         </accessor>
                     </technique_common>
                 </source>
-                <source id="Geometry-mesh052-normals" name="normals">
-                    <float_array id="Geometry-mesh052-normals-array" count="3">
+                <source id="Geometry-decal_01-normals" name="normals">
+                    <float_array id="Geometry-decal_01-normals-array" count="3">
                         0 1 0
                     </float_array>
                     <technique_common>
-                        <accessor count="1" source="#Geometry-mesh052-normals-array" stride="3">
+                        <accessor count="1" source="#Geometry-decal_01-normals-array" stride="3">
                             <param name="X" type="float" />
                             <param name="Y" type="float" />
                             <param name="Z" type="float" />
                         </accessor>
                     </technique_common>
                 </source>
-                <source id="Geometry-mesh052-Texture" name="Texture">
-                    <float_array id="Geometry-mesh052-Texture-array" count="8">
+                <source id="Geometry-decal_01-Texture" name="Texture">
+                    <float_array id="Geometry-decal_01-Texture-array" count="8">
                         0.982803 0.984923
                         0.0123513 0.984923
                         0.0123513 0.0103536
                         0.982803 0.0103536
                     </float_array>
                     <technique_common>
-                        <accessor count="4" source="#Geometry-mesh052-Texture-array" stride="2">
+                        <accessor count="4" source="#Geometry-decal_01-Texture-array" stride="2">
                             <param name="S" type="float" />
                             <param name="T" type="float" />
                         </accessor>
                     </technique_common>
                 </source>
-                <vertices id="Geometry-mesh052-vertices">
-                    <input semantic="POSITION" source="#Geometry-mesh052-positions" />
+                <vertices id="Geometry-decal_01-vertices">
+                    <input semantic="POSITION" source="#Geometry-decal_01-positions" />
                 </vertices>
                 <polylist count="1" material="Material-material1">
-                    <input semantic="VERTEX" source="#Geometry-mesh052-vertices" offset="0" />
-                    <input semantic="NORMAL" source="#Geometry-mesh052-normals" offset="1" />
-                    <input semantic="TEXCOORD" source="#Geometry-mesh052-Texture" offset="2" set="0" />
+                    <input semantic="VERTEX" source="#Geometry-decal_01-vertices" offset="0" />
+                    <input semantic="NORMAL" source="#Geometry-decal_01-normals" offset="1" />
+                    <input semantic="TEXCOORD" source="#Geometry-decal_01-Texture" offset="2" set="0" />
                     <vcount>4</vcount>
                     <p>1 0 0 0 0 1 2 0 2 3 0 3</p>
                 </polylist>
@@ -3265,20 +3265,44 @@
                 <translate sid="translation012">-6.6 0 5.5</translate>
                 <scale sid="scale040">8.425 8.425 8.425</scale>
             </node>
-            <node id="Texture_GroupNode" name="Texture_Group" type="NODE">
-                <node id="Snone___Image___Texture_Node" name="_none___Image___Texture_" type="NODE">
-                    <translate sid="translation013">0 0 0</translate>
-                    <rotate sid="rotation027Y">0 1 0 0</rotate>
-                    <rotate sid="rotation027X">1 0 0 0</rotate>
-                    <rotate sid="rotation027Z">0 0 1 0</rotate>
-                    <scale sid="scale041">1 1 1</scale>
-                </node>
-            </node>
             <node id="navlight_red_1Node" name="navlight_red_1" type="NODE">
                 <translate sid="translation014">-10.2 0 -1.25</translate>
             </node>
             <node id="navlight_green_1Node" name="navlight_green_1" type="NODE">
                 <translate sid="translation015">10.2 0 -1.25</translate>
+            </node>
+            <node id="locator056Node" name="tag_camera_back" type="NODE">
+                <translate sid="translation058">0 0 6</translate>
+            </node>
+            <node id="locator053Node" name="tag_camera_bottom" type="NODE">
+                <translate sid="translation060">0 -5.72 0</translate>
+                <rotate sid="rotation059Y">0 1 0 0</rotate>
+                <rotate sid="rotation059X">1 0 0 90</rotate>
+                <rotate sid="rotation059Z">0 0 1 180</rotate>
+            </node>
+            <node id="locator057Node" name="tag_camera_top" type="NODE">
+                <translate sid="translation062">0 6.04 0</translate>
+                <rotate sid="rotation061Y">0 1 0 0</rotate>
+                <rotate sid="rotation061X">1 0 0 270</rotate>
+                <rotate sid="rotation061Z">0 0 1 180</rotate>
+            </node>
+            <node id="locator055Node" name="tag_camera_left" type="NODE">
+                <translate sid="translation064">-11 0 0</translate>
+                <rotate sid="rotation063Y">0 1 0 -90</rotate>
+                <rotate sid="rotation063X">1 0 0 0</rotate>
+                <rotate sid="rotation063Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator052Node" name="tag_camera_front" type="NODE">
+                <translate sid="translation066">0 0 -14.7</translate>
+                <rotate sid="rotation065Y">0 1 0 -180</rotate>
+                <rotate sid="rotation065X">1 0 0 0</rotate>
+                <rotate sid="rotation065Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator054Node" name="tag_camera_right" type="NODE">
+                <translate sid="translation068">11 0 0</translate>
+                <rotate sid="rotation067Y">0 1 0 90</rotate>
+                <rotate sid="rotation067X">1 0 0 0</rotate>
+                <rotate sid="rotation067Z">0 0 1 0</rotate>
             </node>
             <node id="Geometry-cargo_loaderNode" name="cargo_loader" type="NODE">
                 <translate sid="translation016">0 0 0</translate>
@@ -3294,8 +3318,8 @@
                     </bind_material>
                 </instance_geometry>
             </node>
-            <node id="Geometry-mesh052Node" name="decal_01" type="NODE">
-                <instance_geometry url="#Geometry-mesh052">
+            <node id="Geometry-decal_01Node" name="decal_01" type="NODE">
+                <instance_geometry url="#Geometry-decal_01">
                     <bind_material>
                         <technique_common>
                             <instance_material symbol="Material-material1" target="#Material-material1" />

@@ -26,10 +26,10 @@
                 Save 3ds Max Profile: Yes;
                 Formatted Arrays: Yes;
             </comments>
-            <source_data>file:///C:/Users/rivalin/Desktop/pioneercurrent/data/models/ships/(1)Ultra-Light/(1C)mining_pod/Mining_Pod.dae</source_data>
+            <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/ships/(1)Ultra-Light/(1C)mining_pod/mining_pod.dae</source_data>
         </contributor>
-        <created>2013-11-15T12:26:21Z</created>
-        <modified>2013-11-15T12:26:21Z</modified>
+        <created>2013-11-18T10:16:07Z</created>
+        <modified>2013-11-18T10:16:07Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -87,7 +87,7 @@
                             <color sid="specular_effect_rgb">0.2 0.2 0.2 1</color>
                         </specular>
                         <shininess>
-                            <float sid="specular_effect_rgb">0.4</float>
+                            <float sid="specular_effect_rgb">256</float>
                         </shininess>
                     </phong>
                 </technique>
@@ -3033,14 +3033,38 @@
             <node id="Mesh__3_Node" name="Mesh__3_" type="NODE" />
             <node id="Mesh__4_Node" name="Mesh__4_" type="NODE" />
             <node id="Mesh__5_Node" name="Mesh__5_" type="NODE" />
-            <node id="Texture_GroupNode" name="Texture_Group" type="NODE">
-                <node id="auz09u__Image___Texture_Node" name="auz09u__Image___Texture_" type="NODE">
-                    <translate sid="translation013">0 0 0</translate>
-                    <rotate sid="rotation026Y">0 1 0 0</rotate>
-                    <rotate sid="rotation026X">1 0 0 0</rotate>
-                    <rotate sid="rotation026Z">0 0 1 0</rotate>
-                    <scale sid="scale039">1 1 1</scale>
-                </node>
+            <node id="locator051Node" name="tag_camera_top" type="NODE">
+                <translate sid="translation058">0 3.62 0</translate>
+                <rotate sid="rotation057Y">0 1 0 0</rotate>
+                <rotate sid="rotation057X">1 0 0 270</rotate>
+                <rotate sid="rotation057Z">0 0 1 180</rotate>
+            </node>
+            <node id="locator054Node" name="tag_camera_left" type="NODE">
+                <translate sid="translation060">-4 0 0</translate>
+                <rotate sid="rotation059Y">0 1 0 -90</rotate>
+                <rotate sid="rotation059X">1 0 0 0</rotate>
+                <rotate sid="rotation059Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator056Node" name="tag_camera_front" type="NODE">
+                <translate sid="translation062">0 0 -4.38</translate>
+                <rotate sid="rotation061Y">0 1 0 -180</rotate>
+                <rotate sid="rotation061X">1 0 0 0</rotate>
+                <rotate sid="rotation061Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator053Node" name="tag_camera_right" type="NODE">
+                <translate sid="translation064">4 0 0</translate>
+                <rotate sid="rotation063Y">0 1 0 90</rotate>
+                <rotate sid="rotation063X">1 0 0 0</rotate>
+                <rotate sid="rotation063Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator055Node" name="tag_camera_back" type="NODE">
+                <translate sid="translation065">0 0 8.7</translate>
+            </node>
+            <node id="locator052Node" name="tag_camera_bottom" type="NODE">
+                <translate sid="translation067">0 -2 0</translate>
+                <rotate sid="rotation066Y">0 1 0 0</rotate>
+                <rotate sid="rotation066X">1 0 0 90</rotate>
+                <rotate sid="rotation066Z">0 0 1 180</rotate>
             </node>
             <node id="Geometry-MeshNode" name="Mesh" type="NODE">
                 <instance_geometry url="#Geometry-Mesh">
