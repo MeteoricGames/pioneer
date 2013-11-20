@@ -20,6 +20,6 @@ lod 1000
 
 mesh cargo_loader.dae
 
-collision passenger_shuttle_collision.obj
+collision cargo_loader_collision.obj
 
 
