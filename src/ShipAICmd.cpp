@@ -17,6 +17,7 @@
 
 static const double VICINITY_MIN = 15000.0;
 static const double VICINITY_MUL = 4.0;
+static const float TRANSIT_START_SPEED = 100000.0f;
 
 AICommand *AICommand::Load(Serializer::Reader &rd)
 {
@@ -718,8 +719,9 @@ AICmdFlyTo::~AICmdFlyTo()
 {
 	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		// Transit interrupted
-		float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
-			m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
+		//float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
+		//	m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
+		float interrupt_velocity = TRANSIT_START_SPEED;
 		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
 		m_ship->SetJuice(20.0);
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
@@ -743,8 +745,8 @@ bool AICmdFlyTo::TimeStepUpdate()
 	Equip::Type t = m_ship->m_equipment.Get(Equip::SLOT_ENGINE);
 	int hyperclass = Equip::types[t].pval;
 	// Required speed for transit to kick in and accelerate ship
-	const float transit_start_speed = m_ship->GetMaxManeuverSpeed() < 100000.0f? m_ship->GetMaxManeuverSpeed() : 100000.0f;
-	// Required speed for transit ready state (plays a sound), may cause an issue if max maneuver speed is set to something less than 10000?
+	const float transit_start_speed = TRANSIT_START_SPEED;
+	// Required speed for transit ready state (plays the start sound), may cause an issue if max maneuver speed is set to something less than 10000?
 	const float transit_ready_speed = std::max<float>(0.0f, transit_start_speed - 5000.0f);
 
 	if (m_targframe && m_ship && !m_child){   //orbit order planet. dock planet

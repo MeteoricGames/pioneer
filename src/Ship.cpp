@@ -1066,7 +1066,9 @@ void Ship::StaticUpdate(const float timeStep)
 
 	UpdateAlertState();
 
-	ApplyThrusterLimits();
+	if(!AIIsActive()) {
+		ApplyThrusterLimits();
+	}
 
 	/* FUEL SCOOPING!!!!!!!!! */
 	if ((m_flightState == FLYING) && (m_equipment.Get(Equip::SLOT_FUELSCOOP) != Equip::NONE)) {
