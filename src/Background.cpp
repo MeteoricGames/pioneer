@@ -323,19 +323,23 @@ void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 {
 	if(m_bLoadNewCubemap) {
 		m_bLoadNewCubemap = false;
-		if(Pi::player && Pi::game->GetSpace()->GetStarSystem()) {
-			Uint32 seeds [5];
-			const SystemPath& system_path = Pi::game->GetSpace()->GetStarSystem()->GetPath();
-			seeds[0] = system_path.systemIndex + 41;
-			seeds[1] = system_path.sectorX;
-			seeds[2] = system_path.sectorY;
-			seeds[3] = system_path.sectorZ;
-			seeds[4] = UNIVERSE_SEED;
-			Random rand(seeds, 5);
-			m_universeBox.LoadCubeMap(renderer, &rand);
+		if(Pi::player == nullptr || Pi::player->GetFlightState() != Ship::HYPERSPACE) {
+			if(Pi::player && Pi::game->GetSpace()->GetStarSystem()) {
+				Uint32 seeds [5];
+				const SystemPath& system_path = Pi::game->GetSpace()->GetStarSystem()->GetPath();
+				seeds[0] = system_path.systemIndex + 41;
+				seeds[1] = system_path.sectorX;
+				seeds[2] = system_path.sectorY;
+				seeds[3] = system_path.sectorZ;
+				seeds[4] = UNIVERSE_SEED;
+				Random rand(seeds, 5);
+				m_universeBox.LoadCubeMap(renderer, &rand);
+			} else {
+				Random rand(m_uSeed);
+				m_universeBox.LoadCubeMap(renderer, &rand);
+			}
 		} else {
-			Random rand(m_uSeed);
-			m_universeBox.LoadCubeMap(renderer, &rand);
+			m_universeBox.LoadCubeMap(renderer);
 		}
 	}
 	renderer->SetBlendMode(BLEND_SOLID);

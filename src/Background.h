@@ -34,7 +34,7 @@ namespace Background
 		~UniverseBox();
 
 		void Draw(Graphics::Renderer *r);
-		void LoadCubeMap(Graphics::Renderer *r, Random* randomizer);
+		void LoadCubeMap(Graphics::Renderer *r, Random* randomizer = nullptr);
 
 	private:
 		void Init(Graphics::Renderer *);
