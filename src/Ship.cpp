@@ -425,8 +425,6 @@ void Ship::SetThrusterState(int axis, double level)
 }
 
 // Effectively applies speed limit set in maxManeuverSpeed (max_maneuver_speed in ship info)
-//   Issues:
-//     1. This might apply to any flight mode not only MANEUVER
 void Ship::ApplyThrusterLimits()
 {
 	float max_maneuver_speed = GetShipType()->maxManeuverSpeed;
@@ -511,7 +509,9 @@ double Ship::GetAccelUp() const {
 void Ship::ClearThrusterState()
 {
 	m_angThrusters = vector3d(0,0,0);
-	if (m_launchLockTimeout <= 0.0f) m_thrusters = vector3d(0,0,0);
+	if (m_launchLockTimeout <= 0.0f) {
+		m_thrusters = vector3d(0,0,0);
+	}
 }
 
 Equip::Type Ship::GetHyperdriveFuelType() const

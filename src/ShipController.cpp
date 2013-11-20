@@ -94,18 +94,20 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 		switch (m_flightControlState) {
 		case CONTROL_MANEUVER:
 			PollControls(timeStep, true);
-			if (IsAnyLinearThrusterKeyDown()) break;
-			v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
-			if (m_setSpeedTarget) {
-				v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
-			}
-			m_ship->AIMatchVel(v);
+			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
+				if (IsAnyLinearThrusterKeyDown()) break;
+				v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
+				if (m_setSpeedTarget) {
+					v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+				}
+				m_ship->AIMatchVel(v);
 
-			// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
-			current_velocity = m_ship->GetVelocity().Length();
-			if(current_velocity >= m_ship->GetShipType()->maxManeuverSpeed ||
-				current_velocity <= -m_ship->GetShipType()->maxManeuverSpeed) {
-				v = vector3d(0.0, 0.0, 0.0);
+				// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
+				current_velocity = m_ship->GetVelocity().Length();
+				if(current_velocity >= m_ship->GetShipType()->maxManeuverSpeed ||
+					current_velocity <= -m_ship->GetShipType()->maxManeuverSpeed) {
+					v = vector3d(0.0, 0.0, 0.0);
+				}
 			}
 			break;
 		case CONTROL_MANUAL:

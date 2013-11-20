@@ -86,6 +86,7 @@ public:
 	void SetAngThrusterState(const vector3d &levels);
 	vector3d GetAngThrusterState() const { return m_angThrusters; }
 	void ClearThrusterState();
+	float GetLaunchLockTimeout() const { return m_launchLockTimeout; }
 
 	vector3d GetMaxThrust(const vector3d &dir) const;
 	float GetMaxManeuverSpeed() const;
