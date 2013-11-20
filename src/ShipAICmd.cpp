@@ -11,6 +11,8 @@
 #include "Planet.h"
 #include "SpaceStation.h"
 #include "Space.h"
+#include "Sound.h"
+#include "Sfx.h"
 
 
 static const double VICINITY_MIN = 15000.0;
@@ -231,18 +233,6 @@ bool AICmdKamikaze::TimeStepUpdate()
 	m_ship->AIAccelToModelRelativeVelocity(aimVel * m_ship->GetOrient());
 
 	return false;
-}
-
-AICmdFlyTo::~AICmdFlyTo()
-{
-	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
-		// Transit interrupted
-		float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
-			m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
-		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
-		m_ship->SetJuice(20.0);
-		m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
-	}
 }
 
 bool AICmdKill::TimeStepUpdate()
@@ -722,6 +712,19 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, double dist) : AICommand(ship, 
 			}
 	}
 	m_target = target; m_targframe = 0;
+}
+
+AICmdFlyTo::~AICmdFlyTo()
+{
+	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
+		// Transit interrupted
+		float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
+			m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
+		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
+		m_ship->SetJuice(20.0);
+		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
+		m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
+	}
 }
 
 // Specified pos, endvel should be > 0
