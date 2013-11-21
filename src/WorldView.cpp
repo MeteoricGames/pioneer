@@ -115,23 +115,6 @@ void WorldView::InitObject()
 		btn->onClick.connect(sigc::bind(sigc::mem_fun(this, &WorldView::OnSelectLowThrustPower), LOW_THRUST_LEVELS[i]));
 	}
 
-	// Wheels button
-	m_wheelsButton = new Gui::MultiStateImageButton();
-	m_wheelsButton->SetShortcut(SDLK_F6, KMOD_NONE);
-	m_wheelsButton->AddState(0, "icons/wheels_up.png", Lang::WHEELS_ARE_UP);
-	m_wheelsButton->AddState(1, "icons/wheels_down.png", Lang::WHEELS_ARE_DOWN);
-	m_wheelsButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeWheelsState));
-	m_wheelsButton->SetRenderDimensions(30.0f, 22.0f);
-	//m_rightButtonBar->Add(m_wheelsButton, 34, 2);
-
-	// Low thrust button
-	Gui::ImageButton *set_low_thrust_power_button = new Gui::ImageButton("icons/set_low_thrust_power.png");
-	set_low_thrust_power_button->SetShortcut(SDLK_F8, KMOD_NONE);
-	set_low_thrust_power_button->SetToolTip(Lang::SELECT_LOW_THRUST_POWER_LEVEL);
-	set_low_thrust_power_button->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickLowThrustPower));
-	set_low_thrust_power_button->SetRenderDimensions(30.0f, 22.0f);
-	//m_rightButtonBar->Add(set_low_thrust_power_button, 98, 2);
-
 	//// Paragon Flight System
 	// Autopilot button
 	m_flightAutopilotButton = new Gui::MultiStateImageButton();
@@ -371,14 +354,6 @@ void WorldView::UpdateCameraName()
 	m_showCameraNameTimeout = SDL_GetTicks();
 }
 
-void WorldView::OnChangeWheelsState(Gui::MultiStateImageButton *b)
-{
-	Pi::BoinkNoise();
-	if (!Pi::player->SetWheelState(b->GetState()!=0)) {
-		b->StatePrev();
-	}
-}
-
 void WorldView::OnClickAutopilotButton(Gui::MultiStateImageButton *b)
 {
 	int newState = b->GetState();
@@ -586,8 +561,6 @@ void WorldView::RefreshButtonStateAndVisibility()
 		Pi::cpan->SetOverlayToolTip(ShipCpanel::OVERLAY_BOTTOM_LEFT,  Lang::EXTERNAL_ATMOSPHERIC_PRESSURE);
 		Pi::cpan->SetOverlayToolTip(ShipCpanel::OVERLAY_BOTTOM_RIGHT, Lang::SHIP_ALTITUDE_ABOVE_TERRAIN);
 	}
-
-	m_wheelsButton->SetActiveState(int(Pi::player->GetWheelState()) || Pi::player->GetWheelTransition() == 1);
 
 	RefreshHyperspaceButton();
 
@@ -1157,15 +1130,6 @@ void WorldView::ShowLowThrustPowerOptions()
 	m_showLowThrustPowerTimeout = SDL_GetTicks();
 	m_lowThrustPowerOptions->Show();
 	HideTargetActions();
-}
-
-void WorldView::OnClickLowThrustPower()
-{
-	Pi::BoinkNoise();
-	if (m_showLowThrustPowerTimeout)
-		HideLowThrustPowerOptions();
-	else
-		ShowLowThrustPowerOptions();
 }
 
 void WorldView::OnSelectLowThrustPower(float power)

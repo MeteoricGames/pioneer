@@ -100,7 +100,6 @@ private:
 
 	void HideLowThrustPowerOptions();
 	void ShowLowThrustPowerOptions();
-	void OnClickLowThrustPower();
 	void OnSelectLowThrustPower(float power);
 
 	// Paragon flight system
@@ -112,7 +111,6 @@ private:
 	void HideParagonFlightButtons();
 
 	void OnClickHyperspace();
-	void OnChangeWheelsState(Gui::MultiStateImageButton *b);
 	void OnChangeFlightState(Gui::MultiStateImageButton *b);
 	void OnHyperspaceTargetChanged();
 	void OnPlayerDockOrUndock();
@@ -135,7 +133,6 @@ private:
 	Gui::Fixed *m_lowThrustPowerOptions;
 	Gui::Label *m_flightStatus, *m_debugText;
 	Gui::ImageButton *m_launchButton;
-	Gui::MultiStateImageButton *m_wheelsButton;
 
 	Gui::MultiStateImageButton *m_flightControlButton;
 

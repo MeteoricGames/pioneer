@@ -432,7 +432,10 @@ bool SpaceStation::OnCollision(Object *b, Uint32 flags, double relVel)
 		if (IsGroundStation()) {
 			vector3d dockingNormal = GetOrient()*dport.yaxis;
 			const double dot = s->GetOrient().VectorY().Dot(dockingNormal);
-			if ((dot < 0.99) || (s->GetWheelState() < 1.0)) return false;	// <0.99 harsh?
+			if (dot < 0.99) return false;	// <0.99 harsh?
+			if (s->GetWheelState() < 1.0) {
+				s->SetWheelState(true);
+			}
 			if (s->GetVelocity().Length() > MAX_LANDING_SPEED) {
 				// This is causing a bug: randomly when a ship is trying to dock it never switches to docking states
 				//return false;
