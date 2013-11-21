@@ -18,13 +18,6 @@
 static const double VICINITY_MIN = 15000.0;
 static const double VICINITY_MUL = 4.0;
 
-// Transit
-static const double GRAVITY_RANGE_1 = 15000.0;
-static const double GRAVITY_RANGE_2 = 50000.0;
-static const double TRANSIT_START_SPEED = 100000.0;
-static const double TRANSIT_DRIVE_1_SPEED = 349999.0;
-static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
-
 AICommand *AICommand::Load(Serializer::Reader &rd)
 {
 	CmdName name = CmdName(rd.Int32());

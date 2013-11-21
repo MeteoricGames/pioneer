@@ -115,6 +115,10 @@ void WorldView::InitObject()
 		btn->onClick.connect(sigc::bind(sigc::mem_fun(this, &WorldView::OnSelectLowThrustPower), LOW_THRUST_LEVELS[i]));
 	}
 
+	//// Altitude
+	m_bAltitudeAvailable = false;
+	m_altitude = 0.0;
+
 	//// Paragon Flight System
 	// Autopilot button
 	m_flightAutopilotButton = new Gui::MultiStateImageButton();
@@ -388,6 +392,7 @@ void WorldView::OnClickManeuverButton(Gui::MultiStateImageButton *b)
 
 void WorldView::OnClickTransitButton(Gui::MultiStateImageButton *b)
 {
+
 }
 
 void WorldView::OnClickJumpButton(Gui::MultiStateImageButton *b)
@@ -537,6 +542,13 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 	RefreshHyperspaceButton();
 
+	bool is_outside_gravity_bubble = false;
+	if(m_bAltitudeAvailable) {
+		if(m_altitude > TRANSIT_GRAVITY_RANGE_1) {
+			is_outside_gravity_bubble = true;
+		}
+	}
+
 	switch(Pi::player->GetFlightState()) {
 		case Ship::LANDED:
 			m_flightStatus->SetText(Lang::LANDED);
@@ -579,6 +591,14 @@ void WorldView::RefreshButtonStateAndVisibility()
 						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
 						m_flightAutopilotButton->SetEnabled(true);
 					}
+					// If it's outside the gravity bubble, enable transit button
+					if(is_outside_gravity_bubble) {
+						m_flightTransitButton->SetEnabled(true);
+						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					} else {
+						m_flightTransitButton->SetEnabled(false);
+						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+					}
 					break;
 
 				case CONTROL_MANEUVER: {
@@ -599,6 +619,14 @@ void WorldView::RefreshButtonStateAndVisibility()
 						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
 						m_flightAutopilotButton->SetEnabled(true);
 					}
+					// If it's outside the gravity bubble, enable transit button
+					if(is_outside_gravity_bubble) {
+						m_flightTransitButton->SetEnabled(true);
+						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					} else {
+						m_flightTransitButton->SetEnabled(false);
+						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+					}
 					break;
 				}
 
@@ -606,8 +634,10 @@ void WorldView::RefreshButtonStateAndVisibility()
 					m_flightStatus->SetText(Lang::AUTOPILOT);
 					m_flightAutopilotButton->SetEnabled(true);
 					m_flightManeuverButton->SetEnabled(true);
+					m_flightTransitButton->SetEnabled(false);
 					m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_ON);
 					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
 					break;
 
 				default: assert(0); break;
@@ -722,6 +752,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 		// altitude
 		const Frame* frame = Pi::player->GetFrame();
+		m_bAltitudeAvailable = false;
 		if (frame->GetBody() && frame->GetBody()->IsType(Object::SPACESTATION))
 			frame = frame->GetParent();
 		if (frame && frame->GetBody() && frame->GetBody()->IsType(Object::TERRAINBODY) &&
@@ -745,12 +776,15 @@ void WorldView::RefreshButtonStateAndVisibility()
 					double vspeed = velocity.Dot(surface_pos);
 					if (fabs(vspeed) < 0.05) vspeed = 0.0; // Avoid alternating between positive/negative zero
 					if (altitude < 0) altitude = 0;
-					if (altitude >= 100000.0)
+					if (altitude >= 100000.0) {
 						Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_BOTTOM_RIGHT, stringf(Lang::ALT_IN_KM, formatarg("altitude", altitude / 1000.0),
 							formatarg("vspeed", vspeed / 1000.0)));
-					else
+					} else {
 						Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_BOTTOM_RIGHT, stringf(Lang::ALT_IN_METRES, formatarg("altitude", altitude),
 							formatarg("vspeed", vspeed)));
+					}
+					m_bAltitudeAvailable = true;
+					m_altitude = altitude;
 				} else {
 					Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_BOTTOM_RIGHT, "");
 				}
@@ -758,6 +792,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 				Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_BOTTOM_RIGHT, "");
 			}
 
+			// atmosphere and pressure
 			if (astro->IsType(Object::PLANET)) {
 				double pressure, density;
 				static_cast<Planet*>(astro)->GetAtmosphericState(center_dist, &pressure, &density);

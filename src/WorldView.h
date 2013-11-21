@@ -138,6 +138,10 @@ private:
 	Gui::MultiStateImageButton *m_flightTransitButton;
 	Gui::MultiStateImageButton *m_flightJumpButton;
 
+	// Used to cache altitude calculation in WorldView::RefreshButtonStateAndVisibility()
+	bool m_bAltitudeAvailable;
+	double m_altitude;
+
 	bool m_labelsOn;
 	enum CamType m_camType;
 	Uint32 m_showTargetActionsTimeout;

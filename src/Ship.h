@@ -57,6 +57,13 @@ enum TransitState {
 	TRANSIT_DRIVE_FINISHED,
 };
 
+// Transit Constants
+static const double TRANSIT_GRAVITY_RANGE_1 = 15000.0;
+static const double TRANSIT_GRAVITY_RANGE_2 = 50000.0;
+static const double TRANSIT_START_SPEED = 100000.0;
+static const double TRANSIT_DRIVE_1_SPEED = 349999.0;
+static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
+
 class Ship: public DynamicBody {
 	friend class ShipController; //only controllers need access to AITimeStep
 	friend class PlayerShipController;
