@@ -17,7 +17,13 @@
 
 static const double VICINITY_MIN = 15000.0;
 static const double VICINITY_MUL = 4.0;
-static const float TRANSIT_START_SPEED = 100000.0f;
+
+// Transit
+static const double GRAVITY_RANGE_1 = 15000.0;
+static const double GRAVITY_RANGE_2 = 50000.0;
+static const double TRANSIT_START_SPEED = 100000.0;
+static const double TRANSIT_DRIVE_1_SPEED = 349999.0;
+static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
 
 AICommand *AICommand::Load(Serializer::Reader &rd)
 {
@@ -683,14 +689,14 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target) : AICommand(ship, CMD_FLYTO)
 	else m_dist = VICINITY_MUL*MaxEffectRad(target, ship);
 
 	if (target->IsType(Object::SPACESTATION) && static_cast<SpaceStation*>(target)->IsGroundStation()) {
-		m_posoff = target->GetPosition() + 15000.0 * target->GetOrient().VectorY();
-		m_posoff.x+=Pi::rng.Int32(-500,500);
+		m_posoff = target->GetPosition() + VICINITY_MIN * target->GetOrient().VectorY();
+		m_posoff.x+=Pi::rng.Int32(-500, 500);
 	//	m_posoff += 500.0 * target->GetOrient().VectorX();
 		m_targframe = target->GetFrame(); m_target = 0;
 	}
 	else { m_target = target; m_targframe = 0; }
 
-	if (ship->GetPositionRelTo(target).Length() <= 15000.0) {		
+	if (ship->GetPositionRelTo(target).Length() <= VICINITY_MIN) {		
 		m_targframe = 0;
 		m_ship->SetJuice(1.0);
 	}
@@ -719,8 +725,6 @@ AICmdFlyTo::~AICmdFlyTo()
 {
 	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		// Transit interrupted
-		//float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
-		//	m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
 		float interrupt_velocity = TRANSIT_START_SPEED;
 		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
 		m_ship->SetJuice(20.0);
@@ -748,14 +752,24 @@ bool AICmdFlyTo::TimeStepUpdate()
 	const float transit_start_speed = TRANSIT_START_SPEED;
 	// Required speed for transit ready state (plays the start sound), may cause an issue if max maneuver speed is set to something less than 10000?
 	const float transit_ready_speed = std::max<float>(0.0f, transit_start_speed - 5000.0f);
+	// Max speed depends on distance from gravity bubbles
+	const double transit_max_speed = TRANSIT_DRIVE_2_SPEED - (hyperclass * 10000000);
+	// Juice factors
+	const double juice_transit = 80.0;
+	const double juice_transit_end = 0.1;
+	const double juice_high = 20.0;
+	const double juice_normal = 1.0;
 
 	if (m_targframe && m_ship && !m_child){   //orbit order planet. dock planet
 		double cspeed = m_ship->GetVelocity().Length();
 		double target_radii = 50000000.0;
 
-		if (m_targframe->GetBody()->IsType(Object::PLANET))	target_radii = std::max(m_targframe->GetBody()->GetSystemBody()->GetRadius()*1.25,10000000.0);
+		if (m_targframe->GetBody()->IsType(Object::PLANET))	{
+			target_radii = std::max(m_targframe->GetBody()->GetSystemBody()->GetRadius() * 1.25, 10000000.0);
+		}
 
-		double setspeed = std::min((double)m_ship->GetPositionRelTo(m_targframe).Length()/1.0-target_radii,std::min(cspeed*1.05,99999999999.0-hyperclass*10000000));
+		double setspeed = std::min((double)m_ship->GetPositionRelTo(m_targframe).Length() / 1.0 - target_radii, 
+			std::min(cspeed * 1.05, transit_max_speed));
 
 		if ( //check for sound transit start
 			m_ship->GetPositionRelTo(m_targframe).Length()>target_radii &&
@@ -771,81 +785,104 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetFlightState() == Ship::FLYING
 			)
 		{
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) m_ship->SetTransitState(TRANSIT_DRIVE_ON);
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length()<10000000.0 && m_ship->GetVelocity().Length()>setspeed) m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
+				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
+			}
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
+				m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
+			}
 
-			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -setspeed));
+			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -setspeed));
 
-			m_ship->AIFaceDirection(m_targframe->GetPositionRelTo(m_ship->GetFrame())-m_ship->GetPositionRelTo(m_ship->GetFrame()));
-			if (m_ship->GetVelocity().Length()<79999999999.0) m_ship->SetJuice(80.0); else m_ship->SetJuice(0.1);
-
+			m_ship->AIFaceDirection(m_targframe->GetPositionRelTo(m_ship->GetFrame()) - m_ship->GetPositionRelTo(m_ship->GetFrame()));
+			if (m_ship->GetVelocity().Length() < 79999999999.0) {
+				m_ship->SetJuice(juice_transit); 
+			} else {
+				m_ship->SetJuice(juice_transit_end);
+			}
 			return false;
 		}
 		else if (
-			m_ship->GetPositionRelTo(m_targframe).Length()<=target_radii &&
-			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice()==80.0
+			m_ship->GetPositionRelTo(m_targframe).Length() <= target_radii &&
+			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice() == juice_transit
 			//m_ship->GetVelocity().Length()>=550000
 			) 
 		{
 			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -transit_start_speed));
 			//m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -99000));
-			m_ship->SetJuice(20.0);
+			m_ship->SetJuice(juice_high);
 			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			return true;
 		}
 	}
-	else if (m_target && m_ship && !m_child){   //vincinty only...  /dock orbiting station    ...vincinity ship.
+	else if (m_target && m_ship && !m_child) {   //vincinty only...  /dock orbiting station    ...vincinity ship.
 		double cspeed = m_ship->GetVelocity().Length();
 		double target_radii = 5000000;
 
-		if (m_target->IsType(Object::PLANET))		target_radii = std::max(m_target->GetSystemBody()->GetRadius()*1.25,10000000.0);//std::max(m_targframe->GetParent()->GetBody()->GetPhysRadius()+5000000.0,5000000.0);
-		if (m_target->IsType(Object::SHIP))			target_radii = 500000.0;
+		if (m_target->IsType(Object::PLANET)) {
+			target_radii = std::max(m_target->GetSystemBody()->GetRadius() * 1.25, 10000000.0);//std::max(m_targframe->GetParent()->GetBody()->GetPhysRadius()+5000000.0,5000000.0);
+		}
+		if (m_target->IsType(Object::SHIP)) {
+			target_radii = 500000.0;
+		}
 
-		double setspeed=0.0;
-		if (m_target->IsType(Object::SHIP))
-			setspeed = std::min((double)m_ship->GetPositionRelTo(m_target).Length()/1.0-target_radii,std::min(cspeed*1.05,99999999999.0-hyperclass*10000000));
-		else
-			setspeed = std::min((double)m_ship->GetPositionRelTo(m_target->GetFrame()).Length()/1.0-target_radii,std::min(cspeed*1.05,99999999999.0-hyperclass*10000000));
+		double setspeed = 0.0;
+		if (m_target->IsType(Object::SHIP)) {
+			setspeed = std::min((double)m_ship->GetPositionRelTo(m_target).Length() / 1.0 - target_radii, std::min(cspeed * 1.05, transit_max_speed));
+		} else {
+			setspeed = std::min((double)m_ship->GetPositionRelTo(m_target->GetFrame()).Length() / 1.0 - target_radii,std::min(cspeed * 1.05, transit_max_speed));
+		}
 
 		if ( //check for sound transit start
-			m_ship->GetPositionRelTo(m_target->GetFrame()).Length()>target_radii &&
+			m_ship->GetPositionRelTo(m_target->GetFrame()).Length() > target_radii &&
 			m_ship->GetVelocity().Length() > transit_ready_speed &&
 			m_ship->GetFlightState() == Ship::FLYING
-			) {
-				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) m_ship->SetTransitState(TRANSIT_DRIVE_START);
+			) 
+		{
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
+				m_ship->SetTransitState(TRANSIT_DRIVE_START);
+			}
 		}
 
 		if (  //start transit drive now...
-			m_ship->GetPositionRelTo(m_target->GetFrame()).Length()>target_radii &&
+			m_ship->GetPositionRelTo(m_target->GetFrame()).Length() > target_radii &&
 			m_ship->GetVelocity().Length() > transit_start_speed && 
 			m_ship->GetFlightState() == Ship::FLYING
-			)
+			) 
 		{
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) m_ship->SetTransitState(TRANSIT_DRIVE_ON);
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length()<10000000.0 && m_ship->GetVelocity().Length()>setspeed) m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
+				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
+			}
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
+				m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
+			}
 
-			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -setspeed));
+			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -setspeed));
 
-			m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame())-m_ship->GetPositionRelTo(m_ship->GetFrame()));
-			if (m_ship->GetVelocity().Length()<79999999999.0) m_ship->SetJuice(80.0); else m_ship->SetJuice(0.1);
+			m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame()) - m_ship->GetPositionRelTo(m_ship->GetFrame()));
+			if (m_ship->GetVelocity().Length() < 79999999999.0) {
+				m_ship->SetJuice(juice_transit);
+			} else {
+				m_ship->SetJuice(juice_transit_end);
+			}
 			return false;
 		}
 		else if (
-			m_ship->GetPositionRelTo(m_target->GetFrame()).Length()<=target_radii &&
-			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice()==80.0
-			//m_ship->GetVelocity().Length()>=550000
+			m_ship->GetPositionRelTo(m_target->GetFrame()).Length() <= target_radii &&
+			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice() == juice_transit
+			//m_ship->GetVelocity().Length() >= 550000
 			)
 		{
 			if (m_target->IsType(Object::SHIP)) {  //chasing ship.
-				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -299000));
-				m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame())-m_ship->GetPositionRelTo(m_ship->GetFrame()));
-				m_ship->SetJuice(20.0);
+				m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -299000));
+				m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame()) - m_ship->GetPositionRelTo(m_ship->GetFrame()));
+				m_ship->SetJuice(juice_high);
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
 			else {
 				//m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
-				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
-				m_ship->SetJuice(20.0);
+				m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -transit_start_speed));
+				m_ship->SetJuice(juice_high);
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
 			return true;
@@ -855,8 +892,11 @@ bool AICmdFlyTo::TimeStepUpdate()
 	if (!m_target && !m_targframe) return true;			// deleted object
 
 	// sort out gear, launching
-	if (m_ship->GetFlightState() == Ship::FLYING) m_ship->SetWheelState(false);
-	else { LaunchShip(m_ship); return false; }
+	if (m_ship->GetFlightState() == Ship::FLYING) {
+		m_ship->SetWheelState(false);
+	} else { 
+		LaunchShip(m_ship); return false; 
+	}
 
 	// generate base target pos (with vicinity adjustment) & vel 
 	double timestep = Pi::game->GetTimeStep();
