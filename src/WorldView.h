@@ -111,7 +111,6 @@ private:
 	void HideParagonFlightButtons();
 
 	void OnClickHyperspace();
-	void OnChangeFlightState(Gui::MultiStateImageButton *b);
 	void OnHyperspaceTargetChanged();
 	void OnPlayerDockOrUndock();
 	void OnPlayerChangeTarget();
@@ -133,8 +132,6 @@ private:
 	Gui::Fixed *m_lowThrustPowerOptions;
 	Gui::Label *m_flightStatus, *m_debugText;
 	Gui::ImageButton *m_launchButton;
-
-	Gui::MultiStateImageButton *m_flightControlButton;
 
 	Gui::MultiStateImageButton *m_flightAutopilotButton;
 	Gui::MultiStateImageButton *m_flightManeuverButton;

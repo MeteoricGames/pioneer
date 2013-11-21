@@ -174,17 +174,6 @@ void WorldView::InitObject()
 	m_launchButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_launchButton, 2, 2);
 
-	// Flight control button
-	m_flightControlButton = new Gui::MultiStateImageButton();
-	m_flightControlButton->SetShortcut(SDLK_F5, KMOD_NONE);
-	// these states must match Player::FlightControlState (so that the enum values match)
-	m_flightControlButton->AddState(CONTROL_MANEUVER, "icons/manual_control.png", Lang::MANEUVER_CONTROL_ON);
-	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/manual_control.png", Lang::MANUAL_CONTROL);
-	m_flightControlButton->AddState(CONTROL_AUTOPILOT, "icons/autopilot.png", Lang::AUTOPILOT_ON);
-	m_flightControlButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeFlightState));
-	m_flightControlButton->SetRenderDimensions(30.0f, 22.0f);
-	//m_rightButtonBar->Add(m_flightControlButton, 2, 2);
-
 	m_flightStatus = (new Gui::Label(""))->Color(0.0f, 1.f, 0.0f);
 	m_rightRegion2->Add(m_flightStatus, 2, 0);
 
@@ -432,26 +421,10 @@ void WorldView::HideParagonFlightButtons()
 	m_flightJumpButton->Hide();
 }
 
-/* This is UI click to change flight control state (manual, speed ctrl) */
-void WorldView::OnChangeFlightState(Gui::MultiStateImageButton *b)
-{
-	Pi::BoinkNoise();
-	int newState = b->GetState();
-	// skip certain states
-	switch (newState) {
-		case CONTROL_AUTOPILOT: 
-			newState = CONTROL_MANEUVER; break;
-		default: 
-			break;
-	}
-	b->SetActiveState(newState);
-	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
-}
-
 /* This is when the flight control state actually changes... */
 void WorldView::OnPlayerChangeFlightControlState()
 {
-	m_flightControlButton->SetActiveState(Pi::player->GetPlayerController()->GetFlightControlState());
+	
 }
 
 void WorldView::OnClickBlastoff()
@@ -568,28 +541,24 @@ void WorldView::RefreshButtonStateAndVisibility()
 		case Ship::LANDED:
 			m_flightStatus->SetText(Lang::LANDED);
 			m_launchButton->Show();
-			m_flightControlButton->Hide();
 			HideParagonFlightButtons();
 			break;
 
 		case Ship::DOCKING:
 			m_flightStatus->SetText(Lang::DOCKING);
 			m_launchButton->Hide();
-			m_flightControlButton->Hide();
 			HideParagonFlightButtons();
 			break;
 
 		case Ship::DOCKED:
 			m_flightStatus->SetText(Lang::DOCKED);
 			m_launchButton->Show();
-			m_flightControlButton->Hide();
 			HideParagonFlightButtons();
 			break;
 
 		case Ship::HYPERSPACE:
 			m_flightStatus->SetText(Lang::HYPERSPACE);
 			m_launchButton->Hide();
-			m_flightControlButton->Hide();
 			HideParagonFlightButtons();
 			break;
 
@@ -644,8 +613,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 				default: assert(0); break;
 			}
 
-			m_launchButton->Hide();
-			m_flightControlButton->Show();			
+			m_launchButton->Hide();		
 			ShowParagonFlightButtons();
 	}
 
