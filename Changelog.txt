@@ -8,11 +8,15 @@ November 2013
      * Improvements to the ship spinner (used in Ship Info view) (#2532)
 
    * Script and UI API changes
+     * Console will load "console.lua" in your user dir at startup (#2556)
      * New methods Ship:SetInvulnerable and Ship:GetInvulnerable (#2531)
+     * UI.Table widget now accepts mouse events and has added methods:
+       ClearRows, SetMouseEnabled, and onRowClicked (#2554)
 
    * Fixes
      * Fix potential divide-by-zero in autopilot (#2535, #2547)
      * Spawn docked ships in the correct bay based on size (#2538)
+     * Table widget now recomputes layout on content and style changes (#2555)
 
    * Internal changes
      * Build fixes for MSVC
