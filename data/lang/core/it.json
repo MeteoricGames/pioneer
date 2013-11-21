@@ -1571,6 +1571,42 @@
         "message": "Manuale",
         "description": ""
     },
+	"MANEUVER_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Maneuver mode disabled (it)"
+	},
+	"MANEUVER_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Maneuver mode off (it)"
+	},
+	"MANEUVER_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Maneuver mode on (it)"
+	},
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Transit mode disabled (it)"
+	},
+	"TRANSIT_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Transit mode off (it)"
+	},
+	"TRANSIT_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Transit mode on (it)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (it)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (it)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (it)"
+	},
     "ECONOMY_TYPE": {
         "message": "Forma di economia:",
         "description": ""

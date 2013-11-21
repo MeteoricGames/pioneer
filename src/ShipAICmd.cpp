@@ -11,10 +11,13 @@
 #include "Planet.h"
 #include "SpaceStation.h"
 #include "Space.h"
+#include "Sound.h"
+#include "Sfx.h"
 
 
 static const double VICINITY_MIN = 15000.0;
 static const double VICINITY_MUL = 4.0;
+static const float TRANSIT_START_SPEED = 100000.0f;
 
 AICommand *AICommand::Load(Serializer::Reader &rd)
 {
@@ -712,6 +715,20 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, double dist) : AICommand(ship, 
 	m_target = target; m_targframe = 0;
 }
 
+AICmdFlyTo::~AICmdFlyTo()
+{
+	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
+		// Transit interrupted
+		//float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
+		//	m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
+		float interrupt_velocity = TRANSIT_START_SPEED;
+		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
+		m_ship->SetJuice(20.0);
+		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
+		m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
+	}
+}
+
 // Specified pos, endvel should be > 0
 AICmdFlyTo::AICmdFlyTo(Ship *ship, Frame *targframe, const vector3d &posoff, double endvel, bool tangent)
 	: AICommand(ship, CMD_FLYTO)
@@ -727,6 +744,10 @@ bool AICmdFlyTo::TimeStepUpdate()
 {
 	Equip::Type t = m_ship->m_equipment.Get(Equip::SLOT_ENGINE);
 	int hyperclass = Equip::types[t].pval;
+	// Required speed for transit to kick in and accelerate ship
+	const float transit_start_speed = TRANSIT_START_SPEED;
+	// Required speed for transit ready state (plays the start sound), may cause an issue if max maneuver speed is set to something less than 10000?
+	const float transit_ready_speed = std::max<float>(0.0f, transit_start_speed - 5000.0f);
 
 	if (m_targframe && m_ship && !m_child){   //orbit order planet. dock planet
 		double cspeed = m_ship->GetVelocity().Length();
@@ -738,20 +759,20 @@ bool AICmdFlyTo::TimeStepUpdate()
 
 		if ( //check for sound transit start
 			m_ship->GetPositionRelTo(m_targframe).Length()>target_radii &&
-			m_ship->GetVelocity().Length()>95000 &&
+			m_ship->GetVelocity().Length() > transit_ready_speed &&
 			m_ship->GetFlightState() == Ship::FLYING
 			) {
-				if (m_ship->GetTransitState()==0) m_ship->SetTransitState(-5);
-		}
-
+				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) m_ship->SetTransitState(TRANSIT_DRIVE_START);
+		} 
+		
 		if ( //start transit drive now..
 			m_ship->GetPositionRelTo(m_targframe).Length()>target_radii &&
-			m_ship->GetVelocity().Length()>100000 && 
+			m_ship->GetVelocity().Length() > transit_start_speed && 
 			m_ship->GetFlightState() == Ship::FLYING
 			)
 		{
-			if (m_ship->GetTransitState()==-3) m_ship->SetTransitState(1);
-			if (m_ship->GetTransitState()==1 && m_ship->GetVelocity().Length()<10000000.0 && m_ship->GetVelocity().Length()>setspeed) m_ship->SetTransitState(-4); //for finish transitdrive sound
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) m_ship->SetTransitState(TRANSIT_DRIVE_ON);
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length()<10000000.0 && m_ship->GetVelocity().Length()>setspeed) m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
 
 			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -setspeed));
 
@@ -764,12 +785,13 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetPositionRelTo(m_targframe).Length()<=target_radii &&
 			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice()==80.0
 			//m_ship->GetVelocity().Length()>=550000
-			)
+			) 
 		{
-			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
+			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -transit_start_speed));
+			//m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -99000));
 			m_ship->SetJuice(20.0);
-			m_ship->SetTransitState(0);
-			return false;
+			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
+			return true;
 		}
 	}
 	else if (m_target && m_ship && !m_child){   //vincinty only...  /dock orbiting station    ...vincinity ship.
@@ -787,20 +809,20 @@ bool AICmdFlyTo::TimeStepUpdate()
 
 		if ( //check for sound transit start
 			m_ship->GetPositionRelTo(m_target->GetFrame()).Length()>target_radii &&
-			m_ship->GetVelocity().Length()>95000 &&
+			m_ship->GetVelocity().Length() > transit_ready_speed &&
 			m_ship->GetFlightState() == Ship::FLYING
 			) {
-				if (m_ship->GetTransitState()==0) m_ship->SetTransitState(-5);
+				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) m_ship->SetTransitState(TRANSIT_DRIVE_START);
 		}
 
 		if (  //start transit drive now...
 			m_ship->GetPositionRelTo(m_target->GetFrame()).Length()>target_radii &&
-			m_ship->GetVelocity().Length()>100000 && 
+			m_ship->GetVelocity().Length() > transit_start_speed && 
 			m_ship->GetFlightState() == Ship::FLYING
 			)
 		{
-			if (m_ship->GetTransitState()==-3) m_ship->SetTransitState(1);
-			if (m_ship->GetTransitState()==1 && m_ship->GetVelocity().Length()<10000000.0 && m_ship->GetVelocity().Length()>setspeed) m_ship->SetTransitState(-4); //for finish transitdrive sound
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) m_ship->SetTransitState(TRANSIT_DRIVE_ON);
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length()<10000000.0 && m_ship->GetVelocity().Length()>setspeed) m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
 
 			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -setspeed));
 
@@ -818,14 +840,15 @@ bool AICmdFlyTo::TimeStepUpdate()
 				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -299000));
 				m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame())-m_ship->GetPositionRelTo(m_ship->GetFrame()));
 				m_ship->SetJuice(20.0);
-				m_ship->SetTransitState(0);
+				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
 			else {
-				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
+				//m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
+				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
 				m_ship->SetJuice(20.0);
-				m_ship->SetTransitState(0);
+				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
-			return false;
+			return true;
 		}
 	}
 
@@ -1100,7 +1123,10 @@ bool AICmdDock::TimeStepUpdate()
 	if (af < 0.01) {
 		af = m_ship->AIFaceUpdir(trot * m_dockupdir, av) - ang;
 	}
-	if (m_state < eInvalidDockingStage && af < 0.01 && m_ship->GetWheelState() >= 1.0f) {
+	if (m_state < eInvalidDockingStage && af < 0.01) {
+		if(m_ship->GetWheelState() >= 1.0f) {
+			m_ship->SetWheelState(true);
+		}
 		IncrementState();
 	}
 

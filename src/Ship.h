@@ -47,6 +47,16 @@ public:
 	void Load(Serializer::Reader &rd);
 };
 
+// Transit State
+enum TransitState {
+	TRANSIT_DRIVE_OFF,
+	TRANSIT_DRIVE_READY,
+	TRANSIT_DRIVE_START,
+	TRANSIT_DRIVE_ON,
+	TRANSIT_DRIVE_STOP,
+	TRANSIT_DRIVE_FINISHED,
+};
+
 class Ship: public DynamicBody {
 	friend class ShipController; //only controllers need access to AITimeStep
 	friend class PlayerShipController;
@@ -69,18 +79,17 @@ public:
 
 	virtual void Render(Graphics::Renderer *r, const Camera *camera, const vector3d &viewCoords, const matrix4x4d &viewTransform);
 
-	void SetThrusterState(int axis, double level) {
-		if (m_thrusterFuel <= 0.f) level = 0.0;
-		m_thrusters[axis] = Clamp(level, -1.0, 1.0);
-	}
+	void SetThrusterState(int axis, double level);
 	void SetThrusterState(const vector3d &levels);
 	vector3d GetThrusterState() const { return m_thrusters; }
 	void SetAngThrusterState(int axis, double level) { m_angThrusters[axis] = Clamp(level, -1.0, 1.0); }
 	void SetAngThrusterState(const vector3d &levels);
 	vector3d GetAngThrusterState() const { return m_angThrusters; }
 	void ClearThrusterState();
+	float GetLaunchLockTimeout() const { return m_launchLockTimeout; }
 
 	vector3d GetMaxThrust(const vector3d &dir) const;
+	float GetMaxManeuverSpeed() const;
 	double GetAccelFwd() const ;
 	double GetAccelRev() const ;
 	double GetAccelUp() const ;
@@ -120,14 +129,14 @@ public:
 	void SetFlightState(FlightState s);
 	float GetWheelState() const { return m_wheelState; }
 	float GetJuice() const { return m_juice; }
-	int GetTransitState() const { return m_transitstate; }
+	TransitState GetTransitState() const { return m_transitstate; }
 	int GetWheelTransition() const { return m_wheelTransition; }
 	bool SpawnCargo(CargoBody * c_body) const;
 
 	virtual bool IsInSpace() const { return (m_flightState != HYPERSPACE); }
 
 	void SetJuice(const double &juice) { m_juice = juice; }
-	void SetTransitState(const int &transitstate) { m_transitstate = transitstate; }
+	void SetTransitState(const TransitState &transitstate) { m_transitstate = transitstate; }
 	void SetHyperspaceDest(const SystemPath &dest) { m_hyperspace.dest = dest; }
 	const SystemPath &GetHyperspaceDest() const { return m_hyperspace.dest; }
 	double GetHyperspaceDuration() const { return m_hyperspace.duration; }
@@ -263,7 +272,8 @@ protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
 	void RenderLaserfire();
-
+	void ApplyThrusterLimits();
+		
 	bool AITimeStep(float timeStep); // Called by controller. Returns true if complete
 
 	virtual void SetAlertState(AlertState as);
@@ -313,7 +323,7 @@ private:
 	float m_wheelState;
 	int m_wheelTransition;
 	double m_juice;
-	int m_transitstate;
+	TransitState m_transitstate;
 
 	vector3d m_thrusters;
 	vector3d m_angThrusters;

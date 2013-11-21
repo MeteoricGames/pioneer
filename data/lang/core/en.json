@@ -885,11 +885,47 @@
    },
    "MANUAL_CONTROL" : {
       "description" : "",
-      "message" : "Manual control"
+	  "message" : "Manual control"
    },
    "MANUAL_CONTROL_MODE" : {
       "description" : "",
-      "message" : "Manual control mode"
+	  "message" : "Manual control mode"
+   },
+   "MANEUVER_CONTROL_UNAVAILABLE" : {
+      "description" : "",
+	  "message" : "Maneuver mode disabled"
+   },
+   "MANEUVER_CONTROL_OFF" : {
+      "description" : "",
+	  "message" : "Maneuver mode off"
+   },
+   "MANEUVER_CONTROL_ON" : {
+      "description" : "",
+	  "message" : "Maneuver mode on"
+   },
+   "TRANSIT_CONTROL_UNAVAILABLE" : {
+      "description" : "",
+	  "message" : "Transit mode disabled"
+   },
+   "TRANSIT_CONTROL_OFF" : {
+      "description" : "",
+	  "message" : "Transit mode off"
+   },
+   "TRANSIT_CONTROL_ON" : {
+      "description" : "",
+	  "message" : "Transit mode on"
+   },
+   "JUMP_CONTROL_UNAVAILABLE" : {
+      "description" : "",
+	  "message" : "Jump mode unavailable"
+   },
+   "JUMP_CONTROL_OFF" : {
+      "description" : "",
+	  "message" : "Jump mode off"
+   },
+   "JUMP_CONTROL_ON" : {
+      "description" : "",
+	  "message" : "Jump mode on"
    },
    "MASS" : {
       "description" : "",

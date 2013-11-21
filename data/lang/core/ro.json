@@ -1571,6 +1571,42 @@
         "message": "Control manual",
         "description": ""
     },
+	"MANEUVER_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Maneuver mode disabled (ro)"
+	},
+	"MANEUVER_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Maneuver mode off (ro)"
+	},
+	"MANEUVER_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Maneuver mode on (ro)"
+	},
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Transit mode disabled (ro)"
+	},
+	"TRANSIT_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Transit mode off (ro)"
+	},
+	"TRANSIT_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Transit mode on (ro)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (ro)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (ro)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (ro)"
+	},
     "ECONOMY_TYPE": {
         "message": "Tipul economiei:",
         "description": ""

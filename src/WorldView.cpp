@@ -38,6 +38,11 @@ static const float WHEEL_SENSITIVITY = .05f;	// Should be a variable in user set
 static const float HUD_CROSSHAIR_SIZE = 24.0f;
 static const float HUD_ALPHA          = 0.34f;
 
+static void autopilot_flyto(Body *b);
+static void autopilot_dock(Body *b);
+static void autopilot_orbit(Body *b, double alt);
+static void player_target_hypercloud(HyperspaceCloud *cloud);
+
 WorldView::WorldView(): View()
 {
 	m_camType = CAM_INTERNAL;
@@ -110,46 +115,64 @@ void WorldView::InitObject()
 		btn->onClick.connect(sigc::bind(sigc::mem_fun(this, &WorldView::OnSelectLowThrustPower), LOW_THRUST_LEVELS[i]));
 	}
 
-	m_wheelsButton = new Gui::MultiStateImageButton();
-	m_wheelsButton->SetShortcut(SDLK_F6, KMOD_NONE);
-	m_wheelsButton->AddState(0, "icons/wheels_up.png", Lang::WHEELS_ARE_UP);
-	m_wheelsButton->AddState(1, "icons/wheels_down.png", Lang::WHEELS_ARE_DOWN);
-	m_wheelsButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeWheelsState));
-	m_wheelsButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_wheelsButton, 34, 2);
+	//// Paragon Flight System
+	// Autopilot button
+	m_flightAutopilotButton = new Gui::MultiStateImageButton();
+	m_flightAutopilotButton->SetShortcut(SDLK_F5, KMOD_NONE);
+	m_flightAutopilotButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/autopilot_unavailable.png", Lang::AUTOPILOT_UNAVAILABLE);
+	m_flightAutopilotButton->AddState(FLIGHT_BUTTON_OFF, "icons/autopilot_off.png", Lang::AUTOPILOT_OFF);
+	m_flightAutopilotButton->AddState(FLIGHT_BUTTON_ON, "icons/autopilot_on.png", Lang::AUTOPILOT_ON);
+	m_flightAutopilotButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickAutopilotButton));
+	m_flightAutopilotButton->SetRenderDimensions(30.0f, 22.0f);
+	m_rightButtonBar->Add(m_flightAutopilotButton, 0.0f, 2.0f);
+	m_flightAutopilotButton->SetEnabled(false);
+	// Maneuver button
+	m_flightManeuverButton = new Gui::MultiStateImageButton();
+	m_flightManeuverButton->SetShortcut(SDLK_F6, KMOD_NONE);
+	m_flightManeuverButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/maneuver_unavailable.png", Lang::MANEUVER_CONTROL_UNAVAILABLE);
+	m_flightManeuverButton->AddState(FLIGHT_BUTTON_OFF, "icons/maneuver_off.png", Lang::MANEUVER_CONTROL_OFF);
+	m_flightManeuverButton->AddState(FLIGHT_BUTTON_ON, "icons/maneuver_on.png", Lang::MANEUVER_CONTROL_ON);
+	m_flightManeuverButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickManeuverButton));
+	m_flightManeuverButton->SetRenderDimensions(30.0f, 22.0f);
+	m_rightButtonBar->Add(m_flightManeuverButton, 34.0f, 2.0f);
+	m_flightManeuverButton->SetEnabled(false);
+	// Transit button
+	m_flightTransitButton = new Gui::MultiStateImageButton();
+	m_flightTransitButton->SetShortcut(SDLK_F7, KMOD_NONE);
+	m_flightTransitButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/transit_unavailable.png", Lang::TRANSIT_CONTROL_UNAVAILABLE);
+	m_flightTransitButton->AddState(FLIGHT_BUTTON_OFF, "icons/transit_off.png", Lang::TRANSIT_CONTROL_OFF);
+	m_flightTransitButton->AddState(FLIGHT_BUTTON_ON, "icons/transit_on.png", Lang::TRANSIT_CONTROL_ON);
+	m_flightTransitButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickTransitButton));
+	m_flightTransitButton->SetRenderDimensions(30.0f, 22.0f);
+	m_rightButtonBar->Add(m_flightTransitButton, 64.0f, 2.0f);
+	m_flightTransitButton->SetEnabled(false);
+	// Jump button
+	m_flightJumpButton = new Gui::MultiStateImageButton();
+	m_flightJumpButton->SetShortcut(SDLK_F8, KMOD_NONE);
+	m_flightJumpButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/jump_unavailable.png", Lang::JUMP_CONTROL_UNAVAILABLE);
+	m_flightJumpButton->AddState(FLIGHT_BUTTON_OFF, "icons/jump_off.png", Lang::JUMP_CONTROL_OFF);
+	m_flightJumpButton->AddState(FLIGHT_BUTTON_ON, "icons/jump_on.png", Lang::JUMP_CONTROL_ON);
+	m_flightJumpButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickJumpButton));
+	m_flightJumpButton->SetRenderDimensions(30.0f, 22.0f);
+	m_rightButtonBar->Add(m_flightJumpButton, 98.0f, 2.0f);
+	m_flightJumpButton->SetEnabled(false);
+	////-----------------------------------------------------------
 
-	Gui::ImageButton *set_low_thrust_power_button = new Gui::ImageButton("icons/set_low_thrust_power.png");
-	set_low_thrust_power_button->SetShortcut(SDLK_F8, KMOD_NONE);
-	set_low_thrust_power_button->SetToolTip(Lang::SELECT_LOW_THRUST_POWER_LEVEL);
-	set_low_thrust_power_button->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickLowThrustPower));
-	set_low_thrust_power_button->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(set_low_thrust_power_button, 98, 2);
-
+	// Hypserspace button
 	m_hyperspaceButton = new Gui::ImageButton("icons/hyperspace_f8.png");
 	m_hyperspaceButton->SetShortcut(SDLK_F7, KMOD_NONE);
 	m_hyperspaceButton->SetToolTip(Lang::HYPERSPACE_JUMP);
 	m_hyperspaceButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickHyperspace));
 	m_hyperspaceButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_hyperspaceButton, 66, 2);
+	//m_rightButtonBar->Add(m_hyperspaceButton, 66, 2);
 
+	// Launch button
 	m_launchButton = new Gui::ImageButton("icons/blastoff.png");
 	m_launchButton->SetShortcut(SDLK_F5, KMOD_NONE);
 	m_launchButton->SetToolTip(Lang::TAKEOFF);
 	m_launchButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickBlastoff));
 	m_launchButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_launchButton, 2, 2);
-
-	m_flightControlButton = new Gui::MultiStateImageButton();
-	m_flightControlButton->SetShortcut(SDLK_F5, KMOD_NONE);
-	// these states must match Player::FlightControlState (so that the enum values match)
-	m_flightControlButton->AddState(CONTROL_MANUAL, "icons/manual_control.png", Lang::MANUAL_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXSPEED, "icons/manual_control.png", Lang::COMPUTER_SPEED_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXHEADING_FORWARD, "icons/manual_control.png", Lang::COMPUTER_HEADING_CONTROL);
-	m_flightControlButton->AddState(CONTROL_FIXHEADING_BACKWARD, "icons/manual_control.png", Lang::COMPUTER_HEADING_CONTROL);
-	m_flightControlButton->AddState(CONTROL_AUTOPILOT, "icons/autopilot.png", Lang::AUTOPILOT_ON);
-	m_flightControlButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnChangeFlightState));
-	m_flightControlButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_flightControlButton, 2, 2);
 
 	m_flightStatus = (new Gui::Label(""))->Color(0.0f, 1.f, 0.0f);
 	m_rightRegion2->Add(m_flightStatus, 2, 0);
@@ -320,43 +343,88 @@ void WorldView::UpdateCameraName()
 	m_showCameraNameTimeout = SDL_GetTicks();
 }
 
-void WorldView::OnChangeWheelsState(Gui::MultiStateImageButton *b)
+void WorldView::OnClickAutopilotButton(Gui::MultiStateImageButton *b)
 {
+	int newState = b->GetState();
 	Pi::BoinkNoise();
-	if (!Pi::player->SetWheelState(b->GetState()!=0)) {
-		b->StatePrev();
+	if(newState == FLIGHT_BUTTON_UNAVAILABLE) {		// Autopilot is being turned off
+		newState = FLIGHT_BUTTON_OFF;
+		b->SetActiveState(newState);
+		m_flightAutopilotButton->SetEnabled(false);
+		Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(CONTROL_MANEUVER));
+	} else if(newState == FLIGHT_BUTTON_ON) {		// Autopilot is being turned on
+		Body* const navtarget = Pi::player->GetNavTarget();
+		Body* const comtarget = Pi::player->GetCombatTarget();
+		if(navtarget || comtarget) {
+			b->SetActiveState(newState);
+			m_flightAutopilotButton->SetEnabled(true);
+			autopilot_flyto(navtarget? navtarget : comtarget);
+		} else {
+			assert(0); // The autopilot button should've been disabled, no targets are found
+		}
+	} else {
+		// previous state was FLIGHT_BUTTON_UNAVAILABLE before click, which means autopilot button should have been disabled
+		assert(0);
 	}
 }
 
-/* This is UI click to change flight control state (manual, speed ctrl) */
-void WorldView::OnChangeFlightState(Gui::MultiStateImageButton *b)
+void WorldView::OnClickManeuverButton(Gui::MultiStateImageButton *b)
 {
-	Pi::BoinkNoise();
 	int newState = b->GetState();
-	if (Pi::KeyState(SDLK_LCTRL) || Pi::KeyState(SDLK_RCTRL)) {
-		// skip certain states
-		switch (newState) {
-			case CONTROL_FIXSPEED: newState = CONTROL_FIXHEADING_FORWARD; break;
-			case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
-			default: break;
-		}
-	} else {
-		// skip certain states
-		switch (newState) {
-			case CONTROL_FIXHEADING_FORWARD: // fallthrough
-			case CONTROL_FIXHEADING_BACKWARD: newState = CONTROL_MANUAL; break;
-			case CONTROL_AUTOPILOT: newState = CONTROL_MANUAL; break;
-			default: break;
-		}
+	Pi::BoinkNoise();
+	switch(newState) {		
+		case FLIGHT_BUTTON_UNAVAILABLE:
+		case FLIGHT_BUTTON_OFF:
+			newState = CONTROL_MANUAL;
+			break;
+		
+		case FLIGHT_BUTTON_ON:
+			newState = CONTROL_MANEUVER;
+			break;
 	}
 	b->SetActiveState(newState);
 	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
 }
 
+void WorldView::OnClickTransitButton(Gui::MultiStateImageButton *b)
+{
+}
+
+void WorldView::OnClickJumpButton(Gui::MultiStateImageButton *b)
+{
+	if (Pi::player->IsHyperspaceActive()) {
+		// Hyperspace countdown in effect.. abort!
+		Pi::player->ResetHyperspaceCountdown();
+		Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_OFF);
+	} else {
+		// Initiate hyperspace drive
+		SystemPath path = Pi::sectorView->GetHyperspaceTarget();
+		Pi::player->StartHyperspaceCountdown(path);
+		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
+	}
+}
+
+void WorldView::ShowParagonFlightButtons()
+{
+	m_flightAutopilotButton->Show();
+	m_flightManeuverButton->Show();
+	m_flightTransitButton->Show();
+	m_flightJumpButton->Show();
+}
+
+void WorldView::HideParagonFlightButtons()
+{
+	m_flightAutopilotButton->Hide();
+	m_flightManeuverButton->Hide();
+	m_flightTransitButton->Hide();
+	m_flightJumpButton->Hide();
+}
+
 /* This is when the flight control state actually changes... */
 void WorldView::OnPlayerChangeFlightControlState()
 {
-	m_flightControlButton->SetActiveState(Pi::player->GetPlayerController()->GetFlightControlState());
+	
 }
 
 void WorldView::OnClickBlastoff()
@@ -432,10 +500,19 @@ static Color get_color_for_warning_meter_bar(float v) {
 }
 
 void WorldView::RefreshHyperspaceButton() {
-	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget()))
+	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget())) {
 		m_hyperspaceButton->Show();
-	else
+		if(Pi::player->IsHyperspaceActive()) {
+			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
+		} else {
+			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_OFF);
+		}
+		m_flightJumpButton->SetEnabled(true);
+	} else {
 		m_hyperspaceButton->Hide();
+		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+		m_flightJumpButton->SetEnabled(false);		
+	}
 }
 
 void WorldView::RefreshButtonStateAndVisibility()
@@ -458,70 +535,86 @@ void WorldView::RefreshButtonStateAndVisibility()
 		Pi::cpan->SetOverlayToolTip(ShipCpanel::OVERLAY_BOTTOM_RIGHT, Lang::SHIP_ALTITUDE_ABOVE_TERRAIN);
 	}
 
-	m_wheelsButton->SetActiveState(int(Pi::player->GetWheelState()) || Pi::player->GetWheelTransition() == 1);
-
 	RefreshHyperspaceButton();
 
 	switch(Pi::player->GetFlightState()) {
 		case Ship::LANDED:
 			m_flightStatus->SetText(Lang::LANDED);
 			m_launchButton->Show();
-			m_flightControlButton->Hide();
+			HideParagonFlightButtons();
 			break;
 
 		case Ship::DOCKING:
 			m_flightStatus->SetText(Lang::DOCKING);
 			m_launchButton->Hide();
-			m_flightControlButton->Hide();
+			HideParagonFlightButtons();
 			break;
 
 		case Ship::DOCKED:
 			m_flightStatus->SetText(Lang::DOCKED);
 			m_launchButton->Show();
-			m_flightControlButton->Hide();
+			HideParagonFlightButtons();
 			break;
 
 		case Ship::HYPERSPACE:
 			m_flightStatus->SetText(Lang::HYPERSPACE);
 			m_launchButton->Hide();
-			m_flightControlButton->Hide();
+			HideParagonFlightButtons();
 			break;
 
 		case Ship::FLYING:
 		default:
 			const FlightControlState fstate = Pi::player->GetPlayerController()->GetFlightControlState();
+			Body * const navtarget = Pi::player->GetNavTarget();
+			Body * const comtarget = Pi::player->GetCombatTarget();
 			switch (fstate) {
 				case CONTROL_MANUAL:
-					m_flightStatus->SetText(Lang::MANUAL_CONTROL); break;
+					m_flightStatus->SetText(Lang::MANUAL_CONTROL); 
+					m_flightManeuverButton->SetEnabled(true);
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					if(!navtarget && !comtarget) { 
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+						m_flightAutopilotButton->SetEnabled(false);
+					} else {
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+						m_flightAutopilotButton->SetEnabled(true);
+					}
+					break;
 
-				case CONTROL_FIXSPEED: {
+				case CONTROL_MANEUVER: {
 					std::string msg;
 					const double setspeed = Pi::player->GetPlayerController()->GetSetSpeed();
-					if (setspeed > 1000) {
+					if (setspeed > 1000 || setspeed < -1000) {
 						msg = stringf(Lang::SET_SPEED_KM_S, formatarg("speed", setspeed*0.001));
 					} else {
 						msg = stringf(Lang::SET_SPEED_M_S, formatarg("speed", setspeed));
 					}
 					m_flightStatus->SetText(msg);
+					m_flightManeuverButton->SetEnabled(true);
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_ON);	
+					if(!navtarget && !comtarget) { 
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+						m_flightAutopilotButton->SetEnabled(false);
+					} else {
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+						m_flightAutopilotButton->SetEnabled(true);
+					}
 					break;
 				}
 
-				case CONTROL_FIXHEADING_FORWARD:
-					m_flightStatus->SetText(Lang::HEADING_LOCK_FORWARD);
-					break;
-				case CONTROL_FIXHEADING_BACKWARD:
-					m_flightStatus->SetText(Lang::HEADING_LOCK_BACKWARD);
-					break;
-
 				case CONTROL_AUTOPILOT:
 					m_flightStatus->SetText(Lang::AUTOPILOT);
+					m_flightAutopilotButton->SetEnabled(true);
+					m_flightManeuverButton->SetEnabled(true);
+					m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_ON);
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
 					break;
 
 				default: assert(0); break;
 			}
 
-			m_launchButton->Hide();
-			m_flightControlButton->Show();
+			m_launchButton->Hide();		
+			ShowParagonFlightButtons();
 	}
 
 	// Direction indicator
@@ -1005,15 +1098,6 @@ void WorldView::ShowLowThrustPowerOptions()
 	m_showLowThrustPowerTimeout = SDL_GetTicks();
 	m_lowThrustPowerOptions->Show();
 	HideTargetActions();
-}
-
-void WorldView::OnClickLowThrustPower()
-{
-	Pi::BoinkNoise();
-	if (m_showLowThrustPowerTimeout)
-		HideLowThrustPowerOptions();
-	else
-		ShowLowThrustPowerOptions();
 }
 
 void WorldView::OnSelectLowThrustPower(float power)
