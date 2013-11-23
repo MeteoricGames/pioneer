@@ -355,7 +355,7 @@ void WorldView::OnClickAutopilotButton(Gui::MultiStateImageButton *b)
 		newState = FLIGHT_BUTTON_OFF;
 		b->SetActiveState(newState);
 		m_flightAutopilotButton->SetEnabled(false);
-		Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(CONTROL_MANEUVER));
+		Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_MANEUVER);
 	} else if(newState == FLIGHT_BUTTON_ON) {		// Autopilot is being turned on
 		Body* const navtarget = Pi::player->GetNavTarget();
 		Body* const comtarget = Pi::player->GetCombatTarget();
@@ -376,23 +376,36 @@ void WorldView::OnClickManeuverButton(Gui::MultiStateImageButton *b)
 {
 	int newState = b->GetState();
 	Pi::BoinkNoise();
-	switch(newState) {		
+	switch(static_cast<FlightButtonStatus>(newState)) {	
 		case FLIGHT_BUTTON_UNAVAILABLE:
 		case FLIGHT_BUTTON_OFF:
-			newState = CONTROL_MANUAL;
+			newState = FLIGHT_BUTTON_OFF;
+			Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_MANUAL);
 			break;
 		
 		case FLIGHT_BUTTON_ON:
-			newState = CONTROL_MANEUVER;
+			Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_MANEUVER);
 			break;
 	}
 	b->SetActiveState(newState);
-	Pi::player->GetPlayerController()->SetFlightControlState(static_cast<FlightControlState>(newState));
 }
 
 void WorldView::OnClickTransitButton(Gui::MultiStateImageButton *b)
 {
-
+	int newState = b->GetState();
+	Pi::BoinkNoise();
+	switch(static_cast<FlightButtonStatus>(newState)) {	
+		case FLIGHT_BUTTON_UNAVAILABLE:
+		case FLIGHT_BUTTON_OFF:
+			newState = FLIGHT_BUTTON_OFF;
+			Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_MANEUVER);
+			break;
+		
+		case FLIGHT_BUTTON_ON:
+			Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_TRANSIT);
+			break;
+	}
+	b->SetActiveState(newState);
 }
 
 void WorldView::OnClickJumpButton(Gui::MultiStateImageButton *b)
@@ -543,10 +556,15 @@ void WorldView::RefreshButtonStateAndVisibility()
 	RefreshHyperspaceButton();
 
 	bool is_outside_gravity_bubble = false;
+	bool is_outside_gravity_bubble_2 = false;
 	if(!m_bAltitudeAvailable) {
 		is_outside_gravity_bubble = true;
+		is_outside_gravity_bubble_2 = true;
 	} else if(m_altitude > TRANSIT_GRAVITY_RANGE_1) {
 		is_outside_gravity_bubble = true;
+		if(m_altitude > TRANSIT_GRAVITY_RANGE_2) {
+			is_outside_gravity_bubble_2 = true;
+		}
 	}
 
 	switch(Pi::player->GetFlightState()) {
@@ -627,6 +645,28 @@ void WorldView::RefreshButtonStateAndVisibility()
 						m_flightTransitButton->SetEnabled(false);
 						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
 					}
+					break;
+				}
+
+				case CONTROL_TRANSIT: {
+					std::string msg = "TRANSIT DRIVE ";
+					if(is_outside_gravity_bubble_2) {
+						msg.append("2");
+					} else {
+						msg.append("1");
+					}
+					m_flightStatus->SetText(msg);
+					m_flightTransitButton->SetEnabled(true);
+					m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_ON);
+					if(!navtarget && !comtarget) { 
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
+						m_flightAutopilotButton->SetEnabled(false);
+					} else {
+						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+						m_flightAutopilotButton->SetEnabled(true);
+					}
+					m_flightManeuverButton->SetEnabled(true);
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
 					break;
 				}
 

@@ -97,6 +97,7 @@ public:
 
 	vector3d GetMaxThrust(const vector3d &dir) const;
 	float GetMaxManeuverSpeed() const;
+	double GetMaxTransitSpeed() const;
 	double GetAccelFwd() const ;
 	double GetAccelRev() const ;
 	double GetAccelUp() const ;
