@@ -769,7 +769,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetVelocity().Length() > transit_ready_speed &&
 			m_ship->GetFlightState() == Ship::FLYING
 			) {
-				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) m_ship->SetTransitState(TRANSIT_DRIVE_START);
+				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) m_ship->SetTransitState(TRANSIT_DRIVE_READY);
 		} 
 		
 		if ( //start transit drive now..
@@ -778,7 +778,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetFlightState() == Ship::FLYING
 			)
 		{
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
 			}
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
@@ -833,7 +833,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			) 
 		{
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
-				m_ship->SetTransitState(TRANSIT_DRIVE_START);
+				m_ship->SetTransitState(TRANSIT_DRIVE_READY);
 			}
 		}
 
@@ -843,7 +843,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->GetFlightState() == Ship::FLYING
 			) 
 		{
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
 			}
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {

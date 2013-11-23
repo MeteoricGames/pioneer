@@ -465,9 +465,13 @@ vector3d Ship::GetMaxThrust(const vector3d &dir) const
 		: -m_type->linThrust[ShipType::THRUSTER_DOWN];
 	maxThrust.z = (dir.z > 0) ? m_type->linThrust[ShipType::THRUSTER_REVERSE]
 		: -m_type->linThrust[ShipType::THRUSTER_FORWARD];
-	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return maxThrust*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
-	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return maxThrust*m_juice;
+
+	if ((m_curAICmd != 0 || Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_MANEUVER) && GetVelocity().Length() > 1000) {
+		return maxThrust * std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004);
+	}
+	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
+		return maxThrust * m_juice;
+	}
 	return maxThrust;
 }
 
@@ -481,28 +485,41 @@ double Ship::GetAccelMin() const
 	float val = m_type->linThrust[ShipType::THRUSTER_UP];
 	val = std::min(val, m_type->linThrust[ShipType::THRUSTER_RIGHT]);
 	val = std::min(val, -m_type->linThrust[ShipType::THRUSTER_LEFT]);
-	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return (val / GetMass())*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
-	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return (val / GetMass())*m_juice;
+
+	if ((m_curAICmd != 0 || Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_MANEUVER) && GetVelocity().Length() > 1000) {
+		return (val / GetMass()) * std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004);
+	}
+	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
+		return (val / GetMass()) * m_juice;
+	}
 	return (val / GetMass());
 }
 
-double Ship::GetAccelFwd() const { 
-	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
-	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
+double Ship::GetAccelFwd() const {
+	if ((m_curAICmd != 0 || Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_MANEUVER) && GetVelocity().Length() > 1000) { 
+		return std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004) * -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
+	}
+	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
+		return m_juice * -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
+	}
 	return -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass(); 
 }
-double Ship::GetAccelRev() const { 
-	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
-	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
+double Ship::GetAccelRev() const {
+	if ((m_curAICmd != 0 || Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_MANEUVER) && GetVelocity().Length() > 1000) {
+		return std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004) * m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
+	}
+	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
+		return m_juice*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
+	}
 	return m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass(); 
 }
-double Ship::GetAccelUp() const { 
-	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
-	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
+double Ship::GetAccelUp() const {
+	if ((m_curAICmd != 0 || Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_MANEUVER) && GetVelocity().Length() > 1000) {
+		return std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004) * m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
+	}
+	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
+		return m_juice * m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
+	}
 	return m_type->linThrust[ShipType::THRUSTER_UP] / GetMass(); 
 }
 
@@ -815,8 +832,8 @@ void Ship::TimeStepUpdate(const float timeStep)
 	// but we call this crap anyway and hope it doesn't do anything bad
 
 	vector3d maxThrust = GetMaxThrust(m_thrusters);
-	vector3d thrust = vector3d(maxThrust.x*m_thrusters.x, maxThrust.y*m_thrusters.y,
-		maxThrust.z*m_thrusters.z);
+	vector3d thrust = vector3d(maxThrust.x * m_thrusters.x, maxThrust.y * m_thrusters.y,
+		maxThrust.z * m_thrusters.z);
 
 	AddRelForce(thrust);
 	AddRelTorque(GetShipType()->angThrust * m_angThrusters);
@@ -1196,9 +1213,9 @@ void Ship::StaticUpdate(const float timeStep)
 	}
 
 	//play start transit drive
-	if (m_transitstate == TRANSIT_DRIVE_START && IsType(Object::PLAYER)) {
+	if (m_transitstate == TRANSIT_DRIVE_READY && IsType(Object::PLAYER)) {
 		Sound::PlaySfx("Transit_Start", 0.25f, 0.25f, false);
-		SetTransitState(TRANSIT_DRIVE_READY);
+		SetTransitState(TRANSIT_DRIVE_START);
 	}
 	//play stop transit drive
 	if (m_transitstate == TRANSIT_DRIVE_STOP && IsType(Object::PLAYER) ) {

@@ -543,10 +543,10 @@ void WorldView::RefreshButtonStateAndVisibility()
 	RefreshHyperspaceButton();
 
 	bool is_outside_gravity_bubble = false;
-	if(m_bAltitudeAvailable) {
-		if(m_altitude > TRANSIT_GRAVITY_RANGE_1) {
-			is_outside_gravity_bubble = true;
-		}
+	if(!m_bAltitudeAvailable) {
+		is_outside_gravity_bubble = true;
+	} else if(m_altitude > TRANSIT_GRAVITY_RANGE_1) {
+		is_outside_gravity_bubble = true;
 	}
 
 	switch(Pi::player->GetFlightState()) {
