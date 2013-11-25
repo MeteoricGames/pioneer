@@ -1240,11 +1240,39 @@ void Ship::StaticUpdate(const float timeStep)
 	if (m_transitstate == TRANSIT_DRIVE_READY && IsType(Object::PLAYER)) {
 		Sound::PlaySfx("Transit_Start", 0.25f, 0.25f, false);
 		SetTransitState(TRANSIT_DRIVE_START);
+		m_transitStartTimeout = TRANSIT_START_TIME;
+	}
+	if(m_transitstate == TRANSIT_DRIVE_START && IsType(Object::PLAYER)) {
+		if(m_transitStartTimeout > 0.0f) {
+			m_transitStartTimeout -= timeStep;
+		} else {
+			m_transitStartTimeout = 0.0f;
+			SetTransitState(TRANSIT_DRIVE_ON);
+		}
 	}
 	//play stop transit drive
 	if (m_transitstate == TRANSIT_DRIVE_STOP && IsType(Object::PLAYER) ) {
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
 		SetTransitState(TRANSIT_DRIVE_FINISHED);
+	}
+}
+
+void Ship::StartTransitDrive()
+{
+	if(GetTransitState() == TRANSIT_DRIVE_OFF && IsType(Object::PLAYER)) {
+		SetTransitState(TRANSIT_DRIVE_READY);
+	}
+}
+
+void Ship::StopTransitDrive()
+{
+	if(GetTransitState() != TRANSIT_DRIVE_OFF && IsType(Object::PLAYER)) {
+		// Transit interrupted
+		float interrupt_velocity = TRANSIT_START_SPEED;
+		SetVelocity(GetOrient()*vector3d(0, 0, -interrupt_velocity));
+		SetJuice(1.0);
+		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
+		SetTransitState(TRANSIT_DRIVE_OFF);
 	}
 }
 

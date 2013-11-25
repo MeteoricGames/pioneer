@@ -88,7 +88,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 {
 	vector3d v;
 	matrix4x4d m;
-	float current_velocity;
+	double current_velocity;
 
 	if (m_ship->GetFlightState() == Ship::FLYING) {
 		switch (m_flightControlState) {
@@ -114,18 +114,29 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 		case CONTROL_TRANSIT:
 			PollControls(timeStep, true);
 			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
-				if (IsAnyLinearThrusterKeyDown()) break;
-				v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
-				if (m_setSpeedTarget) {
-					v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
-				}
-				m_ship->AIMatchVel(v);
-
-				// No thrust if ship is at max transit speed, otherwise due to thrust limiter jitter will occur
-				current_velocity = m_ship->GetVelocity().Length();
-				if(current_velocity >= m_ship->GetMaxTransitSpeed() ||
-					current_velocity <= -m_ship->GetMaxTransitSpeed()) {
-					v = vector3d(0.0, 0.0, 0.0);
+				if(m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
+					// READY
+					// Ship.cpp will start the transit drive
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
+					// START
+					// Ship.cpp will engage the transit drive to ON state
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_ON) {
+					if (IsAnyLinearThrusterKeyDown()) break;
+					v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
+					if (m_setSpeedTarget) {
+						v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+					}
+					m_ship->AIMatchVel(v);
+					// No thrust if ship is at max transit speed, otherwise due to thrust limiter jitter will occur
+					current_velocity = m_ship->GetVelocity().Length();
+					if(current_velocity >= m_ship->GetMaxTransitSpeed() ||
+						current_velocity <= -m_ship->GetMaxTransitSpeed()) {
+						v = vector3d(0.0, 0.0, 0.0);
+					}
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_STOP) {
+					// STOP
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
+					// OFF
 				}
 			}
 			break;
@@ -333,6 +344,13 @@ bool PlayerShipController::IsAnyLinearThrusterKeyDown()
 void PlayerShipController::SetFlightControlState(FlightControlState s)
 {
 	if (m_flightControlState != s) {
+		// finalizer
+		switch(m_flightControlState) {
+			case CONTROL_TRANSIT:
+				m_ship->StopTransitDrive();
+				break;
+		}
+		// new state
 		m_flightControlState = s;
 		m_ship->AIClearInstructions();
 		switch(m_flightControlState) {
@@ -350,7 +368,8 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 			}
 
 			case CONTROL_TRANSIT:
-				// Set m_setSpeed to transit speed
+				m_ship->StartTransitDrive();
+				// Set transit speed
 				m_setSpeed = m_ship->GetMaxTransitSpeed();
 				// Give it some juice to hit transit speed faster
 				m_ship->SetJuice(80.0);
