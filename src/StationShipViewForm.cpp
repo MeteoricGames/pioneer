@@ -79,7 +79,7 @@ StationShipViewForm::StationShipViewForm(FormController *controller, int marketI
 	row->SetSpacing(10.0f);
 
 	int row_size = 5, pos = 0;
-	for (int drivetype = Equip::DRIVE_CLASS1; drivetype <= Equip::DRIVE_CLASS9; drivetype++) {
+	for (int drivetype = Equip::DRIVE_CLASS1; drivetype <= Equip::DRIVE_CLASS20; drivetype++) {
 		if (type.capacity < Equip::types[drivetype].mass)
 			break;
 

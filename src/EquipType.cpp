@@ -231,15 +231,15 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::DRIVE_CLASS1,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  70000, 4, 1, 0, true, 0
+	  70000, 2, 1, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS2,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  130000, 10, 2, 0, true, 0
+	  130000, 4, 2, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS3,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  250000, 20, 3, 0, true, 0
+	  250000, 8, 3, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS4,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
@@ -251,19 +251,63 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::DRIVE_CLASS6,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  2000000, 225, 6, 0, true, 0
+	  2000000, 225, 12, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS7,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  3000000, 400, 7, 0, true, 0
+	  3000000, 400, 14, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS8,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  6000000, 580, 8, 0, true, 0
+	  6000000, 580, 16, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS9,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 740, 9, 0, true, 0
+	  12000000, 740, 18, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS10,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 20, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS11,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 30, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS12,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 34, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS13,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 38, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS14,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 42, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS15,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 46, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS16,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 80, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS17,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 88, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS18,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 96, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS19,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 104, 0, true, 0
+	},{
+	  Lang::DRIVE_CLASS20,0,
+	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
+	  12000000, 800, 112, 0, true, 0
 	},{
 	  Lang::DRIVE_MIL1,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::MILITARY_FUEL},
