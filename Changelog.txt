@@ -3,6 +3,8 @@ November 2013
    * New features
      * Translations now managed via Transifex (#2521, #2537, #2536)
      * "Speed lines" option to convey movement to the player (#2528)
+     * Modelviewer mouselook mode (#2559)
+     * Pioneer now requires OpenGL 2.0 and always uses shaders (#2540)
 
    * Minor changes and tweaks
      * Improvements to the ship spinner (used in Ship Info view) (#2532)
@@ -12,6 +14,10 @@ November 2013
      * New methods Ship:SetInvulnerable and Ship:GetInvulnerable (#2531)
      * UI.Table widget now accepts mouse events and has added methods:
        ClearRows, SetMouseEnabled, and onRowClicked (#2554)
+     * UI.Gauge widget has added method SetUpperLimit (#2561)
+     * It is now possible to create custom properties (#2553)
+     * Ship:GetStats() has been removed; stats are now exposed as
+       properties of the Ship object (#2552)
 
    * Fixes
      * Fix potential divide-by-zero in autopilot (#2535, #2547)
