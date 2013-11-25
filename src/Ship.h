@@ -59,9 +59,9 @@ enum TransitState {
 
 // Transit Constants
 static const double TRANSIT_GRAVITY_RANGE_1 = 15000.0;
-static const double TRANSIT_GRAVITY_RANGE_2 = 50000.0;
+static const double TRANSIT_GRAVITY_RANGE_2 = 1000000.0;
 static const double TRANSIT_START_SPEED = 100000.0;
-static const double TRANSIT_DRIVE_1_SPEED = 349999.0;
+static const double TRANSIT_DRIVE_1_SPEED = 299000.0;
 static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
 static const float TRANSIT_START_TIME = 2.0; // Allows sound to play first then the drive kicks in
 
@@ -98,7 +98,6 @@ public:
 
 	vector3d GetMaxThrust(const vector3d &dir) const;
 	float GetMaxManeuverSpeed() const;
-	double GetMaxTransitSpeed() const;
 	double GetAccelFwd() const ;
 	double GetAccelRev() const ;
 	double GetAccelUp() const ;

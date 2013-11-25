@@ -46,6 +46,8 @@ public:
 	void HideTargetActions();
 	int GetActiveWeapon() const;
 	void OnClickBlastoff();
+	bool IsAltitudeAvailable() const { return m_bAltitudeAvailable; }
+	double GetAltitude() const { return m_altitude; }
 
 	sigc::signal<void> onChangeCamType;
 

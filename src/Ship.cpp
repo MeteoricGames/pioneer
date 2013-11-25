@@ -430,7 +430,7 @@ void Ship::ApplyThrusterLimits()
 {
 	float max_speed = GetMaxManeuverSpeed();
 	if(IsType(Object::PLAYER) && Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_TRANSIT) {
-		max_speed = GetMaxTransitSpeed();
+		max_speed = Pi::player->GetPlayerController()->GetSetSpeed();
 	}
 	// If no max maneuver speed is set it will be considred unlimited
 	if(max_speed > 0.0) {
@@ -478,7 +478,7 @@ vector3d Ship::GetMaxThrust(const vector3d &dir) const
 		if(m_curAICmd != 0 || current_flight_mode == CONTROL_MANEUVER) {
 			return maxThrust * std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004);
 		} else if(current_flight_mode == CONTROL_TRANSIT) {
-			return maxThrust * std::max(m_juice, 1.0 + GetVelocity().Length() * 0.004);
+			return maxThrust * std::max(m_juice, 1.0 + GetVelocity().Length() * 0.008);
 		}
 	}
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
@@ -490,11 +490,6 @@ vector3d Ship::GetMaxThrust(const vector3d &dir) const
 float Ship::GetMaxManeuverSpeed() const
 {
 	return GetShipType()->maxManeuverSpeed;
-}
-
-double Ship::GetMaxTransitSpeed() const
-{
-	return TRANSIT_DRIVE_2_SPEED;
 }
 
 double Ship::GetAccelMin() const
