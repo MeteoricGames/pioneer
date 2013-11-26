@@ -139,6 +139,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 						}
 					} else {
 						m_ship->StopTransitDrive();
+						SetFlightControlState(CONTROL_MANEUVER);
 					}
 					m_ship->SetJuice(80.0);
 					//if (any_linthrust_keydown) break;
