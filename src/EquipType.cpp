@@ -251,23 +251,23 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::DRIVE_CLASS6,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  2000000, 15, 12, 0, true, 0
+	  2000000, 15, 6, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS7,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  3000000, 15, 14, 0, true, 0
+	  3000000, 15, 7, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS8,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  6000000, 15, 16, 0, true, 0
+	  6000000, 15, 8, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS9,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 15, 18, 0, true, 0
+	  12000000, 15, 9, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS10,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 15, 20, 0, true, 0
+	  12000000, 15, 10, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS11,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
