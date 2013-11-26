@@ -64,6 +64,8 @@ struct ShipType {
 	Equip::Type hyperdrive;
 	vector3d cameraOffset;
 	int minCrew, maxCrew; // XXX really only for Lua, but needs to be declared in the ship def
+	// Paragon Flight System
+	float maxManeuverSpeed;
 	///////
 
 	// percentage (ie, 0--100) of tank used per second at full thrust

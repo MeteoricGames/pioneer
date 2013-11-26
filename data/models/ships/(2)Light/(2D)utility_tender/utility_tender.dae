@@ -28,8 +28,8 @@
             </comments>
             <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/ships/(2)Light/(2D)utility_tender/utility_tender.dae</source_data>
         </contributor>
-        <created>2013-09-17T17:29:07Z</created>
-        <modified>2013-09-17T17:29:07Z</modified>
+        <created>2013-11-18T11:02:42Z</created>
+        <modified>2013-11-18T11:02:42Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -5165,56 +5165,56 @@
                 </extra>
             </mesh>
         </geometry>
-        <geometry id="Geometry-mesh048" name="decal_01">
+        <geometry id="Geometry-decal_01" name="decal_01">
             <mesh>
-                <source id="Geometry-mesh048-positions" name="positions">
-                    <float_array id="Geometry-mesh048-positions-array" count="12">
+                <source id="Geometry-decal_01-positions" name="positions">
+                    <float_array id="Geometry-decal_01-positions-array" count="12">
                         -10.7885 2.78438 -17.4816
                         -10.7885 2.78438 -15.5184
                         -9.1101 3.7914 -17.4816
                         -9.1101 3.7914 -15.5184
                     </float_array>
                     <technique_common>
-                        <accessor count="4" source="#Geometry-mesh048-positions-array" stride="3">
+                        <accessor count="4" source="#Geometry-decal_01-positions-array" stride="3">
                             <param name="X" type="float" />
                             <param name="Y" type="float" />
                             <param name="Z" type="float" />
                         </accessor>
                     </technique_common>
                 </source>
-                <source id="Geometry-mesh048-normals" name="normals">
-                    <float_array id="Geometry-mesh048-normals-array" count="3">
+                <source id="Geometry-decal_01-normals" name="normals">
+                    <float_array id="Geometry-decal_01-normals-array" count="3">
                         -0.514493 0.857495 0
                     </float_array>
                     <technique_common>
-                        <accessor count="1" source="#Geometry-mesh048-normals-array" stride="3">
+                        <accessor count="1" source="#Geometry-decal_01-normals-array" stride="3">
                             <param name="X" type="float" />
                             <param name="Y" type="float" />
                             <param name="Z" type="float" />
                         </accessor>
                     </technique_common>
                 </source>
-                <source id="Geometry-mesh048-texture" name="texture">
-                    <float_array id="Geometry-mesh048-texture-array" count="8">
+                <source id="Geometry-decal_01-texture" name="texture">
+                    <float_array id="Geometry-decal_01-texture-array" count="8">
                         0.991421 0.992463
                         0.008579 0.992463
                         0.008579 0.00753685
                         0.991421 0.00753685
                     </float_array>
                     <technique_common>
-                        <accessor count="4" source="#Geometry-mesh048-texture-array" stride="2">
+                        <accessor count="4" source="#Geometry-decal_01-texture-array" stride="2">
                             <param name="S" type="float" />
                             <param name="T" type="float" />
                         </accessor>
                     </technique_common>
                 </source>
-                <vertices id="Geometry-mesh048-vertices">
-                    <input semantic="POSITION" source="#Geometry-mesh048-positions" />
+                <vertices id="Geometry-decal_01-vertices">
+                    <input semantic="POSITION" source="#Geometry-decal_01-positions" />
                 </vertices>
                 <polylist count="1" material="Material-material1">
-                    <input semantic="VERTEX" source="#Geometry-mesh048-vertices" offset="0" />
-                    <input semantic="NORMAL" source="#Geometry-mesh048-normals" offset="1" />
-                    <input semantic="TEXCOORD" source="#Geometry-mesh048-texture" offset="2" set="0" />
+                    <input semantic="VERTEX" source="#Geometry-decal_01-vertices" offset="0" />
+                    <input semantic="NORMAL" source="#Geometry-decal_01-normals" offset="1" />
+                    <input semantic="TEXCOORD" source="#Geometry-decal_01-texture" offset="2" set="0" />
                     <vcount>4</vcount>
                     <p>1 0 0 3 0 1 2 0 2 0 0 3</p>
                 </polylist>
@@ -5435,6 +5435,39 @@
             <node id="navlight_red_1__4_Node" name="navlight_red_1__4_" type="NODE">
                 <translate sid="translation014">-12.17 0 16.201</translate>
             </node>
+            <node id="locator051Node" name="tag_camera_left" type="NODE">
+                <translate sid="translation055">-17 0 0</translate>
+                <rotate sid="rotation054Y">0 1 0 -90</rotate>
+                <rotate sid="rotation054X">1 0 0 0</rotate>
+                <rotate sid="rotation054Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator053Node" name="tag_camera_front" type="NODE">
+                <translate sid="translation057">0 0 -33.85</translate>
+                <rotate sid="rotation056Y">0 1 0 -180</rotate>
+                <rotate sid="rotation056X">1 0 0 0</rotate>
+                <rotate sid="rotation056Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator049Node" name="tag_camera_bottom" type="NODE">
+                <translate sid="translation059">0 -9 0</translate>
+                <rotate sid="rotation058Y">0 1 0 0</rotate>
+                <rotate sid="rotation058X">1 0 0 90</rotate>
+                <rotate sid="rotation058Z">0 0 1 180</rotate>
+            </node>
+            <node id="locator052Node" name="tag_camera_back" type="NODE">
+                <translate sid="translation060">0 0 18</translate>
+            </node>
+            <node id="locator050Node" name="tag_camera_right" type="NODE">
+                <translate sid="translation062">17 0 0</translate>
+                <rotate sid="rotation061Y">0 1 0 90</rotate>
+                <rotate sid="rotation061X">1 0 0 0</rotate>
+                <rotate sid="rotation061Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator048Node" name="tag_camera_top" type="NODE">
+                <translate sid="translation064">0 9 0</translate>
+                <rotate sid="rotation063Y">0 1 0 0</rotate>
+                <rotate sid="rotation063X">1 0 0 270</rotate>
+                <rotate sid="rotation063Z">0 0 1 180</rotate>
+            </node>
             <node id="Geometry-MeshNode" name="Mesh" type="NODE">
                 <instance_geometry url="#Geometry-Mesh">
                     <bind_material>
@@ -5445,8 +5478,8 @@
                     </bind_material>
                 </instance_geometry>
             </node>
-            <node id="Geometry-mesh048Node" name="decal_01" type="NODE">
-                <instance_geometry url="#Geometry-mesh048">
+            <node id="Geometry-decal_01Node" name="decal_01" type="NODE">
+                <instance_geometry url="#Geometry-decal_01">
                     <bind_material>
                         <technique_common>
                             <instance_material symbol="Material-material1" target="#Material-material1" />
