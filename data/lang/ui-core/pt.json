@@ -328,7 +328,7 @@
         "description": ""
     },
     "SAVE": {
-        "message": "Save",
+        "message": "Guardar",
         "description": ""
     },
     "CITY_DETAIL_LEVEL": {
@@ -376,7 +376,7 @@
         "description": ""
     },
     "ALLEGIANCE": {
-        "message": "Allegiance:",
+        "message": "Fidelidade:",
         "description": ""
     },
     "RANK": {

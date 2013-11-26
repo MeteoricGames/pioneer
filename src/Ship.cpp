@@ -74,7 +74,7 @@ void Ship::Save(Serializer::Writer &wr, Space *space)
 	wr.Int32(int(m_alertState));
 	wr.Double(m_lastFiringAlert);
 	wr.Double(m_juice);
-	wr.Int32(m_transitstate);
+	wr.Int32(int(m_transitstate));
 
 	// XXX make sure all hyperspace attrs and the cloud get saved
 	m_hyperspace.dest.Serialize(wr);
@@ -122,7 +122,7 @@ void Ship::Load(Serializer::Reader &rd, Space *space)
 	Properties().Set("alertStatus", EnumStrings::GetString("ShipAlertStatus", m_alertState));
 	m_lastFiringAlert = rd.Double();
 	m_juice = rd.Double();
-	m_transitstate = rd.Int32();
+	m_transitstate = static_cast<TransitState>(rd.Int32());
 
 	m_hyperspace.dest = SystemPath::Unserialize(rd);
 	m_hyperspace.countdown = rd.Float();
@@ -148,6 +148,11 @@ void Ship::Load(Serializer::Reader &rd, Space *space)
 	m_stats.fuel_tank_mass_left = GetShipType()->fuelTankMass * GetFuel();
 	m_reserveFuel = rd.Double();
 	UpdateStats(); // this is necessary, UpdateStats() in Ship::Init has wrong values of m_thrusterFuel after Load
+
+	PropertyMap &p = Properties();
+	p.Set("hullMassLeft", m_stats.hull_mass_left);
+	p.Set("shieldMassLeft", m_stats.shield_mass_left);
+	p.Set("fuelMassLeft", m_stats.fuel_tank_mass_left);
 
 	m_controller = 0;
 	const ShipController::Type ctype = static_cast<ShipController::Type>(rd.Int32());
@@ -179,6 +184,8 @@ void Ship::InitGun(const char *tag, int num)
 
 void Ship::Init()
 {
+	m_invulnerable = false;
+
 	m_navLights.reset(new NavLights(GetModel()));
 	m_navLights->SetEnabled(true);
 
@@ -186,6 +193,12 @@ void Ship::Init()
 	UpdateStats();
 	m_stats.hull_mass_left = float(m_type->hullMass);
 	m_stats.shield_mass_left = 0;
+
+	PropertyMap &p = Properties();
+	p.Set("hullMassLeft", m_stats.hull_mass_left);
+	p.Set("shieldMassLeft", m_stats.shield_mass_left);
+	p.Set("fuelMassLeft", m_stats.fuel_tank_mass_left);
+
 	m_hyperspace.now = false;			// TODO: move this on next savegame change, maybe
 	m_hyperspaceCloud = 0;
 
@@ -234,7 +247,7 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_ecmRecharge = 0;
 	m_curAICmd = 0;
 	m_juice = 20.0;
-	m_transitstate = 0;
+	m_transitstate = TRANSIT_DRIVE_OFF;
 	m_aiMessage = AIERROR_NONE;
 	m_decelerating = false;
 	m_equipment.onChange.connect(sigc::mem_fun(this, &Ship::OnEquipmentChange));
@@ -277,6 +290,7 @@ float Ship::GetPercentShields() const
 void Ship::SetPercentHull(float p)
 {
 	m_stats.hull_mass_left = 0.01f * Clamp(p, 0.0f, 100.0f) * float(m_type->hullMass);
+	Properties().Set("hullMassLeft", m_stats.hull_mass_left);
 }
 
 void Ship::UpdateMass()
@@ -300,6 +314,11 @@ double Ship::GetSpeedReachedWithFuel() const
 
 bool Ship::OnDamage(Object *attacker, float kgDamage)
 {
+	if (m_invulnerable) {
+		Sound::BodyMakeNoise(this, "Hull_hit_Small", 0.5f);
+		return true;
+	}
+
 	if (!IsDead()) {
 		float dam = kgDamage*0.001f;
 		if (m_stats.shield_mass_left > 0.0f) {
@@ -310,9 +329,11 @@ bool Ship::OnDamage(Object *attacker, float kgDamage)
 				dam -= m_stats.shield_mass_left;
 				m_stats.shield_mass_left = 0;
 			}
+			Properties().Set("shieldMassLeft", m_stats.shield_mass_left);
 		}
 
 		m_stats.hull_mass_left -= dam;
+		Properties().Set("hullMassLeft", m_stats.hull_mass_left);
 		if (m_stats.hull_mass_left < 0) {
 			if (attacker) {
 				if (attacker->IsType(Object::BODY))
@@ -392,6 +413,8 @@ bool Ship::OnCollision(Object *b, Uint32 flags, double relVel)
 //destroy ship in an explosion
 void Ship::Explode()
 {
+	if (m_invulnerable) return;
+
 	Pi::game->GetSpace()->KillBody(this);
 	Sfx::Add(this, Sfx::TYPE_EXPLOSION);
 	Sound::BodyMakeNoise(this, "Explosion_1", 1.0f);
@@ -406,6 +429,37 @@ void Ship::SetThrusterState(const vector3d &levels)
 		m_thrusters.x = Clamp(levels.x, -1.0, 1.0);
 		m_thrusters.y = Clamp(levels.y, -1.0, 1.0);
 		m_thrusters.z = Clamp(levels.z, -1.0, 1.0);
+	}
+}
+
+void Ship::SetThrusterState(int axis, double level) 
+{
+	if (m_thrusterFuel <= 0.f) level = 0.0;
+	m_thrusters[axis] = Clamp(level, -1.0, 1.0);
+}
+
+// Effectively applies speed limit set in maxManeuverSpeed (max_maneuver_speed in ship info)
+void Ship::ApplyThrusterLimits()
+{
+	float max_maneuver_speed = GetShipType()->maxManeuverSpeed;
+	// If no max maneuver speed is set it will be considred unlimited
+	if(max_maneuver_speed > 0.0) {
+		vector3d current_velocity = GetVelocity() * GetOrient();
+		double current_magnitude = current_velocity.Length();
+		if(current_magnitude >= max_maneuver_speed) {
+			vector3d current_normal = current_velocity / current_magnitude;
+			vector3d thrusters_normal = m_thrusters.Normalized();
+			double dot = current_normal.Dot(thrusters_normal);
+			if(dot > 0.0) {
+				if(dot <= 0.999999) {
+					// Apply thrusters only if they deviate from current velocity vector (otherwise may cause jitter)
+					m_thrusters = (thrusters_normal - current_normal).Normalized();
+				} else {
+					// Thrusters and current velocity have the same direction, no need to thrust
+					m_thrusters = vector3d(0.0, 0.0, 0.0);
+				}
+			}
+		}
 	}
 }
 
@@ -426,9 +480,14 @@ vector3d Ship::GetMaxThrust(const vector3d &dir) const
 	maxThrust.z = (dir.z > 0) ? m_type->linThrust[ShipType::THRUSTER_REVERSE]
 		: -m_type->linThrust[ShipType::THRUSTER_FORWARD];
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_FIXSPEED) && GetVelocity().Length() > 1000) return maxThrust*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
+	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return maxThrust*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return maxThrust*m_juice;
 	return maxThrust;
+}
+
+float Ship::GetMaxManeuverSpeed() const
+{
+	return GetShipType()->maxManeuverSpeed;
 }
 
 double Ship::GetAccelMin() const
@@ -437,26 +496,26 @@ double Ship::GetAccelMin() const
 	val = std::min(val, m_type->linThrust[ShipType::THRUSTER_RIGHT]);
 	val = std::min(val, -m_type->linThrust[ShipType::THRUSTER_LEFT]);
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_FIXSPEED) && GetVelocity().Length() > 1000) return (val / GetMass())*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
+	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return (val / GetMass())*std::min(m_juice,1.0+GetVelocity().Length()*0.004);
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return (val / GetMass())*m_juice;
 	return (val / GetMass());
 }
 
 double Ship::GetAccelFwd() const { 
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_FIXSPEED) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
+	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*-m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 	return -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass(); 
 }
 double Ship::GetAccelRev() const { 
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_FIXSPEED) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
+	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
 	return m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass(); 
 }
 double Ship::GetAccelUp() const { 
 	//double juice = std::min(GetVelocity().Length()/200.0,20.0)+0.5;
-	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_FIXSPEED) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
+	if ((m_curAICmd!=0||Pi::player->GetPlayerController()->GetFlightControlState()==CONTROL_MANEUVER) && GetVelocity().Length() > 1000) return std::min(m_juice,1.0+GetVelocity().Length()*0.004)*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) return m_juice*m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
 	return m_type->linThrust[ShipType::THRUSTER_UP] / GetMass(); 
 }
@@ -464,7 +523,9 @@ double Ship::GetAccelUp() const {
 void Ship::ClearThrusterState()
 {
 	m_angThrusters = vector3d(0,0,0);
-	if (m_launchLockTimeout <= 0.0f) m_thrusters = vector3d(0,0,0);
+	if (m_launchLockTimeout <= 0.0f) {
+		m_thrusters = vector3d(0,0,0);
+	}
 }
 
 Equip::Type Ship::GetHyperdriveFuelType() const
@@ -475,7 +536,8 @@ Equip::Type Ship::GetHyperdriveFuelType() const
 
 void Ship::UpdateEquipStats()
 {
-	m_stats.max_capacity = m_type->capacity;
+	PropertyMap &p = Properties();
+
 	m_stats.used_capacity = 0;
 	m_stats.used_cargo = 0;
 
@@ -486,35 +548,40 @@ void Ship::UpdateEquipStats()
 			if (Equip::Slot(i) == Equip::SLOT_CARGO) m_stats.used_cargo += Equip::types[t].mass;
 		}
 	}
-	m_stats.free_capacity = m_stats.max_capacity - m_stats.used_capacity;
+	m_stats.free_capacity = m_type->capacity - m_stats.used_capacity;
 	m_stats.total_mass = m_stats.used_capacity + m_type->hullMass;
 
+	p.Set("usedCapacity", m_stats.used_capacity);
+	p.Set("usedCargo", m_stats.used_cargo);
+	p.Set("freeCapacity", m_stats.free_capacity);
+	p.Set("totalMass", m_stats.total_mass);
+
 	m_stats.shield_mass = TONS_HULL_PER_SHIELD * float(m_equipment.Count(Equip::SLOT_SHIELD, Equip::SHIELD_GENERATOR));
+	p.Set("shieldMass", m_stats.shield_mass);
 
 	UpdateMass();
 	UpdateFuelStats();
 
 	Equip::Type fuelType = GetHyperdriveFuelType();
 
+	m_stats.hyperspace_range = m_stats.hyperspace_range_max = 0;
 	if (m_type->equipSlotCapacity[Equip::SLOT_ENGINE]) {
 		Equip::Type t = m_equipment.Get(Equip::SLOT_ENGINE);
 		int hyperclass = Equip::types[t].pval;
-		if (!hyperclass) { // no drive
-			m_stats.hyperspace_range = m_stats.hyperspace_range_max = 0;
-		} else {
+		if (hyperclass) {
 			m_stats.hyperspace_range_max = Pi::CalcHyperspaceRangeMax(hyperclass, GetMass()/1000);
 			m_stats.hyperspace_range = Pi::CalcHyperspaceRange(hyperclass, GetMass()/1000, m_equipment.Count(Equip::SLOT_CARGO, fuelType));
 		}
-	} else {
-		m_stats.hyperspace_range = m_stats.hyperspace_range_max = 0;
 	}
+
+	p.Set("hyperspaceRange", m_stats.hyperspace_range);
+	p.Set("maxHyperspaceRange", m_stats.hyperspace_range_max);
 }
 
 void Ship::UpdateFuelStats()
 {
-	m_stats.fuel_tank_mass = m_type->fuelTankMass;
-	m_stats.fuel_use = GetShipType()->GetFuelUseRate();
-	m_stats.fuel_tank_mass_left = m_stats.fuel_tank_mass * GetFuel();
+	m_stats.fuel_tank_mass_left = m_type->fuelTankMass * GetFuel();
+	Properties().Set("fuelMassLeft", m_stats.fuel_tank_mass_left);
 
 	UpdateMass();
 }
@@ -770,6 +837,7 @@ void Ship::TimeStepUpdate(const float timeStep)
 	vector3d maxThrust = GetMaxThrust(m_thrusters);
 	vector3d thrust = vector3d(maxThrust.x*m_thrusters.x, maxThrust.y*m_thrusters.y,
 		maxThrust.z*m_thrusters.z);
+
 	AddRelForce(thrust);
 	AddRelTorque(GetShipType()->angThrust * m_angThrusters);
 
@@ -820,7 +888,7 @@ void Ship::DoThrusterSounds() const
 
 	//transit
 	float transitVol[2] = { 0.f, 0.f };
-	if (m_transitstate>0 && IsType(Object::PLAYER)) {
+	if (m_transitstate == TRANSIT_DRIVE_ON && IsType(Object::PLAYER)) {
 		transitVol[0] = targetVol[0];
 		transitVol[1] = targetVol[1];
 	}
@@ -1018,6 +1086,10 @@ void Ship::StaticUpdate(const float timeStep)
 
 	UpdateAlertState();
 
+	if(!AIIsActive()) {
+		ApplyThrusterLimits();
+	}
+
 	/* FUEL SCOOPING!!!!!!!!! */
 	if ((m_flightState == FLYING) && (m_equipment.Get(Equip::SLOT_FUELSCOOP) != Equip::NONE)) {
 		Body *astro = GetFrame()->GetBody();
@@ -1098,9 +1170,9 @@ void Ship::StaticUpdate(const float timeStep)
 		if (m_equipment.Get(Equip::SLOT_ENERGYBOOSTER) != Equip::NONE) {
 			recharge_rate *= float(Equip::types[ m_equipment.Get(Equip::SLOT_ENERGYBOOSTER) ].pval);
 		}
-		m_stats.shield_mass_left += m_stats.shield_mass * recharge_rate * timeStep;
+		m_stats.shield_mass_left = Clamp(m_stats.shield_mass_left + m_stats.shield_mass * recharge_rate * timeStep, 0.0f, m_stats.shield_mass);
+		Properties().Set("shieldMassLeft", m_stats.shield_mass_left);
 	}
-	m_stats.shield_mass_left = Clamp(m_stats.shield_mass_left, 0.0f, m_stats.shield_mass);
 
 	if (m_wheelTransition) {
 		m_wheelState += m_wheelTransition*0.3f*timeStep;
@@ -1111,8 +1183,10 @@ void Ship::StaticUpdate(const float timeStep)
 
 	if (m_testLanded) TestLanded();
 
-	if (m_equipment.Get(Equip::SLOT_HULLAUTOREPAIR) == Equip::HULL_AUTOREPAIR)
+	if (m_equipment.Get(Equip::SLOT_HULLAUTOREPAIR) == Equip::HULL_AUTOREPAIR) {
 		m_stats.hull_mass_left = std::min(m_stats.hull_mass_left + 0.1f*timeStep, float(m_type->hullMass));
+		Properties().Set("hullMassLeft", m_stats.hull_mass_left);
+	}
 
 	// After calling StartHyperspaceTo this Ship must not spawn objects
 	// holding references to it (eg missiles), as StartHyperspaceTo
@@ -1144,14 +1218,14 @@ void Ship::StaticUpdate(const float timeStep)
 	}
 
 	//play start transit drive
-	if (m_transitstate==-5 && IsType(Object::PLAYER)) {
+	if (m_transitstate == TRANSIT_DRIVE_START && IsType(Object::PLAYER)) {
 		Sound::PlaySfx("Transit_Start", 0.25f, 0.25f, false);
-		m_transitstate=-3;
+		SetTransitState(TRANSIT_DRIVE_READY);
 	}
 	//play stop transit drive
-	if (m_transitstate==-4 && IsType(Object::PLAYER) ) {
+	if (m_transitstate == TRANSIT_DRIVE_STOP && IsType(Object::PLAYER) ) {
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
-		m_transitstate=-6;
+		SetTransitState(TRANSIT_DRIVE_FINISHED);
 	}
 }
 

@@ -301,24 +301,21 @@ int SpaceStation::NumShipsDocked() const
 
 int SpaceStation::GetFreeDockingPort(const Ship *s) const
 {
+	assert(s);
 	for (unsigned int i=0; i<m_type->numDockingPorts; i++) {
 		if (m_shipDocking[i].ship == 0) {
-			if(s) {
-				// fwing
-				// initial unoccupied check
-				if (m_shipDocking[i].ship != 0) continue;
+			// fwing
+			// initial unoccupied check
+			if (m_shipDocking[i].ship != 0) continue;
 
-				// size-of-ship vs size-of-bay check
-				const SpaceStationType::SBayGroup *const pBayGroup = m_type->FindGroupByBay(i);
-				if( !pBayGroup ) continue;
+			// size-of-ship vs size-of-bay check
+			const SpaceStationType::SBayGroup *const pBayGroup = m_type->FindGroupByBay(i);
+			if( !pBayGroup ) continue;
 
-				const Aabb &bbox = s->GetAabb();
-				const double bboxRad = bbox.GetRadius();
+			const Aabb &bbox = s->GetAabb();
+			const double bboxRad = bbox.GetRadius();
 
-				if( pBayGroup->minShipSize < bboxRad && bboxRad < pBayGroup->maxShipSize ) {
-					return i;
-				}
-			} else {
+			if( pBayGroup->minShipSize < bboxRad && bboxRad < pBayGroup->maxShipSize ) {
 				return i;
 			}
 		}
@@ -339,13 +336,14 @@ void SpaceStation::SetDocked(Ship *ship, int port)
 	PositionDockedShip(ship, port);
 }
 
-void SpaceStation::SwapDockedShipsPort(Ship *ship, const int oldPort, const int newPort)
+void SpaceStation::SwapDockedShipsPort(const int oldPort, const int newPort)
 {
 	if( oldPort == newPort )
 		return;
 
 	// set new location
-	//SetDocked(ship, newPort);
+	Ship *ship = m_shipDocking[oldPort].ship;
+	assert(ship);
 	ship->SetDockedWith(this, newPort);
 
 	m_shipDocking[oldPort].ship = 0;
@@ -434,8 +432,14 @@ bool SpaceStation::OnCollision(Object *b, Uint32 flags, double relVel)
 		if (IsGroundStation()) {
 			vector3d dockingNormal = GetOrient()*dport.yaxis;
 			const double dot = s->GetOrient().VectorY().Dot(dockingNormal);
-			if ((dot < 0.99) || (s->GetWheelState() < 1.0)) return false;	// <0.99 harsh?
-			if (s->GetVelocity().Length() > MAX_LANDING_SPEED) return false;
+			if (dot < 0.99) return false;	// <0.99 harsh?
+			if (s->GetWheelState() < 1.0) {
+				s->SetWheelState(true);
+			}
+			if (s->GetVelocity().Length() > MAX_LANDING_SPEED) {
+				// This is causing a bug: randomly when a ship is trying to dock it never switches to docking states
+				//return false;
+			}
 		}
 
 		// if there is more docking port anim to do, don't set docked yet
