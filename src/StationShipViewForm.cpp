@@ -79,7 +79,9 @@ StationShipViewForm::StationShipViewForm(FormController *controller, int marketI
 	row->SetSpacing(10.0f);
 
 	int row_size = 5, pos = 0;
+	int drive = 0;
 	for (int drivetype = Equip::DRIVE_CLASS1; drivetype <= Equip::DRIVE_CLASS20; drivetype++) {
+		drive++;
 		if (type.capacity < Equip::types[drivetype].mass)
 			break;
 
@@ -89,7 +91,7 @@ StationShipViewForm::StationShipViewForm(FormController *controller, int marketI
 		Gui::VBox *cell = new Gui::VBox();
 		row->PackEnd(cell);
 
-		cell->PackEnd(new Gui::Label(stringf(Lang::CLASS_NUMBER, formatarg("class", hyperclass))));
+		cell->PackEnd(new Gui::Label(stringf(Lang::CLASS_NUMBER, formatarg("class", drive))));
 		if (type.capacity < Equip::types[drivetype].mass)
 			cell->PackEnd(new Gui::Label("---"));
 		else
