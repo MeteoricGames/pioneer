@@ -89,6 +89,8 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	vector3d v;
 	matrix4x4d m;
 	double current_velocity;
+	bool any_linthrust_keydown = IsAnyLinearThrusterKeyDown();
+	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown();
 	// Get altitude from WorldView (that's where altitude is being calculated for UI display
 	// and since it's a bit expensive retrieving it is better than calculating it twice per frame)
 	double altitude = -1.0;
@@ -102,7 +104,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 		case CONTROL_MANEUVER:
 			PollControls(timeStep, true);
 			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
-				if (IsAnyLinearThrusterKeyDown()) break;
+				if (any_linthrust_keydown) break;
 				v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
 				if (m_setSpeedTarget) {
 					v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
@@ -128,38 +130,18 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 					// START
 					// Ship.cpp will engage the transit drive to ON state
 				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_ON) {
-					if(altitude > TRANSIT_GRAVITY_RANGE_1) {
-						if(altitude < TRANSIT_GRAVITY_RANGE_2) {
-							m_setSpeed = TRANSIT_DRIVE_1_SPEED;
-							if(m_ship->GetVelocity().Length() > m_setSpeed) {
-								m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
-							}
-						} else {
-							m_setSpeed = TRANSIT_DRIVE_2_SPEED;
-						}
-					} else if(altitude > 0.0) {
-						m_ship->StopTransitDrive();
-					} else {
+					if((altitude < 0.0 || altitude > TRANSIT_GRAVITY_RANGE_2) && !any_angthrust_keydown) {
 						m_setSpeed = TRANSIT_DRIVE_2_SPEED;
-					}
-					/*
-					if(altitude > TRANSIT_GRAVITY_RANGE_2) {
-						// Transit Drive 2
-						m_setSpeed = TRANSIT_DRIVE_2_SPEED;
-					} else if(altitude > TRANSIT_GRAVITY_RANGE_1) {
-						// Transit Drive 1
+					} else if(altitude < 0.0 || altitude > TRANSIT_GRAVITY_RANGE_1) {
 						m_setSpeed = TRANSIT_DRIVE_1_SPEED;
-					} else if(altitude >= 0.0) {
-						// Transit interruption, altitude less than gravity bubble
-						//m_ship->SetTransitState(TRANSIT_DRIVE_STOP);
-						m_ship->StopTransitDrive();
+						if(m_ship->GetVelocity().Length() > m_setSpeed) {
+							m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
+						}
 					} else {
-						// No altitude available (in gravity free space)
-						m_setSpeed = TRANSIT_DRIVE_2_SPEED;
+						m_ship->StopTransitDrive();
 					}
-					*/
 					m_ship->SetJuice(80.0);
-					//if (IsAnyLinearThrusterKeyDown()) break;
+					//if (any_linthrust_keydown) break;
 					v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
 					if (m_setSpeedTarget) {
 						v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
