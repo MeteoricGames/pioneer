@@ -37,7 +37,7 @@ void View::Attach() {
 
 	if (Pi::cpan) {
 		Gui::Screen::AddBaseWidget(Pi::cpan, 0, h-80);
-		Gui::Screen::AddBaseWidget(m_rightButtonBar, w-128, h-26);
+		Gui::Screen::AddBaseWidget(m_rightButtonBar, w-342, h-26);
 		Gui::Screen::AddBaseWidget(m_rightRegion2, w-127, h-42);
 		Gui::Screen::AddBaseWidget(m_rightRegion1, w-123, h-62);
 
