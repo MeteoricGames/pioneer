@@ -155,6 +155,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 						v = vector3d(0.0, 0.0, 0.0);
 						m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
 					}
+					TransitTunnelingTest(timeStep);
 				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_STOP) {
 					// STOP
 				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
@@ -189,6 +190,52 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	OS::EnableFPE();
 	m_ship->AITimeStep(timeStep);
 	OS::DisableFPE();
+}
+
+void PlayerShipController::TransitTunnelingTest(const float timeStep) {
+	// Perform future collision detection with current system if it's a planet to detect possible tunneling collisions
+	// Perform future collision detection with planet to detect required changes to transit drive
+	if(m_ship->GetFrame()->GetBody()->IsType(Object::PLANET)) {
+		Frame* frame = m_ship->GetFrame();
+		Body* planet = frame->GetBody();
+		vector3d ship_position = m_ship->GetPositionRelTo(frame);
+		vector3d ship_velocity = m_ship->GetVelocityRelTo(frame);
+		vector3d ship_direction = ship_velocity.Normalized();
+		vector3d planet_position = planet->GetPosition();
+		vector3d ship_to_planet = planet_position - ship_position;
+		float heading_check = ship_to_planet.Dot(ship_direction);
+		if(heading_check > 0.0f) {
+			assert(planet->IsType(Object::TERRAINBODY));
+			double terrain_height = static_cast<TerrainBody*>(planet)->GetTerrainHeight(ship_position.Normalized());
+			ship_velocity *= timeStep;
+			double ship_step = ship_velocity.Length();
+			double distance_to_planet = ship_to_planet.Length();
+			vector3d ship_position_future = ship_position + (ship_direction * ship_step);
+			double future_distance_to_planet = (ship_position_future - planet_position).Length();
+			double planet_radius = terrain_height;
+			double gravity_bubble_2_radius = planet_radius + TRANSIT_GRAVITY_RANGE_2;
+			double gravity_bubble_1_radius = planet_radius + TRANSIT_GRAVITY_RANGE_1;
+
+			bool motion_clamp = false;
+			double desired_distance;
+
+			if(future_distance_to_planet <= gravity_bubble_1_radius) {
+				m_setSpeed = m_ship->GetMaxManeuverSpeed();
+				motion_clamp = true;
+				desired_distance = distance_to_planet - planet_radius - TRANSIT_GRAVITY_RANGE_1 + 100.0;
+				m_ship->StopTransitDrive();
+				SetFlightControlState(CONTROL_MANEUVER);
+			} else if(m_setSpeed > TRANSIT_DRIVE_1_SPEED && future_distance_to_planet <= gravity_bubble_2_radius) {
+				m_setSpeed = TRANSIT_DRIVE_1_SPEED;
+				motion_clamp = true;				
+				desired_distance = distance_to_planet - planet_radius - TRANSIT_GRAVITY_RANGE_2 + 100.0;
+			}
+			if(motion_clamp && desired_distance > 0.0) {
+				m_ship->SetPosition(ship_position + (ship_direction * desired_distance));
+				m_ship->SetVelocity(ship_direction * m_setSpeed);
+			}
+		}
+	}
 }
 
 void PlayerShipController::CheckControlsLock()
