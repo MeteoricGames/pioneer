@@ -610,7 +610,7 @@ void UseEquipWidget::UpdateEquip()
 
 ///////////////////////////////////////////////
 
-MultiFuncSelectorWidget::MultiFuncSelectorWidget(): Gui::Fixed(144, 17)
+MultiFuncSelectorWidget::MultiFuncSelectorWidget(): Gui::Fixed(144, 99)
 {
 	m_active = 0;
 	m_rg = new Gui::RadioGroup();
@@ -653,6 +653,6 @@ void MultiFuncSelectorWidget::UpdateButtons()
 	RemoveAllChildren();
 
 	for (int i = 0; i < MFUNC_MAX; ++i) {
-		Add(m_buttons[i], 36.0f + 36.0f * float(i), 0.0);
+		Add(m_buttons[i], 36.0f + 36.0f * float(i), 26.0);
 	}
 }
