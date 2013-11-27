@@ -90,7 +90,8 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	matrix4x4d m;
 	double current_velocity;
 	bool any_linthrust_keydown = IsAnyLinearThrusterKeyDown();
-	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown();
+	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || m_mouseActive;
+
 	// Get altitude from WorldView (that's where altitude is being calculated for UI display
 	// and since it's a bit expensive retrieving it is better than calculating it twice per frame)
 	double altitude = -1.0;
