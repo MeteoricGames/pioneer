@@ -81,7 +81,7 @@
    },
    "COMMANDER" : {
       "description" : "",
-      "message" : "Commander"
+      "message" : "Captain"
    },
    "COMPETENT" : {
       "description" : "",
@@ -169,7 +169,7 @@
    },
    "ELITE" : {
       "description" : "",
-      "message" : "ELITE"
+      "message" : "PARAGON"
    },
    "EMPLOYMENT" : {
       "description" : "",
@@ -273,11 +273,11 @@
    },
    "HYPERDRIVE" : {
       "description" : "",
-      "message" : "Hyperdrive"
+      "message" : "Phase Drive Jump Module"
    },
    "HYPERSPACE_RANGE" : {
       "description" : "",
-      "message" : "Hyperspace range"
+      "message" : "Jump range"
    },
    "IM_TIRED_OF_WORKING_FOR_NOTHING_DONT_YOU_KNOW_WHAT_A_CONTRACT_IS" : {
       "description" : "",
@@ -577,7 +577,7 @@
    },
    "START_AT_NEW_HOPE" : {
       "description" : "",
-      "message" : "Start at New Hope"
+      "message" : "Start at Firedrake"
    },
    "STATUS" : {
       "description" : "",
@@ -589,7 +589,7 @@
    },
    "THE_SHIP_IS_UNDER_STATION_CONTROL_COMMANDER" : {
       "description" : "",
-      "message" : "The ship is under station control, Commander."
+      "message" : "The ship is under station control, Captain."
    },
    "TOGGLE_MALE_FEMALE" : {
       "description" : "",
@@ -641,26 +641,26 @@
    },
    "WE_ARE_IN_HYPERSPACE_COMMANDER" : {
       "description" : "",
-      "message" : "We are in hyperspace, Commander."
+      "message" : "We are in hyperspace, Captain."
    },
    "YOURE_GOING_TO_REGRET_SACKING_ME" : {
       "description" : "",
-      "message" : "You're going to regret sacking me!"
+      "message" : "You're going to regret firing me!"
    },
    "YOU_MUST_FIRST_SELECT_A_COMBAT_TARGET_COMMANDER" : {
       "description" : "",
-      "message" : "You must first select a combat target, Commander."
+      "message" : "You must first select a combat target, Captain."
    },
    "YOU_MUST_FIRST_SELECT_A_SUITABLE_NAVIGATION_TARGET_COMMANDER" : {
       "description" : "",
-      "message" : "You must first select a suitable navigation target, Commander."
+      "message" : "You must first select a suitable navigation target, Captain."
    },
    "YOU_MUST_LAUNCH_FIRST_COMMANDER" : {
       "description" : "",
-      "message" : "You must launch first, Commander."
+      "message" : "You must launch first, Captain."
    },
    "YOU_MUST_REQUEST_LAUNCH_CLEARANCE_FIRST_COMMANDER" : {
       "description" : "",
-      "message" : "You must request launch clearance first, Commander."
+      "message" : "You must request launch clearance first, Captain."
    }
 }
