@@ -125,7 +125,7 @@
    },
    "BULLETIN_BOARD" : {
       "description" : "",
-      "message" : "Bulletin Board"
+      "message" : "Local Exonet"
    },
    "BUTTON" : {
       "description" : "",
@@ -169,7 +169,7 @@
    },
    "CANT_SAVE_IN_HYPERSPACE" : {
       "description" : "",
-      "message" : "Can't save game while in hyperspace"
+      "message" : "Can't save game while jumping"
    },
    "CAPACITY" : {
       "description" : "",
@@ -293,7 +293,7 @@
    },
    "CONTACT_LOCAL_POLICE" : {
       "description" : "",
-      "message" : "Contact local police"
+      "message" : "Contact local security"
    },
    "CONTROLS" : {
       "description" : "",
@@ -393,39 +393,39 @@
    },
    "DRIVE_CLASS1" : {
       "description" : "",
-      "message" : "Class 1 Hyperdrive"
+      "message" : "Class 1 Jump Module"
    },
    "DRIVE_CLASS2" : {
       "description" : "",
-      "message" : "Class 2 Hyperdrive"
+      "message" : "Class 2 Jump Module"
    },
    "DRIVE_CLASS3" : {
       "description" : "",
-      "message" : "Class 3 Hyperdrive"
+      "message" : "Class 3 Jump Module"
    },
    "DRIVE_CLASS4" : {
       "description" : "",
-      "message" : "Class 4 Hyperdrive"
+      "message" : "Class 4 Jump Module"
    },
    "DRIVE_CLASS5" : {
       "description" : "",
-      "message" : "Class 5 Hyperdrive"
+      "message" : "Class 5 Jump Module"
    },
    "DRIVE_CLASS6" : {
       "description" : "",
-      "message" : "Class 6 Hyperdrive"
+      "message" : "Class 6 Jump Module"
    },
    "DRIVE_CLASS7" : {
       "description" : "",
-      "message" : "Class 7 Hyperdrive"
+      "message" : "Class 7 Jump Module"
    },
    "DRIVE_CLASS8" : {
       "description" : "",
-      "message" : "Class 8 Hyperdrive"
+      "message" : "Class 8 Jump Module"
    },
    "DRIVE_CLASS9" : {
       "description" : "",
-      "message" : "Class 9 Hyperdrive"
+      "message" : "Class 9 Jump Module"
    },
    "DRIVE_MIL1" : {
       "description" : "",
@@ -509,7 +509,7 @@
    },
    "FARM_MACHINERY" : {
       "description" : "",
-      "message" : "Farm machinery"
+      "message" : "Agri machinery"
    },
    "FERTILIZER" : {
       "description" : "",
@@ -565,7 +565,7 @@
    },
    "FRUIT_AND_VEG" : {
       "description" : "",
-      "message" : "Fruit and Veg"
+      "message" : "Fruits and Vegetables"
    },
    "FUEL" : {
       "description" : "",
@@ -633,7 +633,7 @@
    },
    "HANG_UP" : {
       "description" : "",
-      "message" : "Hang up."
+      "message" : "Disconnect"
    },
    "HARD_CAPITALIST" : {
       "description" : "",
@@ -689,51 +689,51 @@
    },
    "HYDROGEN_DESCRIPTION" : {
       "description" : "",
-      "message" : "Hydrogen is primarily used as a fusion fuel"
+      "message" : "Hydrogen is primarily used as a fuel source"
    },
    "HYPERCLOUD_ANALYZER" : {
       "description" : "",
-      "message" : "Hypercloud Analyzer"
+      "message" : "Phase Wake Analyzer"
    },
    "HYPERCLOUD_ANALYZER_DESCRIPTION" : {
       "description" : "",
-      "message" : "Analyze hyperspace clouds to determine destination and time of arrival or departure."
+      "message" : "Analyze phase wakes to determine destination and time of arrival or departure."
    },
    "HYPERDRIVE_FITTED" : {
       "description" : "",
-      "message" : "Hyperdrive fitted:"
+      "message" : "Phase drive jump module fitted:"
    },
    "HYPERSPACE" : {
       "description" : "",
-      "message" : "Hyperspace"
+      "message" : "Jump"
    },
    "HYPERSPACE_ARRIVAL_CLOUD" : {
       "description" : "",
-      "message" : "Hyperspace arrival cloud"
+      "message" : "Phase drive arrival jump wake"
    },
    "HYPERSPACE_ARRIVAL_CLOUD_REMNANT" : {
       "description" : "",
-      "message" : "Hyperspace arrival cloud remnant"
+      "message" : "Phase drive arrival jump wake remnant"
    },
    "HYPERSPACE_DEPARTURE_CLOUD" : {
       "description" : "",
-      "message" : "Hyperspace departure cloud"
+      "message" : "Phase drive departure jump wake"
    },
    "HYPERSPACE_JUMP" : {
       "description" : "",
-      "message" : "Hyperspace Jump"
+      "message" : "Phase Drive Jump"
    },
    "HYPERSPACE_JUMP_ABORTED" : {
       "description" : "",
-      "message" : "Hyperspace jump aborted."
+      "message" : "Phase drive jump aborted."
    },
    "HYPERSPACE_TARGET" : {
       "description" : "",
-      "message" : "Hyperspace target"
+      "message" : "Phase drive jump target"
    },
    "HYPERSPACING_IN_N_SECONDS" : {
       "description" : "",
-      "message" : "Hyperspacing in %countdown{f.0} seconds"
+      "message" : "Jumping in %countdown{f.0} seconds"
    },
    "H_ATMOSPHERE" : {
       "description" : "",
@@ -781,11 +781,11 @@
    },
    "IN_TRANSIT" : {
       "description" : "",
-      "message" : "In transit"
+      "message" : "Jumping"
    },
    "IN_TRANSIT_TO_N_X_X_X" : {
       "description" : "",
-      "message" : "In transit to %system [%x,%y,%z]"
+      "message" : "Jumping to %system [%x,%y,%z]"
    },
    "ITEM" : {
       "description" : "",
@@ -841,7 +841,7 @@
    },
    "LASER_FIRE_DETECTED" : {
       "description" : "",
-      "message" : "Laser fire detected."
+      "message" : "Weapons fire detected."
    },
    "LAUNCH_PERMISSION_DENIED_BUSY" : {
       "description" : "",
@@ -1101,7 +1101,7 @@
    },
    "NEW_AND_RECONDITIONED_SHIPS" : {
       "description" : "",
-      "message" : "New and reconditioned ships"
+      "message" : "Ships"
    },
    "NONE" : {
       "description" : "",
@@ -1137,7 +1137,7 @@
    },
    "NO_HYPERDRIVE" : {
       "description" : "",
-      "message" : "No hyperdrive"
+      "message" : "No phase drive jump module"
    },
    "NO_REGISTERED_INHABITANTS" : {
       "description" : "",
@@ -1265,7 +1265,7 @@
    },
    "PIONEER" : {
       "description" : "",
-      "message" : "PIONEER"
+      "message" : "PARAGON"
    },
    "PIRACY" : {
       "description" : "",
@@ -1337,7 +1337,7 @@
    },
    "PROBABILITY_OF_ARRIVAL_X_PERCENT" : {
       "description" : "",
-      "message" : "Probability of arrival: %probability%%"
+      "message" : "Jump Progress: %probability%%"
    },
    "PULSECANNON_10MW" : {
       "description" : "",
@@ -1373,7 +1373,7 @@
    },
    "RADAR_MAPPER" : {
       "description" : "",
-      "message" : "Radar Mapper"
+      "message" : "Ship Scanner"
    },
    "RADAR_MAPPER_DESCRIPTION" : {
       "description" : "",
@@ -1501,11 +1501,11 @@
    },
    "SCANNER" : {
       "description" : "",
-      "message" : "Scanner"
+      "message" : "Lidar"
    },
    "SCANNER_CONTROL" : {
       "description" : "",
-      "message" : "Scanner control"
+      "message" : "Lidar control"
    },
    "SCANNER_DESCRIPTION" : {
       "description" : "",
@@ -1553,11 +1553,11 @@
    },
    "SET_HYPERSPACE_DESTINATION_TO" : {
       "description" : "",
-      "message" : "Set hyperspace destination to %system"
+      "message" : "Set jump destination to %system"
    },
    "SET_HYPERSPACE_TARGET_TO_FOLLOW_THIS_DEPARTURE" : {
       "description" : "",
-      "message" : "Hyperspace cloud analyzer: Set hyperspace target to follow this departure"
+      "message" : "Phase drive jump wake analyzer: Set jump target to follow this departure"
    },
    "SET_LOW_THRUST_POWER_LEVEL_TO_X_PERCENT" : {
       "description" : "",
@@ -1605,7 +1605,7 @@
    },
    "SHIPYARD" : {
       "description" : "",
-      "message" : "Shipyard"
+      "message" : "Ship Dealer"
    },
    "SHIP_ALTITUDE_ABOVE_TERRAIN" : {
       "description" : "",
@@ -1657,7 +1657,7 @@
    },
    "SIMULATING_UNIVERSE_EVOLUTION_N_BYEARS" : {
       "description" : "",
-      "message" : "Simulating evolution of the universe: %age{f.1} billion years ;-)"
+      "message" : "Tapes Loading"
    },
    "SLAVES" : {
       "description" : "",
@@ -1681,7 +1681,7 @@
    },
    "SMALL_SCALE_PROSPECTING_NO_SETTLEMENTS" : {
       "description" : "",
-      "message" : "Small-scale prospecting. No registered settlements."
+      "message" : "No registered settlements."
    },
    "SOCIAL_DEMOCRACY" : {
       "description" : "",
@@ -1701,7 +1701,7 @@
    },
    "SOMEWHERE_POLICE" : {
       "description" : "",
-      "message" : "%station Police"
+      "message" : "%station Security"
    },
    "SOMEWHERE_SERVICES" : {
       "description" : "",
@@ -1709,7 +1709,7 @@
    },
    "SOMEWHERE_SHIPYARD" : {
       "description" : "",
-      "message" : "%station shipyard"
+      "message" : "%station ship dealer"
    },
    "SOMEWHERE_SHIP_EQUIPMENT" : {
       "description" : "",
@@ -1733,7 +1733,7 @@
    },
    "SPACESTATION_LONG_WELCOME_MESSAGE" : {
       "description" : "",
-      "message" : "Hello, traveller.  Welcome to our little blue play-pen.  If it's your first time here, feel free to get acquainted with the residents.  We hope you enjoy your stay.\\nPlease remember that renovations are under way, and that scenery may change between visits."
+      "message" : "Welcome aboard."
    },
    "SPEED_CONTROL_MODE" : {
       "description" : "",
@@ -1933,7 +1933,7 @@
    },
    "THANKS_AND_REMEMBER_TO_BUY_FUEL" : {
       "description" : "",
-      "message" : "Thank you for your purchase. Remember to fit equipment and buy fuel before you depart."
+      "message" : "Thank you for your purchase. Remember to fit equipment and purchase fuel before departure."
    },
    "THICK" : {
       "description" : "",
@@ -1997,7 +1997,7 @@
    },
    "TOMBSTONE_EPITAPH" : {
       "description" : "",
-      "message" : "RIP OLD BEAN"
+      "message" : "Game Over"
    },
    "TRADER_NOT_ENOUGH_MONEY" : {
       "description" : "",
@@ -2065,7 +2065,7 @@
    },
    "VID_LINK_ESTABLISHED" : {
       "description" : "",
-      "message" : "Video link established"
+      "message" : "Visual link established"
    },
    "VIEW" : {
       "description" : "",
@@ -2101,11 +2101,11 @@
    },
    "WHEELS_ARE_DOWN" : {
       "description" : "",
-      "message" : "Wheels are down"
+      "message" : "Repulsors active"
    },
    "WHEELS_ARE_UP" : {
       "description" : "",
-      "message" : "Wheels are up"
+      "message" : "Repulsors inactive"
    },
    "WHITE_DWARF" : {
       "description" : "",
