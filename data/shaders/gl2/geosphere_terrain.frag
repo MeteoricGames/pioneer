@@ -69,6 +69,11 @@ void main(void)
 	vec4 diff = vec4(0.0);
 	float nDotVP=0.0;
 	float nnDotVP=0.0;
+	// when does the eye ray intersect atmosphere
+	float atmosStart = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
+	float ldprod=0.0;
+	float fogFactor=0.0;
+
 #ifdef TERRAIN_WITH_WATER
 	float specularReflection=0.0;
 #endif
@@ -96,8 +101,28 @@ void main(void)
 		}
 #endif // ECLIPSE
 		unshadowed = clamp(unshadowed, 0.0, 1.0);
+#ifdef ATMOSPHERE
+		float sn = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
+
+		{
+		float atmosDist = geosphereScale * (length(eyepos) - atmosStart);
+
+		// a&b scaled so length of 1.0 means planet surface.
+		vec3 a = (atmosStart * eyenorm - geosphereCenter) / geosphereScaledRadius;
+		vec3 b = (eyepos - geosphereCenter) / geosphereScaledRadius;
+		ldprod = AtmosLengthDensityProduct(a, b, atmosColor.w*geosphereAtmosFogDensity, atmosDist, geosphereAtmosInvScaleHeight);
+		fogFactor = clamp( 1.5 / exp(ldprod),0.0,1.0);
+		}
+
+		vec3 surfaceNorm = mix(normalize(sn*eyenorm - geosphereCenter),tnorm,fogFactor);
+
+		vec3 n  = mix(tnorm,surfaceNorm,clamp(geosphereAtmosFogDensity*75000.0,0.0,1.0)); //mix eye normals in dense atmosphere.
+		nDotVP  = max(0.0, dot(n, normalize(vec3(gl_LightSource[i].position))));
+		nnDotVP = max(0.0, dot(n, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
+#else
 		nDotVP  = max(0.0, dot(tnorm, normalize(vec3(gl_LightSource[i].position))));
 		nnDotVP = max(0.0, dot(tnorm, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
+#endif
 		diff += gl_LightSource[i].diffuse * unshadowed * 0.5*(nDotVP+0.5*clamp(1.0-nnDotVP*4.0,0.0,1.0) * INV_NUM_LIGHTS);
 
 #ifdef TERRAIN_WITH_WATER
@@ -113,19 +138,6 @@ void main(void)
 	}
 
 #ifdef ATMOSPHERE
-	// when does the eye ray intersect atmosphere
-	float atmosStart = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
-	float ldprod=0.0;
-	float fogFactor=0.0;
-	{
-		float atmosDist = geosphereScale * (length(eyepos) - atmosStart);
-		
-		// a&b scaled so length of 1.0 means planet surface.
-		vec3 a = (atmosStart * eyenorm - geosphereCenter) / geosphereScaledRadius;
-		vec3 b = (eyepos - geosphereCenter) / geosphereScaledRadius;
-		ldprod = AtmosLengthDensityProduct(a, b, atmosColor.w*geosphereAtmosFogDensity, atmosDist, geosphereAtmosInvScaleHeight);
-		fogFactor = clamp( 1.5 / exp(ldprod),0.0,1.0); 
-	}
 
 	//calculate sunset tone red when passing through more atmosphere, clamp everything.
 	float atmpower = (diff.r+diff.g+diff.b)/3.0;
