@@ -128,7 +128,7 @@ void ShipCpanel::InitObject()
 	map_button->AddState(0, "icons/cpan_f2_map.png", "icons/cpan_f2_map_on.png", Lang::NAVIGATION_STAR_MAPS);
 	map_button->onClick.connect(sigc::mem_fun(this, &ShipCpanel::OnChangeToMapView));
 	map_button->SetRenderDimensions(30, 22);
-	Add(map_button, 248, 56);
+	Add(map_button, 247, 56);
 
 	Gui::MultiStateImageButton *info_button = new Gui::MultiStateImageButton();
 	m_leftButtonGroup->Add(info_button);
@@ -137,7 +137,7 @@ void ShipCpanel::InitObject()
 	info_button->AddState(0, "icons/cpan_f3_shipinfo.png", "icons/cpan_f3_shipinfo_on.png", Lang::SHIP_INFORMATION);
 	info_button->onClick.connect(sigc::mem_fun(this, &ShipCpanel::OnChangeInfoView));
 	info_button->SetRenderDimensions(30, 22);
-	Add(info_button, 282, 56);
+	Add(info_button, 279, 56);
 
 	Gui::MultiStateImageButton *comms_button = new Gui::MultiStateImageButton();
 	m_leftButtonGroup->Add(comms_button);
@@ -146,7 +146,7 @@ void ShipCpanel::InitObject()
 	comms_button->AddState(0, "icons/comms_f4.png", "icons/comms_f4_on.png", Lang::COMMS);
 	comms_button->onClick.connect(sigc::mem_fun(this, &ShipCpanel::OnClickComms));
 	comms_button->SetRenderDimensions(30, 22);
-	Add(comms_button, 316, 56);
+	Add(comms_button, 312, 56);
 
 	m_clock = (new Gui::Label(""))->Color(0.0f,0.8f,0.0f);
 	Add(m_clock, 4, 64);
@@ -158,14 +158,14 @@ void ShipCpanel::InitObject()
 	b->SetShortcut(SDLK_F5, KMOD_NONE);
 	b->SetToolTip(Lang::GALAXY_SECTOR_VIEW);
 	b->SetRenderDimensions(30, 22);
-	Add(b, 460, 56);
+	Add(b, 459, 56);
 	m_mapViewButtons[0] = b;
 	b = new Gui::ImageRadioButton(m_rightButtonGroup, "icons/map_system_view.png", "icons/map_system_view_on.png");
 	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnChangeMapView), MAP_SYSTEM));
 	b->SetShortcut(SDLK_F6, KMOD_NONE);
 	b->SetToolTip(Lang::SYSTEM_ORBIT_VIEW);
 	b->SetRenderDimensions(30, 22);
-	Add(b, 492, 56);
+	Add(b, 491, 56);
 	m_mapViewButtons[1] = b;
 	b = new Gui::ImageRadioButton(m_rightButtonGroup, "icons/map_sysinfo_view.png", "icons/map_sysinfo_view_on.png");
 	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnChangeMapView), MAP_INFO));

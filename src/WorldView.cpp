@@ -144,7 +144,7 @@ void WorldView::InitObject()
 	m_flightTransitButton->AddState(FLIGHT_BUTTON_ON, "icons/transit_on.png", Lang::TRANSIT_CONTROL_ON);
 	m_flightTransitButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickTransitButton));
 	m_flightTransitButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_flightTransitButton, 68.0f, 2.0f);
+	m_rightButtonBar->Add(m_flightTransitButton, 66.0f, 2.0f);
 	m_flightTransitButton->SetEnabled(false);
 	// Jump button
 	m_flightJumpButton = new Gui::MultiStateImageButton();
@@ -154,7 +154,7 @@ void WorldView::InitObject()
 	m_flightJumpButton->AddState(FLIGHT_BUTTON_ON, "icons/jump_on.png", Lang::JUMP_CONTROL_ON);
 	m_flightJumpButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickJumpButton));
 	m_flightJumpButton->SetRenderDimensions(30.0f, 22.0f);
-	m_rightButtonBar->Add(m_flightJumpButton, 102.0f, 2.0f);
+	m_rightButtonBar->Add(m_flightJumpButton, 98.0f, 2.0f);
 	m_flightJumpButton->SetEnabled(false);
 	////-----------------------------------------------------------
 
