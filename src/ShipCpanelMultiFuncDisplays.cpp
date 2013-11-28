@@ -189,7 +189,7 @@ void ScannerWidget::Draw()
 	VertexArray va(ATTRIB_POSITION | ATTRIB_DIFFUSE, 128); //reserve some space for positions & colors
 	va.Add(vector3f(m_x, m_y, 0.f), green);
 	for (float a = 0; a < 2 * float(M_PI); a += float(M_PI) * 0.02f) {
-		va.Add(vector3f(m_x + m_x * sin(a), m_y + SCANNER_YSHRINK * m_y * cos(a), 0.f), green);
+		va.Add(vector3f(m_x + 0.25 * m_x * sin(a), m_y + SCANNER_YSHRINK * m_y * cos(a), 0.f), green);
 	}
 	va.Add(vector3f(m_x, m_y + SCANNER_YSHRINK * m_y, 0.f), green);
 	m_renderer->DrawTriangles(&va, Graphics::vtxColorMaterial, TRIANGLE_FAN);
@@ -197,7 +197,7 @@ void ScannerWidget::Draw()
 	// circles and spokes
 	glPushMatrix();
 	glTranslatef(m_x, m_y, 0);
-	glScalef(m_x, m_y, 1.0f);
+	glScalef(m_x * 0.25f, m_y, 1.0f);
 	DrawRingsAndSpokes(false);
 	glPopMatrix();
 
@@ -398,7 +398,7 @@ void ScannerWidget::DrawBlobs(bool below)
 		if ((pos.y > 0) && (below)) continue;
 		if ((pos.y < 0) && (!below)) continue;
 
-		const float x = m_x + m_x * float(pos.x) * m_scale;
+		const float x = m_x + m_x * float(pos.x) * m_scale * 0.25f;
 		const float y_base = m_y + m_y * SCANNER_YSHRINK * float(pos.z) * m_scale;
 		const float y_blob = y_base - m_y * SCANNER_YSHRINK * float(pos.y) * m_scale;
 
