@@ -9,8 +9,7 @@ GameConfig::GameConfig()
 {
 	// set defaults
 	std::map<std::string, std::string> &map = m_map[""];
-	map["Lang"] = "English";
-	map["DisableShaders"] = "0";
+	map["Lang"] = "en";
 	map["DisableEclipse"] = "0";
 	map["DisableSound"] = "0";
 	map["StartFullscreen"] = "0";

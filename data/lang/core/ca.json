@@ -1571,6 +1571,42 @@
         "message": "Control Manual",
         "description": ""
     },
+	"MANEUVER_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Maneuver mode disabled (ca)"
+	},
+	"MANEUVER_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Maneuver mode off (ca)"
+	},
+	"MANEUVER_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Maneuver mode on (ca)"
+	},
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Transit mode disabled (ca)"
+	},
+	"TRANSIT_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Transit mode off (ca)"
+	},
+	"TRANSIT_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Transit mode on (ca)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (ca)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (ca)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (ca)"
+	},
     "ECONOMY_TYPE": {
         "message": "Tipus d'economia:",
         "description": ""

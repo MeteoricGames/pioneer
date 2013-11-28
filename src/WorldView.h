@@ -100,12 +100,17 @@ private:
 
 	void HideLowThrustPowerOptions();
 	void ShowLowThrustPowerOptions();
-	void OnClickLowThrustPower();
 	void OnSelectLowThrustPower(float power);
 
+	// Paragon flight system
+	void OnClickAutopilotButton(Gui::MultiStateImageButton *b);
+	void OnClickManeuverButton(Gui::MultiStateImageButton *b);
+	void OnClickTransitButton(Gui::MultiStateImageButton *b);
+	void OnClickJumpButton(Gui::MultiStateImageButton *b);
+	void ShowParagonFlightButtons();
+	void HideParagonFlightButtons();
+
 	void OnClickHyperspace();
-	void OnChangeWheelsState(Gui::MultiStateImageButton *b);
-	void OnChangeFlightState(Gui::MultiStateImageButton *b);
 	void OnHyperspaceTargetChanged();
 	void OnPlayerDockOrUndock();
 	void OnPlayerChangeTarget();
@@ -127,8 +132,12 @@ private:
 	Gui::Fixed *m_lowThrustPowerOptions;
 	Gui::Label *m_flightStatus, *m_debugText;
 	Gui::ImageButton *m_launchButton;
-	Gui::MultiStateImageButton *m_wheelsButton;
-	Gui::MultiStateImageButton *m_flightControlButton;
+
+	Gui::MultiStateImageButton *m_flightAutopilotButton;
+	Gui::MultiStateImageButton *m_flightManeuverButton;
+	Gui::MultiStateImageButton *m_flightTransitButton;
+	Gui::MultiStateImageButton *m_flightJumpButton;
+
 	bool m_labelsOn;
 	enum CamType m_camType;
 	Uint32 m_showTargetActionsTimeout;

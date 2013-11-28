@@ -11,6 +11,3 @@ shininess 80
 
 mesh omni_explorer.dae
 collision omni_explorer_collision.obj
-
-lod 10
-mesh omni_explorer_lod.obj

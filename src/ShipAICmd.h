@@ -28,6 +28,7 @@ public:
 		if (m_child) m_child->GetStatusText(str);
 		else strcpy(str, "AI state unknown");
 	}
+	CmdName GetCommandName() const {return m_cmdName;}
 
 	// Serialisation functions
 	static AICommand *Load(Serializer::Reader &rd);
@@ -110,6 +111,7 @@ public:
 	AICmdFlyTo(Ship *ship, Frame *targframe, const vector3d &posoff, double endvel, bool tangent);
 	AICmdFlyTo(Ship *ship, Body *target);
 	AICmdFlyTo(Ship *ship, Body *target, double dist);
+	virtual ~AICmdFlyTo();
 
 	virtual void GetStatusText(char *str) {
 		if (m_child) m_child->GetStatusText(str);

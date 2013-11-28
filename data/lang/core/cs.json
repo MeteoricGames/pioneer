@@ -1571,6 +1571,42 @@
         "message": "Manuální ovládání",
         "description": ""
     },
+		"MANEUVER_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Maneuver mode disabled (cs)"
+	},
+	"MANEUVER_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Maneuver mode off (cs)"
+	},
+	"MANEUVER_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Maneuver mode on (cs)"
+	},
+	"TRANSIT_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Transit mode disabled (cs)"
+	},
+	"TRANSIT_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Transit mode off (cs)"
+	},
+	"TRANSIT_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Transit mode on (cs)"
+	},
+	"JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable (cs)"
+	},
+	"JUMP_CONTROL_OFF" : {
+	  "description" : "",
+	  "message" : "Jump mode off (cs)"
+	},
+	"JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Jump mode on (cs)"
+	},
     "ECONOMY_TYPE": {
         "message": "Druh ekonomiky:",
         "description": ""

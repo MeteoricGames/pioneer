@@ -61,7 +61,7 @@ local spawnPolice = function()
 		while max_police > 0 and lawlessness < 0.5 do
 			max_police = max_police-1
 
-			local ship = Space.SpawnShipDocked("kanara", starport)
+			local ship = Space.SpawnShipDocked("security_interceptor", starport)
 			if ship~=nil then
 				ship:AddEquip('PULSECANNON_DUAL_1MW')
 				ship:AddEquip('LASER_COOLING_BOOSTER')
@@ -87,16 +87,6 @@ local deletePolice = function (player)
 		end
 		warn=false
 	end
-end
-
-local onEnterSystem = function (player)
-	if not player:IsPlayer() then return end
-	deletePolice(player)
-end
-
-local onGameStart = function ()
-	starport = getMyStarport(Game.player)
-	spawnPolice()
 end
 
 local doLawAndOrder = function (ship)
@@ -129,7 +119,6 @@ local doLawAndOrder = function (ship)
 				end)
 			end
 		else
-			print "Police idle..."
 			for k, v in pairs(police) do
 				if v.ship~=nil and v.ship:exists() then
 					v.ship:CancelAI()
@@ -142,24 +131,17 @@ local doLawAndOrder = function (ship)
 	end
 end
 
-local onFrameChanged = function (ship)
-	if not ship:isa('Ship') then return end
-	if ship:IsPlayer() then
-		doLawAndOrder(ship)
-	end
+local onEnterSystem = function (player)
+	if not player:IsPlayer() then return end
+	deletePolice(player)
+	Timer:CallEvery(5, function () doLawAndOrder(Game.player) end)
 end
 
-local onShipHit = function (ship, attacker)
-	if not ship:IsPlayer() then return end
-	doLawAndOrder(Game.player)
+local onGameStart = function ()
+	starport = getMyStarport(Game.player)
+	spawnPolice()
+	Timer:CallEvery(5, function () doLawAndOrder(Game.player) end)
 end
 
-local onShipAlertChanged = function (ship, alert)
-	doLawAndOrder(Game.player)
-end
-
-Event.Register("onShipAlertChanged", onShipAlertChanged)
-Event.Register("onShipHit", onShipHit)
-Event.Register("onFrameChanged", onFrameChanged)
 Event.Register("onGameStart", onGameStart)
 Event.Register("onEnterSystem", onEnterSystem)

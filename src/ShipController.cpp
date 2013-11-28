@@ -31,7 +31,7 @@ PlayerShipController::PlayerShipController() :
 	m_mouseX(0.0),
 	m_mouseY(0.0),
 	m_setSpeed(0.0),
-	m_flightControlState(CONTROL_MANUAL),
+	m_flightControlState(CONTROL_MANEUVER),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
 	m_mouseDir(0.0)
 {
@@ -88,26 +88,27 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 {
 	vector3d v;
 	matrix4x4d m;
+	float current_velocity;
 
 	if (m_ship->GetFlightState() == Ship::FLYING) {
 		switch (m_flightControlState) {
-		case CONTROL_FIXSPEED:
+		case CONTROL_MANEUVER:
 			PollControls(timeStep, true);
-			if (IsAnyLinearThrusterKeyDown()) break;
-			v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
-			if (m_setSpeedTarget) {
-				v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
+				if (IsAnyLinearThrusterKeyDown()) break;
+				v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
+				if (m_setSpeedTarget) {
+					v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+				}
+				m_ship->AIMatchVel(v);
+
+				// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
+				current_velocity = m_ship->GetVelocity().Length();
+				if(current_velocity >= m_ship->GetShipType()->maxManeuverSpeed ||
+					current_velocity <= -m_ship->GetShipType()->maxManeuverSpeed) {
+					v = vector3d(0.0, 0.0, 0.0);
+				}
 			}
-			m_ship->AIMatchVel(v);
-			break;
-		case CONTROL_FIXHEADING_FORWARD:
-		case CONTROL_FIXHEADING_BACKWARD:
-			PollControls(timeStep, true);
-			if (IsAnyAngularThrusterKeyDown()) break;
-			v = m_ship->GetVelocity().NormalizedSafe();
-			if (m_flightControlState == CONTROL_FIXHEADING_BACKWARD)
-				v = -v;
-			m_ship->AIFaceDirection(v);
 			break;
 		case CONTROL_MANUAL:
 			PollControls(timeStep, false);
@@ -118,14 +119,13 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 //			AIMatchVel(vector3d(0.0));			// just in case autopilot doesn't...
 						// actually this breaks last timestep slightly in non-relative target cases
 			m_ship->AIMatchAngVelObjSpace(vector3d(0.0));
-			if (m_ship->GetFrame()->IsRotFrame()) SetFlightControlState(CONTROL_FIXSPEED);
-			else SetFlightControlState(CONTROL_MANUAL);
+			SetFlightControlState(CONTROL_MANEUVER);
 			m_setSpeed = 0.0;
 			break;
 		default: assert(0); break;
 		}
 	}
-	else SetFlightControlState(CONTROL_MANUAL);
+	else SetFlightControlState(CONTROL_MANEUVER);
 
 	//call autopilot AI, if active (also applies to set speed and heading lock modes)
 	OS::EnableFPE();
@@ -203,7 +203,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		}
 		else m_mouseActive = false;
 
-		if (m_flightControlState == CONTROL_FIXSPEED) {
+		if (m_flightControlState == CONTROL_MANEUVER) {
 			double oldSpeed = m_setSpeed;
 			if (stickySpeedKey) {
 				if (!(KeyBindings::increaseSpeed.IsActive() || KeyBindings::decreaseSpeed.IsActive())) {
@@ -216,6 +216,10 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 					m_setSpeed += std::max(fabs(m_setSpeed)*0.05, 1.0);
 				if (KeyBindings::decreaseSpeed.IsActive())
 					m_setSpeed -= std::max(fabs(m_setSpeed)*0.05, 1.0);
+				// Limit set speed mode to maximum maneuver speed
+				m_setSpeed = Clamp<double>(m_setSpeed, 
+					-m_ship->GetShipType()->maxManeuverSpeed, 
+					m_ship->GetShipType()->maxManeuverSpeed);
 				if ( ((oldSpeed < 0.0) && (m_setSpeed >= 0.0)) ||
 						((oldSpeed > 0.0) && (m_setSpeed <= 0.0)) ) {
 					// flipped from going forward to backwards. make the speed 'stick' at zero
@@ -307,7 +311,7 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 		m_flightControlState = s;
 		m_ship->AIClearInstructions();
 		//set desired velocity to current actual
-		if (m_flightControlState == CONTROL_FIXSPEED) {
+		if (m_flightControlState == CONTROL_MANEUVER) {
 			// Speed is set to the projection of the velocity onto the target.
 
 			vector3d shipVel = m_setSpeedTarget ?
