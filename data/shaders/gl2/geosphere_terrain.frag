@@ -116,7 +116,7 @@ void main(void)
 
 		vec3 surfaceNorm = mix(normalize(sn*eyenorm - geosphereCenter),tnorm,fogFactor);
 
-		vec3 n  = mix(tnorm,surfaceNorm,clamp(geosphereAtmosFogDensity*75000.0,0.0,1.0)); //mix eye normals in dense atmosphere.
+		vec3 n  = mix(tnorm,surfaceNorm,clamp(geosphereAtmosFogDensity*80000.0,0.0,1.0)); //mix eye normals in dense atmosphere.
 		nDotVP  = max(0.0, dot(n, normalize(vec3(gl_LightSource[i].position))));
 		nnDotVP = max(0.0, dot(n, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
 #else
