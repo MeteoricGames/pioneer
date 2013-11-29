@@ -18,12 +18,12 @@ define_ship {
 	max_cargoscoop = 0,
 	min_crew = 6,
 	max_crew = 20,
-	capacity = 2000,
-	hull_mass = 10000,
-	fuel_tank_mass = 6000,
+	capacity = 6696,
+	hull_mass = 3348,
+	fuel_tank_mass = 1116,
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 55123e3,
 	price = 120000000,
-	hyperdrive_class = 10,
+	hyperdrive_class = 0,
 }
