@@ -4,13 +4,13 @@
 define_ship {
 	name='Utility Flitter',
 	model='utility_flitter',
-	forward_thrust = 52e5,
-	reverse_thrust = 52e5,
-	up_thrust = 28e5,
-	down_thrust = 6e5,
-	left_thrust = 6e5,
-	right_thrust = 6e5,
-	angular_thrust = 86e5,
+	forward_thrust = 9e5,
+	reverse_thrust = 9e5,
+	up_thrust = 3e5,
+	down_thrust = 3e5,
+	left_thrust = 3e5,
+	right_thrust = 3e5,
+	angular_thrust = 30e5,
 	max_cargo = 5,
 	max_laser = 0,
 	max_missile = 0,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 80000e3,
 	price = 140000,
-	hyperdrive_class = 1,
+	hyperdrive_class = 0,
 }

@@ -5,13 +5,13 @@
 define_ship {
 	name='Omni Explorer',
 	model='omni_explorer',
-	forward_thrust = 20000e5,
-	reverse_thrust = 20000e5,
-	up_thrust = 120000e5,
-	down_thrust = 120000e5,
-	left_thrust = 120000e5,
-	right_thrust = 120000e5,
-	angular_thrust = 3000000e5,
+	forward_thrust = 120000e5,
+	reverse_thrust = 120000e5,
+	up_thrust = 3000e5,
+	down_thrust = 3000e5,
+	left_thrust = 3000e5,
+	right_thrust = 3000e5,
+	angular_thrust = 300000e5,
 	max_cargo = 6696,
 	max_laser = 2,
 	max_missile = 0,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 55123e3,
 	price = 3400000,
-	hyperdrive_class = 11,
+	hyperdrive_class = 13,
 }

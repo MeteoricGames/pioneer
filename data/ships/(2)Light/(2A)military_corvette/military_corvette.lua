@@ -4,13 +4,13 @@
 define_ship {
 	name='Military Corvette',
 	model='military_corvette',
-	forward_thrust = 280e5,
-	reverse_thrust = 280e5,
-	up_thrust = 230e5,
-	down_thrust = 230e5,
-	left_thrust = 230e5,
-	right_thrust = 230e5,
-	angular_thrust = 600e5,
+	forward_thrust = 357e5,
+	reverse_thrust = 357e5,
+	up_thrust = 120e5,
+	down_thrust = 120e5,
+	left_thrust = 120e5,
+	right_thrust = 120e5,
+	angular_thrust = 1200e5,
 	max_cargo = 214,
 	max_laser = 2,
 	max_missile = 2,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 60556e3,
 	price = 2870,
-	hyperdrive_class = 10,
+	hyperdrive_class = 5,
 }

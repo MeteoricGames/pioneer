@@ -4,13 +4,13 @@
 define_ship {
 	name='Cargo Hauler',
 	model='cargo_hauler',
-	forward_thrust = 200e5,
-	reverse_thrust = 200e5,
-	up_thrust = 220e5,
-	down_thrust = 220e5,
-	left_thrust = 220e5,
-	right_thrust = 220e5,
-	angular_thrust = 400e5,
+	forward_thrust = 1120e5,
+	reverse_thrust = 1120e5,
+	up_thrust = 333e5,
+	down_thrust = 333e5,
+	left_thrust = 333e5,
+	right_thrust = 333e5,
+	angular_thrust = 3330e5,
 	max_cargo = 672,
 	max_missile = 1,
 	max_laser = 0,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 57273e3,
 	price = 400000,
-	hyperdrive_class = 10,
+	hyperdrive_class = 9,
 }

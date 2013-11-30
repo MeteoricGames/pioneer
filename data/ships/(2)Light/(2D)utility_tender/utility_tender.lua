@@ -4,13 +4,13 @@
 define_ship {
 	name='Utility Tender',
 	model='utility_tender',
-	forward_thrust = 220e5,
-	reverse_thrust = 220e5,
-	up_thrust = 250e5,
-	down_thrust = 250e5,
-	left_thrust = 250e5,
-	right_thrust = 250e5,
-	angular_thrust = 400e5,
+	forward_thrust = 1190e5,
+	reverse_thrust = 1190e5,
+	up_thrust = 310e5,
+	down_thrust = 310e5,
+	left_thrust = 310e5,
+	right_thrust = 310e5,
+	angular_thrust = 3100e5,
 	max_cargo = 672,
 	max_missile = 1,
 	max_laser = 0,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 57273e3,
 	price = 450000,
-	hyperdrive_class = 10,
+	hyperdrive_class = 9,
 }

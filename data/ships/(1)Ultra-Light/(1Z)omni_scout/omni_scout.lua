@@ -4,13 +4,13 @@
 define_ship {
 	name='Omni Scout',
 	model='omni_scout',
-	forward_thrust = 88e5,
-	reverse_thrust = 88e5,
-	up_thrust = 70e5,
-	down_thrust = 70e5,
-	left_thrust = 70e5,
-	right_thrust = 70e5,
-	angular_thrust = 80e5,
+	forward_thrust = 165e5,
+	reverse_thrust = 165e5,
+	up_thrust = 55e5,
+	down_thrust = 55e5,
+	left_thrust = 55e5,
+	right_thrust = 55e5,
+	angular_thrust = 550e5,
 	max_cargo = 99,
 	max_laser = 2,
 	max_missile = 4,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 65000e3,
 	price = 200000,
-	hyperdrive_class = 1,
+	hyperdrive_class = 3,
 }

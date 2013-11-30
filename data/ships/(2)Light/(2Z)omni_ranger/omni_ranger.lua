@@ -4,13 +4,13 @@
 define_ship {
 	name='Omni Ranger',
 	model='omni_ranger',
-	forward_thrust = 280e5,
-	reverse_thrust = 280e5,
-	up_thrust = 200e5,
-	down_thrust = 200e5,
-	left_thrust = 200e5,
-	right_thrust = 200e5,
-	angular_thrust = 600e5,
+	forward_thrust = 538e5,
+	reverse_thrust = 538e5,
+	up_thrust = 180e5,
+	down_thrust = 180e5,
+	left_thrust = 180e5,
+	right_thrust = 180e5,
+	angular_thrust = 1800e5,
 	max_cargo = 324,
 	max_missile = 1,
 	max_laser = 2,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 57273e3,
 	price = 700000,
-	hyperdrive_class = 10,
+	hyperdrive_class = 8,
 }

@@ -4,13 +4,13 @@
 define_ship {
 	name='Mining Ship',
 	model='mining_ship',
-	forward_thrust = 250e5,
-	reverse_thrust = 250e5,
-	up_thrust = 350e5,
-	down_thrust = 350e5,
-	left_thrust = 350e5,
-	right_thrust = 350e5,
-	angular_thrust = 600e5,
+	forward_thrust = 1323e5,
+	reverse_thrust = 1323e5,
+	up_thrust = 400e5,
+	down_thrust = 400e5,
+	left_thrust = 400e5,
+	right_thrust = 400e5,
+	angular_thrust = 4000e5,
 	max_cargo = 792,
 	max_missile = 1,
 	max_laser = 0,
@@ -25,5 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 57273e3,
 	price = 450000,
-	hyperdrive_class = 10,
+	hyperdrive_class = 9,
 }
