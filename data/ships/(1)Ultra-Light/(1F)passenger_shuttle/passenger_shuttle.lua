@@ -11,7 +11,7 @@ define_ship {
 	left_thrust = 6e5,
 	right_thrust = 6e5,
 	angular_thrust = 8e5,
-	max_cargo = 30,
+	max_cargo = 7,
 	max_laser = 0,
 	max_missile = 0,
 	max_cargoscoop = 1,
@@ -25,6 +25,5 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 80000e3,
 	price = 80000,
-	hyperdrive_class = 0,
-	max_engines = 0,
+	hyperdrive_class = 1,
 }
