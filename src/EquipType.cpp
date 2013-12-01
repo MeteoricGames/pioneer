@@ -251,7 +251,7 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::DRIVE_CLASS6,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  2000000, 15, 6, 0, true, 0
+	  2000000, 1, 6, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS7,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
@@ -267,47 +267,47 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::DRIVE_CLASS10,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 10, 0, true, 0
+	  24000000, 1, 10, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS11,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 30, 0, true, 0
+	  48000000, 15, 30, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS12,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 34, 0, true, 0
+	  96000000, 15, 34, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS13,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 38, 0, true, 0
+	  200000000, 15, 38, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS14,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 42, 0, true, 0
+	  300000000, 15, 42, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS15,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 46, 0, true, 0
+	  400000000, 15, 46, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS16,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 90, 0, true, 0
+	  500000000, 100, 90, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS17,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 110, 0, true, 0
+	  600000000, 100, 110, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS18,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 130, 0, true, 0
+	  800000000, 100, 130, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS19,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 150, 0, true, 0
+	  1000000000, 100, 150, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS20,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
-	  12000000, 1, 170, 0, true, 0
+	  1200000000, 100, 170, 0, true, 0
 	},{
 	  Lang::DRIVE_MIL1,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::MILITARY_FUEL},
