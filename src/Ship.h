@@ -211,6 +211,7 @@ public:
 	//void AIJourney(SystemBodyPath &dest);
 	void AIDock(SpaceStation *target);
 	void AIFlyTo(Body *target);
+	void AIFlyTo(Body *target, vector3d posoff);
 	void AIFlyToClose(Body *target, double dist);
 	void AIOrbit(Body *target, double alt);
 	void AIHoldPosition();
