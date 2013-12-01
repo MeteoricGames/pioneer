@@ -79,17 +79,35 @@ StationShipViewForm::StationShipViewForm(FormController *controller, int marketI
 	row->SetSpacing(10.0f);
 
 	int row_size = 5, pos = 0;
-	for (int drivetype = Equip::DRIVE_CLASS1; drivetype <= Equip::DRIVE_CLASS9; drivetype++) {
+	int drive = 0;
+	for (int drivetype = Equip::DRIVE_CLASS1; drivetype <= Equip::DRIVE_CLASS20; drivetype++) {
+		drive++;
+
+		int hyperclass = Equip::types[drivetype].pval;
+
+		const int weight=type.hullMass + type.capacity + type.fuelTankMass;
+		int maxrange = 0;
+
+		float range = Pi::CalcHyperspaceRangeMax(hyperclass, type.hullMass + type.capacity + type.fuelTankMass);
+		//hard limit ranges based on weight.
+		if			(weight < 20 ) maxrange = 18;
+		else if		(weight < 40 ) maxrange = 24;
+		else if		(weight < 80 ) maxrange = 28;
+		else if		(weight < 200 ) maxrange = 38;
+		else if		(weight < 500 ) maxrange = 44;
+		else if		(weight < 1000 ) maxrange = 48;
+		else if		(weight < 10000 ) maxrange = 54;
+		else		maxrange = 60;
+
 		if (type.capacity < Equip::types[drivetype].mass)
 			break;
 
-		int hyperclass = Equip::types[drivetype].pval;
-		float range = Pi::CalcHyperspaceRangeMax(hyperclass, type.hullMass + type.capacity + type.fuelTankMass);
+		if (range > maxrange || range < 4.5f) continue;
 
 		Gui::VBox *cell = new Gui::VBox();
 		row->PackEnd(cell);
 
-		cell->PackEnd(new Gui::Label(stringf(Lang::CLASS_NUMBER, formatarg("class", hyperclass))));
+		cell->PackEnd(new Gui::Label(stringf(Lang::CLASS_NUMBER, formatarg("class", drive))));
 		if (type.capacity < Equip::types[drivetype].mass)
 			cell->PackEnd(new Gui::Label("---"));
 		else
