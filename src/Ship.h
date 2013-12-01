@@ -141,7 +141,9 @@ public:
 	virtual bool IsInSpace() const { return (m_flightState != HYPERSPACE); }
 
 	void SetJuice(const double &juice) { m_juice = juice; }
-	void SetTransitState(const TransitState &transitstate) { m_transitstate = transitstate; }
+	void SetTransitState(const TransitState &transitstate) { 
+		m_transitstate = transitstate; 
+	}
 	void SetHyperspaceDest(const SystemPath &dest) { m_hyperspace.dest = dest; }
 	const SystemPath &GetHyperspaceDest() const { return m_hyperspace.dest; }
 	double GetHyperspaceDuration() const { return m_hyperspace.duration; }

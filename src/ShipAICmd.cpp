@@ -938,10 +938,18 @@ printf("Autopilot dist = %.1f, speed = %.1f, zthrust = %.2f, state = %i\n",
 			double ang = m_ship->AIFaceDirection(m_ship->GetPosition());
 			//add engine juice on fast asteroid approach
 			m_ship->AIMatchVel(ang < 0.05 ? m_ship->GetJuice()*20000.0 * m_ship->GetPosition().Normalized() : vector3d(0.0));
-		}
-		else {							// same thing for 2/3/4
-			if (!m_child) m_child = new AICmdFlyAround(m_ship, m_frame->GetBody(), erad*1.05, 0.0);
-			static_cast<AICmdFlyAround*>(m_child)->SetTargPos(targpos);
+		} else {							// same thing for 2/3/4
+			if(m_ship->IsType(Object::PLAYER)) {
+				if (!m_child) {				
+					m_child = new AICmdTransitAround(m_ship, m_frame->GetBody());
+				}				
+				static_cast<AICmdTransitAround*>(m_child)->SetTargPos(targpos);
+			} else {
+				if (!m_child) {
+					m_child = new AICmdFlyAround(m_ship, m_frame->GetBody(), erad*1.05, 0.0);
+				}
+				static_cast<AICmdFlyAround*>(m_child)->SetTargPos(targpos);
+			}
 			ProcessChild();
 		}
 		if (coll) { m_state = -coll; return false; }
@@ -1292,6 +1300,50 @@ bool AICmdFlyAround::TimeStepUpdate()
 	}
 	return false;
 }
+
+//------------------------------- Command: Transit Around
+// Assumptions:
+// - Only player ship uses this logic
+
+AICmdTransitAround::AICmdTransitAround(Ship *ship, Body *obstructor) : AICommand(ship, CMD_TRANSITAROUND)
+{
+	m_obstructor = obstructor;
+}
+
+AICmdTransitAround::~AICmdTransitAround()
+{
+	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
+		m_ship->StopTransitDrive();
+		m_ship->SetJuice(1.0);
+	}
+}
+
+bool AICmdTransitAround::TimeStepUpdate()
+{
+	if (!ProcessChild()) return false;
+
+	const double time_step = Pi::game->GetTimeStep();
+	// 1: determine suitable altitude and move towards it (TODO)
+	// 2: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting (TODO)
+	// 3: Engage transit after 2 seconds to give sound effects enough time to play (TODO)
+	// 4: follow flight tangent at Transit speed
+	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
+		m_ship->GetPosition();
+	vector3d ship_to_target = m_targetPosition - m_ship->GetPosition();
+	vector3d up_vector = -ship_to_obstructor.Normalized();
+	vector3d right_vector = ship_to_obstructor.Cross(ship_to_target).Normalized();
+	vector3d velocity_vector = up_vector.Cross(right_vector).Normalized();
+	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
+		m_ship->StartTransitDrive();
+	}
+	m_ship->SetJuice(80.0);
+	m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED);
+	m_ship->AIFaceDirection(velocity_vector);
+	m_ship->AIFaceUpdir(up_vector);
+	return false;
+}
+
+//-------------------------------- Command: Formation
 
 AICmdFormation::AICmdFormation(Ship *ship, Ship *target, const vector3d &posoff)
 	: AICommand(ship, CMD_FORMATION)
