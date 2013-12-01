@@ -1302,6 +1302,7 @@ bool AICmdFormation::TimeStepUpdate()
 	if (m_target->IsDecelerating()) m_ship->SetDecelerating(true);
 
 	m_ship->AIFaceDirection(-torient.VectorZ());
+	m_ship->AIFaceUpdir(m_target->GetOrient().VectorY());
 	return false;					// never self-terminates
 }
 
