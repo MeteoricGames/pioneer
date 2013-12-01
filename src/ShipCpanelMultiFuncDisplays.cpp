@@ -562,7 +562,7 @@ void UseEquipWidget::UpdateEquip()
 	int numSlots = missiles.size();
 
 	if (numSlots) {
-		float spacing = 380.0f / numSlots;
+		float spacing = 18.0f / numSlots;
 
 		for (int i = 0; i < numSlots; ++i) {
 			const Equip::Type t = static_cast<Equip::Type>(LuaConstants::GetConstant(l, "EquipType", missiles[i].c_str()));
@@ -584,10 +584,10 @@ void UseEquipWidget::UpdateEquip()
 					b = new Gui::ImageButton("icons/missile_naval.png");
 					break;
 			}
-			Add(b, spacing * i, 40);
+			Add(b, 230+spacing * i, 0);
 			b->onClick.connect(sigc::bind(sigc::mem_fun(this, &UseEquipWidget::FireMissile), i));
 			b->SetToolTip(Equip::types[t].name);
-			b->SetRenderDimensions(16, 16);
+			b->SetRenderDimensions(8, 8);
 		}
 	}
 
@@ -600,9 +600,9 @@ void UseEquipWidget::UpdateEquip()
 			assert(b);
 
 			b->onClick.connect(sigc::mem_fun(Pi::player, &Ship::UseECM));
-			b->SetRenderDimensions(32, 32);
+			b->SetRenderDimensions(16, 16);
 
-			Add(b, 32, 0);
+			Add(b, 142, 0);
 		}
 	}
 
@@ -610,7 +610,7 @@ void UseEquipWidget::UpdateEquip()
 
 ///////////////////////////////////////////////
 
-MultiFuncSelectorWidget::MultiFuncSelectorWidget(): Gui::Fixed(144, 17)
+MultiFuncSelectorWidget::MultiFuncSelectorWidget(): Gui::Fixed(144, 99)
 {
 	m_active = 0;
 	m_rg = new Gui::RadioGroup();
@@ -653,6 +653,6 @@ void MultiFuncSelectorWidget::UpdateButtons()
 	RemoveAllChildren();
 
 	for (int i = 0; i < MFUNC_MAX; ++i) {
-		Add(m_buttons[i], 36.0f + 36.0f * float(i), 0.0);
+		Add(m_buttons[i], 36.0f + 36.0f * float(i), 26.0);
 	}
 }

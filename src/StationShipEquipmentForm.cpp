@@ -146,6 +146,28 @@ void StationShipEquipmentForm::FitItem(Equip::Type t)
 		return;
 	}
 
+	if (slot == Equip::SLOT_ENGINE) {
+		const int weight=Pi::player->GetShipType()->hullMass + Pi::player->GetShipType()->capacity + Pi::player->GetShipType()->fuelTankMass;
+		int hyperclass = Equip::types[t].pval;
+		float range = Pi::CalcHyperspaceRangeMax(hyperclass, weight);
+
+		int maxrange = 0;
+
+		if			(weight < 20 )	maxrange = 18;
+		else if		(weight < 40 )	maxrange = 24;
+		else if		(weight < 80 )	maxrange = 28;
+		else if		(weight < 200 ) maxrange = 38;
+		else if		(weight < 500 ) maxrange = 44;
+		else if		(weight < 1000 ) maxrange = 48;
+		else if		(weight < 10000 ) maxrange = 54;
+		else		maxrange = 60;
+		if (range > maxrange || range < 4.5f)
+		{
+			Pi::cpan->MsgLog()->Message("", Lang::NO_SPACE_ON_SHIP);
+			return;
+		}
+	}
+
 	if (freespace > 1 && slot == Equip::SLOT_LASER) {
 		/* you have a choice of mount points for lasers */
 		m_formController->ActivateForm(new PickLaserMountForm(m_formController, this, t, true));
