@@ -6,6 +6,7 @@
 #
 # Created:     02/12/2013
 #-------------------------------------------------------------------------------
+from __future__ import generators
 import os
 import shlex
 import subprocess
@@ -25,7 +26,7 @@ def generateCommand(path, name, ext):
     return command
 
 def convertDirectory(directory):
-    print("> Processing directory \"" + CUBEMAPS_PATH + directory + "\"")
+    print(("> Processing directory \"" + CUBEMAPS_PATH + directory + "\""))
     print("> Determining cubemap file extension")
     test_file = CUBEMAPS_PATH + directory + "/" + directory + "_right1."
     extension = ""
@@ -46,7 +47,7 @@ def main():
     print("and convert any SpaceScape cubemaps it finds to DDS cubemaps using ")
     print("CubeMapGen.                                                        ")
     print("All cubemaps are compressed to DXT1 and include no mipmaps.      \n")
-    directories = os.walk(CUBEMAPS_PATH).next()[1]
+    directories = next(os.walk(CUBEMAPS_PATH))[1]
     for d in directories:
         convertDirectory(d)
 
