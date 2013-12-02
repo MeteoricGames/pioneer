@@ -1231,10 +1231,10 @@ static int l_ship_ai_fly_formation(lua_State *l)
 		x = double(luaL_checknumber(l, 3));
 	}
 	if (lua_isnumber(l, 4)) {
-		y = double(luaL_checknumber(l, 3));
+		y = double(luaL_checknumber(l, 4));
 	}
 	if (lua_isnumber(l, 5)) {
-		z = double(luaL_checknumber(l, 3));
+		z = double(luaL_checknumber(l, 5));
 	}
 	s->AIFlyTo(target,vector3d((double)x,(double)y,(double)z));
 	return 0;
