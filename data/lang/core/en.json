@@ -427,6 +427,50 @@
       "description" : "",
       "message" : "Class 9 Jump Module"
    },
+   "DRIVE_CLASS10" : {
+      "description" : "",
+      "message" : "Class 10 Jump Module"
+   },
+   "DRIVE_CLASS11" : {
+      "description" : "",
+      "message" : "Class 11 Jump Module"
+   },
+   "DRIVE_CLASS12" : {
+      "description" : "",
+      "message" : "Class 12 Jump Module"
+   },
+   "DRIVE_CLASS13" : {
+      "description" : "",
+      "message" : "Class 13 Jump Module"
+   },
+   "DRIVE_CLASS14" : {
+      "description" : "",
+      "message" : "Class 14 Jump Module"
+   },
+   "DRIVE_CLASS15" : {
+      "description" : "",
+      "message" : "Class 15 Jump Module"
+   },
+   "DRIVE_CLASS16" : {
+      "description" : "",
+      "message" : "Class 16 Jump Module"
+   },
+   "DRIVE_CLASS17" : {
+      "description" : "",
+      "message" : "Class 17 Jump Module"
+   },
+   "DRIVE_CLASS18" : {
+      "description" : "",
+      "message" : "Class 18 Jump Module"
+   },
+   "DRIVE_CLASS19" : {
+      "description" : "",
+      "message" : "Class 19 Jump Module"
+   },
+   "DRIVE_CLASS20" : {
+      "description" : "",
+      "message" : "Class 20 Jump Module"
+   },
    "DRIVE_MIL1" : {
       "description" : "",
       "message" : "Class 1 Military drive"
