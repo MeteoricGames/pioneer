@@ -1308,6 +1308,8 @@ bool AICmdFlyAround::TimeStepUpdate()
 AICmdTransitAround::AICmdTransitAround(Ship *ship, Body *obstructor) : AICommand(ship, CMD_TRANSITAROUND)
 {
 	m_obstructor = obstructor;
+	m_alt = 0.0;
+	m_state = AITA_ALTITUDE;
 }
 
 AICmdTransitAround::~AICmdTransitAround()
@@ -1323,16 +1325,34 @@ bool AICmdTransitAround::TimeStepUpdate()
 	if (!ProcessChild()) return false;
 
 	const double time_step = Pi::game->GetTimeStep();
-	// 1: determine suitable altitude and move towards it (TODO)
-	// 2: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting (TODO)
-	// 3: Engage transit after 2 seconds to give sound effects enough time to play (TODO)
-	// 4: follow flight tangent at Transit speed
+	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 5000.0;
 	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
 		m_ship->GetPosition();
 	vector3d ship_to_target = m_targetPosition - m_ship->GetPosition();
 	vector3d up_vector = -ship_to_obstructor.Normalized();
 	vector3d right_vector = ship_to_obstructor.Cross(ship_to_target).Normalized();
-	vector3d velocity_vector = up_vector.Cross(right_vector).Normalized();
+	vector3d velocity_vector = up_vector.Cross(right_vector).NormalizedSafe();
+
+	// 1: determine suitable altitude and move towards it (TODO)
+	if(m_obstructor->IsType(Object::TERRAINBODY)) {
+		if(Pi::worldView->IsAltitudeAvailable()) {
+			m_alt = Pi::worldView->GetAltitude();
+			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
+				// Flyto transit altitude
+				const double end_velocity = m_ship->GetMaxManeuverSpeed();
+				//vector3d tangent = GenerateTangent(m_ship, m_obstructor->GetFrame(), 
+				//	up_vector * transit_altitude, m_alt);
+				vector3d position_offset = up_vector * (m_alt - transit_altitude);
+				m_child = new AICmdFlyTo(m_ship, m_obstructor->GetFrame(), position_offset, end_velocity, false);
+				m_state = AITA_ALTITUDE;
+				return false;
+			}
+		}
+	}
+	m_state = AITA_TRANSIT;
+	// 2: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting (TODO)
+	// 3: Engage transit after 2 seconds to give sound effects enough time to play (TODO)
+	// 4: follow flight tangent at Transit speed
 	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
 		m_ship->StartTransitDrive();
 	}

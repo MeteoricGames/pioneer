@@ -220,7 +220,8 @@ public:
 
 	virtual void GetStatusText(char *str) {
 		if(m_child) m_child->GetStatusText(str);
-		else snprintf(str, 255, "TransitAround");
+		else snprintf(str, 255, "TransitAround: alt %1fkm, state %s", m_alt/1000.0,
+			(m_state == AITA_ALTITUDE? "Altitude Correction" : "Transit Engaged"));
 	}
 
 	virtual void Save(Serializer::Writer &wr) {
@@ -243,11 +244,17 @@ public:
 		m_targetPosition = target_position; 
 	}
 
+	enum AITransitAroundState {
+		AITA_ALTITUDE,
+		AITA_TRANSIT
+	};
+
 private:
-	Body *m_obstructor;			// Body of obstructor (planet->GetBody)
-	vector3d m_targetPosition;  // Target location in ship coordinates
-	int m_obstructorIndex;		// Used for seriialization
-	
+	Body *m_obstructor;				// Body of obstructor (planet->GetBody)
+	vector3d m_targetPosition;		// Target location in ship coordinates
+	int m_obstructorIndex;			// Used for serialization
+	double m_alt;					// Actual altitude, for display
+	AITransitAroundState m_state;	// TransitAround state, for display
 };
 
 class AICmdKill : public AICommand {
