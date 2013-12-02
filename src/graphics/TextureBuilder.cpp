@@ -105,8 +105,19 @@ void TextureBuilder::PrepareSurface()
 		bool needConvert = !GetTargetFormat(m_surface->format, &targetTextureFormat, &targetPixelFormat, m_forceRGBA);
 
 		if (needConvert) {
-			SDL_Surface *s = SDL_ConvertSurface(m_surface.Get(), targetPixelFormat, SDL_SWSURFACE);
-			m_surface = SDLSurfacePtr::WrapNew(s);
+			if(m_textureType == TEXTURE_2D) {
+				SDL_Surface *s = SDL_ConvertSurface(m_surface.Get(), targetPixelFormat, SDL_SWSURFACE);
+				m_surface = SDLSurfacePtr::WrapNew(s);
+			} else if(m_textureType == TEXTURE_CUBE_MAP) {
+				assert(m_cubemap.size() == 6);
+				for(unsigned int i = 0; i < 6; ++i) {
+					SDL_Surface *s = SDL_ConvertSurface(m_cubemap[i].Get(), targetPixelFormat, SDL_SWSURFACE);
+					m_cubemap[i] = SDLSurfacePtr::WrapNew(s);
+				}
+			} else {
+				// Unknown texture type
+				assert(0);
+			}
 		}
 
 		virtualWidth = actualWidth = m_surface->w;
@@ -117,12 +128,25 @@ void TextureBuilder::PrepareSurface()
 			actualWidth = ceil_pow2(m_surface->w);
 			actualHeight = ceil_pow2(m_surface->h);
 			if (actualWidth != virtualWidth || actualHeight != virtualHeight) {
-				SDL_Surface *s = SDL_CreateRGBSurface(SDL_SWSURFACE, actualWidth, actualHeight, targetPixelFormat->BitsPerPixel,
-					targetPixelFormat->Rmask, targetPixelFormat->Gmask, targetPixelFormat->Bmask, targetPixelFormat->Amask);
-				SDL_SetSurfaceBlendMode(m_surface.Get(), SDL_BLENDMODE_NONE);
-				SDL_BlitSurface(m_surface.Get(), 0, s, 0);
+				if(m_textureType == TEXTURE_2D) {
+					SDL_Surface *s = SDL_CreateRGBSurface(SDL_SWSURFACE, actualWidth, actualHeight, targetPixelFormat->BitsPerPixel,
+						targetPixelFormat->Rmask, targetPixelFormat->Gmask, targetPixelFormat->Bmask, targetPixelFormat->Amask);
+					SDL_SetSurfaceBlendMode(m_surface.Get(), SDL_BLENDMODE_NONE);
+					SDL_BlitSurface(m_surface.Get(), 0, s, 0);
 
-				m_surface = SDLSurfacePtr::WrapNew(s);
+					m_surface = SDLSurfacePtr::WrapNew(s);
+				} else if(m_textureType == TEXTURE_CUBE_MAP) {
+					assert(m_cubemap.size() == 6);
+					for(unsigned int i = 0; i < 6; ++i) {
+						SDL_Surface *s = SDL_CreateRGBSurface(SDL_SWSURFACE, actualWidth, actualHeight, targetPixelFormat->BitsPerPixel,
+							targetPixelFormat->Rmask, targetPixelFormat->Gmask, targetPixelFormat->Bmask, targetPixelFormat->Amask);
+						SDL_SetSurfaceBlendMode(m_cubemap[i].Get(), SDL_BLENDMODE_NONE);
+						SDL_BlitSurface(m_cubemap[i].Get(), 0, s, 0);
+						m_cubemap[i] = SDLSurfacePtr::WrapNew(s);
+					}
+				} else {
+					assert(0);
+				}
 			}
 		}
 		else if (! m_filename.empty()) {
@@ -179,14 +203,33 @@ static size_t LoadDDSFromFile(const std::string &filename, PicoDDS::DDSImage& dd
 void TextureBuilder::LoadSurface()
 {
 	assert(!m_surface);
-	// SDL surfaces only support 2D textures for now
-	assert(m_textureType == TEXTURE_2D);
 
-	// SAL: a multi-file cube map could be supported here by automatically loading 6 image files:
-	//      filename_px.ext, filename_nx.ext, ...etc
-
-	SDLSurfacePtr s = LoadSurfaceFromFile(m_filename);
-	if (! s) { s = LoadSurfaceFromFile("textures/unknown.png"); }
+	SDLSurfacePtr s;
+	if(m_textureType == TEXTURE_2D) {
+		s = LoadSurfaceFromFile(m_filename);
+		if (! s) { 
+			s = LoadSurfaceFromFile("textures/unknown.png"); 
+		}
+	} else if(m_textureType == TEXTURE_CUBE_MAP) {
+		int idx = m_filename.find_last_of('.');
+		assert(idx != std::string::npos); // Error: filename incorrect, should be "file.ext"
+		// Loads cube map based on SpaceScape format: cubemap_sideN.png/.jpg
+		std::string cube_right = m_filename.substr(0, idx) + "_right1" + m_filename.substr(idx);
+		std::string cube_left = m_filename.substr(0, idx) + "_left2" + m_filename.substr(idx);
+		std::string cube_top = m_filename.substr(0, idx) + "_top3" + m_filename.substr(idx);
+		std::string cube_bottom = m_filename.substr(0, idx) + "_bottom4" + m_filename.substr(idx);
+		std::string cube_front = m_filename.substr(0, idx) + "_front5" + m_filename.substr(idx);
+		std::string cube_back = m_filename.substr(0, idx) + "_back6" + m_filename.substr(idx);
+		m_cubemap.clear();
+		m_cubemap.push_back(LoadSurfaceFromFile(cube_right));
+		m_cubemap.push_back(LoadSurfaceFromFile(cube_left));
+		m_cubemap.push_back(LoadSurfaceFromFile(cube_top));
+		m_cubemap.push_back(LoadSurfaceFromFile(cube_bottom));
+		m_cubemap.push_back(LoadSurfaceFromFile(cube_front));
+		m_cubemap.push_back(LoadSurfaceFromFile(cube_back));
+		assert(m_cubemap[0] && m_cubemap[1] && m_cubemap[2] && m_cubemap[3] && m_cubemap[4] && m_cubemap[5]);
+		s = m_cubemap[0];
+	}
 
 	// XXX if we can't load the fallback texture, then what?
 	m_surface = s;
@@ -206,8 +249,23 @@ void TextureBuilder::LoadDDS()
 void TextureBuilder::UpdateTexture(Texture *texture)
 {
 	if( m_surface ) {
-		assert(texture->GetDescriptor().type == TEXTURE_2D);
-		texture->Update(m_surface->pixels, vector2f(m_surface->w,m_surface->h), m_descriptor.format, 0);
+		if(texture->GetDescriptor().type == TEXTURE_2D && m_textureType == TEXTURE_2D) {
+			texture->Update(m_surface->pixels, vector2f(m_surface->w,m_surface->h), m_descriptor.format, 0);
+		} else if(texture->GetDescriptor().type == TEXTURE_CUBE_MAP && m_textureType == TEXTURE_CUBE_MAP) {
+			assert(m_cubemap.size() == 6);
+			TextureCubeData tcd;
+			// Sequence of cube map face storage: +X -X +Y -Y -Z +Z
+			tcd.posX = m_cubemap[0]->pixels;
+			tcd.negX = m_cubemap[1]->pixels;
+			tcd.posY = m_cubemap[2]->pixels;
+			tcd.negY = m_cubemap[3]->pixels;
+			tcd.posZ = m_cubemap[4]->pixels;
+			tcd.negZ = m_cubemap[5]->pixels;
+			texture->Update(tcd, vector2f(m_cubemap[0]->w, m_cubemap[0]->h), m_descriptor.format, 0);
+		} else {
+			// Given texture and current texture don't have the same type!
+			assert(0);
+		}
 	} else {
 		assert(m_dds.headerdone_);
 		assert(m_descriptor.format == TEXTURE_DXT1 || m_descriptor.format == TEXTURE_DXT5);
