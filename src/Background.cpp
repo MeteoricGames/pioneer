@@ -44,7 +44,7 @@ UniverseBox::~UniverseBox()
 void UniverseBox::Init(Graphics::Renderer *r)
 {
 	// Load cubemap
-	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/ub0/ub0.png");
+	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/ub0.dds");
 	m_cubemap = texture_builder.CreateTexture(r);
 
 	// Create skybox geometry
@@ -118,7 +118,7 @@ void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Random* randomizer)
 		if(new_ubox_index > 0) {
 			// Load new one
 			std::ostringstream os;
-			os << "textures/cube/ub" << (new_ubox_index - 1) << "/ub" << (new_ubox_index - 1) << ".png";
+			os << "textures/cube/ub" << (new_ubox_index - 1) << ".dds";
 			TextureBuilder texture_builder = TextureBuilder::Cube(os.str().c_str());
 			m_cubemap = texture_builder.CreateTexture(r);
 			m_material->texture0 = m_cubemap;
