@@ -2128,7 +2128,7 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 			m_metallicity < (fixed(1,1) - system->m_humanProx)) return;
 	}
 
-	if (!this->HasAtmosphere() || m_atmosDensity>3.0 || m_atmosDensity<0.5 || m_life < 0.1 || averageTemp-273 > 90 || averageTemp-273 < -90 || mass > 3.0 || mass < 0.2 || m_atmosOxidizing < fixed(7,10)) {
+	if (!this->HasAtmosphere() || m_atmosDensity>3.0 || m_atmosDensity<0.5 || m_life < 0.1 || averageTemp-273 > 90 || averageTemp-273 < -90 || mass > 2.0 || mass < 0.5 || m_atmosOxidizing < fixed(7,10)) {
 		m_population = fixed(1,100000)*rand.Fixed()*2.0; //max 20k on these..
 		outTotalPop += m_population;
 		return;
