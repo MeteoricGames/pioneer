@@ -305,6 +305,13 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 	else if (pop > fixed(1,1000))	newsegment = fixed(625,1);     							//above 1 mill, 1 or 2 cites
 	else							newsegment = fixed(300,1)*rand.Fixed();
 
+	if (ends_with(station->GetModel()->GetName(), "dome"))
+	{
+		mx = m*vector3d(0.2,0,0);
+		mz = m*vector3d(0,0,0.2);
+		newsegment = fixed(aabb.max.x,1);
+	}
+
 	seg=Clamp(newsegment.ToDouble(),100.0,5000.0);
 
 	double sizex = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);
