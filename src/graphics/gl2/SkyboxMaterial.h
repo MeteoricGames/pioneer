@@ -10,9 +10,12 @@
 namespace Graphics {
 	namespace GL2 {
 		class SkyboxMaterial : public Material {
+		private:
+
 		public:
 			SkyboxMaterial() {
 				texture0 = nullptr;
+				fSkyboxFactor = 0.8f;
 			}
 
 			Program *CreateProgram(const MaterialDescriptor &) {
@@ -24,6 +27,7 @@ namespace Graphics {
 				if(texture0) {
 					m_program->texture0.Set(texture0, 0);
 				}
+				m_program->shininess.Set(fSkyboxFactor);
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
 				glEnable(GL_DEPTH_TEST);
 				glDepthMask(GL_FALSE);
@@ -33,6 +37,9 @@ namespace Graphics {
 				glPopAttrib();
 				m_program->Unuse();
 			}
+			
+			// Skybox multiplier
+			float fSkyboxFactor;
 		};
 	}
 }
