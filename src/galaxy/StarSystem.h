@@ -143,6 +143,7 @@ public:
 
 	// XXX merge all this atmosphere stuff
 	bool HasAtmosphere() const;
+	double GetDensity() const { return m_atmosDensity; }
 
 	void PickAtmosphere();
 	void GetAtmosphereFlavor(Color *outColor, double *outDensity) const {
