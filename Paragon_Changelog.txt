@@ -29,3 +29,55 @@ Environment / Technical
 -Vastly improved loading and startup times.
 -Fixed save game loading
 -New jump cloud graphics
+
+
+Alpha 3
+
+* New laser sound effect
+* Quarter size arrival/dep clouds, color departure cloud orange.
+* Let paragon use its own userdir, mod friendly does not interfere with pioneer or genesia.
+* New ships always equips autopilot
+* Remove retro firing, and reduce the overshooting autopilot.
+* Show hyperspace jumps in minutes/seconds instead of days/hours (sector view)
+* Sound effects for transit drive stage 2. (breaks savegames from Alpha2)
+* Re added custom system : Firedrake (new hope)
+* Jovians can be scooped by autopilot
+ - works on gas giants lesser than 150 earth masses, but it is not guarranteed that autopilot manages to orbit the planet.
+ - slightly changed atmosphere properties on gas giants, making them scoop friendly.
+ - hydrogen is now reaction mass for fuel instead of water
+ - ship will now automatic refuel during a scooping.
+* Local parked traffic added, tradeships will now jump in low orbit instead of just above ground.
+* New interface sound effect.
+* New warning sound effect.
+* HUD textures improved.
+*New ship; Mining Pod
+*(Mining Drone model added to game)
+* New ship : Mining Pod
+* New drone : Mining Drone.
+* Shields are dimmed to be less intrusive
+* Fulcrums added; artificial jump exit points in developed systems that override natural ones.
+* New Model : Large Fulcrum
+* New Sound: Fulcrum Activation
+* Police are now scripted, backs off if fines are paid, you have a 20 second limit to pay fines before they attack.
+* Starmap/sectorview now have an population indicator
+* Added lights to ships and stations
+* Added back in updated small starport for less populated worlds
+* New ship names
+* New ship; Utility  Tender
+* New ship; Omni Explorer
+* All new city buildings
+* Multiple older ships and stations retextured
+* New missile and cargo models
+* Different sized cities and starports based based on planet characteristics
+* New mining pod model
+* New ship; mining ship
+* New ship; mining carrier
+* 1st phase of big update to the space flight system completed.
+* New HUD design
+* Medium and large class ships now able to dock and undock from stations
+* All ship statistics properly balanced
+* New drives implemented to cater for all ship sizes, only drives appropriate to current ship appear for sale
+* GLSL skybox support added to engine
+* Persistent nebulas appear on a per sector basis
+* add support for formation flying
+
