@@ -98,6 +98,7 @@ void UniverseBox::Init(Graphics::Renderer *r)
 	m_material.Reset(r->CreateMaterial(desc));
 	m_material->texture0 = m_cubemap;
 	m_model->AddSurface(RefCountedPtr<Surface>(new Surface(TRIANGLES, box, m_material)));
+	SetIntensity(1.0f);
 }
 
 void UniverseBox::Draw(Graphics::Renderer *r)
@@ -356,6 +357,7 @@ void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 
 void Container::SetIntensity(float intensity)
 {
+	m_universeBox.SetIntensity(intensity);
 	m_starField.SetIntensity(intensity);
 	m_milkyWay.SetIntensity(intensity);
 }
