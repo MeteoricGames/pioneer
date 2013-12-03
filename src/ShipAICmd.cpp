@@ -717,10 +717,8 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, double dist) : AICommand(ship, 
 
 AICmdFlyTo::~AICmdFlyTo()
 {
-	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
+	if(m_ship && m_ship->IsType(Object::PLAYER) && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		// Transit interrupted
-		//float interrupt_velocity = m_ship->GetVelocity().Length() > m_ship->GetMaxManeuverSpeed()?
-		//	m_ship->GetMaxManeuverSpeed() : m_ship->GetVelocity().Length();
 		float interrupt_velocity = TRANSIT_START_SPEED;
 		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
 		m_ship->SetJuice(20.0);
