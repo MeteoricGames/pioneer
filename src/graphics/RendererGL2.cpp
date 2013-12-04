@@ -16,6 +16,7 @@
 #include "gl2/RingMaterial.h"
 #include "gl2/StarfieldMaterial.h"
 #include "gl2/FresnelColourMaterial.h"
+#include "gl2/SkyboxMaterial.h"
 
 namespace Graphics {
 
@@ -146,6 +147,9 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 		break;
 	case EFFECT_FRESNEL_SPHERE:
 		mat = new GL2::FresnelColourMaterial();
+		break;
+	case EFFECT_SKYBOX:
+		mat = new GL2::SkyboxMaterial();
 		break;
 	default:
 		if (desc.lighting)

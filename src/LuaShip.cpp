@@ -1199,6 +1199,48 @@ static int l_ship_ai_fly_to_close(lua_State *l)
 }
 
 /*
+ * Method: AIFlyFormation
+ *
+ * Fly close to a physics body at given dist
+ *
+ * > ship:AIFlyFormation(target,x,y,z)
+ *
+ * Parameters:
+ *
+ *   target - the <Body> to fly to
+ *   xyz   - offset in meters
+ *
+ * Availability:
+ *
+ *  alpha
+ *
+ * Status:
+ *
+ *  experimental
+ */
+static int l_ship_ai_fly_formation(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	if (s->GetFlightState() == Ship::HYPERSPACE)
+		return luaL_error(l, "Ship:AIFlyFormation() cannot be called on a ship in hyperspace");
+	Body *target = LuaObject<Body>::CheckFromLua(2);
+	double x = 100;
+	double y = 100;
+	double z = 100;
+	if (lua_isnumber(l, 3)) {
+		x = double(luaL_checknumber(l, 3));
+	}
+	if (lua_isnumber(l, 4)) {
+		y = double(luaL_checknumber(l, 4));
+	}
+	if (lua_isnumber(l, 5)) {
+		z = double(luaL_checknumber(l, 5));
+	}
+	s->AIFlyTo(target,vector3d((double)x,(double)y,(double)z));
+	return 0;
+}
+
+/*
  * Method: AIDockWith
  *
  * Fly to and dock with a given station
@@ -1420,6 +1462,7 @@ template <> void LuaObject<Ship>::RegisterClass()
 		{ "AIFire",				l_ship_ai_fire	             },
 		{ "AIFlyTo",            l_ship_ai_fly_to             },
 		{ "AIFlyToClose",       l_ship_ai_fly_to_close       },
+		{ "AIFlyFormation",     l_ship_ai_fly_formation      },
 		{ "AIDockWith",         l_ship_ai_dock_with          },
 		{ "AIEnterLowOrbit",    l_ship_ai_enter_low_orbit    },
 		{ "AIEnterMediumOrbit", l_ship_ai_enter_medium_orbit },

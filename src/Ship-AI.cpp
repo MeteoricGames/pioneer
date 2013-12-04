@@ -137,6 +137,17 @@ void Ship::AIFlyTo(Body *target)
 	else m_curAICmd = new AICmdFlyTo(this, target);
 }
 
+void Ship::AIFlyTo(Body *target, vector3d posoff)
+{
+	AIClearInstructions();
+	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
+
+	if (target->IsType(Object::SHIP)) {		// test code
+		m_curAICmd = new AICmdFormation(this, static_cast<Ship*>(target), posoff);
+	}
+	else m_curAICmd = new AICmdFlyTo(this, target);
+}
+
 void Ship::AIFlyToClose(Body *target, double dist)
 {
 	AIClearInstructions();
