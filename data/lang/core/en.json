@@ -1207,6 +1207,14 @@
       "description" : "",
       "message" : "%hours{f.1} hrs"
    },
+   "NUMBER_MINUTES" : {
+      "description" : "",
+      "message" : "%minutes{f.1} min"
+   },
+   "NUMBER_SECONDS" : {
+      "description" : "",
+      "message" : "%seconds{f.1} sec"
+   },
    "NUMBER_LY" : {
       "description" : "",
       "message" : "%distance{f.2} ly"
