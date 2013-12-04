@@ -28,8 +28,8 @@
             </comments>
             <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/stations/megastation/megastation_docking.dae</source_data>
         </contributor>
-        <created>2013-09-07T12:51:22Z</created>
-        <modified>2013-09-07T12:51:22Z</modified>
+        <created>2013-12-04T21:46:45Z</created>
+        <modified>2013-12-04T21:46:45Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -5702,6 +5702,201 @@
                 <rotate sid="rotation1800Y">0 1 0 -135</rotate>
                 <rotate sid="rotation1800X">1 0 0 -1.19783e-014</rotate>
                 <rotate sid="rotation1800Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1838Node" name="leaving_stage1_bay123" type="NODE">
+                <translate sid="translation1843">1951.61 400 -1.13687e-013</translate>
+                <rotate sid="rotation1842Y">0 1 0 -180</rotate>
+                <rotate sid="rotation1842X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1842Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1833Node" name="leaving_stage2_bay124" type="NODE">
+                <translate sid="translation1844">-2900 215 0</translate>
+            </node>
+            <node id="locator1824Node" name="leaving_stage3_bay121" type="NODE">
+                <translate sid="translation1846">-1380 400 1380</translate>
+                <rotate sid="rotation1845Y">0 1 0 -315</rotate>
+                <rotate sid="rotation1845X">1 0 0 0</rotate>
+                <rotate sid="rotation1845Z">0 0 1 9.92313e-015</rotate>
+            </node>
+            <node id="locator1815Node" name="leaving_stage4_bay123" type="NODE">
+                <translate sid="translation1848">1951.61 400 -1.13687e-013</translate>
+                <rotate sid="rotation1847Y">0 1 0 -180</rotate>
+                <rotate sid="rotation1847X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1847Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1830Node" name="leaving_stage2_bay122" type="NODE">
+                <translate sid="translation1850">-1380 400 -1380</translate>
+                <rotate sid="rotation1849Y">0 1 0 -45</rotate>
+                <rotate sid="rotation1849X">1 0 0 0</rotate>
+                <rotate sid="rotation1849Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator1821Node" name="leaving_stage3_bay122" type="NODE">
+                <translate sid="translation1852">-1380 400 -1380</translate>
+                <rotate sid="rotation1851Y">0 1 0 -45</rotate>
+                <rotate sid="rotation1851X">1 0 0 0</rotate>
+                <rotate sid="rotation1851Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator1836Node" name="leaving_stage1_bay124" type="NODE">
+                <translate sid="translation1853">-2900 215 0</translate>
+            </node>
+            <node id="locator1819Node" name="leaving_stage4_bay124" type="NODE">
+                <translate sid="translation1854">-2900 215 0</translate>
+            </node>
+            <node id="locator1839Node" name="leaving_stage1_bay126" type="NODE">
+                <translate sid="translation1856">2050.61 215 2050.61</translate>
+                <rotate sid="rotation1855Y">0 1 0 -225</rotate>
+                <rotate sid="rotation1855X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1855Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1825Node" name="leaving_stage3_bay125" type="NODE">
+                <translate sid="translation1858">2050.61 215 -2050.61</translate>
+                <rotate sid="rotation1857Y">0 1 0 -135</rotate>
+                <rotate sid="rotation1857X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1857Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1816Node" name="leaving_stage4_bay121" type="NODE">
+                <translate sid="translation1860">-1380 400 1380</translate>
+                <rotate sid="rotation1859Y">0 1 0 -315</rotate>
+                <rotate sid="rotation1859X">1 0 0 0</rotate>
+                <rotate sid="rotation1859Z">0 0 1 9.92313e-015</rotate>
+            </node>
+            <node id="locator1831Node" name="leaving_stage2_bay125" type="NODE">
+                <translate sid="translation1862">2050.61 215 -2050.61</translate>
+                <rotate sid="rotation1861Y">0 1 0 -135</rotate>
+                <rotate sid="rotation1861X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1861Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1822Node" name="leaving_stage3_bay127" type="NODE">
+                <translate sid="translation1864">-2.27374e-013 215 -3500</translate>
+                <rotate sid="rotation1863Y">0 1 0 -90</rotate>
+                <rotate sid="rotation1863X">1 0 0 -1.40334e-014</rotate>
+                <rotate sid="rotation1863Z">0 0 1 -1.76556e-031</rotate>
+            </node>
+            <node id="locator1828Node" name="leaving_stage2_bay123" type="NODE">
+                <translate sid="translation1866">1951.61 400 -1.13687e-013</translate>
+                <rotate sid="rotation1865Y">0 1 0 -180</rotate>
+                <rotate sid="rotation1865X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1865Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1834Node" name="leaving_stage2_bay127" type="NODE">
+                <translate sid="translation1868">-2.27374e-013 215 -3500</translate>
+                <rotate sid="rotation1867Y">0 1 0 -90</rotate>
+                <rotate sid="rotation1867X">1 0 0 -1.40334e-014</rotate>
+                <rotate sid="rotation1867Z">0 0 1 -1.76556e-031</rotate>
+            </node>
+            <node id="locator1840Node" name="leaving_stage1_bay122" type="NODE">
+                <translate sid="translation1870">-1380 400 -1380</translate>
+                <rotate sid="rotation1869Y">0 1 0 -45</rotate>
+                <rotate sid="rotation1869X">1 0 0 0</rotate>
+                <rotate sid="rotation1869Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator1826Node" name="leaving_stage3_bay123" type="NODE">
+                <translate sid="translation1872">1951.61 400 -1.13687e-013</translate>
+                <rotate sid="rotation1871Y">0 1 0 -180</rotate>
+                <rotate sid="rotation1871X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1871Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1817Node" name="leaving_stage4_bay126" type="NODE">
+                <translate sid="translation1874">2050.61 215 2050.61</translate>
+                <rotate sid="rotation1873Y">0 1 0 -225</rotate>
+                <rotate sid="rotation1873X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1873Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1841Node" name="leaving_stage4_bay122" type="NODE">
+                <translate sid="translation1876">-1380 400 -1380</translate>
+                <rotate sid="rotation1875Y">0 1 0 -45</rotate>
+                <rotate sid="rotation1875X">1 0 0 0</rotate>
+                <rotate sid="rotation1875Z">0 0 1 0</rotate>
+            </node>
+            <node id="locator1837Node" name="leaving_stage1_bay127" type="NODE">
+                <translate sid="translation1878">-2.27374e-013 215 -3500</translate>
+                <rotate sid="rotation1877Y">0 1 0 -90</rotate>
+                <rotate sid="rotation1877X">1 0 0 -1.40334e-014</rotate>
+                <rotate sid="rotation1877Z">0 0 1 -1.76556e-031</rotate>
+            </node>
+            <node id="locator1832Node" name="leaving_stage2_bay121" type="NODE">
+                <translate sid="translation1880">-1380 400 1380</translate>
+                <rotate sid="rotation1879Y">0 1 0 -315</rotate>
+                <rotate sid="rotation1879X">1 0 0 0</rotate>
+                <rotate sid="rotation1879Z">0 0 1 9.92313e-015</rotate>
+            </node>
+            <node id="locator1823Node" name="leaving_stage3_bay126" type="NODE">
+                <translate sid="translation1882">2050.61 215 2050.61</translate>
+                <rotate sid="rotation1881Y">0 1 0 -225</rotate>
+                <rotate sid="rotation1881X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1881Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1829Node" name="leaving_stage2_bay126" type="NODE">
+                <translate sid="translation1884">2050.61 215 2050.61</translate>
+                <rotate sid="rotation1883Y">0 1 0 -225</rotate>
+                <rotate sid="rotation1883X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1883Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1820Node" name="leaving_stage4_bay125" type="NODE">
+                <translate sid="translation1886">2050.61 215 -2050.61</translate>
+                <rotate sid="rotation1885Y">0 1 0 -135</rotate>
+                <rotate sid="rotation1885X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1885Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1835Node" name="leaving_stage1_bay121" type="NODE">
+                <translate sid="translation1888">-1380 400 1380</translate>
+                <rotate sid="rotation1887Y">0 1 0 -315</rotate>
+                <rotate sid="rotation1887X">1 0 0 0</rotate>
+                <rotate sid="rotation1887Z">0 0 1 9.92313e-015</rotate>
+            </node>
+            <node id="locator1827Node" name="leaving_stage3_bay124" type="NODE">
+                <translate sid="translation1889">-2900 215 0</translate>
+            </node>
+            <node id="locator1818Node" name="leaving_stage4_bay127" type="NODE">
+                <translate sid="translation1891">-2.27374e-013 215 -3500</translate>
+                <rotate sid="rotation1890Y">0 1 0 -90</rotate>
+                <rotate sid="rotation1890X">1 0 0 -1.40334e-014</rotate>
+                <rotate sid="rotation1890Z">0 0 1 -1.76556e-031</rotate>
+            </node>
+            <node id="locator1814Node" name="leaving_stage1_bay125" type="NODE">
+                <translate sid="translation1893">2050.61 215 -2050.61</translate>
+                <rotate sid="rotation1892Y">0 1 0 -135</rotate>
+                <rotate sid="rotation1892X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1892Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1896Node" name="leaving_stage5_bay124" type="NODE">
+                <translate sid="translation1901">-2900 215 0</translate>
+            </node>
+            <node id="locator1897Node" name="leaving_stage5_bay127" type="NODE">
+                <translate sid="translation1903">-2.27374e-013 215 -3500</translate>
+                <rotate sid="rotation1902Y">0 1 0 -90</rotate>
+                <rotate sid="rotation1902X">1 0 0 -1.40334e-014</rotate>
+                <rotate sid="rotation1902Z">0 0 1 -1.76556e-031</rotate>
+            </node>
+            <node id="locator1898Node" name="leaving_stage5_bay126" type="NODE">
+                <translate sid="translation1905">2050.61 215 2050.61</translate>
+                <rotate sid="rotation1904Y">0 1 0 -225</rotate>
+                <rotate sid="rotation1904X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1904Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1899Node" name="leaving_stage5_bay121" type="NODE">
+                <translate sid="translation1907">-1380 400 1380</translate>
+                <rotate sid="rotation1906Y">0 1 0 -315</rotate>
+                <rotate sid="rotation1906X">1 0 0 0</rotate>
+                <rotate sid="rotation1906Z">0 0 1 9.92313e-015</rotate>
+            </node>
+            <node id="locator1895Node" name="leaving_stage5_bay125" type="NODE">
+                <translate sid="translation1909">2050.61 215 -2050.61</translate>
+                <rotate sid="rotation1908Y">0 1 0 -135</rotate>
+                <rotate sid="rotation1908X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1908Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1900Node" name="leaving_stage5_bay123" type="NODE">
+                <translate sid="translation1911">1951.61 400 -1.13687e-013</translate>
+                <rotate sid="rotation1910Y">0 1 0 -180</rotate>
+                <rotate sid="rotation1910X">1 0 0 -1.19783e-014</rotate>
+                <rotate sid="rotation1910Z">0 0 1 4.96156e-015</rotate>
+            </node>
+            <node id="locator1894Node" name="leaving_stage5_bay122" type="NODE">
+                <translate sid="translation1913">-1380 400 -1380</translate>
+                <rotate sid="rotation1912Y">0 1 0 -45</rotate>
+                <rotate sid="rotation1912X">1 0 0 0</rotate>
+                <rotate sid="rotation1912Z">0 0 1 0</rotate>
             </node>
             <node id="Geometry-MeshNode" name="Mesh" type="NODE">
                 <instance_geometry url="#Geometry-Mesh">
