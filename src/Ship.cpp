@@ -878,7 +878,7 @@ void Ship::TimeStepUpdate(const float timeStep)
 
 	DynamicBody::TimeStepUpdate(timeStep);
 
-	if(IsType(Object::PLAYER) && Pi::player->GetPlayerController()->GetFlightControlState() == CONTROL_TRANSIT) {
+	if(IsType(Object::PLAYER) && GetTransitState() != TRANSIT_DRIVE_OFF) {
 		// Do not update fuel (otherwise it will runout very fast!)
 	} else {
 		// fuel use decreases mass, so do this as the last thing in the frame

@@ -1348,9 +1348,8 @@ bool AICmdTransitAround::TimeStepUpdate()
 			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
 				// Flyto transit altitude
 				const double end_velocity = m_ship->GetMaxManeuverSpeed();
-				//vector3d tangent = GenerateTangent(m_ship, m_obstructor->GetFrame(), 
-				//	up_vector * transit_altitude, m_alt);
-				vector3d position_offset = up_vector * (m_alt - transit_altitude);
+				vector3d position_offset;
+				position_offset = up_vector * (m_alt - transit_altitude);
 				m_child = new AICmdFlyTo(m_ship, m_obstructor->GetFrame(), position_offset, end_velocity, false);
 				m_state = AITA_ALTITUDE;
 				return false;
@@ -1364,7 +1363,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
 		m_ship->StartTransitDrive();
 	}
-	m_ship->SetJuice(80.0);
+	m_ship->SetJuice(std::max<double>(80.0, m_ship->GetVelocity().Length() * 0.008));
 	m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED);
 	m_ship->AIFaceDirection(velocity_vector);
 	m_ship->AIFaceUpdir(up_vector);
