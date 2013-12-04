@@ -796,7 +796,8 @@ bool AICmdFlyTo::TimeStepUpdate()
 		double cspeed = m_ship->GetVelocity().Length();
 		double target_radii = 5000000;
 
-		if (m_target->IsType(Object::PLANET))		target_radii = std::max(m_target->GetSystemBody()->GetRadius()*1.25,10000000.0);//std::max(m_targframe->GetParent()->GetBody()->GetPhysRadius()+5000000.0,5000000.0);
+		//if (m_target->IsType(Object::PLANET))		target_radii = std::max(m_target->GetSystemBody()->GetRadius()*1.25,10000000.0);//std::max(m_targframe->GetParent()->GetBody()->GetPhysRadius()+5000000.0,5000000.0);
+		if (m_target->IsType(Object::PLANET))		target_radii = VICINITY_MUL*MaxEffectRad(m_target, m_ship)+16000000.0;
 		if (m_target->IsType(Object::SHIP))			target_radii = 500000.0;
 
 		double setspeed=0.0;
@@ -846,7 +847,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 				m_ship->SetJuice(20.0);
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
-			return true;
+			return false;
 		}
 	}
 
