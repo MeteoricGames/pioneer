@@ -720,7 +720,10 @@ AICmdFlyTo::~AICmdFlyTo()
 	if(m_ship && m_ship->IsType(Object::PLAYER) && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		// Transit interrupted
 		float interrupt_velocity = TRANSIT_START_SPEED;
-		m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
+		double s = m_ship->GetVelocity().Length();
+		if(s > interrupt_velocity) {
+			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
+		}
 		m_ship->SetJuice(20.0);
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
 		m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
@@ -785,7 +788,10 @@ bool AICmdFlyTo::TimeStepUpdate()
 			//m_ship->GetVelocity().Length()>=550000
 			) 
 		{
-			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -transit_start_speed));
+			double s = m_ship->GetVelocity().Length();
+			if(s > transit_start_speed) {
+				m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -transit_start_speed));
+			}
 			//m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -99000));
 			m_ship->SetJuice(20.0);
 			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
@@ -843,7 +849,10 @@ bool AICmdFlyTo::TimeStepUpdate()
 			}
 			else {
 				//m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
-				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
+				double s = m_ship->GetVelocity().Length();
+				if(s > transit_start_speed) {
+					m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
+				}
 				m_ship->SetJuice(20.0);
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			}
