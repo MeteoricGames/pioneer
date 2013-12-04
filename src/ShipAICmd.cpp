@@ -1345,6 +1345,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 	if(m_obstructor->IsType(Object::TERRAINBODY)) {
 		if(Pi::worldView->IsAltitudeAvailable()) {
 			m_alt = Pi::worldView->GetAltitude();
+			/*
 			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
 				// Flyto transit altitude
 				const double end_velocity = m_ship->GetMaxManeuverSpeed();
@@ -1352,6 +1353,20 @@ bool AICmdTransitAround::TimeStepUpdate()
 				position_offset = up_vector * (m_alt - transit_altitude);
 				m_child = new AICmdFlyTo(m_ship, m_obstructor->GetFrame(), position_offset, end_velocity, false);
 				m_state = AITA_ALTITUDE;
+				return false;
+			}
+			*/
+			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
+				double curve_factor = abs(m_alt - transit_altitude) / 5000.0;
+				if(m_alt < transit_altitude - 3000.0) {
+					velocity_vector = ((up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+				} else if(m_alt > transit_altitude + 10000.0) {
+					velocity_vector = ((-up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+				}
+				m_ship->SetJuice(20.0);
+				m_ship->AIMatchVel(velocity_vector * m_ship->GetMaxManeuverSpeed() * std::min<double>(1.0, curve_factor));
+				m_ship->AIFaceDirection(velocity_vector);
+				m_ship->AIFaceUpdir(up_vector);
 				return false;
 			}
 		}
