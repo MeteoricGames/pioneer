@@ -10,6 +10,8 @@
 #include "Pi.h"
 #include "Game.h"
 
+const double NO_TRANSIT_RANGE = 1000000.0;
+
 class AICommand {
 public:
 	// This enum is solely to make the serialization work
@@ -115,10 +117,11 @@ public:
 
 	virtual void GetStatusText(char *str) {
 		if (m_child) m_child->GetStatusText(str);
-		else if (m_target) snprintf(str, 255, "Intercept: %s, dist %.1fkm, state %i",
-			m_target->GetLabel().c_str(), m_dist, m_state);
-		else snprintf(str, 255, "FlyTo: %s, dist %.1fkm, endvel %.1fkm/s, state %i",
-			m_targframe->GetLabel().c_str(), m_posoff.Length()/1000.0, m_endvel/1000.0, m_state);
+		else if (m_target) snprintf(str, 255, "Intercept: %s, dist %.1fkm, state %i, juice: %.1f",
+			m_target->GetLabel().c_str(), m_dist, m_state, m_ship->GetJuice());
+		else snprintf(str, 255, "FlyTo: %s, dist %.1fkm, endvel %.1fkm/s, state %i, juice: %.1f",
+			m_targframe->GetLabel().c_str(), m_posoff.Length()/1000.0, m_endvel/1000.0, m_state, 
+			m_ship->GetJuice());
 	}
 	virtual void Save(Serializer::Writer &wr) {
 		if(m_child) { delete m_child; m_child = 0; }
@@ -172,6 +175,7 @@ public:
 	virtual bool TimeStepUpdate();
 	AICmdFlyAround(Ship *ship, Body *obstructor, double relalt, int mode=2);
 	AICmdFlyAround(Ship *ship, Body *obstructor, double alt, double vel, int mode=1);
+	virtual ~AICmdFlyAround() {}
 
 	virtual void GetStatusText(char *str) {
 		if (m_child) m_child->GetStatusText(str);
@@ -220,8 +224,8 @@ public:
 
 	virtual void GetStatusText(char *str) {
 		if(m_child) m_child->GetStatusText(str);
-		else snprintf(str, 255, "TransitAround: alt %1fkm, state %s", m_alt/1000.0,
-			(m_state == AITA_ALTITUDE? "Altitude Correction" : "Transit Engaged"));
+		else snprintf(str, 255, "TransitAround: alt %1fkm, state %s, juice %.1f", m_alt/1000.0,
+			(m_state == AITA_ALTITUDE? "Altitude Correction" : "Transit Engaged"), m_ship->GetJuice());
 	}
 
 	virtual void Save(Serializer::Writer &wr) {

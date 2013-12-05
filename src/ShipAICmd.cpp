@@ -947,12 +947,20 @@ printf("Autopilot dist = %.1f, speed = %.1f, zthrust = %.2f, state = %i\n",
 			//add engine juice on fast asteroid approach
 			m_ship->AIMatchVel(ang < 0.05 ? m_ship->GetJuice()*20000.0 * m_ship->GetPosition().Normalized() : vector3d(0.0));
 		} else {							// same thing for 2/3/4
-			if(m_ship->IsType(Object::PLAYER)) {
+			if(m_ship->IsType(Object::PLAYER) && targdist > NO_TRANSIT_RANGE && Pi::worldView->IsAltitudeAvailable()) {
+				if(m_child && m_child->GetCommandName() != AICommand::CMD_TRANSITAROUND) {
+					delete m_child;
+					m_child = 0;
+				}
 				if (!m_child) {				
 					m_child = new AICmdTransitAround(m_ship, m_frame->GetBody());
-				}				
+				}
 				static_cast<AICmdTransitAround*>(m_child)->SetTargPos(targpos);
 			} else {
+				if(m_child && m_child->GetCommandName() != AICommand::CMD_FLYAROUND) {
+					delete m_child;
+					m_child = 0;
+				}
 				if (!m_child) {
 					m_child = new AICmdFlyAround(m_ship, m_frame->GetBody(), erad*1.05, 0.0);
 				}
@@ -1341,21 +1349,14 @@ bool AICmdTransitAround::TimeStepUpdate()
 	vector3d right_vector = ship_to_obstructor.Cross(ship_to_target).Normalized();
 	vector3d velocity_vector = up_vector.Cross(right_vector).NormalizedSafe();
 
-	// 1: determine suitable altitude and move towards it (TODO)
+	// 1: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting (TODO)
+	if(ship_to_target.Length() <= NO_TRANSIT_RANGE) {
+		return true;
+	}
+	// 2: determine suitable altitude and move towards it (TODO)
 	if(m_obstructor->IsType(Object::TERRAINBODY)) {
 		if(Pi::worldView->IsAltitudeAvailable()) {
 			m_alt = Pi::worldView->GetAltitude();
-			/*
-			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
-				// Flyto transit altitude
-				const double end_velocity = m_ship->GetMaxManeuverSpeed();
-				vector3d position_offset;
-				position_offset = up_vector * (m_alt - transit_altitude);
-				m_child = new AICmdFlyTo(m_ship, m_obstructor->GetFrame(), position_offset, end_velocity, false);
-				m_state = AITA_ALTITUDE;
-				return false;
-			}
-			*/
 			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
 				double curve_factor = abs(m_alt - transit_altitude) / 5000.0;
 				if(m_alt < transit_altitude - 3000.0) {
@@ -1372,7 +1373,6 @@ bool AICmdTransitAround::TimeStepUpdate()
 		}
 	}
 	m_state = AITA_TRANSIT;
-	// 2: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting (TODO)
 	// 3: Engage transit after 2 seconds to give sound effects enough time to play (TODO)
 	// 4: follow flight tangent at Transit speed
 	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
