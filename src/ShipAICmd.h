@@ -225,7 +225,8 @@ public:
 	virtual void GetStatusText(char *str) {
 		if(m_child) m_child->GetStatusText(str);
 		else snprintf(str, 255, "TransitAround: alt %1fkm, state %s, juice %.1f", m_alt/1000.0,
-			(m_state == AITA_ALTITUDE? "Altitude Correction" : "Transit Engaged"), m_ship->GetJuice());
+			(m_state == AITA_ALTITUDE? "Altitude Correction" : (m_state == AITA_TRANSIT? "Transit Engaged" : "Transit Ready")), 
+			m_ship->GetJuice());
 	}
 
 	virtual void Save(Serializer::Writer &wr) {
@@ -249,6 +250,7 @@ public:
 	}
 
 	enum AITransitAroundState {
+		AITA_READY,
 		AITA_ALTITUDE,
 		AITA_TRANSIT
 	};
@@ -259,6 +261,7 @@ private:
 	int m_obstructorIndex;			// Used for serialization
 	double m_alt;					// Actual altitude, for display
 	AITransitAroundState m_state;	// TransitAround state, for display
+	float m_warmUpTime;				// Transit startup time (gives sound a chance to play)
 };
 
 class AICmdKill : public AICommand {

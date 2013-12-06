@@ -1325,7 +1325,8 @@ AICmdTransitAround::AICmdTransitAround(Ship *ship, Body *obstructor) : AICommand
 {
 	m_obstructor = obstructor;
 	m_alt = 0.0;
-	m_state = AITA_ALTITUDE;
+	m_state = AITA_READY;
+	m_warmUpTime = 2.0f;
 }
 
 AICmdTransitAround::~AICmdTransitAround()
@@ -1333,6 +1334,10 @@ AICmdTransitAround::~AICmdTransitAround()
 	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		m_ship->StopTransitDrive();
 		m_ship->SetJuice(1.0);
+		float threshold_speed = std::min<float>(m_ship->GetMaxManeuverSpeed(), TRANSIT_START_SPEED);
+		if(m_ship->GetVelocity().Length() > threshold_speed) {
+			m_ship->SetVelocity(m_ship->GetVelocity().Normalized() * 10000.0);
+		}
 	}
 }
 
@@ -1341,7 +1346,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 	if (!ProcessChild()) return false;
 
 	const double time_step = Pi::game->GetTimeStep();
-	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 5000.0;
+	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 8000.0;
 	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
 		m_ship->GetPosition();
 	vector3d ship_to_target = m_targetPosition - m_ship->GetPosition();
@@ -1349,20 +1354,25 @@ bool AICmdTransitAround::TimeStepUpdate()
 	vector3d right_vector = ship_to_obstructor.Cross(ship_to_target).Normalized();
 	vector3d velocity_vector = up_vector.Cross(right_vector).NormalizedSafe();
 
-	// 1: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting (TODO)
+	// 1: if target is close then use normal fly instead of transit otherwise FlyTo will keep overshooting
 	if(ship_to_target.Length() <= NO_TRANSIT_RANGE) {
+		m_warmUpTime = 2.0;
 		return true;
 	}
-	// 2: determine suitable altitude and move towards it (TODO)
+	// 2: determine suitable altitude and move towards it
 	if(m_obstructor->IsType(Object::TERRAINBODY)) {
 		if(Pi::worldView->IsAltitudeAvailable()) {
 			m_alt = Pi::worldView->GetAltitude();
-			if(m_alt < transit_altitude - 3000.0 || m_alt > transit_altitude + 10000.0) { // Transit range is 13km space above gravity bubble
-				double curve_factor = abs(m_alt - transit_altitude) / 5000.0;
-				if(m_alt < transit_altitude - 3000.0) {
-					velocity_vector = ((up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
-				} else if(m_alt > transit_altitude + 10000.0) {
-					velocity_vector = ((-up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+			if(m_alt < TRANSIT_GRAVITY_RANGE_1 || m_alt > transit_altitude + 7000.0) { // Transit range is 13km space above gravity bubble
+				m_warmUpTime = 2.0;
+				m_state = AITA_ALTITUDE;
+				double curve_factor = abs(m_alt - transit_altitude) / 10000.0;
+				if(m_alt < TRANSIT_GRAVITY_RANGE_1) {
+					//velocity_vector = ((up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+					velocity_vector = ((up_vector * curve_factor) + velocity_vector).Normalized();
+				} else if(m_alt > transit_altitude + 7000.0) {
+					//velocity_vector = ((-up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+					velocity_vector = (-(up_vector * curve_factor) + velocity_vector).Normalized();
 				}
 				m_ship->SetJuice(20.0);
 				m_ship->AIMatchVel(velocity_vector * m_ship->GetMaxManeuverSpeed() * std::min<double>(1.0, curve_factor));
@@ -1372,12 +1382,30 @@ bool AICmdTransitAround::TimeStepUpdate()
 			}
 		}
 	}
+	// Adjust velocity slightly to follow the exact transit altitude arc
+	if(m_alt > transit_altitude) {
+		velocity_vector = velocity_vector + (-up_vector * 0.005);
+	} else if(m_alt < transit_altitude) {
+		velocity_vector = velocity_vector + (up_vector * 0.005);
+	}
+	if(m_state == AITA_ALTITUDE) {
+		// Adjust velocity for transit by sharp turning towards velocity vector
+		m_ship->SetVelocity(velocity_vector * m_ship->GetVelocity().Length());
+	}
 	m_state = AITA_TRANSIT;
 	// 3: Engage transit after 2 seconds to give sound effects enough time to play (TODO)
-	// 4: follow flight tangent at Transit speed
 	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
 		m_ship->StartTransitDrive();
 	}
+	if(m_warmUpTime > 0.0) {
+		m_warmUpTime -= time_step;
+		// Issue: transit around is a very fast operation (by design). Waiting for 2 seconds
+		// before engaging transit will cause problems if the ship is coming too fast, it won't
+		// have enough time to adjust it's direction before slamming into the planet or 
+		// completely overshooting the transit range.
+		//return false;
+	}
+	// 4: follow flight tangent at Transit speed
 	m_ship->SetJuice(std::max<double>(80.0, m_ship->GetVelocity().Length() * 0.008));
 	m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED);
 	m_ship->AIFaceDirection(velocity_vector);
