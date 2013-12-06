@@ -5,6 +5,8 @@
 #define _BACKGROUND_H
 
 #include "libs.h"
+#include "galaxy/SystemPath.h"
+#include "graphics/Texture.h"
 
 namespace Graphics {
 	class Renderer;
