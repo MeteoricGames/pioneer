@@ -31,11 +31,11 @@ local max_ass_dist = 30
 local flavours = {}
 for i = 0,5 do
 	table.insert(flavours, {
-		adtext      = l["FLAVOUR_ADTEXT_"..i],
-		introtext   = l["FLAVOUR_INTROTEXT_"..i],
-		successmsg  = l["FLAVOUR_SUCCESSMSG_"..i],
-		failuremsg  = l["FLAVOUR_FAILUREMSG_"..i],
-		failuremsg2 = l["FLAVOUR_FAILUREMSG2_"..i],
+		adtext      = l["FLAVOUR_" .. i .. "_ADTEXT"],
+		introtext   = l["FLAVOUR_" .. i .. "_INTROTEXT"],
+		successmsg  = l["FLAVOUR_" .. i .. "_SUCCESSMSG"],
+		failuremsg  = l["FLAVOUR_" .. i .. "_FAILUREMSG"],
+		failuremsg2 = l["FLAVOUR_" .. i .. "_FAILUREMSG2"],
 	})
 end
 local num_titles = 25
@@ -156,7 +156,7 @@ local makeAdvert = function (station)
 	local location = nearbystations[Engine.rand:Integer(1,#nearbystations)]
 	local dist = location:DistanceTo(Game.system)
 	local time = Engine.rand:Number(0.3, 3)
-	local due = Game.time + Engine.rand:Number(7*60*60*24, time * 31*60*60*24)
+	local due = Game.time + Engine.rand:Number(7*2*2*24, time * 31*2*2*24)
 	local danger = Engine.rand:Integer(1,4)
 	local reward = Engine.rand:Number(2100, 7000) * danger
 
@@ -401,11 +401,11 @@ end
 
 local onUpdateBB = function (station)
 	for ref,ad in pairs(ads) do
-		if (ad.due < Game.time + 5*60*60*24) then
+		if (ad.due < Game.time + 5*2*2*24) then
 			ad.station:RemoveAdvert(ref)
 		end
 	end
-	if Engine.rand:Integer(4*24*60*60) < 60*60 then -- roughly once every four days
+	if Engine.rand:Integer(4*24*2*2) < 2*2 then -- roughly once every four days
 		makeAdvert(station)
 	end
 end

@@ -27,7 +27,7 @@ local ui = Engine.ui
 local max_taxi_dist = 40
 -- typical time for travel to a system max_taxi_dist away
 --	Irigi: ~ 4 days for in-system travel, the rest is FTL travel time
-local typical_travel_time = (2.0 * max_taxi_dist + 4) * 24 * 60 * 60
+local typical_travel_time = (2.0 * max_taxi_dist + 4) * 24 * 2 * 2
 -- typical reward for taxi service to a system max_taxi_dist away
 local typical_reward = 75 * max_taxi_dist
 -- max number of passengers per trip
@@ -95,14 +95,14 @@ local flavours = {
 -- add strings to flavours
 for i = 1,#flavours do
 	local f = flavours[i]
-	f.adtext     = l["FLAVOUR_ADTEXT_"..i-1]
-	f.introtext  = l["FLAVOUR_INTROTEXT_"..i-1]
-	f.whysomuch  = l["FLAVOUR_WHYSOMUCH_"..i-1]
-	f.howmany    = l["FLAVOUR_HOWMANY_"..i-1]
-	f.danger     = l["FLAVOUR_DANGER_"..i-1]
-	f.successmsg = l["FLAVOUR_SUCCESSMSG_"..i-1]
-	f.failuremsg = l["FLAVOUR_FAILUREMSG_"..i-1]
-	f.wherearewe = l["FLAVOUR_WHEREAREWE_"..i-1]
+	f.adtext     = l["FLAVOUR_" .. i-1 .. "_ADTEXT"]
+	f.introtext  = l["FLAVOUR_" .. i-1 .. "_INTROTEXT"]
+	f.whysomuch  = l["FLAVOUR_" .. i-1 .. "_WHYSOMUCH"]
+	f.howmany    = l["FLAVOUR_" .. i-1 .. "_HOWMANY"]
+	f.danger     = l["FLAVOUR_" .. i-1 .. "_DANGER"]
+	f.successmsg = l["FLAVOUR_" .. i-1 .. "_SUCCESSMSG"]
+	f.failuremsg = l["FLAVOUR_" .. i-1 .. "_FAILUREMSG"]
+	f.wherearewe = l["FLAVOUR_" .. i-1 .. "_WHEREAREWE"]
 end
 
 local ads = {}
@@ -273,11 +273,11 @@ end
 
 local onUpdateBB = function (station)
 	for ref,ad in pairs(ads) do
-		if ad.due < Game.time + 5*60*60*24 then
+		if ad.due < Game.time + 5*2*2*24 then
 			ad.station:RemoveAdvert(ref)
 		end
 	end
-	if Engine.rand:Integer(24*60*60) < 60*60 then -- roughly once every day
+	if Engine.rand:Integer(24*2*2) < 2*2 then -- roughly once every day
 		makeAdvert(station)
 	end
 end

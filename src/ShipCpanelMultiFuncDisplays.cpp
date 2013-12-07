@@ -189,7 +189,7 @@ void ScannerWidget::Draw()
 	VertexArray va(ATTRIB_POSITION | ATTRIB_DIFFUSE, 128); //reserve some space for positions & colors
 	va.Add(vector3f(m_x, m_y, 0.f), green);
 	for (float a = 0; a < 2 * float(M_PI); a += float(M_PI) * 0.02f) {
-		va.Add(vector3f(m_x + m_x * sin(a), m_y + SCANNER_YSHRINK * m_y * cos(a), 0.f), green);
+		va.Add(vector3f(m_x + 0.25 * m_x * sin(a), m_y + SCANNER_YSHRINK * m_y * cos(a), 0.f), green);
 	}
 	va.Add(vector3f(m_x, m_y + SCANNER_YSHRINK * m_y, 0.f), green);
 	m_renderer->DrawTriangles(&va, Graphics::vtxColorMaterial, TRIANGLE_FAN);
@@ -197,7 +197,7 @@ void ScannerWidget::Draw()
 	// circles and spokes
 	glPushMatrix();
 	glTranslatef(m_x, m_y, 0);
-	glScalef(m_x, m_y, 1.0f);
+	glScalef(m_x * 0.25f, m_y, 1.0f);
 	DrawRingsAndSpokes(false);
 	glPopMatrix();
 
@@ -398,7 +398,7 @@ void ScannerWidget::DrawBlobs(bool below)
 		if ((pos.y > 0) && (below)) continue;
 		if ((pos.y < 0) && (!below)) continue;
 
-		const float x = m_x + m_x * float(pos.x) * m_scale;
+		const float x = m_x + m_x * float(pos.x) * m_scale * 0.25f;
 		const float y_base = m_y + m_y * SCANNER_YSHRINK * float(pos.z) * m_scale;
 		const float y_blob = y_base - m_y * SCANNER_YSHRINK * float(pos.y) * m_scale;
 
@@ -562,7 +562,7 @@ void UseEquipWidget::UpdateEquip()
 	int numSlots = missiles.size();
 
 	if (numSlots) {
-		float spacing = 380.0f / numSlots;
+		float spacing = 18.0f / numSlots;
 
 		for (int i = 0; i < numSlots; ++i) {
 			const Equip::Type t = static_cast<Equip::Type>(LuaConstants::GetConstant(l, "EquipType", missiles[i].c_str()));
@@ -584,10 +584,10 @@ void UseEquipWidget::UpdateEquip()
 					b = new Gui::ImageButton("icons/missile_naval.png");
 					break;
 			}
-			Add(b, spacing * i, 40);
+			Add(b, 230+spacing * i, 0);
 			b->onClick.connect(sigc::bind(sigc::mem_fun(this, &UseEquipWidget::FireMissile), i));
 			b->SetToolTip(Equip::types[t].name);
-			b->SetRenderDimensions(16, 16);
+			b->SetRenderDimensions(8, 8);
 		}
 	}
 
@@ -600,9 +600,9 @@ void UseEquipWidget::UpdateEquip()
 			assert(b);
 
 			b->onClick.connect(sigc::mem_fun(Pi::player, &Ship::UseECM));
-			b->SetRenderDimensions(32, 32);
+			b->SetRenderDimensions(16, 16);
 
-			Add(b, 32, 0);
+			Add(b, 142, 0);
 		}
 	}
 
@@ -610,7 +610,7 @@ void UseEquipWidget::UpdateEquip()
 
 ///////////////////////////////////////////////
 
-MultiFuncSelectorWidget::MultiFuncSelectorWidget(): Gui::Fixed(144, 17)
+MultiFuncSelectorWidget::MultiFuncSelectorWidget(): Gui::Fixed(144, 99)
 {
 	m_active = 0;
 	m_rg = new Gui::RadioGroup();
@@ -653,6 +653,6 @@ void MultiFuncSelectorWidget::UpdateButtons()
 	RemoveAllChildren();
 
 	for (int i = 0; i < MFUNC_MAX; ++i) {
-		Add(m_buttons[i], 36.0f + 36.0f * float(i), 0.0);
+		Add(m_buttons[i], 36.0f + 36.0f * float(i), 26.0);
 	}
 }

@@ -115,7 +115,7 @@ private:
 
 	class BodyNearFinder {
 	public:
-		BodyNearFinder(const Space *space) : m_space(space) {}
+		BodyNearFinder(const Space *space) : m_space(space) {assert(m_space != nullptr);}
 		void Prepare();
 
 		void GetBodiesMaybeNear(const Body *b, double dist, BodyNearList &bodies) const;
