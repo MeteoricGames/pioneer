@@ -250,13 +250,7 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	if (f == MFUNC_EQUIPMENT) selected = m_useEquipWidget;
 	if (f == MFUNC_MSGLOG) selected = m_msglog;
 
-	//XXX hack to keep the scanner on, always.
-	if (!m_scanner->IsVisible()) {
-		Add(m_scanner, 200, 18);
-		m_scanner->ShowAll();
-	}
-
-	//Remove(m_scanner);
+	Remove(m_scanner);
 	Remove(m_useEquipWidget);
 	Remove(m_msglog);
 	if (selected) {
@@ -267,6 +261,10 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 			Add(selected, 200, 18);
 		selected->ShowAll();
 	}
+
+	//XXX hack to keep the scanner on, always.
+	Add(m_scanner, 200, 18);
+	m_scanner->ShowAll();
 }
 
 void ShipCpanel::OnMultiFuncGrabFocus(multifuncfunc_t f)

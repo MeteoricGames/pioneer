@@ -27,7 +27,7 @@ namespace Graphics {
 				if(texture0) {
 					m_program->texture0.Set(texture0, 0);
 				}
-				m_program->shininess.Set(fSkyboxFactor);
+				m_program->shininess.Set(fSkyboxFactor * emissive.r);
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
 				glEnable(GL_DEPTH_TEST);
 				glDepthMask(GL_FALSE);

@@ -27,7 +27,7 @@ local ui = Engine.ui
 local max_taxi_dist = 40
 -- typical time for travel to a system max_taxi_dist away
 --	Irigi: ~ 4 days for in-system travel, the rest is FTL travel time
-local typical_travel_time = (2.0 * max_taxi_dist + 4) * 24 * 60 * 60
+local typical_travel_time = (2.0 * max_taxi_dist + 4) * 24 * 2 * 2
 -- typical reward for taxi service to a system max_taxi_dist away
 local typical_reward = 75 * max_taxi_dist
 -- max number of passengers per trip
@@ -273,11 +273,11 @@ end
 
 local onUpdateBB = function (station)
 	for ref,ad in pairs(ads) do
-		if ad.due < Game.time + 5*60*60*24 then
+		if ad.due < Game.time + 5*2*2*24 then
 			ad.station:RemoveAdvert(ref)
 		end
 	end
-	if Engine.rand:Integer(24*60*60) < 60*60 then -- roughly once every day
+	if Engine.rand:Integer(24*2*2) < 2*2 then -- roughly once every day
 		makeAdvert(station)
 	end
 end
