@@ -233,9 +233,11 @@ public:
 		if(m_child) { delete m_child; m_child = 0; }
 		AICommand::Save(wr);
 		wr.Int32(Pi::game->GetSpace()->GetIndexForBody(m_obstructor));
+		wr.Float(m_warmUpTime);
 	}
 	AICmdTransitAround(Serializer::Reader &rd) : AICommand(rd, CMD_TRANSITAROUND) {
 		m_obstructorIndex = rd.Int32();
+		m_warmUpTime = rd.Float();
 	}
 	virtual void PostLoadFixup(Space *space) {
 		AICommand::PostLoadFixup(space);
@@ -259,7 +261,7 @@ private:
 	Body *m_obstructor;				// Body of obstructor (planet->GetBody)
 	vector3d m_targetPosition;		// Target location in ship coordinates
 	int m_obstructorIndex;			// Used for serialization
-	double m_alt;					// Actual altitude, for display
+	double m_alt;					// Actual altitude
 	AITransitAroundState m_state;	// TransitAround state, for display
 	float m_warmUpTime;				// Transit startup time (gives sound a chance to play)
 };

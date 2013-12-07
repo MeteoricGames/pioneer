@@ -1333,7 +1333,7 @@ AICmdTransitAround::~AICmdTransitAround()
 {
 	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		m_ship->StopTransitDrive();
-		m_ship->SetJuice(1.0);
+		m_ship->SetJuice(20.0);
 		float threshold_speed = std::min<float>(m_ship->GetMaxManeuverSpeed(), TRANSIT_START_SPEED);
 		if(m_ship->GetVelocity().Length() > threshold_speed) {
 			m_ship->SetVelocity(m_ship->GetVelocity().Normalized() * 10000.0);
@@ -1384,9 +1384,17 @@ bool AICmdTransitAround::TimeStepUpdate()
 	}
 	// Adjust velocity slightly to follow the exact transit altitude arc
 	if(m_alt > transit_altitude) {
-		velocity_vector = velocity_vector + (-up_vector * 0.005);
+		if(m_alt > transit_altitude + 6000.0) {
+			velocity_vector = velocity_vector + (-up_vector * 0.005);
+		} else {
+			velocity_vector = velocity_vector + (-up_vector * 0.001);
+		}
 	} else if(m_alt < transit_altitude) {
-		velocity_vector = velocity_vector + (up_vector * 0.005);
+		if(m_alt < transit_altitude - 6000.0) {
+			velocity_vector = velocity_vector + (up_vector * 0.005);
+		} else {
+			velocity_vector = velocity_vector + (up_vector * 0.001);
+		}
 	}
 	if(m_state == AITA_ALTITUDE) {
 		// Adjust velocity for transit by sharp turning towards velocity vector
