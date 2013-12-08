@@ -363,3 +363,5 @@ void TextureGL::SetSampleMode(TextureSampleMode mode)
 	glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
 	glBindTexture(m_target, 0);
 }
+
+}
