@@ -290,7 +290,7 @@ void Pi::Init()
 	videoSettings.useTextureCompression = (config->Int("UseTextureCompression") != 0);
 	videoSettings.enableDebugMessages = (config->Int("EnableGLDebug") != 0);
 	videoSettings.iconFile = OS::GetIconFilename();
-	videoSettings.title = "Pioneer";
+	videoSettings.title = "Paragon";
 
 	Pi::renderer = Graphics::Init(videoSettings);
 	{

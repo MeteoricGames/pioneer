@@ -56,7 +56,7 @@ Renderer* Init(Settings vs)
 		vs.height = modes.front().height;
 	}
 
-	WindowSDL *window = new WindowSDL(vs, "Pioneer");
+	WindowSDL *window = new WindowSDL(vs, "Paragon");
 	width = window->GetWidth();
 	height = window->GetHeight();
 
