@@ -249,11 +249,6 @@ bool RendererGL2::PostProcessFrame()
 	return true;
 }
 
-bool RendererGL2::EndFrame()
-{
-	return true;
-}
-
 static std::string glerr_to_string(GLenum err)
 {
 	switch (err)
