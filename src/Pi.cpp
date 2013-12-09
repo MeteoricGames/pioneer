@@ -1046,7 +1046,7 @@ void Pi::MainLoop()
 
 		Pi::renderer->EndFrame();
 		Graphics::PostProcessingMode pp_mode = Graphics::POSTPROCESS_GAME;
-		if(currentView == settingsView || currentView == infoView) {
+		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
 			pp_mode = Graphics::POSTPROCESS_GUI;
 		}
 		Pi::renderer->PostProcessFrame(pp_mode);
