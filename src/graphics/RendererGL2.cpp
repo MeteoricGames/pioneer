@@ -311,6 +311,8 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 		break;
 	case EFFECT_SKYBOX:
 		mat = new GL2::SkyboxMaterial();
+		break;
+
 	case EFFECT_TEXTURED_FULLSCREEN_QUAD:
 		mat = new GL2::TexturedFullscreenQuad();
 		break;
