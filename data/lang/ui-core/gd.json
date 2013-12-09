@@ -1,127 +1,127 @@
 {
    "ABOVE_AVERAGE" : {
       "description" : "",
-      "message" : "Überdurchschnittlich"
+      "message" : "Cuibheasach 's a chorr"
    },
    "ACTIVE" : {
       "description" : "",
-      "message" : "Offen"
+      "message" : "Gnìomhach"
    },
    "ALLEGIANCE" : {
       "description" : "",
-      "message" : "Zugehörigkeit:"
+      "message" : "Dìlseachd:"
    },
    "ALL_UP_WEIGHT" : {
       "description" : "",
-      "message" : "Gesamtgewicht"
+      "message" : "Cuideam iomlan"
    },
    "AN_ERROR_HAS_OCCURRED" : {
       "description" : "",
-      "message" : "Es ist ein Fehler aufgetreten"
+      "message" : "Thachair mearachd"
    },
    "ATTEMPT_TO_REPAIR_HULL" : {
       "description" : "",
-      "message" : "Versuch, den Rumpf zu reparieren"
+      "message" : "A' feuchainn ris an t-slige a chàradh"
    },
    "AVERAGE" : {
       "description" : "",
-      "message" : "Durchschnittlich"
+      "message" : "Cuibheasach"
    },
    "BACKWARD_ACCEL" : {
       "description" : "",
-      "message" : "Beschleunigung rückwärts"
+      "message" : "Luathachadh air ais"
    },
    "CABINS" : {
       "description" : "",
-      "message" : "Kabinen"
+      "message" : "Cèibinnean"
    },
    "CANCEL" : {
       "description" : "",
-      "message" : "Abbrechen"
+      "message" : "Sguir dheth"
    },
    "CAPACITY_USED" : {
       "description" : "",
-      "message" : "Ausgelastete Kapazität"
+      "message" : "Tomhas 'ga chleachdadh"
    },
    "CARGO" : {
       "description" : "",
-      "message" : "Ladung"
+      "message" : "Carago"
    },
    "CARGO_SPACE" : {
       "description" : "",
-      "message" : "Laderaum"
+      "message" : "Rum airson carago"
    },
    "CASH" : {
       "description" : "",
-      "message" : "Geld"
+      "message" : "Airgead"
    },
    "CHANGE_BINDING" : {
       "description" : "",
-      "message" : "Anbindung ändern"
+      "message" : "Atharraich an nasgadh"
    },
    "CIRCULAR_ORBIT_SPEED" : {
       "description" : "",
-      "message" : "Kreisbahn-Geschwindigkeit"
+      "message" : "Luaths cuairteach na reul-chuairte"
    },
    "CITY_DETAIL_LEVEL" : {
       "description" : "",
-      "message" : "Detailstufe für Städte"
+      "message" : "Leibheil mion-shealladh nam bailtean"
    },
    "CLEAR" : {
       "description" : "",
-      "message" : "löschen"
+      "message" : "Falamhaich"
    },
    "CLIENT" : {
       "description" : "",
-      "message" : "Auftraggeber"
+      "message" : "Client"
    },
    "COMBAT" : {
       "description" : "",
-      "message" : "Kampf"
+      "message" : "Còmhrag"
    },
    "COMMANDER" : {
       "description" : "",
-      "message" : "Kommandant"
+      "message" : "Comandair"
    },
    "COMPETENT" : {
       "description" : "",
-      "message" : "Kompetent"
+      "message" : "Comasach"
    },
    "COMPLETED" : {
       "description" : "",
-      "message" : "Abgeschlossen"
+      "message" : "Coileanta"
    },
    "COMPRESS_TEXTURES" : {
       "description" : "",
-      "message" : "Texturen komprimieren"
+      "message" : "Dùmhlaich na h-innich"
    },
    "CONTROLS" : {
       "description" : "",
-      "message" : "Steuerung"
+      "message" : "Uidheaman-smachd"
    },
    "CONTROL_OPTIONS" : {
       "description" : "",
-      "message" : "Steuerungseinstellungen"
+      "message" : "Roghainnean nan uidheaman-smachd"
    },
    "COULD_NOT_LOAD_GAME" : {
       "description" : "",
-      "message" : "Kann Spiel nicht laden:"
+      "message" : "Cha b' urrainn dhuinn an geama a luchdadh:"
    },
    "CREW_CABINS" : {
       "description" : "",
-      "message" : "Kabinen der Crew"
+      "message" : "Cèibinnean criutha"
    },
    "CREW_ROSTER" : {
       "description" : "",
-      "message" : "Liste der Crew"
+      "message" : "Clàr an sgioba"
    },
    "DANGEROUS" : {
       "description" : "",
-      "message" : "Gefährlich"
+      "message" : "Cunnartach"
    },
    "DEADLY" : {
       "description" : "",
-      "message" : "Tödlich"
+      "message" : "Marbhtach"
    },
    "DELTA_V" : {
       "description" : "",
@@ -129,387 +129,387 @@
    },
    "DESCENT_TO_GROUND_SPEED" : {
       "description" : "",
-      "message" : "Landegeschwindigkeit:"
+      "message" : "Luaths teàrnadh dhan làr:"
    },
    "DESTROY_ENEMY_SHIP" : {
       "description" : "",
-      "message" : "Feindliches Schiff zerstören"
+      "message" : "Mill soitheach an nàmhaid"
    },
    "DISMISS" : {
       "description" : "",
-      "message" : "Entlassen"
+      "message" : "Leig seachad"
    },
    "DISPLAY_NAV_TUNNELS" : {
       "description" : "",
-      "message" : "Navigationstunnel anzeigen"
+      "message" : "Seall tunailean seòladaireachd"
    },
    "DISPLAY_SPEED_LINES" : {
       "description" : "",
-      "message" : "Geschwindigkeitslinien anzeigen"
+      "message" : "Seall loidhnichean luaiths"
    },
    "DOCK_AT_CURRENT_TARGET" : {
       "description" : "",
-      "message" : "An aktuellen Ziel anlegen"
+      "message" : "Docaich aig an targaid làithreach"
    },
    "DUE" : {
       "description" : "",
-      "message" : "Fällig"
+      "message" : "Due"
    },
    "D_DAYS_LEFT" : {
       "description" : "",
-      "message" : "Verbleibende Tage: %d"
+      "message" : "Làithean air am fàgail: %d"
    },
    "ECONOMY_TRADE" : {
       "description" : "",
-      "message" : "Wirtschaft & Handel"
+      "message" : "Eaconamaidh ⁊ malart"
    },
    "EFFECTS" : {
       "description" : "",
-      "message" : "Effekte:"
+      "message" : "Èifeachdan:"
    },
    "ELITE" : {
       "description" : "",
-      "message" : "ELITE"
+      "message" : "SEANN-EÒLACH"
    },
    "EMPLOYMENT" : {
       "description" : "",
-      "message" : "Anstellung"
+      "message" : "Obair"
    },
    "ENABLE_JOYSTICK" : {
       "description" : "",
-      "message" : "Joystick-Steuerung aktivieren"
+      "message" : "Cuir joystick an comas"
    },
    "ENGINEERING" : {
       "description" : "",
-      "message" : "Konstruktion"
+      "message" : "Einnseanaireachd"
    },
    "EQUIPMENT" : {
       "description" : "",
-      "message" : "Ausrüstung"
+      "message" : "Uidheamachd"
    },
    "ERROR" : {
       "description" : "",
-      "message" : "Fehler"
+      "message" : "Mearachd"
    },
    "ESCAPE_SPEED" : {
       "description" : "",
-      "message" : "Fluchtgeschwindigkeit:"
+      "message" : "Escape speed:"
    },
    "EXIT_THIS_GAME" : {
       "description" : "",
-      "message" : "Spiel beenden"
+      "message" : "Fàg an geama seo"
    },
    "FAILED" : {
       "description" : "",
-      "message" : "Gescheitert"
+      "message" : "Air fhàilligeadh"
    },
    "FEMALE" : {
       "description" : "",
-      "message" : "Weiblich"
+      "message" : "Boireann"
    },
    "FORWARD_ACCEL" : {
       "description" : "",
-      "message" : "Beschleunigung vorwärts"
+      "message" : "Luathachadh air adhart"
    },
    "FRACTAL_DETAIL" : {
       "description" : "",
-      "message" : "Detailstufe für Fraktale"
+      "message" : "Mion-shealladh fractalach"
    },
    "FREE" : {
       "description" : "",
-      "message" : "Verfügbar"
+      "message" : "saor"
    },
    "FRONT_WEAPON" : {
       "description" : "",
-      "message" : "Vorne"
+      "message" : "Arm beulaibh"
    },
    "FUEL" : {
       "description" : "",
-      "message" : "Treibstoff"
+      "message" : "Connadh"
    },
    "FUEL_TANK_FULL" : {
       "description" : "",
-      "message" : "Treibstofftank ist voll."
+      "message" : "Tha an taca-connaidh làn."
    },
    "FUEL_WEIGHT" : {
       "description" : "",
-      "message" : "Treibstoffgewicht"
+      "message" : "Cuideam a' connaidh"
    },
    "FULL_SCREEN" : {
       "description" : "",
-      "message" : "Vollbildmodus"
+      "message" : "Làn-sgrìn"
    },
    "GENERAL_CREW" : {
       "description" : "",
-      "message" : "Hauptcrew"
+      "message" : "Sgioba coitcheann"
    },
    "GIVE_ORDERS_TO_CREW" : {
       "description" : "",
-      "message" : "Gib der Crew Anweisungen"
+      "message" : "Thoir òrduighean dhan sgioba"
    },
    "GOOD_RIDDANCE_TO_YOU_TOO" : {
       "description" : "",
-      "message" : "Dir auch auf Nimmerwiedersehen!"
+      "message" : "'S math cuidhteas fhaighinn dhutsa cuideachd."
    },
    "HARMLESS" : {
       "description" : "",
-      "message" : "Harmlos"
+      "message" : "Neoichiontach"
    },
    "HIGH" : {
       "description" : "",
-      "message" : "Hoch"
+      "message" : "Àrd"
    },
    "HULL_DOES_NOT_REQUIRE_REPAIR" : {
       "description" : "",
-      "message" : "Schiffsrumpf benötigt keine Reparatur"
+      "message" : "Chan eil càradh a dhìth air an t-slige."
    },
    "HULL_REPAIRED_BY_NAME_NOW_AT_N_PERCENT" : {
       "description" : "",
-      "message" : "Schiffsrumpf repariert durch {name}, nun bei {repairPercent}%"
+      "message" : "Chaidh an t-slige a chàradh le {name}, air {repairPercent}% a-nis"
    },
    "HULL_REPAIR_ATTEMPT_FAILED_HULL_SUFFERED_MINOR_DAMAGE" : {
       "description" : "",
-      "message" : "Reparatur des Schiffsrumpfs fehlgeschlagen. Schiffrumpf erlitt einen geringen Schaden"
+      "message" : "Dh'fhàillig le càradh na slige. Fhuair an t-slige beagan dochainn."
    },
    "HYPERDRIVE" : {
       "description" : "",
-      "message" : "Hyperraumantrieb"
+      "message" : "Hyperdrive"
    },
    "HYPERSPACE_RANGE" : {
       "description" : "",
-      "message" : "Hyperraum Reichweite"
+      "message" : "Hyperspace range"
    },
    "IM_TIRED_OF_WORKING_FOR_NOTHING_DONT_YOU_KNOW_WHAT_A_CONTRACT_IS" : {
       "description" : "",
-      "message" : "Ich bin es leid für nichts zu arbeiten. Wissen sie nicht, was ein Vertrag ist?"
+      "message" : "Tha mi sgìth dhen a bhith 'g obair gun phàigheadh. Nach eil fhios agaibh dè th' ann an cùmhnant?"
    },
    "INACTIVE" : {
       "description" : "",
-      "message" : "Inaktiv"
+      "message" : "Neo-ghnìomhach"
    },
    "INVERT_MOUSE_Y" : {
       "description" : "",
-      "message" : "Maus Y-Achse invertieren"
+      "message" : "Ais-tionndaidh Y na luchaige"
    },
    "ITS_BEEN_GREAT_WORKING_FOR_YOU_IF_YOU_NEED_ME_AGAIN_ILL_BE_HERE_A_WHILE" : {
       "description" : "",
-      "message" : "Es war großartig, für sie zu arbeiten. Wenn sie mich wieder brauchen, bin ich noch eine Weile hier."
+      "message" : "Chòrd e rium obair air ur son. Bidh mi an-seo greis fhathast ma bhios feum agaibh orm a-rithist."
    },
    "JETTISON" : {
       "description" : "",
-      "message" : "Abwerfen"
+      "message" : "Tilg a-mach"
    },
    "KILLS" : {
       "description" : "",
-      "message" : "Abschüsse:"
+      "message" : "Air a mhilleadh"
    },
    "LANGUAGE" : {
       "description" : "",
-      "message" : "Sprache"
+      "message" : "Cànan"
    },
    "LANGUAGE_RESTART_GAME_TO_APPLY" : {
       "description" : "",
-      "message" : "Sprachauswahl (Programm muss neu gestartet werden)"
+      "message" : "Cànan (ath-thòisich an geama gus seo a chur an sàs)"
    },
    "LOAD" : {
       "description" : "",
-      "message" : "Laden"
+      "message" : "Luchdaich"
    },
    "LOAD_GAME" : {
       "description" : "",
-      "message" : "Lade Spiel"
+      "message" : "Luchdaich geama"
    },
    "LOCATED_N_KM_FROM_THE_CENTRE_OF_NAME" : {
       "description" : "",
-      "message" : "{distance}km vom Zentrum von {name} lokalisiert:"
+      "message" : "{distance}km air falbh o mheadhan {name}:"
    },
    "LOCATION" : {
       "description" : "",
-      "message" : "Ort"
+      "message" : "Ionad"
    },
    "LOW" : {
       "description" : "",
-      "message" : "Niedrig"
+      "message" : "Ìseal"
    },
    "LY" : {
       "description" : "",
-      "message" : "Lj"
+      "message" : "ly"
    },
    "MAKE_NEW_FACE" : {
       "description" : "",
-      "message" : "Neues Gesicht erstellen"
+      "message" : "Cruthaich aodann ùr"
    },
    "MALE" : {
       "description" : "",
-      "message" : "Männlich"
+      "message" : "Fireann"
    },
    "MASTER" : {
       "description" : "",
-      "message" : "Master:"
+      "message" : "Iomlan:"
    },
    "MAX" : {
       "description" : "",
-      "message" : "Maximum"
+      "message" : "as motha"
    },
    "MEDIUM" : {
       "description" : "",
-      "message" : "Mittel"
+      "message" : "Meadhanach"
    },
    "METAL_ALLOYS" : {
       "description" : "",
-      "message" : "Legierungen"
+      "message" : "Co-mheatailtean"
    },
    "MILITARY" : {
       "description" : "",
-      "message" : "Militärisch"
+      "message" : "An arm"
    },
    "MINIMUM_CREW" : {
       "description" : "",
-      "message" : "Kleinste Crew"
+      "message" : "An criutha as lugha"
    },
    "MISSIONS" : {
       "description" : "",
-      "message" : "Missionen"
+      "message" : "Miseanan"
    },
    "MISSION_DETAILS" : {
       "description" : "",
-      "message" : "Missionsdetails"
+      "message" : "Fiosrachadh a' mhisein"
    },
    "MORE_INFO" : {
       "description" : "",
-      "message" : "Weitere Informationen"
+      "message" : "Barrachd fiosrachaidh..."
    },
    "MOSTLY_HARMLESS" : {
       "description" : "",
-      "message" : "Relativ harmlos"
+      "message" : "Cha mhòr neo-chiontach"
    },
    "MULTISAMPLING" : {
       "description" : "",
-      "message" : "Multisampling"
+      "message" : "Ioma-shamplachadh"
    },
    "MUSIC" : {
       "description" : "",
-      "message" : "Musik:"
+      "message" : "Ceòl:"
    },
    "MUTE" : {
       "description" : "",
-      "message" : "Stummschalten"
+      "message" : "Mùch"
    },
    "NAME" : {
       "description" : "",
-      "message" : "Name"
+      "message" : "Ainm"
    },
    "NAVIGATION" : {
       "description" : "",
-      "message" : "Navigation:"
+      "message" : "Seòladaireachd:"
    },
    "NEGOTIATE" : {
       "description" : "",
-      "message" : "Verhandeln"
+      "message" : "Rèitich"
    },
    "NEXT_PAID" : {
       "description" : "",
-      "message" : "Nächster Bezahlter"
+      "message" : "Next paid"
    },
    "NONE" : {
       "description" : "",
-      "message" : "keine"
+      "message" : "Chan eil gin"
    },
    "NOTES" : {
       "description" : "",
-      "message" : "Notizen:"
+      "message" : "Nòtaichean:"
    },
    "NOT_ENOUGH_ALLOY_TO_ATTEMPT_A_REPAIR" : {
       "description" : "",
-      "message" : "Nicht genig {alloy} um eine Reparatur durchzuführen"
+      "message" : "Chan eil {alloy} gu leòr agad gus feuchainn ris a chàradh"
    },
    "NO_MISSIONS" : {
       "description" : "",
-      "message" : "Keine Missionen."
+      "message" : "Chan eil misean agad."
    },
    "N_LIGHT_YEARS_N_MAX" : {
       "description" : "",
-      "message" : "{range} Lichtjahre ({maxRange} max)"
+      "message" : "{range} bliadhna solais ({maxRange} as motha)"
    },
    "N_OCCUPIED_PASSENGER_CABINS" : {
       "description" : "",
-      "message" : "{quantity} Belegte Passagierkabinen"
+      "message" : "{quantity} cèibinnean taistealaich air an còmhnadh"
    },
    "N_SHIELD_GENERATORS" : {
       "description" : "",
-      "message" : "{quantity} Schild-Generatoren"
+      "message" : "{quantity} gineadairean sgèithe"
    },
    "N_UNOCCUPIED_PASSENGER_CABINS" : {
       "description" : "",
-      "message" : "{quantity} Unbelegte Passagierkabinen"
+      "message" : "{quantity} cèibinnean taistealaich gun chòmhnadh"
    },
    "OFF" : {
       "description" : "",
-      "message" : "Aus"
+      "message" : "Dheth"
    },
    "OK" : {
       "description" : "",
-      "message" : "Ok"
+      "message" : "Ceart ma-thà"
    },
    "OPTIONS" : {
       "description" : "",
-      "message" : "Optionen"
+      "message" : "Roghainnean"
    },
    "ORBIT" : {
       "description" : "",
-      "message" : "Bahn"
+      "message" : "Reul-chuairt"
    },
    "ORBITAL_ANALYSIS" : {
       "description" : "",
-      "message" : "Bahnanalyse"
+      "message" : "Sgrùdadh na reul-chuairte"
    },
    "ORBITAL_ANALYSIS_NOTES" : {
       "description" : "",
-      "message" : "Die Kreisbahn-Geschwindigkeit wird für eine tangentiale Geschwindigkeit angegeben. Das schiff sollte in einem 90°-Winkel zur Schiff/{name}-Achse stehen.\n\nDie Landegeschwindigkeit ist ein absolutes Minimum und ist auch tangential. Eine geringere Geschwindigkeit und ein kleinerer Winkel wird in einem Kurs resultieren, der die Oberfläche von {name} schneidet.\n\nDie Fluchtgeschwindigkeit funktioniert theoretisch gesehen in alle Richtungen, solange das Schiff auf dem Weg mit {name} kollidiert.\n\t\t"
+      "message" : "Circular orbit speed is given for a tangential velocity. The ship should be moving in a direction at 90° to the ship/{name} axis.\n\nDescent speed is an absolute minimum, and is also tangential. A slower speed or a lower angle will result in a course which intersects with the surface of {name}.\n\nEscape speed will in theory work in any direction, as long as the ship does not collide with {name} on the way.\n\t\t"
    },
    "OWED" : {
       "description" : "",
-      "message" : "Schuld"
+      "message" : "Owed"
    },
    "PERSONAL_INFORMATION" : {
       "description" : "",
-      "message" : "Persönliche Informationen"
+      "message" : "Fiosrachadh pearsanta"
    },
    "PILOTING" : {
       "description" : "",
-      "message" : "Steuern:"
+      "message" : "Stiùireadh:"
    },
    "PILOT_SEAT_IS_NOW_OCCUPIED_BY_NAME" : {
       "description" : "",
-      "message" : "Der Pilotensessel ist besetzt von {name}"
+      "message" : "Tha {name} 'na phaidhleat a-nis"
    },
    "PLANET_DETAIL_DISTANCE" : {
       "description" : "",
-      "message" : "Detailentfernung für Planeten"
+      "message" : "Astar mion-shealladh nam planaidean"
    },
    "PLANET_TEXTURES" : {
       "description" : "",
-      "message" : "Planeten Texturen"
+      "message" : "Innich nam planaidean"
    },
    "POOR" : {
       "description" : "",
-      "message" : "Schlecht"
+      "message" : "Bochd"
    },
    "POSITION" : {
       "description" : "",
-      "message" : "Position"
+      "message" : "Ionad"
    },
    "PRESS_A_KEY_OR_CONTROLLER_BUTTON" : {
       "description" : "",
-      "message" : "Drücken sie eine Taste oder einen Knopf des Controllers"
+      "message" : "Brùth air iuchair no putan uidheim-smachd"
    },
    "QUALIFICATION_SCORES" : {
       "description" : "",
-      "message" : "Qualifizierungspunkte"
+      "message" : "Qualification scores"
    },
    "QUIT" : {
       "description" : "",
-      "message" : "Beenden"
+      "message" : "Fàg an-seo"
    },
    "RANK" : {
       "description" : "",
@@ -517,107 +517,107 @@
    },
    "RATING" : {
       "description" : "",
-      "message" : "Einstufung:"
+      "message" : "Rangachadh:"
    },
    "REAR_WEAPON" : {
       "description" : "",
-      "message" : "Achtern"
+      "message" : "Arm cùlaibh"
    },
    "REFUEL" : {
       "description" : "",
-      "message" : "Auftanken"
+      "message" : "Tog connadh"
    },
    "RETURN_TO_MENU" : {
       "description" : "",
-      "message" : "Zurück zum Menü"
+      "message" : "Till dhan chlàr-taice"
    },
    "REWARD" : {
       "description" : "",
-      "message" : "Belohnung"
+      "message" : "Duais"
    },
    "SAVE" : {
       "description" : "",
-      "message" : "Speichern"
+      "message" : "Sàbhail"
    },
    "SELECT" : {
       "description" : "",
-      "message" : "Auswählen"
+      "message" : "Tagh"
    },
    "SELECT_A_FILE_TO_SAVE_TO_OR_ENTER_A_NEW_FILENAME" : {
       "description" : "",
-      "message" : "Wählen Sie den Dateinamen"
+      "message" : "Tagh faidhle airson sàbhaladh no cuir a-steach ainm faidhle ùr"
    },
    "SELECT_FILE" : {
       "description" : "",
-      "message" : "Datei auswählen..."
+      "message" : "Tagh faidhle..."
    },
    "SELECT_GAME_TO_LOAD" : {
       "description" : "",
-      "message" : "Spiel zum Laden auswählen..."
+      "message" : "Tagh geama gus a luchdadh..."
    },
    "SENSORS" : {
       "description" : "",
-      "message" : "Sensoren:"
+      "message" : "Mothaichearan:"
    },
    "SHIP_INFORMATION" : {
       "description" : "",
-      "message" : "Schiffs-Informationen"
+      "message" : "Fiosrachadh an t-soithich"
    },
    "SOUND" : {
       "description" : "",
-      "message" : "Ton"
+      "message" : "Fuaim"
    },
    "START_AT_BARNARDS_STAR" : {
       "description" : "",
-      "message" : "Starte auf Barnard's Star"
+      "message" : "Tòisich air Reul Bharnard"
    },
    "START_AT_EARTH" : {
       "description" : "",
-      "message" : "Starte auf der Erde"
+      "message" : "Tòisich air an Talamh"
    },
    "START_AT_NEW_HOPE" : {
       "description" : "",
-      "message" : "Starte auf New Hope"
+      "message" : "Tòisich air Dòchas Ùr"
    },
    "STATUS" : {
       "description" : "",
-      "message" : "Status"
+      "message" : "Staid"
    },
    "THERE_IS_NOBODY_ELSE_ON_BOARD_ABLE_TO_FLY_THIS_SHIP" : {
       "description" : "",
-      "message" : "Es gibt an Bord niemanden sonst, der dieses Schiff fliegen kann."
+      "message" : "Chan eil duine sam bith aile air bòrd a bhiodh comasach air an t-soitheach seo a stiùireadh."
    },
    "THE_SHIP_IS_UNDER_STATION_CONTROL_COMMANDER" : {
       "description" : "",
-      "message" : "Das Schiff ist unter Kontrolle der Station, Commander"
+      "message" : "Tha an saoitheach fo smachd an stèisein, a Chomandair."
    },
    "TOGGLE_MALE_FEMALE" : {
       "description" : "",
-      "message" : "Zwischen männlich/weiblich umschalten"
+      "message" : "Toglaich fireann/boireann"
    },
    "TOTAL" : {
       "description" : "",
-      "message" : "Komplett: "
+      "message" : "Iomlan:"
    },
    "TYPE" : {
       "description" : "",
-      "message" : "Typ"
+      "message" : "Seòrsa"
    },
    "UP_ACCEL" : {
       "description" : "",
-      "message" : "Beschleunigung nach oben"
+      "message" : "Luathachadh suas"
    },
    "USED" : {
       "description" : "",
-      "message" : "Benutzt"
+      "message" : "Air a chleachdadh"
    },
    "VERY_HIGH" : {
       "description" : "",
-      "message" : "Sehr hoch"
+      "message" : "Glè àrd"
    },
    "VERY_LOW" : {
       "description" : "",
-      "message" : "Sehr niedrig"
+      "message" : "Glè ìseal"
    },
    "VIDEO" : {
       "description" : "",
@@ -625,42 +625,42 @@
    },
    "VIDEO_CONFIGURATION_RESTART_GAME_TO_APPLY" : {
       "description" : "",
-      "message" : "Grafikeinstellungen (Programm muss neu gestartet werden)"
+      "message" : "Rèiteachadh video (bidh ath-thòiseachadh a dhìth)"
    },
    "VIDEO_RESOLUTION" : {
       "description" : "",
-      "message" : "Grafikauflösung"
+      "message" : "Dùmhlachd-bhreacaidh"
    },
    "WAGE" : {
       "description" : "",
-      "message" : "Gehalt"
+      "message" : "Tuarastal"
    },
    "WEIGHT_EMPTY" : {
       "description" : "",
-      "message" : "Leergewicht:"
+      "message" : "Cuideam falamh:"
    },
    "WE_ARE_IN_HYPERSPACE_COMMANDER" : {
       "description" : "",
-      "message" : "Wir sind im Hyperspace, Kommandant."
+      "message" : "We are in hyperspace, Commander."
    },
    "YOURE_GOING_TO_REGRET_SACKING_ME" : {
       "description" : "",
-      "message" : "Du wirst meinen Rauswurf bedauern"
+      "message" : "Bidh sibh duilich gun tug sibh a' bhròg dhomh!"
    },
    "YOU_MUST_FIRST_SELECT_A_COMBAT_TARGET_COMMANDER" : {
       "description" : "",
-      "message" : "Sie müssen erst ein passendes Angriffziel auswählen, Kommandant."
+      "message" : "Feumaidh sibh targaid còmhraige a thaghadh an toiseach, a Chomandair."
    },
    "YOU_MUST_FIRST_SELECT_A_SUITABLE_NAVIGATION_TARGET_COMMANDER" : {
       "description" : "",
-      "message" : "Sie müssen erst ein passendes Navigationsziel auswählen, Kommandant."
+      "message" : "Feumaidh sibh targaid seòladaireachd a thaghadh an toiseach, a Chomandair."
    },
    "YOU_MUST_LAUNCH_FIRST_COMMANDER" : {
       "description" : "",
-      "message" : "Sie müssen zuerst starten, Kommandant."
+      "message" : "Feumaidh sibh losgadh an toiseach, a Chomandair."
    },
    "YOU_MUST_REQUEST_LAUNCH_CLEARANCE_FIRST_COMMANDER" : {
       "description" : "",
-      "message" : "Sie müssen erst die Startfreigabe anfragen, Kommandant."
+      "message" : "Feumaidh sibh cead falbh iarraidh an toiseachd, a Chomandair."
    }
 }
