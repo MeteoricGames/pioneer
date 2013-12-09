@@ -17,6 +17,7 @@ enum FlightControlState {
 	CONTROL_MANEUVER,
 	CONTROL_MANUAL,
 	CONTROL_AUTOPILOT,
+	CONTROL_TRANSIT,
 
 	CONTROL_STATE_COUNT
 };
@@ -89,6 +90,9 @@ private:
 	bool IsAnyLinearThrusterKeyDown();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();
+	// Perform ray collision detection to determine any possible tunneling collisions involving ship
+	void TransitTunnelingTest(const float timeStep);
+
 	Body* m_combatTarget;
 	Body* m_navTarget;
 	Body* m_setSpeedTarget;
