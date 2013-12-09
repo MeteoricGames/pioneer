@@ -290,7 +290,7 @@ void Pi::Init()
 	videoSettings.useTextureCompression = (config->Int("UseTextureCompression") != 0);
 	videoSettings.enableDebugMessages = (config->Int("EnableGLDebug") != 0);
 	videoSettings.iconFile = OS::GetIconFilename();
-	videoSettings.title = "Pioneer";
+	videoSettings.title = "Paragon";
 
 	Pi::renderer = Graphics::Init(videoSettings);
 	{
@@ -1136,7 +1136,7 @@ void Pi::MainLoop()
 float Pi::CalcHyperspaceRangeMax(int hyperclass, int total_mass_in_tonnes)
 {
 	// 625.0f is balancing parameter
-	return 625.0f * hyperclass * hyperclass / (total_mass_in_tonnes);
+	return 312.0f * hyperclass * hyperclass / (total_mass_in_tonnes);
 }
 
 float Pi::CalcHyperspaceRange(int hyperclass, float total_mass_in_tonnes, int fuel)

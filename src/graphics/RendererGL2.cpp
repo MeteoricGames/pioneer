@@ -16,6 +16,7 @@
 #include "gl2/RingMaterial.h"
 #include "gl2/StarfieldMaterial.h"
 #include "gl2/FresnelColourMaterial.h"
+#include "gl2/SkyboxMaterial.h"
 #include "gl2/TexturedFullscreenQuad.h"
 #include "gl2/HorizontalBlurMaterial.h"
 #include "gl2/VerticalBlurMaterial.h"
@@ -308,6 +309,8 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 	case EFFECT_FRESNEL_SPHERE:
 		mat = new GL2::FresnelColourMaterial();
 		break;
+	case EFFECT_SKYBOX:
+		mat = new GL2::SkyboxMaterial();
 	case EFFECT_TEXTURED_FULLSCREEN_QUAD:
 		mat = new GL2::TexturedFullscreenQuad();
 		break;

@@ -57,10 +57,12 @@ local utils = import("utils")
 	vacuum_starports - in the current system; indexed array of SpaceStation objects that can be
 		approached without atmospheric shields,	updated by spawnInitialShips
 
+	orbital_starports - just space stations in orbit for large ships.
+
 	imports, exports - in the current system, indexed array of
 		Constants.EquipType strings, updated by spawnInitialShips
 --]]
-local trade_ships, system_updated, from_paths, starports, vacuum_starports, imports, exports
+local trade_ships, system_updated, from_paths, starports, vacuum_starports, orbital_starports, imports, exports
 
 local addFuel = function (ship)
 	local drive = ship:GetEquip('ENGINE', 1)
@@ -237,7 +239,16 @@ local getRandomStarport = function (ship, current)
 
 	-- Find the nearest starport that we can land at (other than current)
 	local starport, distance
-	starport = starports[Engine.rand:Integer(1,#starports)]
+
+	if ship.totalMass + ship.fuelMassLeft < 1000 then
+		starport = starports[Engine.rand:Integer(1,#starports)]
+	else
+		if orbital_starports~=nil and #orbital_starports > 0 then
+			starport = orbital_starports[Engine.rand:Integer(1,#orbital_starports)]
+		else
+			starport = starports[Engine.rand:Integer(1,#starports)] --fallback
+		end
+	end
 	return starport -- or current
 end
 
@@ -338,9 +349,13 @@ end
 local spawnInitialShips = function (game_start)
 	-- check if the current system can be traded in
 	starports = Space.GetBodies(function (body) return body.superType == 'STARPORT' end)
+
 	if #starports == 0 then return nil end
 	vacuum_starports = Space.GetBodies(function (body)
 		return body.superType == 'STARPORT' and (body.type == 'STARPORT_ORBITAL' or (not body.path:GetSystemBody().parent.hasAtmosphere))
+	end)
+	orbital_starports =  Space.GetBodies(function (body)
+		return body.superType == 'STARPORT' and (body.type == 'STARPORT_ORBITAL')
 	end)
 	local population = Game.system.population
 	if population == 0 then return nil end
@@ -411,6 +426,12 @@ local spawnInitialShips = function (game_start)
 			-- spawn the first quarter in port if at game start
 			local starport = starports[Engine.rand:Integer(1, #starports)]
 
+			if ShipDef[ship_name].capacity + ShipDef[ship_name].hullMass + ShipDef[ship_name].fuelTankMass >= 1000 then
+				if orbital_starports~=nil and #orbital_starports > 0 then
+					starport = orbital_starports[Engine.rand:Integer(1,#orbital_starports)]
+				end
+			end
+
 			ship = Space.SpawnShipDocked(ship_name, starport)
 			if ship ~= nil then
 				trade_ships[ship] = {
@@ -469,7 +490,7 @@ local spawnInitialShips = function (game_start)
 		if trader.status == 'docked' then
 			local delay = fuel_added + addShipCargo(ship, 'export')
 			-- have ship wait 30-45 seconds per unit of cargo
-			trader['delay'] = Game.time + (delay * Engine.rand:Number(1, 2))
+			trader['delay'] = Game.time + (delay * Engine.rand:Number(1, 2)+2)
 			Timer:CallAt(trader.delay, function () doUndock(ship) end)
 		else
 			addShipCargo(ship, 'import')
@@ -666,6 +687,7 @@ local onFrameChanged = function (ship)
 
 		Timer:CallAt(Game.time+1, function () dist= ship:DistanceTo(getMyStarport(ship)) end)
 		Timer:CallAt(Game.time+2, function () 
+			if ship==nil then return end
 			delta=dist-ship:DistanceTo(getMyStarport(ship)) 
 			print('delta: '..delta..',dist: '..dist)
 			if delta~=nil and delta > 0 and delta < 50000000 then
@@ -1007,7 +1029,7 @@ Event.Register("onGameStart", onGameStart)
 local onGameEnd = function ()
 	-- drop the references for our data so Lua can free them
 	-- and so we can start fresh if the player starts another game
-	trade_ships, system_updated, from_paths, starports, vacuum_starports, imports, exports = nil, nil, nil, nil, nil, nil, nil
+	trade_ships, system_updated, from_paths, starports, vacuum_starports, orbital_starports, imports, exports = nil, nil, nil, nil, nil, nil, nil, nil
 end
 Event.Register("onGameEnd", onGameEnd)
 

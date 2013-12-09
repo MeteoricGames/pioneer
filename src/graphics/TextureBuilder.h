@@ -34,7 +34,7 @@ public:
 		return TextureBuilder(filename, LINEAR_CLAMP, true, true, false, true);
 	}
 	static TextureBuilder Cube(const std::string &filename) {
-		return TextureBuilder(filename, LINEAR_REPEAT, true, true, false, true, TEXTURE_CUBE_MAP);
+		return TextureBuilder(filename, LINEAR_CLAMP, true, true, false, true, TEXTURE_CUBE_MAP);
 	}
 
 	const TextureDescriptor &GetDescriptor() { PrepareSurface(); return m_descriptor; }
@@ -62,6 +62,7 @@ public:
 
 private:
 	SDLSurfacePtr m_surface;
+	std::vector<SDLSurfacePtr> m_cubemap;
 	PicoDDS::DDSImage m_dds;
 	std::string m_filename;
 
