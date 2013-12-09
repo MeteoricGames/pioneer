@@ -1419,16 +1419,16 @@ bool AICmdTransitAround::TimeStepUpdate()
 
 	//smooth transit around when nearing target.
 	double factor = 1.0;
-	if (ship_to_target.Length()/10000000.0 < 1.0) factor=ship_to_target.Length()/10000000.0;
+	if (ship_to_target.Length() / 10000000.0 < 1.0) factor = ship_to_target.Length() / 10000000.0;
 
 	//dispose of heat if needed
-	if (m_ship->GetHullTemperature()>0.75) {
+	if (m_ship->GetHullTemperature() > 0.75) {
 		velocity_vector = velocity_vector + (up_vector * 0.001);
 		m_ship->AIFaceDirection(velocity_vector);
 		return false;
 	}
 
-	m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED*factor);
+	m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED * factor);
 	m_ship->AIFaceDirection(velocity_vector);
 	m_ship->AIFaceUpdir(up_vector);
 	return false;
