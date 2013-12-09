@@ -10,10 +10,12 @@
 #include "Pi.h"
 #include "Game.h"
 
+const double NO_TRANSIT_RANGE = 1000000.0;
+
 class AICommand {
 public:
 	// This enum is solely to make the serialization work
-	enum CmdName { CMD_NONE, CMD_DOCK, CMD_FLYTO, CMD_FLYAROUND, CMD_KILL, CMD_KAMIKAZE, CMD_HOLDPOSITION, CMD_FORMATION };
+	enum CmdName { CMD_NONE, CMD_DOCK, CMD_FLYTO, CMD_FLYAROUND, CMD_KILL, CMD_KAMIKAZE, CMD_HOLDPOSITION, CMD_FORMATION, CMD_TRANSITAROUND };
 
 	AICommand(Ship *ship, CmdName name) {
 	   	m_ship = ship; m_cmdName = name;
@@ -115,10 +117,11 @@ public:
 
 	virtual void GetStatusText(char *str) {
 		if (m_child) m_child->GetStatusText(str);
-		else if (m_target) snprintf(str, 255, "Intercept: %s, dist %.1fkm, state %i",
-			m_target->GetLabel().c_str(), m_dist, m_state);
-		else snprintf(str, 255, "FlyTo: %s, dist %.1fkm, endvel %.1fkm/s, state %i",
-			m_targframe->GetLabel().c_str(), m_posoff.Length()/1000.0, m_endvel/1000.0, m_state);
+		else if (m_target) snprintf(str, 255, "Intercept: %s, dist %.1fkm, state %i, juice: %.1f",
+			m_target->GetLabel().c_str(), m_dist, m_state, m_ship->GetJuice());
+		else snprintf(str, 255, "FlyTo: %s, dist %.1fkm, endvel %.1fkm/s, state %i, juice: %.1f",
+			m_targframe->GetLabel().c_str(), m_posoff.Length()/1000.0, m_endvel/1000.0, m_state, 
+			m_ship->GetJuice());
 	}
 	virtual void Save(Serializer::Writer &wr) {
 		if(m_child) { delete m_child; m_child = 0; }
@@ -172,6 +175,7 @@ public:
 	virtual bool TimeStepUpdate();
 	AICmdFlyAround(Ship *ship, Body *obstructor, double relalt, int mode=2);
 	AICmdFlyAround(Ship *ship, Body *obstructor, double alt, double vel, int mode=1);
+	virtual ~AICmdFlyAround() {}
 
 	virtual void GetStatusText(char *str) {
 		if (m_child) m_child->GetStatusText(str);
@@ -208,6 +212,58 @@ private:
 	double m_alt, m_vel;
 	int m_targmode;			// 0 targpos termination, 1 infinite, 2+ orbital termination
 	vector3d m_targpos;		// target position in ship space
+};
+
+class AICmdTransitAround : public AICommand 
+{
+public:
+	AICmdTransitAround(Ship *ship, Body *obstructor);
+	virtual ~AICmdTransitAround();
+
+	virtual bool TimeStepUpdate();
+
+	virtual void GetStatusText(char *str) {
+		if(m_child) m_child->GetStatusText(str);
+		else snprintf(str, 255, "TransitAround: alt %1fkm, state %s, juice %.1f", m_alt/1000.0,
+			(m_state == AITA_ALTITUDE? "Altitude Correction" : (m_state == AITA_TRANSIT? "Transit Engaged" : "Transit Ready")), 
+			m_ship->GetJuice());
+	}
+
+	virtual void Save(Serializer::Writer &wr) {
+		if(m_child) { delete m_child; m_child = 0; }
+		AICommand::Save(wr);
+		wr.Int32(Pi::game->GetSpace()->GetIndexForBody(m_obstructor));
+		wr.Float(m_warmUpTime);
+	}
+	AICmdTransitAround(Serializer::Reader &rd) : AICommand(rd, CMD_TRANSITAROUND) {
+		m_obstructorIndex = rd.Int32();
+		m_warmUpTime = rd.Float();
+	}
+	virtual void PostLoadFixup(Space *space) {
+		AICommand::PostLoadFixup(space);
+		m_obstructor = space->GetBodyByIndex(m_obstructorIndex);
+	}
+	virtual void OnDeleted(const Body *body) {
+		AICommand::OnDeleted(body);
+	}
+
+	void SetTargPos(const vector3d &target_position) { 
+		m_targetPosition = target_position; 
+	}
+
+	enum AITransitAroundState {
+		AITA_READY,
+		AITA_ALTITUDE,
+		AITA_TRANSIT
+	};
+
+private:
+	Body *m_obstructor;				// Body of obstructor (planet->GetBody)
+	vector3d m_targetPosition;		// Target location in ship coordinates
+	int m_obstructorIndex;			// Used for serialization
+	double m_alt;					// Actual altitude
+	AITransitAroundState m_state;	// TransitAround state, for display
+	float m_warmUpTime;				// Transit startup time (gives sound a chance to play)
 };
 
 class AICmdKill : public AICommand {

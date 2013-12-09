@@ -54,6 +54,14 @@ enum TransitState {
 	TRANSIT_DRIVE_FINISHED,
 };
 
+// Transit Constants
+static const double TRANSIT_GRAVITY_RANGE_1 = 15000.0;
+static const double TRANSIT_GRAVITY_RANGE_2 = 1000000.0;
+static const double TRANSIT_START_SPEED = 100000.0;
+static const double TRANSIT_DRIVE_1_SPEED = 299000.0;
+static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
+static const float TRANSIT_START_TIME = 2.0; // Allows sound to play first then the drive kicks in
+
 class Ship: public DynamicBody {
 	friend class ShipController; //only controllers need access to AITimeStep
 	friend class PlayerShipController;
@@ -133,11 +141,17 @@ public:
 	virtual bool IsInSpace() const { return (m_flightState != HYPERSPACE); }
 
 	void SetJuice(const double &juice) { m_juice = juice; }
-	void SetTransitState(const TransitState &transitstate) { m_transitstate = transitstate; }
+	void SetTransitState(const TransitState &transitstate) { 
+		m_transitstate = transitstate; 
+	}
 	void SetHyperspaceDest(const SystemPath &dest) { m_hyperspace.dest = dest; }
 	const SystemPath &GetHyperspaceDest() const { return m_hyperspace.dest; }
 	double GetHyperspaceDuration() const { return m_hyperspace.duration; }
 
+	// Transit Drive
+	void StartTransitDrive();
+	void StopTransitDrive();
+	
 	enum HyperjumpStatus { // <enum scope='Ship' name=ShipJumpStatus prefix=HYPERJUMP_ public>
 		HYPERJUMP_OK,
 		HYPERJUMP_CURRENT_SYSTEM,
@@ -318,6 +332,7 @@ private:
 	FlightState m_flightState;
 	bool m_testLanded;
 	float m_launchLockTimeout;
+	float m_transitStartTimeout;
 	float m_wheelState;
 	int m_wheelTransition;
 	double m_juice;
