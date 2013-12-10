@@ -10,7 +10,7 @@
 #include "Pi.h"
 #include "Game.h"
 
-const double NO_TRANSIT_RANGE = 1000000.0;
+const double NO_TRANSIT_RANGE = 100000.0;
 
 class AICommand {
 public:
@@ -234,10 +234,12 @@ public:
 		AICommand::Save(wr);
 		wr.Int32(Pi::game->GetSpace()->GetIndexForBody(m_obstructor));
 		wr.Float(m_warmUpTime);
+		wr.Bool(m_heatDispose);
 	}
 	AICmdTransitAround(Serializer::Reader &rd) : AICommand(rd, CMD_TRANSITAROUND) {
 		m_obstructorIndex = rd.Int32();
 		m_warmUpTime = rd.Float();
+		m_heatDispose = rd.Bool();
 	}
 	virtual void PostLoadFixup(Space *space) {
 		AICommand::PostLoadFixup(space);
@@ -264,6 +266,7 @@ private:
 	double m_alt;					// Actual altitude
 	AITransitAroundState m_state;	// TransitAround state, for display
 	float m_warmUpTime;				// Transit startup time (gives sound a chance to play)
+	bool m_heatDispose;				// Flag to show if heat is in need of dispose.
 };
 
 class AICmdKill : public AICommand {
