@@ -473,6 +473,7 @@ void WorldView::OnClickHyperspace()
 
 void WorldView::Draw3D()
 {
+	PROFILE_SCOPED()
 	assert(Pi::game);
 	assert(Pi::player);
 	assert(!Pi::player->IsDead());
@@ -989,6 +990,7 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 void WorldView::Update()
 {
+	PROFILE_SCOPED()
 	assert(Pi::game);
 	assert(Pi::player);
 	assert(!Pi::player->IsDead());

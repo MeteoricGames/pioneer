@@ -1458,6 +1458,7 @@ void Ship::OnEnterHyperspace() {
 }
 
 void Ship::EnterSystem() {
+	PROFILE_SCOPED()
 	assert(GetFlightState() == Ship::HYPERSPACE);
 
 	// virtual call, do class-specific things

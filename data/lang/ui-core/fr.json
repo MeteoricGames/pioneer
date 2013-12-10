@@ -217,7 +217,7 @@
    },
    "FREE" : {
       "description" : "",
-      "message" : "Gratuit"
+      "message" : "libre"
    },
    "FRONT_WEAPON" : {
       "description" : "",
@@ -385,7 +385,7 @@
    },
    "MULTISAMPLING" : {
       "description" : "",
-      "message" : "Multisampling"
+      "message" : "Multi-sampling"
    },
    "MUSIC" : {
       "description" : "",
