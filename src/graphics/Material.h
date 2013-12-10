@@ -18,7 +18,6 @@
 namespace Graphics {
 
 class Texture;
-class RendererLegacy;
 class RendererGL2;
 
 // Shorthand for unique effects
@@ -33,7 +32,11 @@ enum EffectType {
 	EFFECT_GEOSPHERE_TERRAIN_WITH_WATER,
 	EFFECT_GEOSPHERE_SKY,
 	EFFECT_FRESNEL_SPHERE,
-	EFFECT_SKYBOX
+	EFFECT_SKYBOX,
+	EFFECT_TEXTURED_FULLSCREEN_QUAD,
+	EFFECT_HORIZONTAL_BLUR,
+	EFFECT_VERTICAL_BLUR,
+	EFFECT_BLOOM_COMPOSITOR
 };
 
 // Renderer creates a material that best matches these requirements.
@@ -90,7 +93,6 @@ protected:
 	MaterialDescriptor m_descriptor;
 
 private:
-	friend class RendererLegacy;
 	friend class RendererGL2;
 };
 

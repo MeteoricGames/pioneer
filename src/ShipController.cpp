@@ -88,14 +88,24 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 {
 	vector3d v;
 	matrix4x4d m;
-	float current_velocity;
+	double current_velocity;
+	bool any_linthrust_keydown = IsAnyLinearThrusterKeyDown();
+	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || m_mouseActive;
+
+	// Get altitude from WorldView (that's where altitude is being calculated for UI display
+	// and since it's a bit expensive retrieving it is better than calculating it twice per frame)
+	double altitude = -1.0;
+	if(Pi::worldView && Pi::worldView->IsAltitudeAvailable()) {
+		altitude = Pi::worldView->GetAltitude();
+	}
 
 	if (m_ship->GetFlightState() == Ship::FLYING) {
+
 		switch (m_flightControlState) {
 		case CONTROL_MANEUVER:
 			PollControls(timeStep, true);
 			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
-				if (IsAnyLinearThrusterKeyDown()) break;
+				if (any_linthrust_keydown) break;
 				v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
 				if (m_setSpeedTarget) {
 					v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
@@ -104,15 +114,61 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 
 				// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
 				current_velocity = m_ship->GetVelocity().Length();
-				if(current_velocity >= m_ship->GetShipType()->maxManeuverSpeed ||
-					current_velocity <= -m_ship->GetShipType()->maxManeuverSpeed) {
+				if(current_velocity >= m_ship->GetMaxManeuverSpeed() ||
+					current_velocity <= -m_ship->GetMaxManeuverSpeed()) {
 					v = vector3d(0.0, 0.0, 0.0);
 				}
 			}
 			break;
+
+		case CONTROL_TRANSIT:
+			PollControls(timeStep, true);
+			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
+				if(m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
+					// READY
+					// Ship.cpp will start the transit drive
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
+					// START
+					// Ship.cpp will engage the transit drive to ON state
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_ON) {
+					if((altitude < 0.0 || altitude > TRANSIT_GRAVITY_RANGE_2) && !any_angthrust_keydown) {
+						m_setSpeed = TRANSIT_DRIVE_2_SPEED;
+					} else if(altitude < 0.0 || altitude > TRANSIT_GRAVITY_RANGE_1) {
+						m_setSpeed = TRANSIT_DRIVE_1_SPEED;
+						if(m_ship->GetVelocity().Length() > m_setSpeed) {
+							m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
+						}
+					} else {
+						m_ship->StopTransitDrive();
+						SetFlightControlState(CONTROL_MANEUVER);
+					}
+					m_ship->SetJuice(80.0);
+					//if (any_linthrust_keydown) break;
+					v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
+					if (m_setSpeedTarget) {
+						v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+					}
+					m_ship->AIMatchVel(v);
+					// No thrust if ship is at max transit speed, otherwise due to thrust limiter jitter will occur
+					current_velocity = m_ship->GetVelocity().Length();
+					if(current_velocity >= m_setSpeed ||
+						current_velocity <= -m_setSpeed) {
+						v = vector3d(0.0, 0.0, 0.0);
+						m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
+					}
+					TransitTunnelingTest(timeStep);
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_STOP) {
+					// STOP
+				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
+					// OFF
+				}
+			}
+			break;
+
 		case CONTROL_MANUAL:
 			PollControls(timeStep, false);
 			break;
+
 		case CONTROL_AUTOPILOT:
 			if (m_ship->AIIsActive()) break;
 			Pi::game->RequestTimeAccel(Game::TIMEACCEL_1X);
@@ -122,15 +178,65 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 			SetFlightControlState(CONTROL_MANEUVER);
 			m_setSpeed = 0.0;
 			break;
-		default: assert(0); break;
+
+		default: 
+			assert(0); 
+			break;
 		}
+	} else {
+		SetFlightControlState(CONTROL_MANEUVER);
 	}
-	else SetFlightControlState(CONTROL_MANEUVER);
 
 	//call autopilot AI, if active (also applies to set speed and heading lock modes)
 	OS::EnableFPE();
 	m_ship->AITimeStep(timeStep);
 	OS::DisableFPE();
+}
+
+void PlayerShipController::TransitTunnelingTest(const float timeStep) {
+	// Perform future collision detection with current system if it's a planet to detect possible tunneling collisions
+	// Perform future collision detection with planet to detect required changes to transit drive
+	if(m_ship->GetFrame()->GetBody()->IsType(Object::PLANET)) {
+		Frame* frame = m_ship->GetFrame();
+		Body* planet = frame->GetBody();
+		vector3d ship_position = m_ship->GetPositionRelTo(frame);
+		vector3d ship_velocity = m_ship->GetVelocityRelTo(frame);
+		vector3d ship_direction = ship_velocity.Normalized();
+		vector3d planet_position = planet->GetPosition();
+		vector3d ship_to_planet = planet_position - ship_position;
+		float heading_check = ship_to_planet.Dot(ship_direction);
+		if(heading_check > 0.0f) {
+			assert(planet->IsType(Object::TERRAINBODY));
+			double terrain_height = static_cast<TerrainBody*>(planet)->GetTerrainHeight(ship_position.Normalized());
+			ship_velocity *= timeStep;
+			double ship_step = ship_velocity.Length();
+			double distance_to_planet = ship_to_planet.Length();
+			vector3d ship_position_future = ship_position + (ship_direction * ship_step);
+			double future_distance_to_planet = (ship_position_future - planet_position).Length();
+			double planet_radius = terrain_height;
+			double gravity_bubble_2_radius = planet_radius + TRANSIT_GRAVITY_RANGE_2;
+			double gravity_bubble_1_radius = planet_radius + TRANSIT_GRAVITY_RANGE_1;
+
+			bool motion_clamp = false;
+			double desired_distance;
+
+			if(future_distance_to_planet <= gravity_bubble_1_radius) {
+				m_setSpeed = m_ship->GetMaxManeuverSpeed();
+				motion_clamp = true;
+				desired_distance = distance_to_planet - planet_radius - TRANSIT_GRAVITY_RANGE_1 + 100.0;
+				m_ship->StopTransitDrive();
+				SetFlightControlState(CONTROL_MANEUVER);
+			} else if(m_setSpeed > TRANSIT_DRIVE_1_SPEED && future_distance_to_planet <= gravity_bubble_2_radius) {
+				m_setSpeed = TRANSIT_DRIVE_1_SPEED;
+				motion_clamp = true;				
+				desired_distance = distance_to_planet - planet_radius - TRANSIT_GRAVITY_RANGE_2 + 100.0;
+			}
+			if(motion_clamp && desired_distance > 0.0) {
+				m_ship->SetPosition(ship_position + (ship_direction * desired_distance));
+				m_ship->SetVelocity(ship_direction * m_setSpeed);
+			}
+		}
+	}
 }
 
 void PlayerShipController::CheckControlsLock()
@@ -308,20 +414,36 @@ bool PlayerShipController::IsAnyLinearThrusterKeyDown()
 void PlayerShipController::SetFlightControlState(FlightControlState s)
 {
 	if (m_flightControlState != s) {
+		// finalizer
+		switch(m_flightControlState) {
+			case CONTROL_TRANSIT:
+				m_ship->StopTransitDrive();
+				break;
+		}
+		// new state
 		m_flightControlState = s;
 		m_ship->AIClearInstructions();
-		//set desired velocity to current actual
-		if (m_flightControlState == CONTROL_MANEUVER) {
-			// Speed is set to the projection of the velocity onto the target.
+		switch(m_flightControlState) {
+			case CONTROL_MANEUVER: {
+				//set desired velocity to current actual
+				// Speed is set to the projection of the velocity onto the target.
+				vector3d shipVel = m_setSpeedTarget ?
+					// Ship's velocity with respect to the target, in current frame's coordinates
+					-m_setSpeedTarget->GetVelocityRelTo(m_ship) :
+					// Ship's velocity with respect to current frame
+					m_ship->GetVelocity();
+				// A change from Manual to Set Speed never sets a negative speed.
+				m_setSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+				break;
+			}
 
-			vector3d shipVel = m_setSpeedTarget ?
-				// Ship's velocity with respect to the target, in current frame's coordinates
-				-m_setSpeedTarget->GetVelocityRelTo(m_ship) :
-				// Ship's velocity with respect to current frame
-				m_ship->GetVelocity();
-
-			// A change from Manual to Set Speed never sets a negative speed.
-			m_setSpeed = std::max(shipVel.Dot(-m_ship->GetOrient().VectorZ()), 0.0);
+			case CONTROL_TRANSIT:
+				m_ship->StartTransitDrive();
+				// Set transit speed to default, limit will be raised in update function based on altitude
+				m_setSpeed = TRANSIT_START_SPEED;
+				// Give it some juice to hit transit speed faster
+				m_ship->SetJuice(80.0);
+				break;
 		}
 		//XXX global stuff
 		Pi::onPlayerChangeFlightControlState.emit();

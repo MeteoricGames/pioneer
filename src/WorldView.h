@@ -46,6 +46,8 @@ public:
 	void HideTargetActions();
 	int GetActiveWeapon() const;
 	void OnClickBlastoff();
+	bool IsAltitudeAvailable() const { return m_bAltitudeAvailable; }
+	double GetAltitude() const { return m_altitude; }
 
 	sigc::signal<void> onChangeCamType;
 
@@ -137,6 +139,10 @@ private:
 	Gui::MultiStateImageButton *m_flightManeuverButton;
 	Gui::MultiStateImageButton *m_flightTransitButton;
 	Gui::MultiStateImageButton *m_flightJumpButton;
+
+	// Used to cache altitude calculation in WorldView::RefreshButtonStateAndVisibility()
+	bool m_bAltitudeAvailable;
+	double m_altitude;
 
 	bool m_labelsOn;
 	enum CamType m_camType;

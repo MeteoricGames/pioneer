@@ -37,7 +37,6 @@ namespace Graphics {
 class Light;
 class Material;
 class MaterialDescriptor;
-class RendererLegacy;
 class RenderTarget;
 class StaticMesh;
 class Surface;
@@ -89,6 +88,7 @@ public:
 
 	virtual bool BeginFrame() = 0;
 	virtual bool EndFrame() = 0;
+	virtual bool PostProcessFrame() = 0;
 	//traditionally gui happens between endframe and swapbuffers
 	virtual bool SwapBuffers() = 0;
 
@@ -185,7 +185,7 @@ private:
 };
 
 // subclass this to store renderer specific information
-// See top of RendererLegacy.cpp
+// See top of RendererGL2.cpp
 struct RenderInfo {
 	RenderInfo() { }
 	virtual ~RenderInfo() { }
