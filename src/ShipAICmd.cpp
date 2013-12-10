@@ -1327,12 +1327,14 @@ AICmdTransitAround::AICmdTransitAround(Ship *ship, Body *obstructor) : AICommand
 	m_alt = 0.0;
 	m_state = AITA_READY;
 	m_warmUpTime = 2.0f;
+	m_heatDispose=false;
 }
 
 AICmdTransitAround::~AICmdTransitAround()
 {
 	if(m_ship && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		m_ship->StopTransitDrive();
+		m_heatDispose=false;
 		m_ship->SetJuice(20.0);
 		float threshold_speed = std::min<float>(m_ship->GetMaxManeuverSpeed(), TRANSIT_START_SPEED);
 		if(m_ship->GetVelocity().Length() > threshold_speed) {
@@ -1344,7 +1346,6 @@ AICmdTransitAround::~AICmdTransitAround()
 bool AICmdTransitAround::TimeStepUpdate()
 {
 	if (!ProcessChild()) return false;
-
 	const double time_step = Pi::game->GetTimeStep();
 	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 8000.0;
 	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
@@ -1419,16 +1420,18 @@ bool AICmdTransitAround::TimeStepUpdate()
 
 	//smooth transit around when nearing target.
 	double factor = 1.0;
-	if (ship_to_target.Length() / 10000000.0 < 1.0) factor = ship_to_target.Length() / 10000000.0;
+	if (ship_to_target.Length() / 1000000.0 < 1.0) factor = ship_to_target.Length() / 1000000.0;
 
-	//dispose of heat if needed
-	if (m_ship->GetHullTemperature() > 0.75) {
-		velocity_vector = velocity_vector + (up_vector * 0.001);
-		m_ship->AIFaceDirection(velocity_vector);
-		return false;
+	//dispose of heat if needed (emergency)
+	if (m_ship->GetHullTemperature() > 0.8 && !m_heatDispose) m_heatDispose=true;
+	if (m_ship->GetHullTemperature() <= 0.1 && m_heatDispose) m_heatDispose=false;
+	if (m_ship->GetHullTemperature() > 0.1 && m_heatDispose) {
+		m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED * 0.01);
+	}
+	else {
+		m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED * factor);
 	}
 
-	m_ship->AIMatchVel(velocity_vector * TRANSIT_DRIVE_1_SPEED * factor);
 	m_ship->AIFaceDirection(velocity_vector);
 	m_ship->AIFaceUpdir(up_vector);
 	return false;
