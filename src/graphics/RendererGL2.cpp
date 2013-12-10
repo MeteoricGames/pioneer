@@ -200,6 +200,7 @@ bool RendererGL2::GetNearFarRange(float &near, float &far) const
 
 bool RendererGL2::BeginFrame()
 {
+	PROFILE_SCOPED()
 	glClearColor(0,0,0,0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
@@ -297,6 +298,7 @@ bool RendererGL2::SwapBuffers()
 
 bool RendererGL2::SetRenderTarget(RenderTarget *rt)
 {
+	PROFILE_SCOPED()
 	if (m_activeRenderTarget && rt != m_activeRenderTarget)
 		m_activeRenderTarget->Unbind();
 	if (rt)
@@ -335,6 +337,7 @@ bool RendererGL2::SetViewport(int x, int y, int width, int height)
 
 bool RendererGL2::SetTransform(const matrix4x4d &m)
 {
+	PROFILE_SCOPED()
 	//XXX this is not pretty but there's no standard way of converting between them.
 	for (int i=0; i<16; ++i) {
 		m_currentTransform[i] = m[i];
@@ -348,6 +351,7 @@ bool RendererGL2::SetTransform(const matrix4x4d &m)
 
 bool RendererGL2::SetTransform(const matrix4x4f &m)
 {
+	PROFILE_SCOPED()
 	//same as above
 	m_currentTransform = m;
 	glMatrixMode(GL_MODELVIEW);
@@ -357,6 +361,8 @@ bool RendererGL2::SetTransform(const matrix4x4f &m)
 
 bool RendererGL2::SetPerspectiveProjection(float fov, float aspect, float near, float far)
 {
+	PROFILE_SCOPED()
+
 	// update values for log-z hack
 	m_invLogZfarPlus1 = 1.0f / (log(far+1.0f)/log(2.0f));
 
@@ -375,6 +381,7 @@ bool RendererGL2::SetPerspectiveProjection(float fov, float aspect, float near, 
 
 bool RendererGL2::SetOrthographicProjection(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
 {
+	PROFILE_SCOPED()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(xmin, xmax, ymin, ymax, zmin, zmax);
@@ -499,6 +506,7 @@ bool RendererGL2::SetScissor(bool enabled, const vector2f &pos, const vector2f &
 
 bool RendererGL2::DrawLines(int count, const vector3f *v, const Color *c, LineType t)
 {
+	PROFILE_SCOPED()
 	if (count < 2 || !v) return false;
 
 	vtxColorProg->Use();
@@ -517,6 +525,7 @@ bool RendererGL2::DrawLines(int count, const vector3f *v, const Color *c, LineTy
 
 bool RendererGL2::DrawLines(int count, const vector3f *v, const Color &c, LineType t)
 {
+	PROFILE_SCOPED()
 	if (count < 2 || !v) return false;
 
 	flatColorProg->Use();
@@ -679,6 +688,8 @@ bool RendererGL2::DrawStaticMesh(StaticMesh *t)
 
 void RendererGL2::EnableClientStates(const VertexArray *v)
 {
+	PROFILE_SCOPED();
+
 	if (!v) return;
 	assert(v->position.size() > 0); //would be strange
 
@@ -709,6 +720,8 @@ void RendererGL2::EnableClientStates(const VertexArray *v)
 
 void RendererGL2::DisableClientStates()
 {
+	PROFILE_SCOPED();
+
 	for (std::vector<GLenum>::const_iterator i = m_clientStates.begin(); i != m_clientStates.end(); ++i)
 		glDisableClientState(*i);
 	m_clientStates.clear();
@@ -716,6 +729,8 @@ void RendererGL2::DisableClientStates()
 
 bool RendererGL2::BufferStaticMesh(StaticMesh *mesh)
 {
+	PROFILE_SCOPED();
+
 	const AttributeSet set = mesh->GetAttributeSet();
 	bool background = false;
 	bool model = false;
@@ -806,6 +821,7 @@ bool RendererGL2::BufferStaticMesh(StaticMesh *mesh)
 
 Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 {
+	PROFILE_SCOPED()
 	MaterialDescriptor desc = d;
 
 	GL2::Material *mat = 0;
