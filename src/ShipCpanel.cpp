@@ -284,6 +284,7 @@ void ShipCpanel::OnDockingClearanceExpired(const SpaceStation *s)
 
 void ShipCpanel::Update()
 {
+	PROFILE_SCOPED()
 	int timeAccel = Pi::game->GetTimeAccel();
 	int requested = Pi::game->GetRequestedTimeAccel();
 
@@ -418,6 +419,7 @@ void ShipCpanel::SetAlertState(Ship::AlertState as)
 
 void ShipCpanel::TimeStepUpdate(float step)
 {
+	PROFILE_SCOPED()
 	m_scanner->TimeStepUpdate(step);
 }
 
