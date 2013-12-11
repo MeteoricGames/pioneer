@@ -103,20 +103,21 @@ void main(void)
 		unshadowed = clamp(unshadowed, 0.0, 1.0);
 #ifdef ATMOSPHERE
 		float sn = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
+		float atmosDensity = geosphereAtmosFogDensity*80000.0;
 
 		{
-		float atmosDist = geosphereScale * (length(eyepos) - atmosStart);
+		float atmosDist = geosphereScale * (length(eyepos) - atmosStart)*0.5;
 
 		// a&b scaled so length of 1.0 means planet surface.
 		vec3 a = (atmosStart * eyenorm - geosphereCenter) / geosphereScaledRadius;
 		vec3 b = (eyepos - geosphereCenter) / geosphereScaledRadius;
 		ldprod = AtmosLengthDensityProduct(a, b, atmosColor.w*geosphereAtmosFogDensity, atmosDist, geosphereAtmosInvScaleHeight);
-		fogFactor = clamp( 1.5 / exp(ldprod),0.0,1.0);
+		fogFactor = clamp( 1.25 / exp(ldprod),0.0,1.0);
 		}
 
 		vec3 surfaceNorm = mix(normalize(sn*eyenorm - geosphereCenter),tnorm,fogFactor);
 
-		vec3 n  = mix(tnorm,surfaceNorm,clamp(geosphereAtmosFogDensity*80000.0,0.0,1.0)); //mix eye normals in dense atmosphere.
+		vec3 n  = mix(tnorm,surfaceNorm,clamp(atmosDensity,0.0,1.0)); //mix eye normals in dense atmosphere.
 		nDotVP  = max(0.0, dot(n, normalize(vec3(gl_LightSource[i].position))));
 		nnDotVP = max(0.0, dot(n, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
 #else
@@ -131,8 +132,8 @@ void main(void)
 		vec3 E = normalize(-eyepos);
 		vec3 R = normalize(-reflect(L,tnorm)); 
 		//water only for specular
-	    if (vertexColor.b > 0.05 && vertexColor.r < 0.05) {
-			specularReflection += pow(max(dot(R,E),0.0),16.0)*0.4 * INV_NUM_LIGHTS;
+		if (vertexColor.b > 0.05 && vertexColor.r < 0.05) {
+			specularReflection += pow(max(dot(R,E),0.0),16.0)*0.6 * INV_NUM_LIGHTS;
 		}
 #endif
 	}
