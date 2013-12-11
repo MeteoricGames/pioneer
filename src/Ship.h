@@ -13,6 +13,7 @@
 #include "Planet.h"
 #include "Serializer.h"
 #include "ShipType.h"
+#include "ShipCockpit.h"
 #include "scenegraph/SceneGraph.h"
 #include "scenegraph/ModelSkin.h"
 #include <list>
@@ -328,6 +329,7 @@ private:
 	shipstats_t m_stats;
 	const ShipType *m_type;
 	SceneGraph::ModelSkin m_skin;
+	std::unique_ptr<ShipCockpit> m_cockpit;
 
 	FlightState m_flightState;
 	bool m_testLanded;

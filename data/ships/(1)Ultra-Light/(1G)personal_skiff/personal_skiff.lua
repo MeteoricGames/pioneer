@@ -4,6 +4,7 @@
 define_ship {
 	name='Personal Skiff',
 	model='personal_skiff',
+	cockpit='passenger_shuttle_cockpit',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,
 	up_thrust = 3e5,
