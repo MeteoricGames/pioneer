@@ -97,7 +97,7 @@ local onAICompleted = function (ship, ai_error)
 	Timer:CallAt(Game.time+2, function () 
 
 	-- Are we full?
-	if miner.miner:GetStats().freeCapacity == 0 and miner.status~='pickup' and miner.status~='pickup_ok' then
+	if miner.miner.freeCapacity == 0 and miner.status~='pickup' and miner.status~='pickup_ok' then
 		miners[miner.miner].status = 'full'
 		Comms.ImportantMessage('MINER: status cargo full, ready for pickup.', miner.miner.label)
 	end
