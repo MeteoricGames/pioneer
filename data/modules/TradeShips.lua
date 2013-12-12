@@ -248,10 +248,9 @@ local getRandomStarport = function (ship, current)
 				starport = orbital_starports[i]
 				if starport.numDocks > 100 then break end
 			end
-			if starport.numDocks <= 100 then getSystemAndJump(ship) end
+			if ship~=nil and starport.numDocks <= 100 then getSystemAndJump(ship) end
 		else
-			--starport = starports[Engine.rand:Integer(1,#starports)] --fallback
-			getSystemAndJump(ship)
+			if ship~=nil then getSystemAndJump(ship) end
 			return nil
 		end
 	end
