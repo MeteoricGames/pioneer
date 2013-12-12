@@ -13,6 +13,8 @@ local InfoGauge = import("ui/InfoGauge")
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
 
+local x=0
+
 local mining = function ()
 
 	--init stuff
@@ -43,17 +45,12 @@ local mining = function ()
 	local deploySurvey = SmallLabeledButton.New("Deploy")
 	local deployMiner  = SmallLabeledButton.New("Deploy")
 
-	--make button logic
-	local click = function ()
-	end
+	--widget updateable
+	local miningListWidget = ui:Margin(0)
 
-	--make clickable area
-	deploySurvey.button.onClick:Connect(click)
-	deployMiner.button.onClick:Connect(click)
-
-	--render ui
-	return ui:Expand():SetInnerWidget(
-	    ui:Grid(1,2)
+	--update function
+	local cc = function()
+	  return ui:Grid(1,2)
 	     :SetRow(0, {
 		ui:VBox(20):PackEnd({
             		(l.LOCATED_N_KM_FROM_THE_CENTRE_OF_NAME):interp({
@@ -77,8 +74,8 @@ local mining = function ()
 				ui:Grid({10,10,50},1)
 					:SetColumn(0, {
 						ui:Table():SetRowSpacing(20):SetColumnSpacing(10):AddRows({
-							{ "Survey drones :" },
-							{ "Mmining drones :" }, 
+							{ "Survey drones :",x },
+							{ "Mmining drones :",x },
 						})	
 					})
 					:SetColumn(1, {
@@ -89,7 +86,20 @@ local mining = function ()
 					}),
 		})--packend
 	     })--setrow
-	)--setinnerwidget
+	end
+
+	--make button logic
+	local click = function ()
+		x=x+1
+		miningListWidget:SetInnerWidget(cc())
+	end
+
+	--make clickable area
+	deploySurvey.button.onClick:Connect(click)
+	deployMiner.button.onClick:Connect(click)
+
+	--render ui
+	return miningListWidget:SetInnerWidget(cc())
 end
 
 return mining
