@@ -19,7 +19,6 @@ void ShipCockpit::Init()
 {
 	assert(!m_type.cockpitName.empty());
 	SetModel(m_type.cockpitName.c_str());
-	//SetStatic(true);
 	SetColliding(false);
 	assert(GetModel());
 }
