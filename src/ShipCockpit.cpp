@@ -18,9 +18,10 @@ ShipCockpit::~ShipCockpit()
 void ShipCockpit::Init()
 {
 	assert(!m_type.cockpitName.empty());
-	SetStatic(true);
-	SetColliding(false);
 	SetModel(m_type.cockpitName.c_str());
+	//SetStatic(true);
+	SetColliding(false);
+	assert(GetModel());
 }
 
 void ShipCockpit::Render(Graphics::Renderer *r, const Camera *camera, const vector3d &viewCoords, const matrix4x4d &viewTransform)
