@@ -259,7 +259,7 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_skin.Apply(GetModel());
 
 	if(!m_type->cockpitName.empty()) {
-		m_cockpit.reset(new ShipCockpit(m_type));
+		m_cockpit.reset(new ShipCockpit(*m_type));
 	}
 
 	Init();
