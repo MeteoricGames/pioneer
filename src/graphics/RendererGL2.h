@@ -45,7 +45,7 @@ public:
 
 	virtual bool BeginFrame();
 	virtual bool EndFrame();
-	virtual bool PostProcessFrame();
+	virtual bool PostProcessFrame(PostProcessingMode pp_mode = POSTPROCESS_GAME);
 	virtual bool SwapBuffers();
 
 	virtual bool SetRenderTarget(RenderTarget*);

@@ -70,6 +70,11 @@ enum BlendMode {
 	BLEND_DEST_ALPHA // XXX maybe crappy name
 };
 
+enum PostProcessingMode {
+	POSTPROCESS_GAME,
+	POSTPROCESS_GUI
+};
+
 // Renderer base, functions return false if
 // failed/unsupported
 class Renderer
@@ -88,7 +93,7 @@ public:
 
 	virtual bool BeginFrame() = 0;
 	virtual bool EndFrame() = 0;
-	virtual bool PostProcessFrame() = 0;
+	virtual bool PostProcessFrame(PostProcessingMode pp_mode = POSTPROCESS_GAME) = 0;
 	//traditionally gui happens between endframe and swapbuffers
 	virtual bool SwapBuffers() = 0;
 
