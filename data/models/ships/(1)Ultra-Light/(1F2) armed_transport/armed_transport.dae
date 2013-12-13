@@ -28,8 +28,8 @@
             </comments>
             <source_data>file:///C:/Users/rivalin/Desktop/pioneer/data/models/ships/(1)Ultra-Light/(1F2)%20armed_transport/armed_transport.dae</source_data>
         </contributor>
-        <created>2013-12-10T14:45:01Z</created>
-        <modified>2013-12-10T14:45:01Z</modified>
+        <created>2013-12-13T17:53:00Z</created>
+        <modified>2013-12-13T17:53:00Z</modified>
         <up_axis>Y_UP</up_axis>
     </asset>
     <library_cameras>
@@ -475,10 +475,10 @@
                         5.02 -0.3 -6.4
                         5.02 -0.3 6.4
                         5.02 -5.40167e-008 6.4
-                        3.05 3.50246e-023 -4.42426
-                        3.05 -2.37069e-024 4.42426
-                        6.15 -6.51722e-023 -4.42426
-                        6.15 -1.02567e-022 4.42426
+                        3.05 0 -4.42426
+                        3.05 0 4.42426
+                        6.15 0 -4.42426
+                        6.15 0 4.42426
                         3.05 -0.3 -4.42426
                         3.05 -0.3 4.42426
                         6.15 -0.3 -4.42426
@@ -509,8 +509,8 @@
                         3.05 -0.755858 4.22296
                         9.75 2 -2
                         9.75 2 2
-                        9.75 -1.46982e-024 -4
-                        9.75 -2.18484e-023 4
+                        9.75 0 -4
+                        9.75 0 4
                         9.75 2 1
                         9.75 2 -1
                         9.75 1.55 2
@@ -531,18 +531,18 @@
                         9.75 -1.85 -2.45
                         9.75 -1.85 1
                         9.75 -1.85 -1
-                        9.75 -7.22431e-025 3.5
+                        9.75 0 3.5
                         9.75 0.5 3.5
                         9.75 -0.3 3.5
                         9.75 -0.8 3.5
-                        9.75 -2.25958e-023 -3.5
+                        9.75 0 -3.5
                         9.75 0.5 -3.5
                         9.75 -0.3 -3.5
                         9.75 -0.8 -3.5
                         9.55 0 -1
                         9.55 0 1
-                        9.55 -1.08412e-015 0.8
-                        9.55 -9.1428e-016 -0.8
+                        9.55 -1.11022e-015 0.8
+                        9.55 -8.88178e-016 -0.8
                         7.75 -2.1 -1
                         7.75 -2.1 1
                         7.75 1.8 1
@@ -567,8 +567,8 @@
                         7.35 -2.1 1.91716
                         7.35 1.8 -1.91716
                         7.35 1.8 1.91716
-                        7.35 -3.21799e-023 -3.71716
-                        7.35 -5.92097e-024 3.71716
+                        7.35 0 -3.71716
+                        7.35 0 3.71716
                         7.35 -2.1 -1
                         7.35 -2.1 1
                         7.35 1.8 1
@@ -581,8 +581,8 @@
                         7.75 -2.1 1.91716
                         7.75 1.8 -1.91716
                         7.75 1.8 1.91716
-                        7.75 7.58405e-023 -3.71716
-                        7.75 -3.77973e-024 3.71716
+                        7.75 0 -3.71716
+                        7.75 0 3.71716
                         7.75 -2.1 -1
                         7.75 -2.1 1
                         7.75 1.8 1
@@ -1015,36 +1015,36 @@
                         2.85 2 -2
                         2.85 2 2
                         -1.15 2 2
-                        -7.15 -1.25409e-024 -2
-                        -7.15 1.77545e-023 2
-                        -1.15 -4.89063e-023 -4
-                        2.85 1.99895e-023 -4
-                        2.85 5.80066e-023 4
-                        -1.15 3.65942e-023 4
+                        -7.15 0 -2
+                        -7.15 0 2
+                        -1.15 0 -4
+                        2.85 0 -4
+                        2.85 0 4
+                        -1.15 0 4
                         0.65 -2.3 -2
                         1.05 -2.3 -2
                         1.05 -2.3 2
                         0.65 -2.3 2
                         0.65 2 -2
                         1.05 2 -2
-                        1.05 -3.71295e-023 -4
-                        0.65 -3.92707e-023 -4
+                        1.05 0 -4
+                        0.65 0 -4
                         1.05 2 2
                         0.65 2 2
-                        0.65 4.62298e-023 4
-                        1.05 4.8371e-023 4
+                        0.65 0 4
+                        1.05 0 4
                         0.65 -2.1 -1.91716
                         1.05 -2.1 -1.91716
                         1.05 -2.1 1.91716
                         0.65 -2.1 1.91716
                         0.65 1.8 -1.91716
                         1.05 1.8 -1.91716
-                        1.05 -7.50868e-024 -3.71716
-                        0.65 -9.64992e-024 -3.71716
+                        1.05 0 -3.71716
+                        0.65 0 -3.71716
                         1.05 1.8 1.91716
                         0.65 1.8 1.91716
-                        0.65 1.6609e-023 3.71716
-                        1.05 1.87502e-023 3.71716
+                        0.65 0 3.71716
+                        1.05 0 3.71716
                         -1.15 2 -0.3
                         -1.15 2 0.3
                         0.65 2 0.3
@@ -1069,8 +1069,8 @@
                         0.65 -2.1 0.3
                         1.05 2 -0.3
                         1.05 2 0.3
-                        -7.15 -5.27119e-024 -0.3
-                        -7.15 -4.69822e-024 0.3
+                        -7.15 0 -0.3
+                        -7.15 0 0.3
                         -7.15 -0.3 -2
                         -7.15 -0.3 2
                         -1.15 -0.3 -4
@@ -1088,10 +1088,10 @@
                         -7.15 -0.3 -0.3
                         -7.15 -0.3 0.3
                         -3.43849 1.23717 2
-                        -3.43849 2.0353e-023 3.23717
+                        -3.43849 0 3.23717
                         -3.43849 -1.53717 2
                         -3.43849 -1.53717 -2
-                        -3.43849 -8.45809e-024 -3.23717
+                        -3.43849 0 -3.23717
                         -3.43849 1.23717 -2
                         -3.43849 1.23717 0.3
                         -3.43849 1.23717 -0.3
@@ -1100,10 +1100,10 @@
                         -3.43849 -0.3 3.23717
                         -3.43849 -0.3 -3.23717
                         -6.43851 0.237164 2
-                        -6.43851 1.74937e-023 2.23716
+                        -6.43851 0 2.23716
                         -6.43851 -0.537164 2
                         -6.43851 -0.537164 -2
-                        -6.43851 -7.68446e-025 -2.23716
+                        -6.43851 0 -2.23716
                         -6.43851 0.237164 -2
                         -6.43851 0.237164 0.3
                         -6.43851 0.237164 -0.3
@@ -1114,29 +1114,29 @@
                         2.85 2 -2
                         2.85 2 2
                         2.85 2 -6.22195e-015
-                        2.85 1.99895e-023 -4
-                        2.85 5.80066e-023 4
+                        2.85 0 -4
+                        2.85 0 4
                         6.35 2 -2
                         6.35 2 2
                         6.35 2 1.01495e-014
-                        6.35 3.87254e-023 -4
-                        6.35 -4.0049e-023 4
+                        6.35 0 -4
+                        6.35 0 4
                         2.85 -2.6 -2.12426
                         2.85 -2.6 2.12426
                         2.85 2.3 -2.12426
                         2.85 2.3 2.12426
                         2.85 -2.6 6.86223e-015
                         2.85 2.3 -6.14847e-015
-                        2.85 3.3954e-023 -4.42426
-                        2.85 -3.44131e-024 4.42426
+                        2.85 0 -4.42426
+                        2.85 0 4.42426
                         6.35 -2.6 -2.12426
                         6.35 -2.6 2.12426
                         6.35 2.3 -2.12426
                         6.35 2.3 2.12426
                         6.35 -2.6 9.02285e-015
                         6.35 2.3 1.0223e-014
-                        6.35 -6.41016e-023 -4.42426
-                        6.35 -1.01497e-022 4.42426
+                        6.35 0 -4.42426
+                        6.35 0 4.42426
                         2.85 -2.3 -2
                         2.85 -2.3 2
                         2.85 -2.3 6.93571e-015
@@ -1152,14 +1152,14 @@
                         6.35 -0.3 -4.42426
                         6.35 -0.3 4.42426
                         -3.43849 1.23717 2
-                        -3.43849 4.87091e-023 3.23717
-                        -3.43849 3.12692e-023 -3.23717
+                        -3.43849 0 3.23717
+                        -3.43849 0 -3.23717
                         -3.43849 1.23717 -2
                         -3.43849 1.23717 0.3
                         -3.43849 1.23717 -0.3
                         -6.43851 0.237164 2
-                        -6.43851 2.68279e-023 2.23716
-                        -6.43851 -3.73642e-023 -2.23716
+                        -6.43851 0 2.23716
+                        -6.43851 0 -2.23716
                         -6.43851 0.237164 -2
                         -6.43851 0.237164 0.3
                         -6.43851 0.237164 -0.3
@@ -1199,14 +1199,14 @@
                         6.35 -2.3 2
                         6.35 2 -2
                         6.35 2 2
-                        6.35 3.87254e-023 -4
-                        6.35 -4.0049e-023 4
+                        6.35 0 -4
+                        6.35 0 4
                         7.35 -2.3 -2
                         7.35 -2.3 2
                         7.35 2 -2
                         7.35 2 2
-                        7.35 4.40785e-023 -4
-                        7.35 -3.46959e-023 4
+                        7.35 0 -4
+                        7.35 0 4
                         7.35 2 -0.3
                         7.35 2 0.3
                         6.35 2 0.3
@@ -1219,8 +1219,8 @@
                         7.35 -2.1 1.91716
                         7.35 1.8 -1.91716
                         7.35 1.8 1.91716
-                        7.35 -3.21799e-023 -3.71716
-                        7.35 -5.92097e-024 3.71716
+                        7.35 0 -3.71716
+                        7.35 0 3.71716
                         7.35 1.8 -0.3
                         7.35 1.8 0.3
                         7.35 -2.1 -0.3
@@ -1231,10 +1231,10 @@
                         7.35 -0.3 4
                         7.35 -0.3 -3.71716
                         7.35 -0.3 3.71716
-                        9.7 -3.33019e-023 -2
-                        9.7 9.44835e-024 2
-                        9.75 -7.74776e-024 -1
-                        9.75 -9.71559e-025 1
+                        9.7 0 -2
+                        9.7 0 2
+                        9.75 0 -1
+                        9.75 0 1
                         9.75 1.55 2
                         9.75 1.55 2.45
                         9.75 1.55 -2.45
@@ -1251,16 +1251,16 @@
                         9.75 -1.85 -2.45
                         9.75 -1.85 1
                         9.75 -1.85 -1
-                        9.75 -7.22431e-025 3.5
+                        9.75 0 3.5
                         9.75 0.5 3.5
                         9.75 -0.3 3.5
                         9.75 -0.8 3.5
-                        9.75 -2.25958e-023 -3.5
+                        9.75 0 -3.5
                         9.75 0.5 -3.5
                         9.75 -0.3 -3.5
                         9.75 -0.8 -3.5
-                        9.75 -1.17837e-023 -1.25
-                        9.75 -1.15346e-023 1.25
+                        9.75 0 -1.25
+                        9.75 0 1.25
                         9.75 1.3 2
                         9.75 1.3 2.34645
                         9.75 1.3 -2.34645
@@ -1275,16 +1275,16 @@
                         9.75 -1.6 -2.34645
                         9.75 -1.6 1.25
                         9.75 -1.6 -1.25
-                        9.75 9.84057e-024 3.25
+                        9.75 0 3.25
                         9.75 0.396447 3.25
                         9.75 -0.3 3.25
                         9.75 -0.696447 3.25
-                        9.75 -3.31588e-023 -3.25
+                        9.75 0 -3.25
                         9.75 0.396447 -3.25
                         9.75 -0.3 -3.25
                         9.75 -0.696447 -3.25
-                        9.5 6.90155e-023 -1.25
-                        9.5 6.92646e-023 1.25
+                        9.5 0 -1.25
+                        9.5 0 1.25
                         9.5 1.3 2
                         9.5 1.3 2.34645
                         9.5 1.3 -2.34645
@@ -1299,16 +1299,16 @@
                         9.5 -1.6 -2.34645
                         9.5 -1.6 1.25
                         9.5 -1.6 -1.25
-                        9.5 8.50229e-024 3.25
+                        9.5 0 3.25
                         9.5 0.396447 3.25
                         9.5 -0.3 3.25
                         9.5 -0.696447 3.25
-                        9.5 -3.44971e-023 -3.25
+                        9.5 0 -3.25
                         9.5 0.396447 -3.25
                         9.5 -0.3 -3.25
                         9.5 -0.696447 -3.25
-                        9.5 7.48076e-023 -1.4
-                        9.5 6.34724e-023 1.4
+                        9.5 0 -1.4
+                        9.5 0 1.4
                         9.5 1.15 2
                         9.5 1.15 2.28431
                         9.5 1.15 -2.28431
@@ -1323,16 +1323,16 @@
                         9.5 -1.45 -2.28431
                         9.5 -1.45 1.4
                         9.5 -1.45 -1.4
-                        9.5 -3.5917e-023 3.1
+                        9.5 0 3.1
                         9.5 0.334315 3.1
                         9.5 -0.3 3.1
                         9.5 -0.634315 3.1
-                        9.5 9.92221e-024 -3.1
+                        9.5 0 -3.1
                         9.5 0.334315 -3.1
                         9.5 -0.3 -3.1
                         9.5 -0.634315 -3.1
-                        10.15 -3.85026e-024 -1.4
-                        10.15 -1.51855e-023 1.4
+                        10.15 0 -1.4
+                        10.15 0 1.4
                         10.15 1.15 2
                         10.15 1.15 2.28431
                         10.15 1.15 -2.28431
@@ -1347,16 +1347,16 @@
                         10.15 -1.45 -2.28431
                         10.15 -1.45 1.4
                         10.15 -1.45 -1.4
-                        10.15 -3.24375e-023 3.1
+                        10.15 0 3.1
                         10.15 0.334315 3.1
                         10.15 -0.3 3.1
                         10.15 -0.634315 3.1
-                        10.15 1.34017e-023 -3.1
+                        10.15 0 -3.1
                         10.15 0.334315 -3.1
                         10.15 -0.3 -3.1
                         10.15 -0.634315 -3.1
-                        10.15 -1.87357e-023 -1.7
-                        10.15 -3.00093e-025 1.7
+                        10.15 0 -1.7
+                        10.15 0 1.7
                         10.15 0.85 2
                         10.15 0.85 2.16005
                         10.15 0.85 -2.16005
@@ -1371,16 +1371,16 @@
                         10.15 -1.15 -2.16005
                         10.15 -1.15 1.7
                         10.15 -1.15 -1.7
-                        10.15 -2.08531e-023 2.8
+                        10.15 0 2.8
                         10.15 0.210051 2.8
                         10.15 -0.3 2.8
                         10.15 -0.51005 2.8
-                        10.15 1.81736e-024 -2.8
+                        10.15 0 -2.8
                         10.15 0.210051 -2.8
                         10.15 -0.3 -2.8
                         10.15 -0.51005 -2.8
-                        9.7 -2.11446e-023 -1.7
-                        9.7 -2.70899e-024 1.7
+                        9.7 0 -1.7
+                        9.7 0 1.7
                         9.7 0.85 2
                         9.7 0.85 2.16005
                         9.7 0.85 -2.16005
@@ -1395,11 +1395,11 @@
                         9.7 -1.15 -2.16005
                         9.7 -1.15 1.7
                         9.7 -1.15 -1.7
-                        9.7 -2.3262e-023 2.8
+                        9.7 0 2.8
                         9.7 0.210051 2.8
                         9.7 -0.3 2.8
                         9.7 -0.51005 2.8
-                        9.7 -5.91538e-025 -2.8
+                        9.7 0 -2.8
                         9.7 0.210051 -2.8
                         9.7 -0.3 -2.8
                         9.7 -0.51005 -2.8
@@ -3710,7 +3710,7 @@
         </geometry>
     </library_geometries>
     <library_lights>
-        <light id="Light-polyRender036" name="Render">
+        <light id="Light-polyRender039" name="Render">
             <technique_common>
                 <ambient>
                     <color sid="ambient_light_rgb">0.05 0.05 0.05</color>
@@ -3836,91 +3836,97 @@
     </library_nodes>
     <library_visual_scenes>
         <visual_scene id="DefaultScene">
-            <node id="polyRender036" name="Render" type="NODE">
-                <instance_light url="#Light-polyRender036" />
+            <node id="polyRender039" name="Render" type="NODE">
+                <instance_light url="#Light-polyRender039" />
             </node>
             <node id="thruster_lightNode" name="thruster_light" type="NODE">
                 <translate sid="translation001">2.911 1.211 -0.25</translate>
-                <rotate sid="rotation013Y">0 1 0 -90</rotate>
-                <rotate sid="rotation013X">1 0 0 -135</rotate>
-                <rotate sid="rotation013Z">0 0 1 0</rotate>
-                <scale sid="scale024">1 1 1</scale>
-            </node>
-            <node id="thruster_light__2_Node" name="thruster_light__2_" type="NODE">
-                <translate sid="translation002">-2.911 -1.511 -0.25</translate>
-                <rotate sid="rotation014Y">0 1 0 90</rotate>
-                <rotate sid="rotation014X">1 0 0 -225</rotate>
-                <rotate sid="rotation014Z">0 0 1 0</rotate>
-                <scale sid="scale025">1 1 1</scale>
-            </node>
-            <node id="thruster_light__3_Node" name="thruster_light__3_" type="NODE">
-                <translate sid="translation003">2.911 -1.511 -0.25</translate>
                 <rotate sid="rotation015Y">0 1 0 -90</rotate>
-                <rotate sid="rotation015X">1 0 0 -225</rotate>
+                <rotate sid="rotation015X">1 0 0 -135</rotate>
                 <rotate sid="rotation015Z">0 0 1 0</rotate>
                 <scale sid="scale026">1 1 1</scale>
             </node>
-            <node id="thruster_light__4_Node" name="thruster_light__4_" type="NODE">
-                <translate sid="translation004">-2.911 1.211 -0.25</translate>
+            <node id="thruster_light__2_Node" name="thruster_light__2_" type="NODE">
+                <translate sid="translation002">-2.911 -1.511 -0.25</translate>
                 <rotate sid="rotation016Y">0 1 0 90</rotate>
-                <rotate sid="rotation016X">1 0 0 -135</rotate>
+                <rotate sid="rotation016X">1 0 0 -225</rotate>
                 <rotate sid="rotation016Z">0 0 1 0</rotate>
                 <scale sid="scale027">1 1 1</scale>
             </node>
-            <node id="thruster_light__5_Node" name="thruster_light__5_" type="NODE">
-                <translate sid="translation005">-2.911 1.211 8.75</translate>
-                <rotate sid="rotation017Y">0 1 0 90</rotate>
-                <rotate sid="rotation017X">1 0 0 -135</rotate>
+            <node id="thruster_light__3_Node" name="thruster_light__3_" type="NODE">
+                <translate sid="translation003">2.911 -1.511 -0.25</translate>
+                <rotate sid="rotation017Y">0 1 0 -90</rotate>
+                <rotate sid="rotation017X">1 0 0 -225</rotate>
                 <rotate sid="rotation017Z">0 0 1 0</rotate>
                 <scale sid="scale028">1 1 1</scale>
             </node>
-            <node id="thruster_light__6_Node" name="thruster_light__6_" type="NODE">
-                <translate sid="translation006">-2.911 -1.511 8.75</translate>
+            <node id="thruster_light__4_Node" name="thruster_light__4_" type="NODE">
+                <translate sid="translation004">-2.911 1.211 -0.25</translate>
                 <rotate sid="rotation018Y">0 1 0 90</rotate>
-                <rotate sid="rotation018X">1 0 0 -225</rotate>
+                <rotate sid="rotation018X">1 0 0 -135</rotate>
                 <rotate sid="rotation018Z">0 0 1 0</rotate>
                 <scale sid="scale029">1 1 1</scale>
             </node>
-            <node id="thruster_light__7_Node" name="thruster_light__7_" type="NODE">
-                <translate sid="translation007">2.911 -1.511 8.75</translate>
-                <rotate sid="rotation019Y">0 1 0 -90</rotate>
-                <rotate sid="rotation019X">1 0 0 -225</rotate>
+            <node id="thruster_light__5_Node" name="thruster_light__5_" type="NODE">
+                <translate sid="translation005">-2.911 1.211 8.75</translate>
+                <rotate sid="rotation019Y">0 1 0 90</rotate>
+                <rotate sid="rotation019X">1 0 0 -135</rotate>
                 <rotate sid="rotation019Z">0 0 1 0</rotate>
                 <scale sid="scale030">1 1 1</scale>
             </node>
-            <node id="thruster_light__8_Node" name="thruster_light__8_" type="NODE">
-                <translate sid="translation008">2.911 1.211 8.75</translate>
-                <rotate sid="rotation020Y">0 1 0 -90</rotate>
-                <rotate sid="rotation020X">1 0 0 -135</rotate>
+            <node id="thruster_light__6_Node" name="thruster_light__6_" type="NODE">
+                <translate sid="translation006">-2.911 -1.511 8.75</translate>
+                <rotate sid="rotation020Y">0 1 0 90</rotate>
+                <rotate sid="rotation020X">1 0 0 -225</rotate>
                 <rotate sid="rotation020Z">0 0 1 0</rotate>
                 <scale sid="scale031">1 1 1</scale>
             </node>
+            <node id="thruster_light__7_Node" name="thruster_light__7_" type="NODE">
+                <translate sid="translation007">2.911 -1.511 8.75</translate>
+                <rotate sid="rotation021Y">0 1 0 -90</rotate>
+                <rotate sid="rotation021X">1 0 0 -225</rotate>
+                <rotate sid="rotation021Z">0 0 1 0</rotate>
+                <scale sid="scale032">1 1 1</scale>
+            </node>
+            <node id="thruster_light__8_Node" name="thruster_light__8_" type="NODE">
+                <translate sid="translation008">2.911 1.211 8.75</translate>
+                <rotate sid="rotation022Y">0 1 0 -90</rotate>
+                <rotate sid="rotation022X">1 0 0 -135</rotate>
+                <rotate sid="rotation022Z">0 0 1 0</rotate>
+                <scale sid="scale033">1 1 1</scale>
+            </node>
             <node id="thruster__2_Node" name="thruster__2_" type="NODE">
                 <translate sid="translation009">-2 0 9.85</translate>
-                <scale sid="scale032">4 4 4</scale>
+                <scale sid="scale034">4 4 4</scale>
             </node>
             <node id="thruster__3_Node" name="thruster__3_" type="NODE">
                 <translate sid="translation010">2 0 9.85</translate>
-                <scale sid="scale033">4 4 4</scale>
+                <scale sid="scale035">4 4 4</scale>
+            </node>
+            <node id="navlight_red_1Node" name="navlight_red_1" type="NODE">
+                <translate sid="translation011">-6.45 -0.15 5.84</translate>
+            </node>
+            <node id="navlight_green_1Node" name="navlight_green_1" type="NODE">
+                <translate sid="translation012">6.45 -0.15 5.84</translate>
             </node>
             <node id="Geometry-MeshNode" name="Mesh" type="NODE">
-                <rotate sid="rotation021Y">0 1 0 -90</rotate>
-                <rotate sid="rotation021X">1 0 0 0</rotate>
-                <rotate sid="rotation021Z">0 0 1 0</rotate>
+                <rotate sid="rotation023Y">0 1 0 -90</rotate>
+                <rotate sid="rotation023X">1 0 0 0</rotate>
+                <rotate sid="rotation023Z">0 0 1 0</rotate>
                 <instance_geometry url="#Geometry-Mesh" />
             </node>
             <node id="Camera-CameraNode" name="Camera" type="NODE">
-                <translate sid="translation011">0 0.75 4</translate>
-                <rotate sid="rotation022Y">0 1 0 0</rotate>
-                <rotate sid="rotation022X">1 0 0 -5</rotate>
-                <rotate sid="rotation022Z">0 0 1 0</rotate>
+                <translate sid="translation013">0 0.75 4</translate>
+                <rotate sid="rotation024Y">0 1 0 0</rotate>
+                <rotate sid="rotation024X">1 0 0 -5</rotate>
+                <rotate sid="rotation024Z">0 0 1 0</rotate>
                 <instance_camera url="#Camera-Camera" />
             </node>
             <node id="Light-Directional_LightNode" name="Directional_Light" type="NODE">
-                <translate sid="translation012">-2 2 2</translate>
-                <rotate sid="rotation023Y">0 1 0 -45</rotate>
-                <rotate sid="rotation023X">1 0 0 -30</rotate>
-                <rotate sid="rotation023Z">0 0 1 0</rotate>
+                <translate sid="translation014">-2 2 2</translate>
+                <rotate sid="rotation025Y">0 1 0 -45</rotate>
+                <rotate sid="rotation025X">1 0 0 -30</rotate>
+                <rotate sid="rotation025Z">0 0 1 0</rotate>
                 <instance_light url="#Light-Directional_Light" />
             </node>
             <extra>
