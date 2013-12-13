@@ -1080,7 +1080,11 @@ void Pi::MainLoop()
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
 		Pi::renderer->EndFrame();
-		Pi::renderer->PostProcessFrame();
+		Graphics::PostProcessingMode pp_mode = Graphics::POSTPROCESS_GAME;
+		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
+			pp_mode = Graphics::POSTPROCESS_GUI;
+		}
+		Pi::renderer->PostProcessFrame(pp_mode);
 
 		if( DrawGUI ) {
 			Gui::Draw();

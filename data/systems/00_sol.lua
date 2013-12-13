@@ -80,6 +80,9 @@ local earth_starports = {
 	CustomSystemBody:new('Brasilia', 'STARPORT_SURFACE')
 		:latitude(math.deg2rad(-15.5))
 		:longitude(math.deg2rad(48)),
+	CustomSystemBody:new('Tokyo', 'STARPORT_SURFACE')
+		:latitude(math.deg2rad(35.5248))
+		:longitude(math.deg2rad(-136.8115)),
 	CustomSystemBody:new('Los Angeles', 'STARPORT_SURFACE')
 		:latitude(math.deg2rad(34))
 		:longitude(math.deg2rad(118)),
