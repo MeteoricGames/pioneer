@@ -104,9 +104,9 @@ void main(void)
 #ifdef ATMOSPHERE
 		float sn = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
 		float atmosDensity = geosphereAtmosFogDensity*80000.0;
+		float atmosDist = geosphereScale * (length(eyepos) - atmosStart)*0.5;
 
 		{
-		float atmosDist = geosphereScale * (length(eyepos) - atmosStart)*0.5;
 
 		// a&b scaled so length of 1.0 means planet surface.
 		vec3 a = (atmosStart * eyenorm - geosphereCenter) / geosphereScaledRadius;
@@ -130,10 +130,10 @@ void main(void)
 		//Specular reflection
 		vec3 L = normalize(gl_LightSource[i].position.xyz - eyepos); 
 		vec3 E = normalize(-eyepos);
-		vec3 R = normalize(-reflect(L,tnorm)); 
+		vec3 R = normalize(-reflect(L,tnorm));//+(cnoise(vec2(ldprod,ldprod)))));
 		//water only for specular
 		if (vertexColor.b > 0.05 && vertexColor.r < 0.05) {
-			specularReflection += pow(max(dot(R,E),0.0),16.0)*0.6 * INV_NUM_LIGHTS;
+			specularReflection += pow(max(dot(R,E),0.0),16.0)*clamp(1.6-ldprod,0.6,1.6) * INV_NUM_LIGHTS;
 		}
 #endif
 	}
@@ -157,7 +157,8 @@ void main(void)
 		  diff*specularReflection*sunset +
 #endif
 		  (0.02-clamp(fogFactor,0.0,0.01))*diff*ldprod*sunset +	      //increase fog scatter				
-		  (pow((1.0-pow(fogFactor,0.75)),256.0)*0.4*diff*atmosColor)*sunset;  //distant fog.
+		  (pow((1.0-pow(fogFactor,0.75)),256.0)*0.4*diff*atmosColor)*sunset * //distant fog.
+		  clamp(1.0/sqrt(geosphereAtmosFogDensity*10000.0),0.4,1.0);  //darken atmosphere based on density
 #else // atmosphere-less planetoids and dim stars
 	gl_FragColor =
 		material.emission +
