@@ -103,7 +103,7 @@ void main(void)
 		unshadowed = clamp(unshadowed, 0.0, 1.0);
 #ifdef ATMOSPHERE
 		float sn = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
-		float atmosDensity = geosphereAtmosFogDensity*80000.0;
+		float fogNormalFactor = geosphereAtmosFogDensity*80000.0; //fognormals should be 8 times atmosdenisty
 		float atmosDist = geosphereScale * (length(eyepos) - atmosStart)*0.5;
 
 		{
@@ -117,7 +117,7 @@ void main(void)
 
 		vec3 surfaceNorm = mix(normalize(sn*eyenorm - geosphereCenter),tnorm,fogFactor);
 
-		vec3 n  = mix(tnorm,surfaceNorm,clamp(atmosDensity,0.0,1.0)); //mix eye normals in dense atmosphere.
+		vec3 n  = mix(tnorm,surfaceNorm,clamp(fogNormalFactor,0.0,1.0)); //mix eye normals in dense atmosphere.
 		nDotVP  = max(0.0, dot(n, normalize(vec3(gl_LightSource[i].position))));
 		nnDotVP = max(0.0, dot(n, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
 #else
@@ -130,7 +130,7 @@ void main(void)
 		//Specular reflection
 		vec3 L = normalize(gl_LightSource[i].position.xyz - eyepos); 
 		vec3 E = normalize(-eyepos);
-		vec3 R = normalize(-reflect(L,tnorm));//+(cnoise(vec2(ldprod,ldprod)))));
+		vec3 R = normalize(-reflect(L,tnorm));
 		//water only for specular
 		if (vertexColor.b > 0.05 && vertexColor.r < 0.05) {
 			specularReflection += pow(max(dot(R,E),0.0),16.0)*clamp(1.6-ldprod,0.6,1.6) * INV_NUM_LIGHTS;
