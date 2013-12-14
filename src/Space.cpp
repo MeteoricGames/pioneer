@@ -436,7 +436,7 @@ static void RelocateStarportIfUnderwaterOrBuried(SystemBody *sbody, Frame *frame
 		}
 
 		// check if underwater
-		const bool starportUnderwater = (height <= 5.0 || height > 50.0);
+		const bool starportUnderwater = (height <= 0.0);
 
 		//printf("%s: try no: %i, Match found: %i, best variation in previous results %f, variationMax this try: %f, maxHeightVariation: %f, Starport is underwater: %i\n",
 		//	sbody->name.c_str(), tries, (variationWithinLimits && !starportUnderwater), bestVariation, variationMax, maxHeightVariation, starportUnderwater);
