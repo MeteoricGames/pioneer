@@ -186,6 +186,10 @@ void Ship::Init()
 {
 	m_invulnerable = false;
 
+	if(m_type->cockpitName.length() > 0) {
+		m_cockpit.reset(new ShipCockpit(*m_type));
+	}
+
 	m_navLights.reset(new NavLights(GetModel()));
 	m_navLights->SetEnabled(true);
 
@@ -257,10 +261,6 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_skin.SetRandomColors(Pi::rng);
 	m_skin.SetPattern(Pi::rng.Int32(0, GetModel()->GetNumPatterns()));
 	m_skin.Apply(GetModel());
-
-	if(m_type->cockpitName.length() > 0) {
-		m_cockpit.reset(new ShipCockpit(*m_type));
-	}
 
 	Init();
 	SetController(new ShipController());
