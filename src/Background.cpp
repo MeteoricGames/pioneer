@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <SDL_stdinc.h>
 
 using namespace Graphics;
 
@@ -27,7 +28,7 @@ namespace Background
 
 void BackgroundElement::SetIntensity(float intensity)
 {
-	m_material->emissive = Color(intensity);
+	m_material->emissive = Color(intensity*255);
 }
 
 UniverseBox::UniverseBox(Graphics::Renderer *r)
@@ -171,7 +172,7 @@ void Starfield::Fill(Uint32 seed)
 
 	//fill the array
 	for (int i=0; i<BG_STAR_MAX; i++) {
-		float col = float(rand.Double(0.2,0.7));
+		Uint8 col = rand.Double(0.2,0.7)*255;
 
 		// this is proper random distribution on a sphere's surface
 		const float theta = float(rand.Double(0.0, 2.0*M_PI));
@@ -181,7 +182,7 @@ void Starfield::Fill(Uint32 seed)
 				1000.0f * sqrt(1.0f - u*u) * cos(theta),
 				1000.0f * u,
 				1000.0f * sqrt(1.0f - u*u) * sin(theta)
-			), Color(col, col, col,	1.f)
+			), Color(col, col, col,	255)
 		);
 	}
 }
@@ -233,8 +234,8 @@ MilkyWay::MilkyWay(Graphics::Renderer *r)
 	VertexArray *bottom = new VertexArray(ATTRIB_POSITION | ATTRIB_DIFFUSE);
 	VertexArray *top = new VertexArray(ATTRIB_POSITION | ATTRIB_DIFFUSE);
 
-	const Color dark(0.f);
-	const Color bright(0.05f, 0.05f, 0.05f, 0.05f);
+	const Color dark(0);
+	const Color bright(13, 13, 13, 13);
 
 	//bottom
 	float theta;

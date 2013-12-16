@@ -6,6 +6,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/VertexArray.h"
 #include "gui/Gui.h"
+#include <SDL_stdinc.h>
 
 using namespace Graphics;
 
@@ -64,7 +65,7 @@ void Star::Render(Graphics::Renderer *renderer, const Camera *camera, const vect
 
 	renderer->SetTransform(trans * rot);
 
-	const float *col = StarSystem::starRealColors[GetSystemBody()->type];
+	const Uint8 *col = StarSystem::starRealColors[GetSystemBody()->type];
 
 	Random(rand);
 
@@ -75,8 +76,8 @@ void Star::Render(Graphics::Renderer *renderer, const Camera *camera, const vect
 	VertexArray vb(ATTRIB_POSITION | ATTRIB_DIFFUSE); //outer
 	VertexArray vc(ATTRIB_POSITION | ATTRIB_DIFFUSE); //outer2 
 
-	const Color bright(col[0], col[1], col[2], 1.f-1.f/(rad*0.9f));   
-	const Color dark(0.0f, 0.0f, 0.0f, 0.f);
+	const Color bright(col[0], col[1], col[2], 255-255/(rad*230));   
+	const Color dark(0);
 
 	va.Add(vector3f(0.f), bright*0.75);  
 	vb.Add(vector3f(0.f,0.f,0.01f), bright*0.45);
