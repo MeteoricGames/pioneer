@@ -15,7 +15,7 @@ namespace Graphics {
 		public:
 			SkyboxMaterial() {
 				texture0 = nullptr;
-				fSkyboxFactor = 0.8;
+				fSkyboxFactor = 0.8f;
 			}
 
 			Program *CreateProgram(const MaterialDescriptor &) {
