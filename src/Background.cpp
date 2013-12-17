@@ -128,6 +128,12 @@ void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Random* randomizer)
 	}
 }
 
+void UniverseBox::SetIntensity(float intensity)
+{
+	fIntensity = intensity;
+	m_material->specialParameter0 = &fIntensity;
+}
+
 Starfield::Starfield(Graphics::Renderer *r)
 {
 	Init(r);

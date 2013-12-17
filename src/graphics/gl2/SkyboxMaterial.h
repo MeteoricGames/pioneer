@@ -15,7 +15,9 @@ namespace Graphics {
 		public:
 			SkyboxMaterial() {
 				texture0 = nullptr;
+				specialParameter0 = nullptr;
 				fSkyboxFactor = 0.8f;
+				fIntensity = 1.0f;
 			}
 
 			Program *CreateProgram(const MaterialDescriptor &) {
@@ -27,7 +29,10 @@ namespace Graphics {
 				if(texture0) {
 					m_program->texture0.Set(texture0, 0);
 				}
-				m_program->shininess.Set(fSkyboxFactor * emissive.r * (1.f/255.f));  //XXX hack emissive into ub range.
+				if(specialParameter0) {
+					fIntensity = *(static_cast<float*>(specialParameter0));
+				}
+				m_program->shininess.Set(fSkyboxFactor * fIntensity);
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
 				glEnable(GL_DEPTH_TEST);
 				glDepthMask(GL_FALSE);
@@ -38,8 +43,8 @@ namespace Graphics {
 				m_program->Unuse();
 			}
 			
-			// Skybox multiplier
 			float fSkyboxFactor;
+			float fIntensity;
 		};
 	}
 }
