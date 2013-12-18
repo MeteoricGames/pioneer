@@ -1347,7 +1347,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 {
 	if (!ProcessChild()) return false;
 	const double time_step = Pi::game->GetTimeStep();
-	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 8000.0;
+	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 8000.0 + m_obstructor->GetPhysRadius()*0.01;
 	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
 		m_ship->GetPosition();
 	vector3d ship_to_target = m_targetPosition - m_ship->GetPosition();
@@ -1364,14 +1364,14 @@ bool AICmdTransitAround::TimeStepUpdate()
 	if(m_obstructor->IsType(Object::TERRAINBODY)) {
 		if(Pi::worldView->IsAltitudeAvailable()) {
 			m_alt = Pi::worldView->GetAltitude();
-			if(m_alt < TRANSIT_GRAVITY_RANGE_1 || m_alt > transit_altitude + 7000.0) { // Transit range is 13km space above gravity bubble
+			if(m_alt < TRANSIT_GRAVITY_RANGE_1 + m_obstructor->GetPhysRadius()*0.01 || m_alt > transit_altitude + std::max(m_obstructor->GetPhysRadius() * 0.005, 7000.0)) { // Transit range is 13km space above gravity bubble
 				m_warmUpTime = 2.0;
 				m_state = AITA_ALTITUDE;
 				double curve_factor = abs(m_alt - transit_altitude) / 10000.0;
-				if(m_alt < TRANSIT_GRAVITY_RANGE_1) {
+				if(m_alt < TRANSIT_GRAVITY_RANGE_1 + m_obstructor->GetPhysRadius()*0.01) {
 					//velocity_vector = ((up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
 					velocity_vector = ((up_vector * curve_factor) + velocity_vector).Normalized();
-				} else if(m_alt > transit_altitude + 7000.0) {
+				} else if(m_alt > transit_altitude + std::max(m_obstructor->GetPhysRadius() * 0.005, 7000.0)) {
 					//velocity_vector = ((-up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
 					velocity_vector = (-(up_vector * curve_factor) + velocity_vector).Normalized();
 				}
@@ -1385,13 +1385,13 @@ bool AICmdTransitAround::TimeStepUpdate()
 	}
 	// Adjust velocity slightly to follow the exact transit altitude arc
 	if(m_alt > transit_altitude) {
-		if(m_alt > transit_altitude + 6000.0) {
+		if(m_alt > transit_altitude + std::max(m_obstructor->GetPhysRadius()*0.004,6000.0)) {
 			velocity_vector = velocity_vector + (-up_vector * 0.005);
 		} else {
 			velocity_vector = velocity_vector + (-up_vector * 0.001);
 		}
 	} else if(m_alt < transit_altitude) {
-		if(m_alt < transit_altitude - 6000.0) {
+		if(m_alt < transit_altitude - std::max(m_obstructor->GetPhysRadius()*0.004,6000.0)) {
 			velocity_vector = velocity_vector + (up_vector * 0.005);
 		} else {
 			velocity_vector = velocity_vector + (up_vector * 0.001);
