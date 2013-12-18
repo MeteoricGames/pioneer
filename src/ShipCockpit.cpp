@@ -44,6 +44,7 @@ void ShipCockpit::Update(float timeStep)
 	}
 	vector3d rot_axis = cur_dir.Cross(vdDir).Normalized();
 	vector3d yaw_axis = Pi::player->GetOrient().VectorY().Normalized();
+	vector3d pitch_axis = Pi::player->GetOrient().VectorX().Normalized();
 	float dot = cur_dir.Dot(vdDir);
 	float angle = acos(dot);
 
@@ -59,12 +60,23 @@ void ShipCockpit::Update(float timeStep)
 		vdDir = cur_dir;
 		if(angle >= 0.0f) {
 			vdDir.ArbRotate(rot_axis, angle);
+			// Pitch
+			vector3d yz_proj = (vdDir - (vdDir.Dot(pitch_axis) * pitch_axis)).Normalized();
+			float pitch_cos = yz_proj.Dot(cur_dir);
+			float pitch_angle = 0.0f;
+			if(pitch_cos < 1.0f) {
+				pitch_angle = acos(pitch_cos);
+				if(rot_axis.Dot(pitch_axis) < 0) {
+					pitch_angle = -pitch_angle;
+				}
+				matTransform.RotateX(-pitch_angle);
+			}
 			// Yaw
 			vector3d xz_proj = (vdDir - (vdDir.Dot(yaw_axis) * yaw_axis)).Normalized();
 			float yaw_cos = xz_proj.Dot(cur_dir);
 			float yaw_angle = 0.0f;
 			if(yaw_cos < 1.0f) {
-				yaw_angle = acos(yaw_cos), M_PI;
+				yaw_angle = acos(yaw_cos);
 				if(rot_axis.Dot(yaw_axis) < 0) {
 					yaw_angle = -yaw_angle;
 				}
