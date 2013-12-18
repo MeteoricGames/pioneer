@@ -310,6 +310,7 @@ protected:
 	float m_ecmRecharge;
 
 	ShipController *m_controller;
+	std::unique_ptr<ShipCockpit> m_cockpit;
 
 private:
 	float GetECMRechargeTime();
@@ -330,7 +331,6 @@ private:
 	shipstats_t m_stats;
 	const ShipType *m_type;
 	SceneGraph::ModelSkin m_skin;
-	std::unique_ptr<ShipCockpit> m_cockpit;
 
 	FlightState m_flightState;
 	bool m_testLanded;
