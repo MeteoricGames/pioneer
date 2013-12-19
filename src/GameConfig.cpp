@@ -39,6 +39,7 @@ GameConfig::GameConfig()
 	map["CockpitCamera"] = "1";
 	map["WorkerThreads"] = "0";
 	map["SpeedLines"] = "0";
+	map["TargetIndicators"] = "0";
 
 #ifdef _WIN32
 	map["RedirectStdio"] = "1";

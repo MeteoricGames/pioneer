@@ -98,6 +98,10 @@ ui.templates.Settings = function (args)
 		local speedLinesCheckBox = optionCheckBox(
 			Engine.GetDisplaySpeedLines, Engine.SetDisplaySpeedLines,
 			l.DISPLAY_SPEED_LINES)
+			
+		local targetIndicatorsCheckBox = optionCheckBox(
+			Engine.GetDisplayTargetIndicators, Engine.SetDisplayTargetIndicators,
+			"Display target indicators")
 
 		local fullScreenCheckBox = optionCheckBox(
 			Engine.GetFullscreen, Engine.SetFullscreen,
@@ -121,6 +125,7 @@ ui.templates.Settings = function (args)
 				cityDetailDropDown,
 				navTunnelsCheckBox,
 				speedLinesCheckBox,
+				targetIndicatorsCheckBox,
 			})))
 	end
 
