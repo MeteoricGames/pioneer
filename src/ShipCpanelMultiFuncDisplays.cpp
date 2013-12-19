@@ -53,11 +53,18 @@ MsgLogWidget::MsgLogWidget()
 void MsgLogWidget::Update()
 {
 	if (m_curMsgType != NONE) {
+
 		// has it expired?
 		bool expired = (SDL_GetTicks() - m_msgAge > 5000);
 
 		if (expired || ((m_curMsgType == NOT_IMPORTANT) && !m_msgQueue.empty())) {
 			ShowNext();
+		}
+
+		// Typewriter style
+		Uint8 uu = (SDL_GetTicks() - m_msgAge) * 0.05;
+		if (uu>0 && uu <= m_typeText.size()) {
+			m_msgLabel->SetText(m_typeText.substr(0,uu)+"              ");
 		}
 	} else {
 		ShowNext();
@@ -95,11 +102,11 @@ void MsgLogWidget::ShowNext()
 		}
 
 		if (msg.sender == "") {
-			m_msgLabel->SetText("#0f0" + msg.message);
+			m_typeText = std::string("#0f0") + msg.message;
 		} else {
-			m_msgLabel->SetText(
+			m_typeText =
 				std::string("#ca0") + stringf(Lang::MESSAGE_FROM_X, formatarg("sender", msg.sender)) +
-				std::string("\n#0f0") + msg.message);
+				std::string("\n#0f0") + msg.message;
 		}
 		m_msgAge = SDL_GetTicks();
 		m_curMsgType = msg.type;
