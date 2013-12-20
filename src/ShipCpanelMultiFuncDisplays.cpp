@@ -54,8 +54,13 @@ void MsgLogWidget::Update()
 {
 	if (m_curMsgType != NONE) {
 
+		//set expiry
+		Uint32 timeout = 0;
+		if (m_curMsgType == MUST_SEE) timeout=10000;
+		else timeout=5000;
+
 		// has it expired?
-		bool expired = (SDL_GetTicks() - m_msgAge > 5000);
+		bool expired = (SDL_GetTicks() - m_msgAge > timeout);
 
 		if (expired || ((m_curMsgType == NOT_IMPORTANT) && !m_msgQueue.empty())) {
 			ShowNext();
