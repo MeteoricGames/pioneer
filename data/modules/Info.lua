@@ -11,7 +11,8 @@ end
 
 local onEnterSystem = function (ship)
 	if ship~=Game.player then return end
-	Comms.ImportantInfo("System : "..Game.system.path:GetStarSystem().name.."\nPopulation :"..round(Game.system.population,2).." billion\nSecurity Rating : "..round(1-Game.system.lawlessness,2).."")
-	Comms.Info(" ")
+	Comms.ImportantInfo("System : "..Game.system.path:GetStarSystem().name..
+		"\nFaction : "..Game.system.faction.name.."\nPopulation : "..round(Game.system.population,2)..
+		" billion\nSecurity Rating : "..round(1-Game.system.lawlessness,2).."")
 end
 Event.Register("onEnterSystem", onEnterSystem)
