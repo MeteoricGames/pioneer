@@ -62,9 +62,9 @@ void MsgLogWidget::Update()
 		}
 
 		// Typewriter style
-		Uint8 uu = (SDL_GetTicks() - m_msgAge) * 0.05;
-		if (uu>0 && uu <= m_typeText.size()) {
-			m_msgLabel->SetText(m_typeText.substr(0,uu)+"              ");
+		Uint8 typer = (SDL_GetTicks() - m_msgAge) * 0.05;
+		if (typer > 0 && !expired) {
+			m_msgLabel->SetText(m_typeText.substr(0, typer)+"              ");
 		}
 	} else {
 		ShowNext();
@@ -117,7 +117,7 @@ void MsgLogWidget::ShowNext()
 void MsgLogWidget::GetSizeRequested(float size[2])
 {
 	size[0] = 400;
-	size[1] = 64;
+	size[1] = 400;
 }
 
 /////////////////////////////////
