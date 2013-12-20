@@ -13,7 +13,7 @@ static const float COCKPIT_LAG_MAX_ANGLE = 7.5f;
 static const float COCKPIT_ROTATION_INTERP_MULTIPLIER = 5.0f;
 static const float COCKPIT_ACCEL_INTERP_MULTIPLIER = 0.5f;
 static const float COCKPIT_MAX_GFORCE = 10000.0f;
-static const float COCKPIT_ACCEL_OFFSET = 0.125f;
+static const float COCKPIT_ACCEL_OFFSET = 0.075f;
 
 enum CockpitLagEasing
 {
@@ -37,7 +37,9 @@ public:
 
 protected:
 	void Init();
-	float Ease(float a, float b, float delta);
+	float CalculateSignedForwardVelocity(vector3d forward, vector3d velocity);
+	float EaseOut(float a, float b, float delta);
+	float EaseIn(float a, float b, float delta);
 
 private:
 	ShipCockpit(const ShipCockpit&);
@@ -51,7 +53,6 @@ private:
 	vector3d vdYaw;			// cockpit yaw vector
 	float fRInterp;			// for rotation interpolation
 	float fTInterp;			// for translation interpolation
-	float fGForce;			// current ship gforce
 	float fOffset;			// current ship offset due to acceleration effect
 	float fShipVel;			// current ship velocity
 	CockpitLagEasing eEasing; // Easing function for lag recover
