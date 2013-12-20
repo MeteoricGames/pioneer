@@ -271,7 +271,7 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	m_scanner->ShowAll();
 
 	//XXX hack to keep InfoBanner on
-	Add(m_inflog, 300, -300);
+	Add(m_inflog, 350, -340);
 	m_inflog->ShowAll();
 }
 
