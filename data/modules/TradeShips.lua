@@ -248,9 +248,9 @@ local getRandomStarport = function (ship, current)
 				starport = orbital_starports[i]
 				if starport.numDocks > 100 then break end
 			end
-			if ship~=nil and starport.numDocks <= 100 then getSystemAndJump(ship) end
+			if ship~=nil and starport.numDocks <= 100 then trade_ships[ship]['status'] = 'outbound' end
 		else
-			if ship~=nil then getSystemAndJump(ship) end
+			if ship~=nil then trade_ships[ship]['status'] = 'outbound' end
 			return nil
 		end
 	end
