@@ -904,7 +904,7 @@ void Pi::Start()
 
 	//XXX global ambient colour hack to make explicit the old default ambient colour dependency
 	// for some models
-	Pi::renderer->SetAmbientColor(Color(0.2f, 0.2f, 0.2f, 1.f));
+	Pi::renderer->SetAmbientColor(Color(51, 51, 51, 255));
 
 	ui->Layout();
 
@@ -1080,7 +1080,11 @@ void Pi::MainLoop()
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
 		Pi::renderer->EndFrame();
-		Pi::renderer->PostProcessFrame();
+		Graphics::PostProcessingMode pp_mode = Graphics::POSTPROCESS_GAME;
+		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
+			pp_mode = Graphics::POSTPROCESS_GUI;
+		}
+		Pi::renderer->PostProcessFrame(pp_mode);
 
 		if( DrawGUI ) {
 			Gui::Draw();

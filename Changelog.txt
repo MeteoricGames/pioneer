@@ -2,11 +2,21 @@ December 2013
 
    * Minor changes and tweaks
      * Make file type (file extension) checks case insensitive (#2328, #2563)
+     * Optimise GL matrix operations (improves FPS) (#2541, #2572)
+     * Rewrote UI.Box layout to constrain children to the allocated area (#2575)
+
+   * Fixes
+     * Fix GL color depth selection (forces alpha channel, which fixes
+       progress bars) (#2573)
+
+   * Script and UI API changes
+     * Add table row alignment, Table:SetRowAlignment (#2579)
 
    * Internal changes
      * Remove legacy (non-shader) renderer (#2568)
      * Single frame profiler (#2541, #2569)
      * Avoid some unnecessary string copies (#2541)
+     * Replace most uses of Color4f with Color4ub (#2574, #2327)
 
 November 2013
 

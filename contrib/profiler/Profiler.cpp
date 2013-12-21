@@ -12,13 +12,12 @@
 	#include <windows.h>
 #else
 	#define copystring strdup
-	#include <unistd.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
-#include <malloc.h>
-#include <time.h>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <cstdlib>
 
 #include "Profiler.h"
 
@@ -39,8 +38,12 @@
 	#undef inline
 	#define inline __forceinline
 #else
-	#include <sched.h>
-	#define YIELD() sched_yield();
+	#if defined(__MINGW32__)
+		#define YIELD() Sleep(0);
+	#else
+		#include <sched.h>
+		#define YIELD() sched_yield();
+	#endif
 	#define PRINTFU64() "%llu"
 	#define PATHSLASH() '/'
 	#define threadlocal __thread

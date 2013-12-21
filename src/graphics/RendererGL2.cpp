@@ -86,7 +86,12 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 , m_useCompressedTextures(false)
 , m_invLogZfarPlus1(0.f)
 , m_activeRenderTarget(0)
+, m_matrixMode(MatrixMode::MODELVIEW)
 {
+	for(Uint32 i = 0; i < 4; i++) {
+		m_currentViewport[i] = 0;
+	}
+
 	const bool useDXTnTextures = vs.useTextureCompression && glewIsSupported("GL_EXT_texture_compression_s3tc");
 	m_useCompressedTextures = useDXTnTextures;
 
@@ -101,6 +106,10 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glAlphaFunc(GL_GREATER, 0.5f);
+
+	glMatrixMode(GL_MODELVIEW);
+	m_modelViewStack.push(matrix4x4f::Identity());
+	m_projectionStack.push(matrix4x4f::Identity());
 
 	SetClearColor(Color(0.f));
 	SetViewport(0, 0, m_width, m_height);
@@ -216,33 +225,42 @@ bool RendererGL2::EndFrame()
 	return true;
 }
 
-bool RendererGL2::PostProcessFrame()
+bool RendererGL2::PostProcessFrame(PostProcessingMode pp_mode)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-	// HBlur pass
-	SetRenderTarget(hblurPassRT);
-	glClear(GL_COLOR_BUFFER_BIT);
-	hblurMtrl->texture0 = scenePassRT->GetColorTexture();
-	hblurMtrl->Apply();
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	hblurMtrl->Unapply();
-	// VBlur pass
-	SetRenderTarget(vblurPassRT);
-	glClear(GL_COLOR_BUFFER_BIT);
-	vblurMtrl->texture0 = hblurPassRT->GetColorTexture();
-	vblurMtrl->Apply();
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	vblurMtrl->Unapply();
-	// Combine pass
-	SetRenderTarget(0);
-	bloomMtrl->texture0 = scenePassRT->GetColorTexture();
-	bloomMtrl->texture1 = vblurPassRT->GetColorTexture();
-	bloomMtrl->Apply();
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	bloomMtrl->Unapply();
+	if(pp_mode == POSTPROCESS_GAME) {
+		// HBlur pass
+		SetRenderTarget(hblurPassRT);
+		glClear(GL_COLOR_BUFFER_BIT);
+		hblurMtrl->texture0 = scenePassRT->GetColorTexture();
+		hblurMtrl->Apply();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		hblurMtrl->Unapply();
+		// VBlur pass
+		SetRenderTarget(vblurPassRT);
+		glClear(GL_COLOR_BUFFER_BIT);
+		vblurMtrl->texture0 = hblurPassRT->GetColorTexture();
+		vblurMtrl->Apply();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		vblurMtrl->Unapply();
+		// Combine pass
+		SetRenderTarget(0);
+		bloomMtrl->texture0 = scenePassRT->GetColorTexture();
+		bloomMtrl->texture1 = vblurPassRT->GetColorTexture();
+		bloomMtrl->Apply();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		bloomMtrl->Unapply();
+	} else if(pp_mode == POSTPROCESS_GUI) {
+		// Just draw directly
+		SetRenderTarget(0);
+		texFullscreenQuadMtrl->texture0 = scenePassRT->GetColorTexture();
+		texFullscreenQuadMtrl->Apply();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		texFullscreenQuadMtrl->Unapply();
+	}
 
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -275,6 +293,7 @@ static std::string glerr_to_string(GLenum err)
 
 bool RendererGL2::SwapBuffers()
 {
+	PROFILE_SCOPED()
 #ifndef NDEBUG
 	// Check if an error occurred during the frame. This is not very useful for
 	// determining *where* the error happened. For that purpose, try GDebugger or
@@ -331,6 +350,10 @@ bool RendererGL2::SetClearColor(const Color &c)
 
 bool RendererGL2::SetViewport(int x, int y, int width, int height)
 {
+	m_currentViewport[0] = x;
+	m_currentViewport[1] = y;
+	m_currentViewport[2] = width;
+	m_currentViewport[3] = height;
 	glViewport(x, y, width, height);
 	return true;
 }
@@ -338,14 +361,9 @@ bool RendererGL2::SetViewport(int x, int y, int width, int height)
 bool RendererGL2::SetTransform(const matrix4x4d &m)
 {
 	PROFILE_SCOPED()
-	//XXX this is not pretty but there's no standard way of converting between them.
-	for (int i=0; i<16; ++i) {
-		m_currentTransform[i] = m[i];
-	}
-	//XXX you might still need the occasional push/pop
-	//GL2+ or ES2 renderers can forego the classic matrix stuff entirely and use uniforms
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixd(&m[0]);
+	matrix4x4f mf;
+	matrix4x4dtof(m, mf);
+	return SetTransform(mf);
 	return true;
 }
 
@@ -353,9 +371,9 @@ bool RendererGL2::SetTransform(const matrix4x4f &m)
 {
 	PROFILE_SCOPED()
 	//same as above
-	m_currentTransform = m;
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(&m[0]);
+	m_modelViewStack.top() = m;
+	SetMatrixMode(MatrixMode::MODELVIEW);
+	LoadMatrix(&m[0]);
 	return true;
 }
 
@@ -368,23 +386,31 @@ bool RendererGL2::SetPerspectiveProjection(float fov, float aspect, float near, 
 
 	Graphics::SetFov(fov);
 
-	double ymax = near * tan(fov * M_PI / 360.0);
-	double ymin = -ymax;
-	double xmin = ymin * aspect;
-	double xmax = ymax * aspect;
+	float ymax = near * tan(fov * M_PI / 360.0);
+	float ymin = -ymax;
+	float xmin = ymin * aspect;
+	float xmax = ymax * aspect;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum(xmin, xmax, ymin, ymax, near, far);
+	const matrix4x4f frustrumMat = matrix4x4f::FrustumMatrix(xmin, xmax, ymin, ymax, near, far);
+	SetProjection(frustrumMat);
 	return true;
 }
 
 bool RendererGL2::SetOrthographicProjection(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
 {
 	PROFILE_SCOPED()
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(xmin, xmax, ymin, ymax, zmin, zmax);
+	const matrix4x4f orthoMat = matrix4x4f::OrthoFrustum(xmin, xmax, ymin, ymax, zmin, zmax);
+	SetProjection(orthoMat);
+	return true;
+}
+
+bool RendererGL2::SetProjection(const matrix4x4f &m)
+{
+	PROFILE_SCOPED()
+	//same as above
+	m_projectionStack.top() = m;
+	SetMatrixMode(MatrixMode::PROJECTION);
+	LoadMatrix(&m[0]);
 	return true;
 }
 
@@ -456,7 +482,7 @@ bool RendererGL2::SetLights(int numlights, const Light *lights)
 
 	//glLight depends on the current transform, but we have always
 	//relied on it being identity when setting lights.
-	glPushMatrix();
+	Graphics::Renderer::MatrixTicket ticket(this, MatrixMode::MODELVIEW);
 	SetTransform(matrix4x4f::Identity());
 
 	m_numLights = numlights;
@@ -472,8 +498,8 @@ bool RendererGL2::SetLights(int numlights, const Light *lights)
 			l.GetType() == Light::LIGHT_DIRECTIONAL ? 0.f : 1.f
 		};
 		glLightfv(GL_LIGHT0+i, GL_POSITION, pos);
-		glLightfv(GL_LIGHT0+i, GL_DIFFUSE, l.GetDiffuse());
-		glLightfv(GL_LIGHT0+i, GL_SPECULAR, l.GetSpecular());
+		glLightfv(GL_LIGHT0+i, GL_DIFFUSE, l.GetDiffuse().ToColor4f());
+		glLightfv(GL_LIGHT0+i, GL_SPECULAR, l.GetSpecular().ToColor4f());
 		glEnable(GL_LIGHT0+i);
 
 		if (l.GetType() == Light::LIGHT_DIRECTIONAL)
@@ -481,8 +507,6 @@ bool RendererGL2::SetLights(int numlights, const Light *lights)
 
 		assert(m_numDirLights < 5);
 	}
-
-	glPopMatrix();
 
 	return true;
 }
@@ -514,7 +538,7 @@ bool RendererGL2::DrawLines(int count, const vector3f *v, const Color *c, LineTy
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(vector3f), v);
-	glColorPointer(4, GL_FLOAT, sizeof(Color), c);
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Color), c);
 	glDrawArrays(t, 0, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -547,30 +571,42 @@ bool RendererGL2::DrawLines2D(int count, const vector2f *v, const Color &c, Line
 	flatColorProg->Use();
 	flatColorProg->diffuse.Set(c);
 	flatColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+
+	glColor4ub(c.r, c.g, c.b, c.a);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(2, GL_FLOAT, sizeof(vector2f), v);
 	glDrawArrays(t, 0, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	flatColorProg->Unuse();
+	glColor4ub(1.f, 1.f, 1.f, 1.f);
+
+	glPopAttrib();
 
 	return true;
 }
 
-bool RendererGL2::DrawPoints(int count, const vector3f *p, const Color *c, float pointSize)
+bool RendererGL2::DrawPoints(int count, const vector3f *points, const Color *colors, float size)
 {
-	if (count < 1 || !p || !c) return false;
+	if (count < 1 || !points || !colors) return false;
 
-	glPointSize(pointSize);
+	glPointSize(size);
 	vtxColorProg->Use();
 	vtxColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, sizeof(vector3f), p);
-	glColorPointer(4, GL_FLOAT, sizeof(Color), c);
+	glVertexPointer(3, GL_FLOAT, 0, points);
+	glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
 	glDrawArrays(GL_POINTS, 0, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	vtxColorProg->Unuse();
+	glPointSize(1.f); // XXX wont't be necessary
+
+	glPopAttrib();
+
+	return true;
 }
 
 bool RendererGL2::DrawTriangles(const VertexArray *v, Material *m, PrimitiveType t)
@@ -613,7 +649,7 @@ bool RendererGL2::DrawPointSprites(int count, const vector3f *positions, Materia
 	SetDepthWrite(false);
 	VertexArray va(ATTRIB_POSITION | ATTRIB_UV0, count * 6);
 
-	matrix4x4f rot(GetCurrentTransform());
+	matrix4x4f rot(GetCurrentModelView());
 	rot.ClearToRotOnly();
 	rot = rot.InverseOf();
 
@@ -702,7 +738,7 @@ void RendererGL2::EnableClientStates(const VertexArray *v)
 		assert(! v->diffuse.empty());
 		m_clientStates.push_back(GL_COLOR_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 0, reinterpret_cast<const GLvoid *>(&v->diffuse[0]));
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, reinterpret_cast<const GLvoid *>(&v->diffuse[0]));
 	}
 	if (v->HasAttrib(ATTRIB_NORMAL)) {
 		assert(! v->normal.empty());
@@ -961,20 +997,20 @@ RenderTarget *RendererGL2::CreateRenderTarget(const RenderTargetDesc &desc)
 // only restoring the things that have changed
 void RendererGL2::PushState()
 {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
+	SetMatrixMode(MatrixMode::PROJECTION);
+	PushMatrix();
+	SetMatrixMode(MatrixMode::MODELVIEW);
+	PushMatrix();
 	glPushAttrib(GL_ALL_ATTRIB_BITS & (~GL_POINT_BIT));
 }
 
 void RendererGL2::PopState()
 {
 	glPopAttrib();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
+	SetMatrixMode(MatrixMode::PROJECTION);
+	PopMatrix();
+	SetMatrixMode(MatrixMode::MODELVIEW);
+	PopMatrix();
 }
 
 static void dump_opengl_value(std::ostream &out, const char *name, GLenum id, int num_elems)
@@ -1081,6 +1117,109 @@ bool RendererGL2::PrintDebugInfo(std::ostream &out)
 #undef DUMP_GL_VALUE2
 
 	return true;
+}
+
+void RendererGL2::SetMatrixMode(MatrixMode mm)
+{
+	PROFILE_SCOPED()
+	if( mm != m_matrixMode ) {
+		switch (mm) {
+			case MatrixMode::MODELVIEW:
+				glMatrixMode(GL_MODELVIEW);
+				break;
+			case MatrixMode::PROJECTION:
+				glMatrixMode(GL_PROJECTION);
+				break;
+		}
+		m_matrixMode = mm;
+	}
+}
+
+void RendererGL2::PushMatrix()
+{
+	PROFILE_SCOPED()
+
+	glPushMatrix();
+	switch(m_matrixMode) {
+		case MatrixMode::MODELVIEW:
+			m_modelViewStack.push(m_modelViewStack.top());
+			break;
+		case MatrixMode::PROJECTION:
+			m_projectionStack.push(m_projectionStack.top());
+			break;
+	}
+}
+
+void RendererGL2::PopMatrix()
+{
+	PROFILE_SCOPED()
+	glPopMatrix();
+	switch(m_matrixMode) {
+		case MatrixMode::MODELVIEW:
+			m_modelViewStack.pop();
+			assert(m_modelViewStack.size());
+			break;
+		case MatrixMode::PROJECTION:
+			m_projectionStack.pop();
+			assert(m_projectionStack.size());
+			break;
+	}
+}
+
+void RendererGL2::LoadIdentity()
+{
+	PROFILE_SCOPED()
+	glLoadIdentity();
+	switch(m_matrixMode) {
+		case MatrixMode::MODELVIEW:
+			m_modelViewStack.top() = matrix4x4f::Identity();
+			break;
+		case MatrixMode::PROJECTION:
+			m_projectionStack.top() = matrix4x4f::Identity();
+			break;
+	}
+}
+
+void RendererGL2::LoadMatrix(const matrix4x4f &m)
+{
+	PROFILE_SCOPED()
+	glLoadMatrixf(&m[0]);
+	switch(m_matrixMode) {
+		case MatrixMode::MODELVIEW:
+			m_modelViewStack.top() = m;
+			break;
+		case MatrixMode::PROJECTION:
+			m_projectionStack.top() = m;
+			break;
+	}
+}
+
+void RendererGL2::Translate( const float x, const float y, const float z )
+{
+	PROFILE_SCOPED()
+	glTranslatef(x,y,z);
+	switch(m_matrixMode) {
+		case MatrixMode::MODELVIEW:
+			m_modelViewStack.top().Translate(x,y,z);
+			break;
+		case MatrixMode::PROJECTION:
+			m_projectionStack.top().Translate(x,y,z);
+			break;
+	}
+}
+
+void RendererGL2::Scale( const float x, const float y, const float z )
+{
+	PROFILE_SCOPED()
+	glScalef(x,y,z);
+	switch(m_matrixMode) {
+		case MatrixMode::MODELVIEW:
+			m_modelViewStack.top().Scale(x,y,z);
+			break;
+		case MatrixMode::PROJECTION:
+			m_modelViewStack.top().Scale(x,y,z);
+			break;
+	}
 }
 
 }
