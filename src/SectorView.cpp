@@ -894,7 +894,7 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 		// Show systems with large population
 		if (i->population>0.0) {
 			glDepthRange(0.15,1.0);
-			m_disk->SetColor(Color(0.f, 1.f, 0.f));
+			m_disk->SetColor(Color(0, 255, 0));
 			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.2f,1.0+i->population.ToFloat(),0.2f));
 			m_disk->Draw(m_renderer);
 		}
