@@ -53,6 +53,7 @@ private:
 	vector3d vdYaw;			// cockpit yaw vector
 	float fRInterp;			// for rotation interpolation
 	float fTInterp;			// for translation interpolation
+	float fGForce;			// current ship gforce
 	float fOffset;			// current ship offset due to acceleration effect
 	float fShipVel;			// current ship velocity
 	CockpitLagEasing eEasing; // Easing function for lag recover
