@@ -39,6 +39,7 @@ public:
 	static Graphics::Material *damageParticle;
 	static Graphics::Material *ecmParticle;
 	static Graphics::Material *smokeParticle;
+	static Graphics::Material *explotionParticle;
 
 private:
 	static Sfx *AllocSfxInFrame(Frame *f);
