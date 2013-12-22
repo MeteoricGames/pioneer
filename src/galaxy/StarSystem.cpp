@@ -789,7 +789,7 @@ static void position_settlement_on_planet(SystemBody *b)
 	// used for orientation on planet surface
 	double r2 = r.Double(); 	// function parameter evaluation order is implementation-dependent
 	double r1 = r.Double();		// can't put two rands in the same expression
-	b->orbit.SetPlane(matrix3x3d::RotateZ(2*M_PI*r1) * matrix3x3d::RotateY(2*M_PI*r2));
+	b->orbit.SetPlane(matrix3x3d::RotateY(2*M_PI*r1) * matrix3x3d::RotateX(2*M_PI*r2));
 
 	// store latitude and longitude to equivalent orbital parameters to
 	// be accessible easier
@@ -1877,12 +1877,13 @@ void SystemBody::PickPlanetType(Random &rand)
 	if (parent->type <= TYPE_STAR_MAX)
 		// get it from the table now rather than setting it on stars/gravpoints as
 		// currently nothing else needs them to have metallicity
-		m_metallicity = StarSystem::starMetallicities[parent->type] * rand.Fixed();
+		m_metallicity = StarSystem::starMetallicities[parent->type] * rand.Fixed()*2.0;
 	else
 		// this assumes the parent's parent is a star/gravpoint, which is currently always true
-		m_metallicity = StarSystem::starMetallicities[parent->parent->type] * rand.Fixed();
+		m_metallicity = StarSystem::starMetallicities[parent->parent->type] * rand.Fixed()*2.0;
 	// harder to be volcanic when you are tiny (you cool down)
-	m_volcanicity = std::min(fixed(1,1), mass) * rand.Fixed();
+	m_volcanicity = std::min(fixed(1,1), mass*2.0) * rand.Fixed();
+
 	m_atmosOxidizing = rand.Fixed();
 	m_life = fixed(0);
 	m_volatileGas = fixed(0);
@@ -1913,7 +1914,7 @@ void SystemBody::PickPlanetType(Random &rand)
 		fixed amount_volatiles = fixed(2,1)*rand.Fixed();
 		if (rand.Int32(3)) amount_volatiles *= mass;
 		// total atmosphere loss
-		if (rand.Fixed() > mass) amount_volatiles = fixed(0);
+		if (rand.Fixed() > mass*2.0) amount_volatiles = fixed(0);
 
 		//printf("Amount volatiles: %f\n", amount_volatiles.ToFloat());
 		// fudge how much of the volatiles are in which state
@@ -1939,7 +1940,7 @@ void SystemBody::PickPlanetType(Random &rand)
 		const fixed proportion_gas = averageTemp / (fixed(100,1) + averageTemp);
 		m_volatileGas = proportion_gas * amount_volatiles;
 
-		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(50,1) + averageTemp));
+		const fixed proportion_liquid = (fixed(1,1)-proportion_gas) * (averageTemp / (fixed(2,1) + averageTemp));
 		m_volatileLiquid = proportion_liquid * amount_volatiles;
 
 		const fixed proportion_ices = fixed(1,1) - (proportion_gas + proportion_liquid);
@@ -1947,20 +1948,22 @@ void SystemBody::PickPlanetType(Random &rand)
 
 		//printf("temp %dK, gas:liquid:ices %f:%f:%f\n", averageTemp, proportion_gas.ToFloat(),
 		//		proportion_liquid.ToFloat(), proportion_ices.ToFloat());
-
-		if ((m_volatileLiquid > fixed(0)) &&
-		    (averageTemp > CELSIUS-60) &&
-		    (averageTemp < CELSIUS+200)) {
+		if ((m_volatileLiquid > fixed(1,10)) &&
+		    (averageTemp > CELSIUS-400) &&
+		    (averageTemp < CELSIUS+300)) {
 			// try for life
 			int minTemp = CalcSurfaceTemp(star, maxDistToStar, albedo, greenhouse);
 			int maxTemp = CalcSurfaceTemp(star, minDistToStar, albedo, greenhouse);
 
+			//if (maxTemp < averageTemp-273+40 && minTemp > averageTemp-273-40 && m_life>fixed(1,10) && m_volatileLiquid > fixed(1,10)) m_atmosOxidizing = 0.95+rand.Fixed()/20.0;
+			
 			if ((star->type != TYPE_BROWN_DWARF) &&
 			    (star->type != TYPE_WHITE_DWARF) &&
 			    (star->type != TYPE_STAR_O) &&
-			    (minTemp > CELSIUS-10) && (minTemp < CELSIUS+90) &&
-			    (maxTemp > CELSIUS-10) && (maxTemp < CELSIUS+90)) {
-				m_life = rand.Fixed();
+			    (minTemp > CELSIUS-100) && (minTemp < CELSIUS+90) &&
+			    (maxTemp > CELSIUS-100) && (maxTemp < CELSIUS+90)) {
+				m_life = fixed(1,4)+rand.Fixed();
+				m_atmosOxidizing = fixed(rand.Int32(190,200),200);
 			}
 		}
 	} else {
@@ -2105,7 +2108,7 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
         // orbital starports should carry a small amount of population
         if (type == SystemBody::TYPE_STARPORT_ORBITAL) {
-			m_population = fixed(1,100000);
+			m_population = fixed(1,10000);
 			outTotalPop += m_population;
         }
 
@@ -2114,16 +2117,22 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 
 	m_agricultural = fixed(0);
 
-	if (m_life > fixed(9,10)) {
+	if (m_life > fixed(9,10)&&this->HasAtmosphere()&&this->m_atmosDensity<3.0 && this->m_atmosDensity>0.9) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+25-averageTemp, 40), fixed(0), fixed(1,1));
 		system->m_agricultural += 2*m_agricultural;
-	} else if (m_life > fixed(1,2)) {
+	} else if (m_life > fixed(1,2)&&this->HasAtmosphere()&&this->m_atmosDensity<3.0 && this->m_atmosDensity>0.5) {
 		m_agricultural = Clamp(fixed(1,1) - fixed(CELSIUS+30-averageTemp, 50), fixed(0), fixed(1,1));
 		system->m_agricultural += 1*m_agricultural;
 	} else {
 		// don't bother populating crap planets
 		if (m_metallicity < fixed(5,10) &&
 			m_metallicity < (fixed(1,1) - system->m_humanProx)) return;
+	}
+
+	if (!this->HasAtmosphere() || m_atmosDensity>3.0 || m_atmosDensity<0.9 || m_life < 0.1 || averageTemp-273 > 90 || averageTemp-273 < -90 || mass > 2.0 || mass < 0.5 || m_atmosOxidizing < fixed(7,10)) {
+		m_population = fixed(1,100000)*rand.Fixed()*2.0; //max 20k on these..
+		outTotalPop += m_population;
+		return;
 	}
 
 	const int NUM_CONSUMABLES = 10;
@@ -2197,6 +2206,7 @@ void SystemBody::PopulateStage1(StarSystem *system, fixed &outTotalPop)
 	m_population = fixed(1,10)*m_population + m_population*m_agricultural;
 
 //	printf("%s: pop %.3f billion\n", name.c_str(), m_population.ToFloat());
+	//m_population/=(1.0+(std::abs(system->m_path.sectorX)+std::abs(system->m_path.sectorY)+std::abs(system->m_path.sectorZ)*10.0));
 
 	outTotalPop += m_population;
 }
@@ -2234,7 +2244,7 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 	RefCountedPtr<Random> namerand(new Random);
 	namerand->seed(_init, 6);
 
-	if (m_population < fixed(1,1000)) return;
+	if (m_population < fixed(1,10000000)) return;
 
 	fixed pop = m_population + rand.Fixed();
 
@@ -2283,8 +2293,16 @@ void SystemBody::PopulateAddStations(StarSystem *system)
 		}
 	}
 	// starports - surface
-	pop = m_population + rand.Fixed();
-	int max = 6;
+	if (this->HasAtmosphere()) {
+		if		(m_population > fixed(1,1))		pop = m_population*fixed(3,1) + rand.Fixed();	//above 1 bill, 3+ cities per bill
+		else if (m_population > fixed(1,10))	pop = m_population*fixed(10,1)+rand.Fixed();	//above 100 mill, 1 city per 100 mill
+		else if (m_population > fixed(1,100))	pop = m_population*fixed(100,1)+rand.Fixed();	//above 10 mill, 1 city per 10 mill
+		else								    pop = fixed(1,1)+rand.Fixed();     				//above 1 mill, 1 or 2 cites
+	}
+	else
+			pop = pop = fixed(1,1);
+
+	int max = 20;
 	while (max-- > 0) {
 		pop -= rand.Fixed();
 		if (pop < 0) break;

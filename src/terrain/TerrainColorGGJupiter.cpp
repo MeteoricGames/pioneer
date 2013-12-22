@@ -60,7 +60,7 @@ vector3d TerrainColorFractal<TerrainColorGGJupiter>::GetColor(const vector3d &p,
 					return col;
 				} else if (n>0.2) {
 					n -= 0.2; n*= 5.0;
-					col = interpolate_color(n, m_ggdarkColor[2], vector3d(.9, .89, .85) );
+					col = interpolate_color(n, m_ggdarkColor[2], vector3d(.7, .69, .65) );
 					return col;
 				} else {
 					n *= 5.0;
@@ -93,11 +93,11 @@ vector3d TerrainColorFractal<TerrainColorGGJupiter>::GetColor(const vector3d &p,
 					return col;
 				} else if (n>0.4) {
 					n -= 0.4; n*= 5.0;
-					col = interpolate_color(n, vector3d(.9, .89, .85), m_gglightColor[4] );
+					col = interpolate_color(n, vector3d(.7, .69, .65), m_gglightColor[4] );
 					return col;
 				} else if (n>0.2) {
 					n -= 0.2; n*= 5.0;
-					col = interpolate_color(n, m_ggdarkColor[2], vector3d(.9, .89, .85) );
+					col = interpolate_color(n, m_ggdarkColor[2], vector3d(.7, .69, .65) );
 					return col;
 				} else {
 					n *= 5.0;
@@ -130,11 +130,11 @@ vector3d TerrainColorFractal<TerrainColorGGJupiter>::GetColor(const vector3d &p,
 					return col;
 				} else if (n>0.4) {
 					n -= 0.4; n*= 5.0;
-					col = interpolate_color(n, vector3d(.9, .89, .85), m_gglightColor[4] );
+					col = interpolate_color(n, vector3d(.7, .69, .65), m_gglightColor[4] );
 					return col;
 				} else if (n>0.2) {
 					n -= 0.2; n*= 5.0;
-					col = interpolate_color(n, m_ggdarkColor[2], vector3d(.9, .89, .85) );
+					col = interpolate_color(n, m_ggdarkColor[2], vector3d(.7, .69, .65) );
 					return col;
 				} else {
 					n *= 5.0;
@@ -157,7 +157,7 @@ vector3d TerrainColorFractal<TerrainColorGGJupiter>::GetColor(const vector3d &p,
 		return col;
 	} else {
 		n *= 2.0;
-		col = interpolate_color(n, vector3d(.9, .89, .85), col );
+		col = interpolate_color(n, vector3d(.7, .69, .65), col );
 		return col;
 	}
 }

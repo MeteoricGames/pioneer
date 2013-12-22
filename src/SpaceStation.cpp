@@ -174,10 +174,13 @@ void SpaceStation::InitStation()
 	Random rand(m_sbody->seed);
 	bool ground = m_sbody->type == SystemBody::TYPE_STARPORT_ORBITAL ? false : true;
 	if (ground) {
-		if (m_sbody->parent->GetRadius()>3000000.0 && m_sbody->parent->HasAtmosphere())
-			m_type = &SpaceStationType::surfaceStationTypes[ 0 ];
+		if (m_sbody->parent->GetRadius()>3000000.0 && m_sbody->parent->HasAtmosphere() && m_sbody->parent->GetDensity() > 0.9)
+			if (m_sbody->parent->GetPop()>fixed(1,1000))
+				m_type = &SpaceStationType::surfaceStationTypes[ 0 ];    //huge 120 bay
+			else
+				m_type = &SpaceStationType::surfaceStationTypes[ 1 ];	// smal 4 bay
 		else
-			m_type = &SpaceStationType::surfaceStationTypes[ 1 ];
+			m_type = &SpaceStationType::surfaceStationTypes[ 2 ]; //domes, bay
 	} else {
 		m_type = &SpaceStationType::orbitalStationTypes[ rand.Int32(SpaceStationType::orbitalStationTypes.size()) ];
 	}

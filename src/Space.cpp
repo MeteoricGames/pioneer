@@ -412,7 +412,7 @@ static void RelocateStarportIfUnderwaterOrBuried(SystemBody *sbody, Frame *frame
 
 	Random r(sbody->seed);
 
-	for (int tries = 0; tries < 200; tries++) {
+	for (int tries = 0; tries < 2000; tries++) {
 		variationWithinLimits = true;
 
 		const double height = planet->GetTerrainHeight(pos_) - radius; // in m

@@ -296,10 +296,23 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 
 	const float rad = planet->GetSystemBody()->GetRadius();
 	double seg = 5000.0;
-	if (planet->GetSystemBody()->HasAtmosphere())
-		seg=Clamp(rad/1000.0,100.0,5000.0);
-	else
-		seg=Clamp(rad/10000.0,150.0,500.0);
+	const fixed pop=planet->GetSystemBody()->GetPop();
+	fixed newsegment;
+
+	if		(pop > fixed(1,1))		newsegment = fixed(5000,1);								//above 1 bill, 3+ cities per bill
+	else if (pop > fixed(1,10))		newsegment = fixed(2500,1);								//above 100 mill, 1 city per 100 mill
+	else if (pop > fixed(1,100))	newsegment = fixed(1250,1);								//above 10 mill, 1 city per 10 mill
+	else if (pop > fixed(1,1000))	newsegment = fixed(625,1);     							//above 1 mill, 1 or 2 cites
+	else							newsegment = fixed(300,1)*rand.Fixed();
+
+	if (ends_with(station->GetModel()->GetName(), "dome"))
+	{
+		mx = m*vector3d(0.2,0,0);
+		mz = m*vector3d(0,0,0.2);
+		newsegment = fixed(aabb.max.x,1);
+	}
+
+	seg=Clamp(newsegment.ToDouble(),100.0,5000.0);
 
 	double sizex = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);
 	double sizez = seg*2.0;// + rand.Int32((int)START_SEG_SIZE);

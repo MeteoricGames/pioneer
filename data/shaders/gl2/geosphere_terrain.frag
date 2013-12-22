@@ -69,6 +69,11 @@ void main(void)
 	vec4 diff = vec4(0.0);
 	float nDotVP=0.0;
 	float nnDotVP=0.0;
+	// when does the eye ray intersect atmosphere
+	float atmosStart = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
+	float ldprod=0.0;
+	float fogFactor=0.0;
+
 #ifdef TERRAIN_WITH_WATER
 	float specularReflection=0.0;
 #endif
@@ -96,36 +101,44 @@ void main(void)
 		}
 #endif // ECLIPSE
 		unshadowed = clamp(unshadowed, 0.0, 1.0);
+#ifdef ATMOSPHERE
+		float sn = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
+		float fogNormalFactor = geosphereAtmosFogDensity*80000.0; //fognormals should be 8 times atmosdenisty
+		float atmosDist = geosphereScale * (length(eyepos) - atmosStart)*0.5;
+
+		{
+
+		// a&b scaled so length of 1.0 means planet surface.
+		vec3 a = (atmosStart * eyenorm - geosphereCenter) / geosphereScaledRadius;
+		vec3 b = (eyepos - geosphereCenter) / geosphereScaledRadius;
+		ldprod = AtmosLengthDensityProduct(a, b, atmosColor.w*geosphereAtmosFogDensity, atmosDist, geosphereAtmosInvScaleHeight);
+		fogFactor = clamp( 1.25 / exp(ldprod),0.0,1.0);
+		}
+
+		vec3 surfaceNorm = mix(normalize(sn*eyenorm - geosphereCenter),tnorm,fogFactor);
+
+		vec3 n  = mix(tnorm,surfaceNorm,clamp(fogNormalFactor,0.0,1.0)); //mix eye normals in dense atmosphere.
+		nDotVP  = max(0.0, dot(n, normalize(vec3(gl_LightSource[i].position))));
+		nnDotVP = max(0.0, dot(n, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
+#else
 		nDotVP  = max(0.0, dot(tnorm, normalize(vec3(gl_LightSource[i].position))));
 		nnDotVP = max(0.0, dot(tnorm, normalize(-vec3(gl_LightSource[i].position)))); //need backlight to increase horizon
+#endif
 		diff += gl_LightSource[i].diffuse * unshadowed * 0.5*(nDotVP+0.5*clamp(1.0-nnDotVP*4.0,0.0,1.0) * INV_NUM_LIGHTS);
 
 #ifdef TERRAIN_WITH_WATER
 		//Specular reflection
 		vec3 L = normalize(gl_LightSource[i].position.xyz - eyepos); 
 		vec3 E = normalize(-eyepos);
-		vec3 R = normalize(-reflect(L,tnorm)); 
+		vec3 R = normalize(-reflect(L,tnorm));
 		//water only for specular
-	    if (vertexColor.b > 0.05 && vertexColor.r < 0.05) {
-			specularReflection += pow(max(dot(R,E),0.0),16.0)*0.4 * INV_NUM_LIGHTS;
+		if (vertexColor.b > 0.05 && vertexColor.r < 0.05) {
+			specularReflection += pow(max(dot(R,E),0.0),16.0)*clamp(1.6-ldprod,0.6,1.6) * INV_NUM_LIGHTS;
 		}
 #endif
 	}
 
 #ifdef ATMOSPHERE
-	// when does the eye ray intersect atmosphere
-	float atmosStart = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
-	float ldprod=0.0;
-	float fogFactor=0.0;
-	{
-		float atmosDist = geosphereScale * (length(eyepos) - atmosStart);
-		
-		// a&b scaled so length of 1.0 means planet surface.
-		vec3 a = (atmosStart * eyenorm - geosphereCenter) / geosphereScaledRadius;
-		vec3 b = (eyepos - geosphereCenter) / geosphereScaledRadius;
-		ldprod = AtmosLengthDensityProduct(a, b, atmosColor.w*geosphereAtmosFogDensity, atmosDist, geosphereAtmosInvScaleHeight);
-		fogFactor = clamp( 1.5 / exp(ldprod),0.0,1.0); 
-	}
 
 	//calculate sunset tone red when passing through more atmosphere, clamp everything.
 	float atmpower = (diff.r+diff.g+diff.b)/3.0;
@@ -144,7 +157,8 @@ void main(void)
 		  diff*specularReflection*sunset +
 #endif
 		  (0.02-clamp(fogFactor,0.0,0.01))*diff*ldprod*sunset +	      //increase fog scatter				
-		  (pow((1.0-pow(fogFactor,0.75)),256.0)*0.4*diff*atmosColor)*sunset;  //distant fog.
+		  (pow((1.0-pow(fogFactor,0.75)),256.0)*0.4*diff*atmosColor)*sunset * //distant fog.
+		  clamp(1.0/sqrt(geosphereAtmosFogDensity*10000.0),0.4,1.0);  //darken atmosphere based on density
 #else // atmosphere-less planetoids and dim stars
 	gl_FragColor =
 		material.emission +

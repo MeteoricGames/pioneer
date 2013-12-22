@@ -1,0 +1,7 @@
+material material1
+
+diffuse 1.0 1.0 1.0
+specular 1.0 1.0 1.0
+shininess 80
+
+mesh dome1.obj
