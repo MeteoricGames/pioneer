@@ -69,8 +69,10 @@ void main(void)
 	vec4 diff = vec4(0.0);
 	float nDotVP=0.0;
 	float nnDotVP=0.0;
+#ifdef ATMOSPHERE
 	// when does the eye ray intersect atmosphere
 	float atmosStart = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
+#endif
 	float ldprod=0.0;
 	float fogFactor=0.0;
 
@@ -102,7 +104,6 @@ void main(void)
 #endif // ECLIPSE
 		unshadowed = clamp(unshadowed, 0.0, 1.0);
 #ifdef ATMOSPHERE
-		float sn = findSphereEyeRayEntryDistance(geosphereCenter, eyepos, geosphereScaledRadius * geosphereAtmosTopRad);
 		float fogNormalFactor = geosphereAtmosFogDensity*80000.0; //fognormals should be 8 times atmosdenisty
 		float atmosDist = geosphereScale * (length(eyepos) - atmosStart)*0.5;
 
@@ -115,7 +116,7 @@ void main(void)
 		fogFactor = clamp( 1.25 / exp(ldprod),0.0,1.0);
 		}
 
-		vec3 surfaceNorm = mix(normalize(sn*eyenorm - geosphereCenter),tnorm,fogFactor);
+		vec3 surfaceNorm = mix(normalize(atmosStart*eyenorm - geosphereCenter),tnorm,fogFactor);
 
 		vec3 n  = mix(tnorm,surfaceNorm,clamp(fogNormalFactor,0.0,1.0)); //mix eye normals in dense atmosphere.
 		nDotVP  = max(0.0, dot(n, normalize(vec3(gl_LightSource[i].position))));
