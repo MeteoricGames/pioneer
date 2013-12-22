@@ -140,7 +140,8 @@ void main(void)
 	gl_FragColor = (1.0-fogFactor) * (atmosDiffuse*
 		vec4(atmosColor.rgb, 1.0)) +
 		(0.02-clamp(fogFactor,0.0,0.01))*atmosDiffuse*ldprod*sunset +     //increase light on lower atmosphere.
-		atmosColor*specularHighlight*(1.0-fogFactor)*sunset;		  //add light from specularHighlight.
+		atmosColor*specularHighlight*(1.0-fogFactor)*sunset *		  //add light from specularHighlight.
+		clamp(1.0/sqrt(geosphereAtmosFogDensity*10000.0),0.4,1.0);	  //darken atmposphere based on density
 
 	SetFragDepth();
 }
