@@ -6,7 +6,7 @@
 #include "galaxy/StarSystem.h"
 #include "libs.h"
 #include "Pi.h"
-#include "Pi.h"
+#include "Ship.h"
 #include "Space.h"
 #include "graphics/Drawables.h"
 #include "graphics/Graphics.h"
@@ -88,7 +88,7 @@ void Sfx::TimeStepUpdate(const float timeStep)
 
 	switch (m_type) {
 		case TYPE_EXPLOSION:
-			if (m_age > 1.6) m_type = TYPE_NONE;
+			if (m_age > 3.2) m_type = TYPE_NONE;
 			break;
 		case TYPE_DAMAGE:
 			if (m_age > 2.0) m_type = TYPE_NONE;
@@ -127,10 +127,15 @@ void Sfx::Render(Renderer *renderer, const matrix4x4d &ftransform)
 			renderer->SetTransform(matrix4x4d::Translation(fpos));
 			//explotionParticle->diffuse = Color(255, 255, 0, (1.0f-(m_age/3.5f))*255);
 			renderer->SetBlendMode(BLEND_ALPHA_ONE);
-			float spriteframe=m_age*10.0+1;
-			std::string fname="explotion/"+std::to_string(static_cast<int>(spriteframe))+".png";
+			float spriteframe=m_age*20+1;
+			std::string fname="explotion/image"+std::to_string(static_cast<int>(spriteframe))+".png";
 			explotionParticle->texture0 = Graphics::TextureBuilder::Billboard(fname).GetOrCreateTexture(renderer, "billboard");
-			renderer->DrawPointSprites(1, &pos, explotionParticle, 2000.f);
+
+			//face camera
+			matrix4x4f trans = trans.Identity();
+			renderer->SetTransform(trans);
+
+			renderer->DrawPointSprites(1, &pos, explotionParticle, m_speed);
 			break;
 
 		} case TYPE_DAMAGE: {
@@ -187,6 +192,21 @@ void Sfx::Add(const Body *b, TYPE t)
 			Pi::rng.Double()-0.5,
 			Pi::rng.Double()-0.5,
 			Pi::rng.Double()-0.5);
+}
+
+void Sfx::AddExplotion(Body *b, TYPE t)
+{
+	Sfx *sfx = AllocSfxInFrame(b->GetFrame());
+	if (!sfx) return;
+
+	sfx->m_type = t;
+	sfx->m_age = 0;
+	sfx->SetPosition(b->GetPosition());
+	sfx->m_vel = b->GetVelocity();
+	if (b->IsType(Object::SHIP)) {
+		Ship *s = static_cast<Ship*>(b);
+		sfx->m_speed = s->GetAabb().radius*25.0;
+	}
 }
 
 void Sfx::AddThrustSmoke(const Body *b, TYPE t, const float speed, vector3d adjustpos)
