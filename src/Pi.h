@@ -37,7 +37,7 @@ class UIView;
 class View;
 class WorldView;
 class SDLGraphics;
-namespace Graphics { class Renderer; }
+namespace Graphics { class Renderer; class PostProcess; }
 namespace SceneGraph { class Model; }
 namespace Sound { class MusicPlayer; }
 namespace UI { class Context; }
@@ -209,6 +209,9 @@ private:
 	static bool speedLinesDisplayed;
 
 	static Gui::Fixed *menu;
+
+	static Graphics::PostProcess* m_gamePP;
+	static Graphics::PostProcess* m_guiPP;
 };
 
 #endif /* _PI_H */
