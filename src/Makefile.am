@@ -312,7 +312,8 @@ pioneer_LDADD = \
 	../contrib/PicoDDS/libpicodds.a \
 	../contrib/jenkins/libjenkins.a \
 	../contrib/json/libjson.a \
-	../contrib/glew/libglew.a
+	../contrib/glew/libglew.a \
+	../contrib/profiler/libprofiler.a
 
 pioneer_LDADD += \
 	$(FREETYPE_LIBS) $(GL_LIBS) \
@@ -389,7 +390,8 @@ uitest_LDADD = \
 	../contrib/jenkins/libjenkins.a \
 	../contrib/PicoDDS/libpicodds.a \
 	../contrib/json/libjson.a \
-	../contrib/glew/libglew.a
+	../contrib/glew/libglew.a \
+	../contrib/profiler/libprofiler.a
 
 uitest_LDADD += \
 	$(FREETYPE_LIBS) $(GL_LIBS) \
@@ -415,8 +417,9 @@ textstress_LDADD = \
 	text/libtext.a \
 	graphics/libgraphics.a \
 	posix/libposix.a \
-	../contrib/PicoDDS/libpicodds.a \
-	../contrib/glew/libglew.a
+	../contrib/json/libjson.a \
+	../contrib/glew/libglew.a \
+	../contrib/profiler/libprofiler.a
 
 textstress_LDADD += \
 	$(FREETYPE_LIBS) $(GL_LIBS) \

@@ -19,6 +19,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <SDL_stdinc.h>
 
 using namespace Graphics;
 
@@ -27,7 +28,7 @@ namespace Background
 
 void BackgroundElement::SetIntensity(float intensity)
 {
-	m_material->emissive = Color(intensity);
+	m_material->emissive = Color(intensity*255);
 }
 
 UniverseBox::UniverseBox(Graphics::Renderer *r)
@@ -127,6 +128,12 @@ void UniverseBox::LoadCubeMap(Graphics::Renderer *r, Random* randomizer)
 	}
 }
 
+void UniverseBox::SetIntensity(float intensity)
+{
+	fIntensity = intensity;
+	m_material->specialParameter0 = &fIntensity;
+}
+
 Starfield::Starfield(Graphics::Renderer *r)
 {
 	Init(r);
@@ -171,7 +178,7 @@ void Starfield::Fill(Uint32 seed)
 
 	//fill the array
 	for (int i=0; i<BG_STAR_MAX; i++) {
-		float col = float(rand.Double(0.2,0.7));
+		Uint8 col = rand.Double(0.2,0.7)*255;
 
 		// this is proper random distribution on a sphere's surface
 		const float theta = float(rand.Double(0.0, 2.0*M_PI));
@@ -181,7 +188,7 @@ void Starfield::Fill(Uint32 seed)
 				1000.0f * sqrt(1.0f - u*u) * cos(theta),
 				1000.0f * u,
 				1000.0f * sqrt(1.0f - u*u) * sin(theta)
-			), Color(col, col, col,	1.f)
+			), Color(col, col, col,	255)
 		);
 	}
 }
@@ -233,8 +240,8 @@ MilkyWay::MilkyWay(Graphics::Renderer *r)
 	VertexArray *bottom = new VertexArray(ATTRIB_POSITION | ATTRIB_DIFFUSE);
 	VertexArray *top = new VertexArray(ATTRIB_POSITION | ATTRIB_DIFFUSE);
 
-	const Color dark(0.f);
-	const Color bright(0.05f, 0.05f, 0.05f, 0.05f);
+	const Color dark(0);
+	const Color bright(13, 13, 13, 13);
 
 	//bottom
 	float theta;
@@ -322,6 +329,9 @@ void Container::Refresh(Uint32 seed)
 
 void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 {
+	PROFILE_SCOPED()
+	//XXX not really const - renderer can modify the buffers
+
 	if(m_bLoadNewCubemap) {
 		m_bLoadNewCubemap = false;
 		if(Pi::player == nullptr || Pi::player->GetFlightState() != Ship::HYPERSPACE) {
@@ -343,6 +353,7 @@ void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 			m_universeBox.LoadCubeMap(renderer);
 		}
 	}
+	
 	renderer->SetBlendMode(BLEND_SOLID);
 	renderer->SetDepthTest(false);
 	renderer->SetTransform(transform);
@@ -357,6 +368,7 @@ void Container::Draw(Graphics::Renderer *renderer, const matrix4x4d &transform)
 
 void Container::SetIntensity(float intensity)
 {
+	PROFILE_SCOPED()
 	m_universeBox.SetIntensity(intensity);
 	m_starField.SetIntensity(intensity);
 	m_milkyWay.SetIntensity(intensity);

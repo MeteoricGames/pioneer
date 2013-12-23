@@ -23,7 +23,7 @@ namespace Background
 	class BackgroundElement
 	{
 	public:
-		void SetIntensity(float intensity);
+		virtual void SetIntensity(float intensity);
 
 	protected:
 		RefCountedPtr<Graphics::Material> m_material;
@@ -38,6 +38,8 @@ namespace Background
 		void Draw(Graphics::Renderer *r);
 		void LoadCubeMap(Graphics::Renderer *r, Random* randomizer = nullptr);
 
+		virtual void SetIntensity(float intensity) override;
+
 	private:
 		void Init(Graphics::Renderer *);
 		Random createRandom(Uint32 seed);
@@ -45,6 +47,7 @@ namespace Background
 
 		Graphics::StaticMesh *m_model;
 		Graphics::Texture* m_cubemap;
+		float fIntensity;
 	};
 
 	class Starfield : public BackgroundElement

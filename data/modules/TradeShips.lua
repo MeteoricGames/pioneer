@@ -244,9 +244,14 @@ local getRandomStarport = function (ship, current)
 		starport = starports[Engine.rand:Integer(1,#starports)]
 	else
 		if orbital_starports~=nil and #orbital_starports > 0 then
-			starport = orbital_starports[Engine.rand:Integer(1,#orbital_starports)]
+			for i = 1, #orbital_starports do
+				starport = orbital_starports[i]
+				if starport.numDocks > 100 then break end
+			end
+			if ship~=nil and starport.numDocks <= 100 then trade_ships[ship]['status'] = 'outbound' end
 		else
-			starport = starports[Engine.rand:Integer(1,#starports)] --fallback
+			if ship~=nil then trade_ships[ship]['status'] = 'outbound' end
+			return nil
 		end
 	end
 	return starport -- or current
@@ -685,7 +690,9 @@ local onFrameChanged = function (ship)
 	if #starports > 0 and ship:isa("Ship") and ship == Game.player then
 		local dist,delta = 0 
 
-		Timer:CallAt(Game.time+1, function () dist= ship:DistanceTo(getMyStarport(ship)) end)
+		Timer:CallAt(Game.time+1, function ()
+			if ship==nil then return end
+			dist= ship:DistanceTo(getMyStarport(ship)) end)
 		Timer:CallAt(Game.time+2, function () 
 			if ship==nil then return end
 			delta=dist-ship:DistanceTo(getMyStarport(ship)) 

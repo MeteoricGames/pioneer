@@ -18,7 +18,7 @@
 #include "Game.h"
 
 // XXX duplicated in WorldView. should probably be a theme variable
-static const Color s_hudTextColor(0.0f,1.0f,0.0f,0.8f);
+static const Color s_hudTextColor(0,255,0,204);
 
 ShipCpanel::ShipCpanel(Graphics::Renderer *r): Gui::Fixed(float(Gui::Screen::GetWidth()), 80)
 {
@@ -148,7 +148,7 @@ void ShipCpanel::InitObject()
 	comms_button->SetRenderDimensions(30, 22);
 	Add(comms_button, 312, 56);
 
-	m_clock = (new Gui::Label(""))->Color(0.0f,0.8f,0.0f);
+	m_clock = (new Gui::Label(""))->Color(0,204,0);
 	Add(m_clock, 4, 64);
 
 	m_rightButtonGroup = new Gui::RadioGroup();
@@ -284,6 +284,7 @@ void ShipCpanel::OnDockingClearanceExpired(const SpaceStation *s)
 
 void ShipCpanel::Update()
 {
+	PROFILE_SCOPED()
 	int timeAccel = Pi::game->GetTimeAccel();
 	int requested = Pi::game->GetRequestedTimeAccel();
 
@@ -418,6 +419,7 @@ void ShipCpanel::SetAlertState(Ship::AlertState as)
 
 void ShipCpanel::TimeStepUpdate(float step)
 {
+	PROFILE_SCOPED()
 	m_scanner->TimeStepUpdate(step);
 }
 

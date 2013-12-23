@@ -21,7 +21,7 @@ void main(void)
    // Screen blending
    gl_FragColor = clamp((scene_sample + blur_sample) - (scene_sample * blur_sample), 0.0, 1.0);
    gl_FragColor.w = 1.0;
-#elif (BlendMode == 3) {
+#elif (BlendMode == 3)
    // Softlight blending
    // Due to the nature of soft lighting, we need to bump the black region of the glowmap
    // to 0.5, otherwise the blended result will be dark (black soft lighting will darken
