@@ -224,7 +224,7 @@ Model *Loader::CreateModel(ModelDefinition &def)
 		//the node must be marked transparent when using this material
 		//and should not be mixed with opaque materials
 		if ((*it).opacity < 100)
-			mat->diffuse.a = 255 * float((*it).opacity) / 100;
+			mat->diffuse.a = (float((*it).opacity) / 100.f) * 255;
 
 		if (!diffTex.empty())
 			mat->texture0 = Graphics::TextureBuilder::Model(diffTex).GetOrCreateTexture(m_renderer, "model");
