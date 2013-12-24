@@ -54,6 +54,7 @@ private:
 	std::list<message_t> m_msgQueue;
 	Uint32 m_msgAge;
 	Gui::Label *m_msgLabel;
+	std::string m_typeText;
 	Type m_curMsgType;
 };
 
