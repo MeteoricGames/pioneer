@@ -242,6 +242,22 @@ void WorldView::InitObject()
 	const Graphics::TextureDescriptor &descriptor = b.GetDescriptor();
 	m_indicatorMousedirSize = vector2f(descriptor.dataSize.x*descriptor.texSize.x,descriptor.dataSize.y*descriptor.texSize.y);
 
+	// Reticle
+	b = Graphics::TextureBuilder::UI("icons/reticle.png");
+	m_reticle.reset(new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	const Graphics::TextureDescriptor &d = b.GetDescriptor();
+	m_reticleSize = vector2f(d.dataSize.x * d.texSize.x, d.dataSize.y * d.texSize.y);
+	{
+		float required_width = 0.3625f * static_cast<float>(Gui::Screen::GetWidth());
+		float required_height = 0.128f * static_cast<float>(Gui::Screen::GetHeight());
+		m_reticleSize.x *= required_width / m_reticleSize.x;
+		m_reticleSize.y *= required_height / m_reticleSize.y;
+		m_reticlePos.x = (Gui::Screen::GetWidth() - m_reticleSize.x) / 2.0f;
+		m_reticlePos.y = (Gui::Screen::GetHeight() - m_reticleSize.y) / 2.0f;
+	}
+
+	// Speedlines
+
     m_speedLines.reset(new SpeedLines(Pi::player));
 
 	//get near & far clipping distances
@@ -1794,6 +1810,10 @@ void WorldView::Draw()
 
 	glLineWidth(2.0f);
 
+	// Reticle
+	m_reticle->Draw(Pi::renderer, m_reticlePos, m_reticleSize);
+
+	// Mouse dir
 	DrawImageIndicator(m_mouseDirIndicator, m_indicatorMousedir.get(), yellow);
 
 	// combat target indicator
