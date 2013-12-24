@@ -1811,7 +1811,9 @@ void WorldView::Draw()
 	glLineWidth(2.0f);
 
 	// Reticle
-	m_reticle->Draw(Pi::renderer, m_reticlePos, m_reticleSize);
+	if(GetCamType() == CAM_INTERNAL && m_internalCameraController->GetMode() == InternalCameraController::MODE_FRONT) {
+		m_reticle->Draw(Pi::renderer, m_reticlePos, m_reticleSize);
+	}
 
 	// Mouse dir
 	DrawImageIndicator(m_mouseDirIndicator, m_indicatorMousedir.get(), yellow);
