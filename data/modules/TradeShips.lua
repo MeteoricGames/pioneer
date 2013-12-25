@@ -251,7 +251,7 @@ local getRandomStarport = function (ship, current)
 			if ship~=nil and starport.numDocks <= 100 then trade_ships[ship]['status'] = 'outbound' end
 		else
 			if ship~=nil then trade_ships[ship]['status'] = 'outbound' end
-			return nil
+			return starports[Engine.rand:Integer(1,#starports)] --fallback and land anyway if all fails
 		end
 	end
 	return starport -- or current
