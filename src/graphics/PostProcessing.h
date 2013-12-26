@@ -20,6 +20,7 @@ namespace Graphics {
 		void BeginFrame();
 		void EndFrame();
 		void Run(PostProcess* pp = nullptr);
+		void SetEnabled(bool enabled);
 
 	protected:
 
@@ -33,6 +34,7 @@ namespace Graphics {
 		unsigned int uScreenQuadBufferId;
 		RenderTarget* rtMain;
 		Renderer* mRenderer;
+		bool bPerformPostProcessing;
 	};
 }
 

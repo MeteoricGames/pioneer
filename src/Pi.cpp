@@ -135,6 +135,7 @@ std::map<SDL_JoystickID,Pi::JoystickState> Pi::joysticks;
 bool Pi::navTunnelDisplayed;
 bool Pi::speedLinesDisplayed = false;
 bool Pi::targetIndicatorsDisplayed = true;
+bool Pi::postProcessingEnabled = true;
 Gui::Fixed *Pi::menu;
 bool Pi::DrawGUI = true;
 Graphics::Renderer *Pi::renderer;
@@ -333,6 +334,7 @@ void Pi::Init()
 	navTunnelDisplayed = (config->Int("DisplayNavTunnel")) ? true : false;
 	speedLinesDisplayed = (config->Int("SpeedLines")) ? true : false;
 	targetIndicatorsDisplayed = (config->Int("TargetIndicators")) ? true : false;
+	postProcessingEnabled = (config->Int("PostProcessing")) ? true : false;
 
 	EnumStrings::Init();
 
@@ -848,7 +850,7 @@ void Pi::TombStoneLoop()
 		Pi::renderer->GetWindow()->SetGrab(false);
 		Pi::renderer->BeginFrame();
 		tombstone->Draw(_time);				
-		Pi::renderer->PostProcessFrame(m_gamePP);
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		Pi::renderer->EndFrame();
 		Gui::Draw();
 		Pi::renderer->SwapBuffers();
@@ -941,7 +943,7 @@ void Pi::Start()
 
 		Pi::renderer->BeginFrame();
 		intro->Draw(_time);		
-		Pi::renderer->PostProcessFrame(m_gamePP);
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		Pi::renderer->EndFrame();
 
 		ui->Update();
@@ -1093,9 +1095,9 @@ void Pi::MainLoop()
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
 		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
-			Pi::renderer->PostProcessFrame(m_guiPP);
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
 		} else {
-			Pi::renderer->PostProcessFrame(m_gamePP);
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		}
 
 		Pi::renderer->EndFrame();

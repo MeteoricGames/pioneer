@@ -53,17 +53,24 @@ void PostProcessing::Init()
 
 void PostProcessing::BeginFrame()
 {
-	mRenderer->SetRenderTarget(rtMain);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(bPerformPostProcessing) {
+		mRenderer->SetRenderTarget(rtMain);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	} else {
+		mRenderer->SetRenderTarget(0);
+	}
 }
 
 void PostProcessing::EndFrame()
 {
-	mRenderer->SetRenderTarget(0);
+	if(bPerformPostProcessing) {
+		mRenderer->SetRenderTarget(0);
+	}
 }
 
 void PostProcessing::Run(PostProcess* pp)
 {
+	if(!bPerformPostProcessing) return;
 	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -100,6 +107,17 @@ void PostProcessing::Run(PostProcess* pp)
 	}
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void PostProcessing::SetEnabled(bool enabled) {
+	if(bPerformPostProcessing != enabled) {
+		bPerformPostProcessing = enabled;
+		if(enabled) {
+			// TODO: Reinitialize all render target buffers
+		} else {
+			// TODO: Release all render target buffers
+		}
+	}
 }
 
 }

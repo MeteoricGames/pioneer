@@ -43,7 +43,7 @@ namespace Graphics {
 		// Accessors
 		unsigned int GetPassCount() const { return vPasses.size(); }
 
-	protected:
+	protected:		
 
 	private:
 		PostProcess(const PostProcess&);
