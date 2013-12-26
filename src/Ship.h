@@ -227,6 +227,7 @@ public:
 	void AIFlyTo(Body *target);
 	void AIFlyTo(Body *target, vector3d posoff);
 	void AIFlyToClose(Body *target, double dist);
+	void AIFlyTo(Body *target, float speed);
 	void AIOrbit(Body *target, double alt);
 	void AIHoldPosition();
 

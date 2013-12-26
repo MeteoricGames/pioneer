@@ -155,6 +155,13 @@ void Ship::AIFlyToClose(Body *target, double dist)
 	m_curAICmd = new AICmdFlyTo(this, target, dist); //close
 }
 
+void Ship::AIFlyTo(Body *target, float speed)
+{
+	AIClearInstructions();
+	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
+	m_curAICmd = new AICmdFlyTo(this, target, speed); //speed
+}
+
 void Ship::AIDock(SpaceStation *target)
 {
 	AIClearInstructions();
