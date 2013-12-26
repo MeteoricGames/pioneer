@@ -414,10 +414,11 @@ bool Ship::OnCollision(Object *b, Uint32 flags, double relVel)
 void Ship::Explode()
 {
 	if (m_invulnerable) return;
-
 	Pi::game->GetSpace()->KillBody(this);
-	Sfx::AddExplotion(this, Sfx::TYPE_EXPLOSION);
-	Sound::BodyMakeNoise(this, "Explosion_1", 1.0f);
+	if (this->GetFrame() == Pi::player->GetFrame()) {
+		Sfx::AddExplotion(this, Sfx::TYPE_EXPLOSION);
+		Sound::BodyMakeNoise(this, "Explosion_1", 1.0f);
+	}
 	ClearThrusterState();
 }
 
@@ -1248,16 +1249,18 @@ void Ship::StaticUpdate(const float timeStep)
 		EnterHyperspace();
 	}
 
-	//Add smoke trails based on thruster state and in atmosphere.
-	if ( GetVelocity().Length() < 5000.0 && GetVelocity().Length() > 5.0 && std::max(0.0001*GetVelocity().Length(),0.1)*Pi::rng.Double() < timeStep ) {
-		vector3d pos = GetOrient() * vector3d(0, 0, GetAabb().radius*0.75);
-		Sfx::AddThrustSmoke(this, Sfx::TYPE_SMOKE, std::min(10.0*GetVelocity().Length()*abs(m_thrusters.z)+abs(m_thrusters.y),std::max(GetVelocity().Length()*0.2,GetAabb().min.y*GetAabb().min.y*0.3)),pos);
-	}
+	if (this->GetFrame() == Pi::player->GetFrame()) {
+		//Add smoke trails based on thruster state and in atmosphere.
+		if ( GetVelocity().Length() < 5000.0 && GetVelocity().Length() > 5.0 && std::max(0.0001*GetVelocity().Length(),0.1)*Pi::rng.Double() < timeStep ) {
+			vector3d pos = GetOrient() * vector3d(0, 0, GetAabb().radius*0.75);
+			Sfx::AddThrustSmoke(this, Sfx::TYPE_SMOKE, std::min(10.0*GetVelocity().Length()*abs(m_thrusters.z)+abs(m_thrusters.y),std::max(GetVelocity().Length()*0.2,GetAabb().min.y*GetAabb().min.y*0.3)),pos);
+		}
 
-	//Add smoke trails for missiles on thruster state
-	if (m_type->tag == ShipType::TAG_MISSILE && m_thrusters.z < 0.0 && 0.1*Pi::rng.Double() < timeStep) {
-		vector3d pos = GetOrient() * vector3d(0, 0 , 5);
-		Sfx::AddThrustSmoke(this, Sfx::TYPE_SMOKE, std::min(10.0*GetVelocity().Length()*abs(m_thrusters.z),100.0),pos);
+		//Add smoke trails for missiles on thruster state
+		if (m_type->tag == ShipType::TAG_MISSILE && m_thrusters.z < 0.0 && 0.1*Pi::rng.Double() < timeStep) {
+			vector3d pos = GetOrient() * vector3d(0, 0 , 5);
+			Sfx::AddThrustSmoke(this, Sfx::TYPE_SMOKE, std::min(10.0*GetVelocity().Length()*abs(m_thrusters.z),100.0),pos);
+		}
 	}
 
 	//play start transit drive
