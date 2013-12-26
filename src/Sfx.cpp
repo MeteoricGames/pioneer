@@ -6,7 +6,7 @@
 #include "galaxy/StarSystem.h"
 #include "libs.h"
 #include "Pi.h"
-#include "Pi.h"
+#include "Ship.h"
 #include "Space.h"
 #include "graphics/Drawables.h"
 #include "graphics/Graphics.h"
@@ -23,6 +23,7 @@ Graphics::Drawables::Sphere3D *Sfx::explosionEffect = 0;
 Graphics::Material *Sfx::damageParticle = 0;
 Graphics::Material *Sfx::ecmParticle = 0;
 Graphics::Material *Sfx::smokeParticle = 0;
+Graphics::Material *Sfx::explotionParticle = 0;
 
 Sfx::Sfx()
 {
@@ -87,7 +88,7 @@ void Sfx::TimeStepUpdate(const float timeStep)
 
 	switch (m_type) {
 		case TYPE_EXPLOSION:
-			if (m_age > 0.5) m_type = TYPE_NONE;
+			if (m_age > 3.2) m_type = TYPE_NONE;
 			break;
 		case TYPE_DAMAGE:
 			if (m_age > 2.0) m_type = TYPE_NONE;
@@ -109,7 +110,7 @@ void Sfx::Render(Renderer *renderer, const matrix4x4d &ftransform)
 	switch (m_type) {
 		case TYPE_NONE: break;
 		case TYPE_EXPLOSION: {
-			//Explosion effect: A quick flash of three concentric coloured spheres. A bit retro.
+			/*//Explosion effect: A quick flash of three concentric coloured spheres. A bit retro.
 			const matrix4x4f trans = matrix4x4f::Translation(fpos.x, fpos.y, fpos.z);
 			RefCountedPtr<Material> exmat = Sfx::explosionEffect->GetMaterial();
 			exmat->diffuse = Color(255, 255, 128, 255);
@@ -122,7 +123,20 @@ void Sfx::Render(Renderer *renderer, const matrix4x4d &ftransform)
 			exmat->diffuse = Color(255, 0, 0, 84);
 			renderer->SetTransform(trans * matrix4x4f::ScaleMatrix(1000*m_age));
 			Sfx::explosionEffect->Draw(renderer);
+			break;*/
+
+			renderer->SetTransform(matrix4x4d::Translation(fpos));
+			//explotionParticle->diffuse = Color(255, 255, 0, (1.0f-(m_age/3.5f))*255);
+			renderer->SetBlendMode(BLEND_ALPHA_ONE);
+			float spriteframe=m_age*20+1;
+			std::string fname="explotion/image"+std::to_string(static_cast<int>(spriteframe))+".png";
+			explotionParticle->texture0 = Graphics::TextureBuilder::Billboard(fname).GetOrCreateTexture(renderer, "billboard");
+			//face camera
+			matrix4x4f trans = trans.Identity();
+			renderer->SetTransform(trans);
+			renderer->DrawPointSprites(1, &pos, explotionParticle, m_speed);
 			break;
+
 		} case TYPE_DAMAGE: {
 			renderer->SetTransform(matrix4x4d::Translation(fpos));
 			damageParticle->diffuse = Color(255, 255, 0, (1.0f-(m_age/2.0f))*255);
@@ -177,6 +191,21 @@ void Sfx::Add(const Body *b, TYPE t)
 			Pi::rng.Double()-0.5,
 			Pi::rng.Double()-0.5,
 			Pi::rng.Double()-0.5);
+}
+
+void Sfx::AddExplotion(Body *b, TYPE t)
+{
+	Sfx *sfx = AllocSfxInFrame(b->GetFrame());
+	if (!sfx) return;
+
+	sfx->m_type = t;
+	sfx->m_age = 0;
+	sfx->SetPosition(b->GetPosition());
+	sfx->m_vel = b->GetVelocity();
+	if (b->IsType(Object::SHIP)) {
+		Ship *s = static_cast<Ship*>(b);
+		sfx->m_speed = s->GetAabb().radius*8.0;
+	}
 }
 
 void Sfx::AddThrustSmoke(const Body *b, TYPE t, const float speed, vector3d adjustpos)
@@ -242,6 +271,8 @@ void Sfx::Init(Graphics::Renderer *r)
 	ecmParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/ecm.png").GetOrCreateTexture(r, "billboard");
 	smokeParticle = r->CreateMaterial(desc);
 	smokeParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/smoke.png").GetOrCreateTexture(r, "billboard");
+	explotionParticle = r->CreateMaterial(desc);
+	explotionParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/smoke.png").GetOrCreateTexture(r, "billboard");
 }
 
 void Sfx::Uninit()
@@ -251,4 +282,5 @@ void Sfx::Uninit()
 	delete damageParticle; damageParticle = 0;
 	delete ecmParticle; ecmParticle = 0;
 	delete smokeParticle; smokeParticle = 0;
+	delete explotionParticle; explotionParticle = 0;
 }
