@@ -124,17 +124,16 @@ void Sfx::Render(Renderer *renderer, const matrix4x4d &ftransform)
 			renderer->SetTransform(trans * matrix4x4f::ScaleMatrix(1000*m_age));
 			Sfx::explosionEffect->Draw(renderer);
 			break;*/
+
 			renderer->SetTransform(matrix4x4d::Translation(fpos));
 			//explotionParticle->diffuse = Color(255, 255, 0, (1.0f-(m_age/3.5f))*255);
 			renderer->SetBlendMode(BLEND_ALPHA_ONE);
 			float spriteframe=m_age*20+1;
 			std::string fname="explotion/image"+std::to_string(static_cast<int>(spriteframe))+".png";
 			explotionParticle->texture0 = Graphics::TextureBuilder::Billboard(fname).GetOrCreateTexture(renderer, "billboard");
-
 			//face camera
 			matrix4x4f trans = trans.Identity();
 			renderer->SetTransform(trans);
-
 			renderer->DrawPointSprites(1, &pos, explotionParticle, m_speed);
 			break;
 
@@ -205,7 +204,7 @@ void Sfx::AddExplotion(Body *b, TYPE t)
 	sfx->m_vel = b->GetVelocity();
 	if (b->IsType(Object::SHIP)) {
 		Ship *s = static_cast<Ship*>(b);
-		sfx->m_speed = s->GetAabb().radius*25.0;
+		sfx->m_speed = s->GetAabb().radius*8.0;
 	}
 }
 
