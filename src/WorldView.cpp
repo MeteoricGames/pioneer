@@ -242,6 +242,22 @@ void WorldView::InitObject()
 	const Graphics::TextureDescriptor &descriptor = b.GetDescriptor();
 	m_indicatorMousedirSize = vector2f(descriptor.dataSize.x*descriptor.texSize.x,descriptor.dataSize.y*descriptor.texSize.y);
 
+	// Reticle
+	b = Graphics::TextureBuilder::UI("icons/reticle.png");
+	m_reticle.reset(new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	const Graphics::TextureDescriptor &d = b.GetDescriptor();
+	m_reticleSize = vector2f(d.dataSize.x * d.texSize.x, d.dataSize.y * d.texSize.y);
+	{
+		float required_width = 0.3625f * static_cast<float>(Gui::Screen::GetWidth());
+		float required_height = 0.128f * static_cast<float>(Gui::Screen::GetHeight());
+		m_reticleSize.x *= required_width / m_reticleSize.x;
+		m_reticleSize.y *= required_height / m_reticleSize.y;
+		m_reticlePos.x = (Gui::Screen::GetWidth() - m_reticleSize.x) / 2.0f;
+		m_reticlePos.y = (Gui::Screen::GetHeight() - m_reticleSize.y) / 2.0f;
+	}
+
+	// Speedlines
+
     m_speedLines.reset(new SpeedLines(Pi::player));
 
 	//get near & far clipping distances
@@ -1492,7 +1508,11 @@ void WorldView::UpdateProjectedObjects()
 			else
 				snprintf(buf, sizeof(buf), "%.0f m/s", navspeed);
 			m_navVelIndicator.label->SetText(buf);
-			UpdateIndicator(m_navVelIndicator, camSpaceNavVel);
+			if(Pi::AreTargetIndicatorsDisplayed()) {
+				UpdateIndicator(m_navVelIndicator, camSpaceNavVel);
+			} else {
+				HideIndicator(m_navVelIndicator);
+			}
 
 			assert(m_navTargetIndicator.side != INDICATOR_HIDDEN);
 			assert(m_navVelIndicator.side != INDICATOR_HIDDEN);
@@ -1658,45 +1678,49 @@ void WorldView::UpdateIndicator(Indicator &indicator, const vector3d &cameraSpac
 			}
 		}
 	}
-
+	
 	// update the label position
 	if (indicator.label) {
-		if (indicator.side != INDICATOR_HIDDEN) {
-			float labelSize[2] = { 500.0f, 500.0f };
-			indicator.label->GetSizeRequested(labelSize);
+		if(Pi::AreTargetIndicatorsDisplayed() || 1) {
+			if (indicator.side != INDICATOR_HIDDEN) {
+				float labelSize[2] = { 500.0f, 500.0f };
+				indicator.label->GetSizeRequested(labelSize);
 
-			int pos[2] = {0,0};
-			switch (indicator.side) {
-			case INDICATOR_HIDDEN: break;
-			case INDICATOR_ONSCREEN: // when onscreen, default to label-below unless it would clamp to be on top of the marker
-				pos[0] = -(labelSize[0]/2.0f);
-				if (indicator.pos.y + pos[1] + labelSize[1] + HUD_CROSSHAIR_SIZE + 2.0f > h - BORDER_BOTTOM)
-					pos[1] = -(labelSize[1] + HUD_CROSSHAIR_SIZE + 2.0f);
-				else
+				int pos[2] = {0,0};
+				switch (indicator.side) {
+				case INDICATOR_HIDDEN: break;
+				case INDICATOR_ONSCREEN: // when onscreen, default to label-below unless it would clamp to be on top of the marker
+					pos[0] = -(labelSize[0]/2.0f);
+					if (indicator.pos.y + pos[1] + labelSize[1] + HUD_CROSSHAIR_SIZE + 2.0f > h - BORDER_BOTTOM)
+						pos[1] = -(labelSize[1] + HUD_CROSSHAIR_SIZE + 2.0f);
+					else
+						pos[1] = HUD_CROSSHAIR_SIZE + 2.0f;
+					break;
+				case INDICATOR_TOP:
+					pos[0] = -(labelSize[0]/2.0f);
 					pos[1] = HUD_CROSSHAIR_SIZE + 2.0f;
-				break;
-			case INDICATOR_TOP:
-				pos[0] = -(labelSize[0]/2.0f);
-				pos[1] = HUD_CROSSHAIR_SIZE + 2.0f;
-				break;
-			case INDICATOR_LEFT:
-				pos[0] = HUD_CROSSHAIR_SIZE + 2.0f;
-				pos[1] = -(labelSize[1]/2.0f);
-				break;
-			case INDICATOR_RIGHT:
-				pos[0] = -(labelSize[0] + HUD_CROSSHAIR_SIZE + 2.0f);
-				pos[1] = -(labelSize[1]/2.0f);
-				break;
-			case INDICATOR_BOTTOM:
-				pos[0] = -(labelSize[0]/2.0f);
-				pos[1] = -(labelSize[1] + HUD_CROSSHAIR_SIZE + 2.0f);
-				break;
-			}
+					break;
+				case INDICATOR_LEFT:
+					pos[0] = HUD_CROSSHAIR_SIZE + 2.0f;
+					pos[1] = -(labelSize[1]/2.0f);
+					break;
+				case INDICATOR_RIGHT:
+					pos[0] = -(labelSize[0] + HUD_CROSSHAIR_SIZE + 2.0f);
+					pos[1] = -(labelSize[1]/2.0f);
+					break;
+				case INDICATOR_BOTTOM:
+					pos[0] = -(labelSize[0]/2.0f);
+					pos[1] = -(labelSize[1] + HUD_CROSSHAIR_SIZE + 2.0f);
+					break;
+				}
 
-			pos[0] = Clamp(pos[0] + indicator.pos.x, BORDER, w - BORDER - labelSize[0]);
-			pos[1] = Clamp(pos[1] + indicator.pos.y, BORDER, h - BORDER_BOTTOM - labelSize[1]);
-			MoveChild(indicator.label, pos[0], pos[1]);
-			indicator.label->Show();
+				pos[0] = Clamp(pos[0] + indicator.pos.x, BORDER, w - BORDER - labelSize[0]);
+				pos[1] = Clamp(pos[1] + indicator.pos.y, BORDER, h - BORDER_BOTTOM - labelSize[1]);
+				MoveChild(indicator.label, pos[0], pos[1]);
+				indicator.label->Show();
+			} else {
+				indicator.label->Hide();
+			}
 		} else {
 			indicator.label->Hide();
 		}
@@ -1779,11 +1803,19 @@ void WorldView::Draw()
 	glLineWidth(1.0f);
 
 	// velocity indicators
-	DrawVelocityIndicator(m_velIndicator, white);
-	DrawVelocityIndicator(m_navVelIndicator, green);
+	if(Pi::AreTargetIndicatorsDisplayed()) {
+		DrawVelocityIndicator(m_velIndicator, white);
+		DrawVelocityIndicator(m_navVelIndicator, green);
+	}
 
 	glLineWidth(2.0f);
 
+	// Reticle
+	if(GetCamType() == CAM_INTERNAL && m_internalCameraController->GetMode() == InternalCameraController::MODE_FRONT) {
+		m_reticle->Draw(Pi::renderer, m_reticlePos, m_reticleSize);
+	}
+
+	// Mouse dir
 	DrawImageIndicator(m_mouseDirIndicator, m_indicatorMousedir.get(), yellow);
 
 	// combat target indicator
@@ -1792,7 +1824,7 @@ void WorldView::Draw()
 	glLineWidth(1.0f);
 
 	// normal crosshairs
-	if (GetCamType() == CAM_INTERNAL) {
+	/*if (GetCamType() == CAM_INTERNAL) {
 		switch (m_internalCameraController->GetMode()) {
 			case InternalCameraController::MODE_FRONT:
 				DrawCrosshair(Gui::Screen::GetWidth()/2.0f, Gui::Screen::GetHeight()/2.0f, HUD_CROSSHAIR_SIZE, white);
@@ -1803,7 +1835,7 @@ void WorldView::Draw()
 			default:
 				break;
 		}
-	}
+	}*/
 
 	glPopAttrib();
 
