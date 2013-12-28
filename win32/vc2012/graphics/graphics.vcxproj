@@ -107,6 +107,8 @@
     <ClCompile Include="..\..\..\src\graphics\Graphics.cpp" />
     <ClCompile Include="..\..\..\src\graphics\Light.cpp" />
     <ClCompile Include="..\..\..\src\graphics\Material.cpp" />
+    <ClCompile Include="..\..\..\src\graphics\PostProcess.cpp" />
+    <ClCompile Include="..\..\..\src\graphics\PostProcessing.cpp" />
     <ClCompile Include="..\..\..\src\graphics\Renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphics\RendererGL2.cpp" />
     <ClCompile Include="..\..\..\src\graphics\StaticMesh.cpp" />
@@ -141,6 +143,8 @@
     <ClInclude Include="..\..\..\src\graphics\Graphics.h" />
     <ClInclude Include="..\..\..\src\graphics\Light.h" />
     <ClInclude Include="..\..\..\src\graphics\Material.h" />
+    <ClInclude Include="..\..\..\src\graphics\PostProcess.h" />
+    <ClInclude Include="..\..\..\src\graphics\PostProcessing.h" />
     <ClInclude Include="..\..\..\src\graphics\Renderer.h" />
     <ClInclude Include="..\..\..\src\graphics\RendererGL2.h" />
     <ClInclude Include="..\..\..\src\graphics\RendererGLBuffers.h" />

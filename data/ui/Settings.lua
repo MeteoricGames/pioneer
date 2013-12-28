@@ -102,6 +102,10 @@ ui.templates.Settings = function (args)
 		local targetIndicatorsCheckBox = optionCheckBox(
 			Engine.GetDisplayTargetIndicators, Engine.SetDisplayTargetIndicators,
 			"Display target indicators")
+			
+		local postProcessingCheckBox = optionCheckBox(
+			Engine.GetPostProcessingEnabled, Engine.SetPostProcessingEnabled,
+			"Post-processing")
 
 		local fullScreenCheckBox = optionCheckBox(
 			Engine.GetFullscreen, Engine.SetFullscreen,
@@ -126,6 +130,7 @@ ui.templates.Settings = function (args)
 				navTunnelsCheckBox,
 				speedLinesCheckBox,
 				targetIndicatorsCheckBox,
+				postProcessingCheckBox,
 			})))
 	end
 

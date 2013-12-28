@@ -13,6 +13,7 @@
 #include "Texture.h"
 #include "TextureGL.h"
 #include "VertexArray.h"
+#include "PostProcessing.h"
 #include "GLDebug.h"
 #include "gl2/GeoSphereMaterial.h"
 #include "gl2/GL2Material.h"
@@ -124,6 +125,9 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	vtxColorProg = new GL2::MultiProgram(desc);
 	m_programs.push_back(std::make_pair(desc, vtxColorProg));
 
+	// Init post processing
+	m_postprocessing.reset(new PostProcessing(this));
+
 	// Init quad used for rendering
 	const float screenquad_vertices [] = {
 		-1.0f,	-1.0f, 0.0f,
@@ -211,60 +215,20 @@ bool RendererGL2::BeginFrame()
 {
 	PROFILE_SCOPED()
 	glClearColor(0,0,0,0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
-
-	SetRenderTarget(scenePassRT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_postprocessing->BeginFrame();
+	return true;
+}
 
+bool RendererGL2::PostProcessFrame(PostProcess* postprocess)
+{
+	m_postprocessing->Run(postprocess);
 	return true;
 }
 
 bool RendererGL2::EndFrame()
 {
-	SetRenderTarget(0);
-	return true;
-}
-
-bool RendererGL2::PostProcessFrame(PostProcessingMode pp_mode)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	if(pp_mode == POSTPROCESS_GAME) {
-		// HBlur pass
-		SetRenderTarget(hblurPassRT);
-		glClear(GL_COLOR_BUFFER_BIT);
-		hblurMtrl->texture0 = scenePassRT->GetColorTexture();
-		hblurMtrl->Apply();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		hblurMtrl->Unapply();
-		// VBlur pass
-		SetRenderTarget(vblurPassRT);
-		glClear(GL_COLOR_BUFFER_BIT);
-		vblurMtrl->texture0 = hblurPassRT->GetColorTexture();
-		vblurMtrl->Apply();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		vblurMtrl->Unapply();
-		// Combine pass
-		SetRenderTarget(0);
-		bloomMtrl->texture0 = scenePassRT->GetColorTexture();
-		bloomMtrl->texture1 = vblurPassRT->GetColorTexture();
-		bloomMtrl->Apply();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		bloomMtrl->Unapply();
-	} else if(pp_mode == POSTPROCESS_GUI) {
-		// Just draw directly
-		SetRenderTarget(0);
-		texFullscreenQuadMtrl->texture0 = scenePassRT->GetColorTexture();
-		texFullscreenQuadMtrl->Apply();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		texFullscreenQuadMtrl->Unapply();
-	}
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+	m_postprocessing->EndFrame();
 	return true;
 }
 

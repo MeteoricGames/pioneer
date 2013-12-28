@@ -43,6 +43,8 @@ class Surface;
 class Texture;
 class TextureDescriptor;
 class VertexArray;
+class PostProcessing;
+class PostProcess;
 struct RenderTargetDesc;
 
 // first some enums
@@ -70,11 +72,6 @@ enum BlendMode {
 	BLEND_DEST_ALPHA // XXX maybe crappy name
 };
 
-enum PostProcessingMode {
-	POSTPROCESS_GAME,
-	POSTPROCESS_GUI
-};
-
 enum class MatrixMode {
 	MODELVIEW,
 	PROJECTION
@@ -92,6 +89,7 @@ public:
 	virtual const char* GetName() const = 0;
 
 	WindowSDL *GetWindow() const { return m_window.get(); }
+	PostProcessing* GetPostProcessing() const { return m_postprocessing.get(); }
 	float GetDisplayAspect() const { return static_cast<float>(m_width) / static_cast<float>(m_height); }
 
 	//get supported minimum for z near and maximum for z far values
@@ -99,7 +97,7 @@ public:
 
 	virtual bool BeginFrame() = 0;
 	virtual bool EndFrame() = 0;
-	virtual bool PostProcessFrame(PostProcessingMode pp_mode = POSTPROCESS_GAME) = 0;
+	virtual bool PostProcessFrame(PostProcess* postprocess = nullptr) = 0;
 	//traditionally gui happens between endframe and swapbuffers
 	virtual bool SwapBuffers() = 0;
 
@@ -220,6 +218,7 @@ protected:
 	int m_width;
 	int m_height;
 	Color m_ambient;
+	std::unique_ptr<PostProcessing> m_postprocessing;
 
 	virtual void PushState() = 0;
 	virtual void PopState() = 0;

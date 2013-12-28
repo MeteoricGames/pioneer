@@ -5,6 +5,7 @@
  * Performs a gaussian horizontal blur on a fullscreen quad.
  */
 #include "libs.h"
+#include "GL2Material.h"
 #include "Program.h"
 
 namespace Graphics {

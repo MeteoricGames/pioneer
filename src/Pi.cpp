@@ -72,6 +72,8 @@
 #include "graphics/Graphics.h"
 #include "graphics/Light.h"
 #include "graphics/Renderer.h"
+#include "graphics/PostProcess.h"
+#include "graphics/gl2/HorizontalBlurMaterial.h"
 #include "gui/Gui.h"
 #include "scenegraph/Model.h"
 #include "scenegraph/Lua.h"
@@ -133,6 +135,7 @@ std::map<SDL_JoystickID,Pi::JoystickState> Pi::joysticks;
 bool Pi::navTunnelDisplayed;
 bool Pi::speedLinesDisplayed = false;
 bool Pi::targetIndicatorsDisplayed = true;
+bool Pi::postProcessingEnabled = true;
 Gui::Fixed *Pi::menu;
 bool Pi::DrawGUI = true;
 Graphics::Renderer *Pi::renderer;
@@ -140,6 +143,8 @@ RefCountedPtr<UI::Context> Pi::ui;
 ModelCache *Pi::modelCache;
 Intro *Pi::intro;
 SDLGraphics *Pi::sdl;
+Graphics::PostProcess* Pi::m_gamePP;
+Graphics::PostProcess* Pi::m_guiPP;
 
 #if WITH_OBJECTVIEWER
 ObjectViewerView *Pi::objectViewerView;
@@ -329,6 +334,7 @@ void Pi::Init()
 	navTunnelDisplayed = (config->Int("DisplayNavTunnel")) ? true : false;
 	speedLinesDisplayed = (config->Int("SpeedLines")) ? true : false;
 	targetIndicatorsDisplayed = (config->Int("TargetIndicators")) ? true : false;
+	postProcessingEnabled = (config->Int("PostProcessing")) ? true : false;
 
 	EnumStrings::Init();
 
@@ -536,6 +542,13 @@ void Pi::Init()
 
 	luaConsole = new LuaConsole(10);
 	KeyBindings::toggleLuaConsole.onPress.connect(sigc::ptr_fun(&Pi::ToggleLuaConsole));
+
+	// Define post processes
+	m_gamePP = new Graphics::PostProcess("Bloom", renderer->GetWindow());
+	m_gamePP->AddPass(renderer, "HBlur", Graphics::EFFECT_HORIZONTAL_BLUR);
+	m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
+	m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR, Graphics::PP_PASS_COMPOSE);
+	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
 }
 
 bool Pi::IsConsoleActive()
@@ -836,9 +849,9 @@ void Pi::TombStoneLoop()
 		Pi::HandleEvents();
 		Pi::renderer->GetWindow()->SetGrab(false);
 		Pi::renderer->BeginFrame();
-		tombstone->Draw(_time);
-		Pi::renderer->EndFrame();		
-		Pi::renderer->PostProcessFrame();
+		tombstone->Draw(_time);				
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		Pi::renderer->EndFrame();
 		Gui::Draw();
 		Pi::renderer->SwapBuffers();
 
@@ -929,9 +942,9 @@ void Pi::Start()
 		}
 
 		Pi::renderer->BeginFrame();
-		intro->Draw(_time);
+		intro->Draw(_time);		
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		Pi::renderer->EndFrame();
-		Pi::renderer->PostProcessFrame();
 
 		ui->Update();
 		ui->Draw();
@@ -1081,12 +1094,13 @@ void Pi::MainLoop()
 
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
-		Pi::renderer->EndFrame();
-		Graphics::PostProcessingMode pp_mode = Graphics::POSTPROCESS_GAME;
 		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
-			pp_mode = Graphics::POSTPROCESS_GUI;
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
+		} else {
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		}
-		Pi::renderer->PostProcessFrame(pp_mode);
+
+		Pi::renderer->EndFrame();
 
 		if( DrawGUI ) {
 			Gui::Draw();
