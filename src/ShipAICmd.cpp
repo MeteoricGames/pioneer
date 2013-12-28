@@ -909,8 +909,11 @@ bool AICmdFlyTo::TimeStepUpdate()
 		}
 	}
 
-		//Check for convoi speed
-	if (m_speed > 0 && m_ship->GetVelocity().Length() > m_speed) m_ship->SetVelocity(m_ship->GetVelocity()*0.9);
+	//Check for convoi speed and adjust juice & speed.
+	if (m_speed > 0 && m_ship->GetVelocity().Length() > m_speed) {
+		m_ship->SetVelocity(m_ship->GetVelocity()*0.99);
+		m_ship->SetJuice(1.0);
+	}
 
 	if (!m_target && !m_targframe) return true;			// deleted object
 
