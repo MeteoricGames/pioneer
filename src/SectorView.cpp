@@ -155,7 +155,7 @@ void SectorView::InitObject()
 
 	m_infoBox = new Gui::VBox();
 	m_infoBox->SetTransparency(false);
-	m_infoBox->SetBgColor(0.05f, 0.05f, 0.12f, 0.5f);
+	m_infoBox->SetBgColor(Color(16,16,32,128));
 	m_infoBox->SetSpacing(10.0f);
 	Add(m_infoBox, 5, 5);
 
@@ -263,7 +263,7 @@ void SectorView::InitObject()
 
 	m_factionBox = new Gui::VBox();
 	m_factionBox->SetTransparency(false);
-	m_factionBox->SetBgColor(0.05f, 0.05f, 0.12f, 0.5f);
+	m_factionBox->SetBgColor(Color(16,16,32,128));
 	m_factionBox->SetSpacing(5.0f);
 	m_factionBox->HideAll();
 	Add(m_factionBox, 5, 5);
@@ -389,6 +389,7 @@ void SectorView::Draw3D()
 	else                                m_renderer->SetPerspectiveProjection(40.f, m_renderer->GetDisplayAspect(), 1.f, 600.f);
 
 	matrix4x4f modelview = matrix4x4f::Identity();
+	glDepthMask(true);
 	m_renderer->ClearScreen();
 
 	m_sectorLabel->SetText(stringf(Lang::SECTOR_X_Y_Z,
