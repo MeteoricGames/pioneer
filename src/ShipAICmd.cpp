@@ -1494,6 +1494,7 @@ bool AICmdFormation::TimeStepUpdate()
 	vector3d targaccel = forient * m_target->GetLastForce() / m_target->GetMass();
 	relvel -= targaccel * Pi::game->GetTimeStep();
 	double maxdecel = m_ship->GetAccelFwd() + targaccel.Dot(reldir);
+	maxdecel*=0.2; //smooth drifting when going into formation.
 	if (maxdecel < 0.0) maxdecel = 0.0;
 
 	// linear thrust
