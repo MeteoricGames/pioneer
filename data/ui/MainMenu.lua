@@ -76,13 +76,13 @@ local menu =
 		:SetRow(0, {
 			ui:Grid({ 0.1, 0.8, 0.1 }, 1)
 				:SetCell(1, 0,
-					ui:Align("LEFT",
+					ui:Align("MIDDLE",
 						ui:Label("Paragon"):SetFont("HEADING_XLARGE")
 					)
 				)
 		})
 		:SetRow(1, {
-			ui:Grid(2,1)
+			ui:Grid(3,1)
 				:SetColumn(1, {
 					ui:Align("MIDDLE",
 						ui:VBox(10):PackEnd(buttonSet):SetFont("HEADING_NORMAL")

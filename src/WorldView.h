@@ -184,6 +184,9 @@ private:
 
 	std::unique_ptr<Gui::TexturedQuad> m_indicatorMousedir;
 	vector2f m_indicatorMousedirSize;
+	std::unique_ptr<Gui::TexturedQuad> m_reticle;
+	vector2f m_reticleSize;
+	vector2f m_reticlePos;
 };
 
 class NavTunnelWidget: public Gui::Widget {

@@ -47,6 +47,7 @@ void ShipCpanel::InitObject()
 	m_currentMapView = MAP_SECTOR;
 	m_useEquipWidget = new UseEquipWidget();
 	m_msglog = new MsgLogWidget();
+	m_inflog = new MsgLogWidget();
 
 	m_userSelectedMfuncWidget = MFUNC_SCANNER;
 
@@ -230,10 +231,12 @@ ShipCpanel::~ShipCpanel()
 	Remove(m_scanner);
 	Remove(m_useEquipWidget);
 	Remove(m_msglog);
+	Remove(m_inflog);
 	Remove(m_mfsel);
 	delete m_scanner;
 	delete m_useEquipWidget;
 	delete m_msglog;
+	delete m_inflog;
 	delete m_mfsel;
 	m_connOnDockingClearanceExpired.disconnect();
 	m_connOnRotationDampingChanged.disconnect();
@@ -254,6 +257,7 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	Remove(m_scanner);
 	Remove(m_useEquipWidget);
 	Remove(m_msglog);
+	Remove(m_inflog);
 	if (selected) {
 		m_mfsel->SetSelected(f);
 		if (selected == m_msglog)
@@ -266,6 +270,10 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	//XXX hack to keep the scanner on, always.
 	Add(m_scanner, 200, 18);
 	m_scanner->ShowAll();
+
+	//XXX hack to keep InfoBanner on
+	Add(m_inflog, 350, -340);
+	m_inflog->ShowAll();
 }
 
 void ShipCpanel::OnMultiFuncGrabFocus(multifuncfunc_t f)
@@ -300,6 +308,7 @@ void ShipCpanel::Update()
 	m_scanner->Update();
 	m_useEquipWidget->Update();
 	m_msglog->Update();
+	m_inflog->Update();
 }
 
 void ShipCpanel::Draw()

@@ -155,7 +155,7 @@ void SectorView::InitObject()
 
 	m_infoBox = new Gui::VBox();
 	m_infoBox->SetTransparency(false);
-	m_infoBox->SetBgColor(0.05f, 0.05f, 0.12f, 0.5f);
+	m_infoBox->SetBgColor(Color(16,16,32,128));
 	m_infoBox->SetSpacing(10.0f);
 	Add(m_infoBox, 5, 5);
 
@@ -263,7 +263,7 @@ void SectorView::InitObject()
 
 	m_factionBox = new Gui::VBox();
 	m_factionBox->SetTransparency(false);
-	m_factionBox->SetBgColor(0.05f, 0.05f, 0.12f, 0.5f);
+	m_factionBox->SetBgColor(Color(16,16,32,128));
 	m_factionBox->SetSpacing(5.0f);
 	m_factionBox->HideAll();
 	Add(m_factionBox, 5, 5);
@@ -895,7 +895,7 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 		// Show systems with large population
 		if (i->population>0.0) {
 			glDepthRange(0.15,1.0);
-			m_disk->SetColor(Color(0.f, 1.f, 0.f));
+			m_disk->SetColor(Color(0, 255, 0));
 			m_renderer->SetTransform(systrans * matrix4x4f::ScaleMatrix(0.2f,1.0+i->population.ToFloat(),0.2f));
 			m_disk->Draw(m_renderer);
 		}

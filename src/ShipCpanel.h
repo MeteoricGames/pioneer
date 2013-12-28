@@ -24,6 +24,7 @@ public:
 	virtual void Draw();
 	void Update();
 	MsgLogWidget *MsgLog() { return m_msglog; }
+	MsgLogWidget *InfLog() { return m_inflog; }
 	void SetAlertState(Ship::AlertState as);
 
 	void TimeStepUpdate(float step);
@@ -71,6 +72,7 @@ private:
 	MultiFuncSelectorWidget *m_mfsel;
 	ScannerWidget *m_scanner;
 	MsgLogWidget *m_msglog;
+	MsgLogWidget *m_inflog;
 	UseEquipWidget *m_useEquipWidget;
 	Gui::MultiStateImageButton *m_camButton;
 	Gui::RadioGroup *m_leftButtonGroup, *m_rightButtonGroup;

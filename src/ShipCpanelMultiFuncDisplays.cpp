@@ -53,11 +53,23 @@ MsgLogWidget::MsgLogWidget()
 void MsgLogWidget::Update()
 {
 	if (m_curMsgType != NONE) {
+
+		//set expiry
+		Uint32 timeout = 0;
+		if (m_curMsgType == MUST_SEE) timeout=10000;
+		else timeout=5000;
+
 		// has it expired?
-		bool expired = (SDL_GetTicks() - m_msgAge > 5000);
+		bool expired = (SDL_GetTicks() - m_msgAge > timeout);
 
 		if (expired || ((m_curMsgType == NOT_IMPORTANT) && !m_msgQueue.empty())) {
 			ShowNext();
+		}
+
+		// Typewriter style
+		Uint8 typer = (SDL_GetTicks() - m_msgAge) * 0.05;
+		if (typer > 0 && !expired) {
+			m_msgLabel->SetText(m_typeText.substr(0, typer)+"              ");
 		}
 	} else {
 		ShowNext();
@@ -95,11 +107,11 @@ void MsgLogWidget::ShowNext()
 		}
 
 		if (msg.sender == "") {
-			m_msgLabel->SetText("#0f0" + msg.message);
+			m_typeText = std::string("#0f0") + msg.message;
 		} else {
-			m_msgLabel->SetText(
+			m_typeText =
 				std::string("#ca0") + stringf(Lang::MESSAGE_FROM_X, formatarg("sender", msg.sender)) +
-				std::string("\n#0f0") + msg.message);
+				std::string("\n#0f0") + msg.message;
 		}
 		m_msgAge = SDL_GetTicks();
 		m_curMsgType = msg.type;
@@ -110,7 +122,7 @@ void MsgLogWidget::ShowNext()
 void MsgLogWidget::GetSizeRequested(float size[2])
 {
 	size[0] = 400;
-	size[1] = 64;
+	size[1] = 400;
 }
 
 /////////////////////////////////

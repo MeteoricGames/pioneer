@@ -96,6 +96,89 @@ static int l_comms_important_message(lua_State *l)
 	return 0;
 }
 
+/*
+ * Function: Info
+ *
+ * Post a message to the player's control panel.
+ *
+ * > Comms.Info(message, from)
+ *
+ * Parameters:
+ *
+ *   message - the message text to post
+ *
+ *   from - optional; who the message is from (person, ship, etc)
+ *
+ * Example:
+ *
+ * > Comms.Info("Please repair my ship.", "Gary Jones")
+ *
+ * Availability:
+ *
+ *   .
+ *
+ * Status:
+ *
+ *   experimental
+ */
+static int l_comms_info(lua_State *l)
+{
+	if (!Pi::cpan)
+		luaL_error(l, "Control panel does not exist.");
+
+	std::string msg = luaL_checkstring(l, 1);
+
+	std::string from;
+	if (lua_gettop(l) >= 2)
+		from = luaL_checkstring(l, 2);
+
+	Pi::cpan->InfLog()->Message(from, msg);
+	return 0;
+}
+
+/*
+ * Function: ImportantInfo
+ *
+ * Post an important message to the player's control panel.
+ *
+ * > Comms.ImportantInfo(message, from)
+ *
+ * The only difference between this and <Message> is that if multiple messages
+ * arrive at the same time, the important ones will be shown first.
+ *
+ * Parameters:
+ *
+ *   message - the message text to post
+ *
+ *   from - optional; who the message is from (person, ship, etc)
+ *
+ * Example:
+ *
+ * > Comms.ImportantInfo("Prepare to die!", "AB-1234")
+ *
+ * Availability:
+ *
+ *   .
+ *
+ * Status:
+ *
+ *   experimental
+ */
+static int l_comms_important_info(lua_State *l)
+{
+	if (!Pi::cpan)
+		luaL_error(l, "Control panel does not exist.");
+
+	std::string msg = luaL_checkstring(l, 1);
+
+	std::string from;
+	if (lua_gettop(l) >= 2)
+		from = luaL_checkstring(l, 2);
+
+	Pi::cpan->InfLog()->ImportantMessage(from, msg);
+	return 0;
+}
+
 void LuaComms::Register()
 {
 	lua_State *l = Lua::manager->GetLuaState();
@@ -105,6 +188,8 @@ void LuaComms::Register()
 	static const luaL_Reg l_methods[] = {
 		{ "Message",          l_comms_message           },
 		{ "ImportantMessage", l_comms_important_message },
+		{ "Info",			  l_comms_info           },
+		{ "ImportantInfo",    l_comms_important_info },
 		{ 0, 0 }
 	};
 
