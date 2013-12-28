@@ -1836,7 +1836,8 @@ void WorldView::Draw()
 	glLineWidth(2.0f);
 
 	// Reticle
-	if(GetCamType() == CAM_INTERNAL && m_internalCameraController->GetMode() == InternalCameraController::MODE_FRONT) {
+	if((GetCamType() == CAM_INTERNAL && m_internalCameraController->GetMode() == InternalCameraController::MODE_FRONT) ||
+		GetCamType() == CAM_COCKPIT) {
 		m_reticle->Draw(Pi::renderer, m_reticlePos, m_reticleSize);
 	}
 
@@ -1847,10 +1848,6 @@ void WorldView::Draw()
 	DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, red);
 
 	glLineWidth(1.0f);
-
-	if(GetCamType() == CAM_COCKPIT) {
-		DrawCrosshair(Gui::Screen::GetWidth() / 2.0f, Gui::Screen::GetHeight() / 2.0f, HUD_CROSSHAIR_SIZE, white);
-	}
 
 	glPopAttrib();
 
