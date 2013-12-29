@@ -100,7 +100,9 @@ local doLawAndOrder = function (ship)
 			return
 		end
 
-		if Game.player:GetFine()>=10000 then
+		local crime,fine = Game.player:GetCrime()
+
+		if fine and fine > 1000 then
 			for k, v in pairs(police) do
 				if v.ship~=nil and v.ship:exists() and v.ship:GetDockedWith() then
 					v.ship:CancelAI()
@@ -114,7 +116,8 @@ local doLawAndOrder = function (ship)
 					warn=true
 				end
 				Timer:CallAt(Game.time+20, function ()
-					if v.ship~=nil and v.ship:exists() and Game.player:GetFine()>=10000 then v.ship:AIKill(Game.player) end
+					local crime,fine = Game.player:GetCrime()
+					if v.ship~=nil and v.ship:exists() and fine and fine > 1000 then v.ship:AIKill(Game.player) end
 				end)
 			end
 		else
