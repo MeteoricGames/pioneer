@@ -33,7 +33,7 @@ local spawnShips = function ()
 	for i=1, num_bulk_ships do
 	local station = stations[Engine.rand:Integer(1,#stations)]
 		local ship = Space.SpawnShipParked(shipdefs[Engine.rand:Integer(1,#shipdefs)].id, station)
-		ship:SetLabel(Ship.MakeRandomLabel())
+		if ship~=nil then ship:SetLabel(Ship.MakeRandomLabel()) end
 	end
 end
 
