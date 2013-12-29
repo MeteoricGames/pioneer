@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Omni Ranger',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='omni_ranger',
 	forward_thrust = 538e5,
 	reverse_thrust = 538e5,

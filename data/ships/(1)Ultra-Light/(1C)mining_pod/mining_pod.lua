@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Mining Pod',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='mining_pod',
 	forward_thrust = 21e5,
 	reverse_thrust = 21e5,

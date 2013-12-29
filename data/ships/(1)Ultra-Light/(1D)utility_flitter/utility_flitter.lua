@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Utility Flitter',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='utility_flitter',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,

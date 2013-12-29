@@ -4,6 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_static_ship {
 	name='military carrier',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='military_carrier',
 	forward_thrust = 692000e5,
 	reverse_thrust = 692000e5,

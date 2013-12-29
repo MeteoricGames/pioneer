@@ -4,6 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_ship {
 	name='Omni Explorer',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='omni_explorer',
 	forward_thrust = 12000e5,
 	reverse_thrust = 12000e5,

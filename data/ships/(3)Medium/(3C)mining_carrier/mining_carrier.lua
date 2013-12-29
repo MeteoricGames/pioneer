@@ -4,6 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_ship {
 	name='Mining Carrier',
+	ship_class = '1',
+	manufacturer = 'test',
 	model='mining_carrier',
 	forward_thrust = 10000e5,
 	reverse_thrust = 10000e5,

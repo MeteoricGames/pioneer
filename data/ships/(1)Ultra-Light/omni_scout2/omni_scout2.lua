@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Omni Scout2',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='omni_scout2',
 	forward_thrust = 165e5,
 	reverse_thrust = 165e5,

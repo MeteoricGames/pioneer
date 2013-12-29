@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Passenger Shuttle',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='passenger_shuttle',
 	forward_thrust = 10e5,
 	reverse_thrust = 10e5,

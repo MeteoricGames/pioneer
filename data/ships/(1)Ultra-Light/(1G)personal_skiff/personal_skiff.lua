@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Personal Skiff',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='personal_skiff',
 	cockpit='passenger_shuttle_cockpit',
 	forward_thrust = 9e5,

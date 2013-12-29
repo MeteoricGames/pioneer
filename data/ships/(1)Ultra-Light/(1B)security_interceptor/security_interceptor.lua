@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Security Interceptor',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='security_interceptor',
 	forward_thrust = 8e5,
 	reverse_thrust = 8e5,
