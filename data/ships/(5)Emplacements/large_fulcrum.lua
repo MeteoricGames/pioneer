@@ -4,7 +4,7 @@
 --Ships not available for purchase (ambient ships)
 define_weapon_ship {
 	name='Large Fulcrum',
-	ship_class = '1',
+	ship_class = 'test',
 	manufacturer = '1',
 	model='large_fulcrum',
 	forward_thrust = 3200e5,
