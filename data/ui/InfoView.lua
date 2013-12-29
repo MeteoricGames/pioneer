@@ -12,6 +12,7 @@ local econTrade       = import("InfoView/EconTrade")
 local missions        = import("InfoView/Missions")
 local crewRoster      = import("InfoView/CrewRoster")
 local orbitalAnalysis = import("InfoView/OrbitalAnalysis")
+local mining	      = import("InfoView/Mining")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
@@ -27,10 +28,11 @@ ui.templates.InfoView = function (args)
 
 	tabGroup:AddTab({ id = "shipInfo",        title = l.SHIP_INFORMATION,     icon = "Satellite", template = shipInfo         })
 	tabGroup:AddTab({ id = "personalInfo",    title = l.PERSONAL_INFORMATION, icon = "User",      template = personalInfo     })
-	tabGroup:AddTab({ id = "econTrade",       title = l.ECONOMY_TRADE,      icon = "Cart",      template = econTrade,       })
+	tabGroup:AddTab({ id = "econTrade",       title = l.ECONOMY_TRADE,     	  icon = "Cart",      template = econTrade,       })
 	tabGroup:AddTab({ id = "missions",        title = l.MISSIONS,             icon = "Star",      template = missions,        })
 	tabGroup:AddTab({ id = "crew",            title = l.CREW_ROSTER,          icon = "Agenda",    template = crewRoster,      })
 	--tabGroup:AddTab({ id = "orbitalAnalysis", title = l.ORBITAL_ANALYSIS,     icon = "Planet",    template = orbitalAnalysis, })
+	tabGroup:AddTab({ id = "mining", 	  title = "Mining",     	  icon = "Planet",    template = mining, })
 
 	return tabGroup.widget
 end

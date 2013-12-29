@@ -325,6 +325,30 @@ static int l_sbodypath_get_system_body(lua_State *l)
 	return 1;
 }
 
+//XXX Do docs
+static int l_sbodypath_get_system_body_metallicity(lua_State *l)
+{
+	SystemPath *path = LuaObject<SystemPath>::CheckFromLua(1);
+
+	if (path->IsSectorPath()) {
+		luaL_error(l, "Path <%d,%d,%d> does not name a system or body", path->sectorX, path->sectorY, path->sectorZ);
+		return 0;
+	}
+
+	RefCountedPtr<StarSystem> sys = StarSystem::GetCached(path);
+	if (path->IsSystemPath()) {
+		luaL_error(l, "Path <%d,%d,%d : %d ('%s')> does not name a body", path->sectorX, path->sectorY, path->sectorZ, path->systemIndex, sys->GetName().c_str());
+		return 0;
+	}
+
+	// Lua should never be able to get an invalid SystemPath
+	// (note: this may change if it becomes possible to remove systems during the game)
+	assert(size_t(path->bodyIndex) < sys->m_bodies.size());
+
+	lua_pushnumber(l, sys->GetBodyByPath(path)->m_metallicity.ToFloat());
+	return 1;
+}
+
 
 /*
  * Attribute: sectorX
@@ -510,6 +534,7 @@ template <> void LuaObject<SystemPath>::RegisterClass()
 
 		{ "GetStarSystem", l_sbodypath_get_star_system },
 		{ "GetSystemBody", l_sbodypath_get_system_body },
+		{ "GetSystemBodyMetallicity", l_sbodypath_get_system_body_metallicity },
 
 		{ 0, 0 }
 	};

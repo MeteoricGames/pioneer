@@ -1,7 +1,7 @@
 -- Copyright © 2008-2013 Pioneer Developers. See AUTHORS.txt for details
 -- Licensed under the terms of CC-BY-SA 3.0. See licenses/CC-BY-SA-3.0.txt
 
-define_ship {
+define_drone {
 	name='Mining Drone',
 	model='mining_drone',
 	forward_thrust = 52e5,
@@ -14,10 +14,14 @@ define_ship {
 	max_cargo = 30,
 	max_laser = 1,
 	max_missile = 0,
+ 	gun_mounts =
+        {
+                { v(0,0,0), v(0,0,-1), 5, 'HORIZONTAL' },
+        },
 	max_cargoscoop = 1,
 	max_fuelscoop = 0,
 	min_crew = 1,
-	max_crew = 2,
+	max_crew = 1,
 	capacity = 30,
 	hull_mass = 30,
 	fuel_tank_mass = 25,

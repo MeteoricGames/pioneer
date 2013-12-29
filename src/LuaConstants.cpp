@@ -314,6 +314,7 @@ void LuaConstants::Register(lua_State *l)
 	 * INDUSTRIAL_MACHINERY - industrial machinery (CARGO)
 	 * FARM_MACHINERY - farm machinery (CARGO)
 	 * MINING_MACHINERY - mining machinery (CARGO
+	 * MINING_DRONE - mining drone (CARGO
 	 * AIR_PROCESSORS - air processors (CARGO)
 	 * SLAVES - slaves (CARGO)
 	 * HAND_WEAPONS - hand weapons (CARGO)
@@ -405,6 +406,7 @@ void LuaConstants::Register(lua_State *l)
 	 * STATIC_SHIP - static ships. These are not available to the player and
 	 *               are used for mission specific functions (large supply
 	 *               ships, warships, etc)
+	 * DRONE  Drones for alot of things
 	 * WRECK_SHIP - Shipwrecks or dismantled ships or other debris
 	 * WEAPON_SHIP - mines, turrets or other weapon based shiptypes.
 	 * NPC_SHIP - NPC non purchable ship.

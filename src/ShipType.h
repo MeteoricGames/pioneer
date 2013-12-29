@@ -33,6 +33,7 @@ struct ShipType {
 		TAG_NONE,
 		TAG_SHIP,
 		TAG_STATIC_SHIP,
+		TAG_DRONE,
 		TAG_WRECK_SHIP,
 		TAG_WEAPON_SHIP,
 		TAG_NPC_SHIP,
@@ -80,6 +81,7 @@ struct ShipType {
 	static std::map<Id, ShipType> types;
 	static std::vector<Id> player_ships;
 	static std::vector<Id> static_ships;
+	static std::vector<Id> drone_ships;
 	static std::vector<Id> wreck_ships;
 	static std::vector<Id> weapon_ships;
 	static std::vector<Id> npc_ships;

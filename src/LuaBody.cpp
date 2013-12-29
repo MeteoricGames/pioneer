@@ -7,6 +7,8 @@
 #include "Body.h"
 #include "galaxy/StarSystem.h"
 #include "Frame.h"
+#include "Pi.h"
+#include "Game.h"
 #include "TerrainBody.h"
 
 /*
@@ -249,6 +251,15 @@ static int l_body_is_dynamic(lua_State *l)
 	return 1;
 }
 
+//XXX docs
+static int l_body_remove(lua_State *l)
+{
+	Body *s = LuaObject<Body>::CheckFromLua(1);
+	//const std::string label(luaL_checkstring(l, 2));
+	Pi::game->GetSpace()->KillBody(s);
+	return 0;
+}
+
 /*
  * Method: DistanceTo
  *
@@ -350,6 +361,7 @@ template <> void LuaObject<Body>::RegisterClass()
 	static luaL_Reg l_methods[] = {
 		{ "IsDynamic",  l_body_is_dynamic  },
 		{ "DistanceTo", l_body_distance_to },
+		{ "Remove",     l_body_remove },
 		{ "GetGroundPosition", l_body_get_ground_position },
 		{ 0, 0 }
 	};
