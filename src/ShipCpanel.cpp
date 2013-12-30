@@ -459,3 +459,9 @@ void ShipCpanel::ClearOverlay()
 		m_overlay[i]->SetToolTip("");
 	}
 }
+
+// This is used by WorldView to update camera button when camera type changes
+void ShipCpanel::ChangeCamButtonState(WorldView::CamType cam_type)
+{
+	m_camButton->SetActiveState(static_cast<int>(cam_type));
+}
