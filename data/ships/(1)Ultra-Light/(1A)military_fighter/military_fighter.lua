@@ -2,9 +2,9 @@
 -- Licensed under the terms of CC-BY-SA 3.0. See licenses/CC-BY-SA-3.0.txt
 
 define_ship {
-	name='Military Fighter',
-	ship_class = 'test',
-	manufacturer = '1',
+	name='Falcon',
+	ship_class = 'military_fighter',
+	manufacturer = 'Arcor',
 	model = 'military_fighter',
 	forward_thrust = 16e5,
 	reverse_thrust = 16e5,

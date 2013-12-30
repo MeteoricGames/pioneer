@@ -4,8 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_static_ship {
 	name='Mining Carrier',
-	ship_class = 'test',
-	manufacturer = '1',
+	ship_class = 'mining_carrier',
+	manufacturer = 'alders_vectrum',
 	model='mining_carrier',
 	forward_thrust = 10000e5,
 	reverse_thrust = 10000e5,
