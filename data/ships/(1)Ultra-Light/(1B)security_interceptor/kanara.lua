@@ -4,7 +4,7 @@
 define_ship {
 	name='Security Interceptor',
 	ship_class = 'test',
-	manufacturer = '1',
+	manufacturer = 'alders_vectrum',
 	model='security_interceptor',
 	cockpit='passenger_shuttle_cockpit',
 	forward_thrust = 9e5,

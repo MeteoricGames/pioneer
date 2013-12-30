@@ -4,8 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_ship {
 	name='Cargo Megafreighter',
-	ship_class = 'test',
-	manufacturer = '1',
+	ship_class = 'cargo_megafreighter',
+	manufacturer = 'alders_vectrum',
 	model='cargo_megafreighter',
 	forward_thrust = 427180e5,
 	reverse_thrust = 427180e5,

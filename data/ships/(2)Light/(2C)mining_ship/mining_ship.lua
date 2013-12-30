@@ -3,8 +3,8 @@
 
 define_ship {
 	name='Mining Ship',
-	ship_class = 'test',
-	manufacturer = '1',
+	ship_class = 'mining_ship',
+	manufacturer = 'alders_vectrum',
 	model='mining_ship',
 	forward_thrust = 1323e5,
 	reverse_thrust = 1323e5,

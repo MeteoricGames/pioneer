@@ -4,8 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_static_ship {
 	name='Utility Control Vessel',
-	ship_class = 'test',
-	manufacturer = '1',
+	ship_class = 'utility_controller',
+	manufacturer = 'alders_vectrum',
 	model='utility_control_vessel',
 	forward_thrust = 39000e5,
 	reverse_thrust = 39000e5,
