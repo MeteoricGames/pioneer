@@ -4,6 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_ship {
 	name='Military Destroyer',
+	ship_class = 'military_destroyer',
+	manufacturer = 'alders_vectrum',
 	model='military_destroyer',
 	forward_thrust = 10000e5,
 	reverse_thrust = 10000e5,

@@ -4,6 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_ship {
 	name='military carrier',
+	ship_class = 'military_carrier',
+	manufacturer = 'alders_vectrum',
 	model='military_carrier',
 	forward_thrust = 692000e5,
 	reverse_thrust = 692000e5,

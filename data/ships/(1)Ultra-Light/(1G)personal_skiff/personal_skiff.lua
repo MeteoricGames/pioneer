@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Personal Skiff',
+	ship_class = 'personal_skiff',
+	manufacturer = 'alders_vectrum',
 	model='personal_skiff',
 	cockpit='passenger_shuttle_cockpit',
 	forward_thrust = 9e5,

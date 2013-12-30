@@ -357,6 +357,23 @@ static int l_engine_set_display_target_indicators(lua_State *l)
 	return 0;
 }
 
+static int l_engine_get_post_processing(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("PostProcessing") != 0);
+	return 1;
+}
+
+static int l_engine_set_post_processing(lua_State *l)
+{
+	if(lua_isnone(l, 1))
+		return luaL_error(l, "EnablePostProcessing takes one boolean argument");
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("PostProcessing", (enabled ? 1 : 0));
+	Pi::config->Save();
+	Pi::SetPostProcessingEnabled(enabled);
+	return 0;
+}
+
 static void set_master_volume(const bool muted, const float volume)
 {
 	Sound::Pause(muted || is_zero_exact(volume));
@@ -724,6 +741,9 @@ void LuaEngine::Register()
 
 		{ "GetDisplayTargetIndicators", l_engine_get_display_target_indicators },
 		{ "SetDisplayTargetIndicators", l_engine_set_display_target_indicators },
+
+		{ "GetPostProcessingEnabled", l_engine_get_post_processing },
+		{ "SetPostProcessingEnabled", l_engine_set_post_processing },
 
 		{ "GetMasterMuted", l_engine_get_master_muted },
 		{ "SetMasterMuted", l_engine_set_master_muted },

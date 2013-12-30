@@ -29,7 +29,6 @@ class SectorView;
 class Ship;
 class ShipCpanel;
 class SpaceStation;
-class SpaceStationView;
 class StarSystem;
 class SystemInfoView;
 class SystemView;
@@ -37,7 +36,7 @@ class UIView;
 class View;
 class WorldView;
 class SDLGraphics;
-namespace Graphics { class Renderer; }
+namespace Graphics { class Renderer; class PostProcess; }
 namespace SceneGraph { class Model; }
 namespace Sound { class MusicPlayer; }
 namespace UI { class Context; }
@@ -92,6 +91,8 @@ public:
 	static void SetSpeedLinesDisplayed(bool state) { speedLinesDisplayed = state; }
 	static bool AreTargetIndicatorsDisplayed() { return targetIndicatorsDisplayed; }
 	static void SetTargetIndicatorsDisplayed(bool state) { targetIndicatorsDisplayed = state; }
+	static bool IsPostProcessingEnabled() { return postProcessingEnabled; }
+	static void SetPostProcessingEnabled(bool state) { postProcessingEnabled = state; }
 	static int MouseButtonState(int button) { return mouseButton[button]; }
 	/// Get the default speed modifier to apply to movement (scrolling, zooming...), depending on the "shift" keys.
 	/// This is a default value only, centralized here to promote uniform user expericience.
@@ -151,7 +152,7 @@ public:
 	static SystemView *systemView;
 	static WorldView *worldView;
 	static DeathView *deathView;
-	static SpaceStationView *spaceStationView;
+	static UIView *spaceStationView;
 	static UIView *infoView;
 	static LuaConsole *luaConsole;
 	static ShipCpanel *cpan;
@@ -216,8 +217,12 @@ private:
 	static bool navTunnelDisplayed;
 	static bool speedLinesDisplayed;
 	static bool targetIndicatorsDisplayed;
+	static bool postProcessingEnabled;
 
 	static Gui::Fixed *menu;
+
+	static Graphics::PostProcess* m_gamePP;
+	static Graphics::PostProcess* m_guiPP;
 };
 
 #endif /* _PI_H */

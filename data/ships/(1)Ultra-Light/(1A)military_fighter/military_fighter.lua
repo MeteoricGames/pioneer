@@ -2,7 +2,9 @@
 -- Licensed under the terms of CC-BY-SA 3.0. See licenses/CC-BY-SA-3.0.txt
 
 define_ship {
-	name='Military Fighter',
+	name='Falcon',
+	ship_class = 'military_fighter',
+	manufacturer = 'Arcor',
 	model = 'military_fighter',
 	forward_thrust = 16e5,
 	reverse_thrust = 16e5,
@@ -23,6 +25,6 @@ define_ship {
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 120000e3,
-	price = 0,
+	price = 1,
 	hyperdrive_class = 0,
 }

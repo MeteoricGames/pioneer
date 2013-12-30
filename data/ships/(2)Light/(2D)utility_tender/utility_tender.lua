@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Utility Tender',
+	ship_class = 'utility_tender',
+	manufacturer = 'alders_vectrum',
 	model='utility_tender',
 	forward_thrust = 1190e5,
 	reverse_thrust = 1190e5,

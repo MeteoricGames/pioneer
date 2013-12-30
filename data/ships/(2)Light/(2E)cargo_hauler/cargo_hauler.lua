@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Cargo Hauler',
+	ship_class = 'cargo_hauler',
+	manufacturer = 'alders_vectrum',
 	model='cargo_hauler',
 	forward_thrust = 1120e5,
 	reverse_thrust = 1120e5,

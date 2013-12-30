@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Military Corvette',
+	ship_class = 'military_corvette',
+	manufacturer = 'alders_vectrum',
 	model='military_corvette',
 	forward_thrust = 357e5,
 	reverse_thrust = 357e5,

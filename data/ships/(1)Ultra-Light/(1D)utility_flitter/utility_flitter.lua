@@ -2,7 +2,9 @@
 -- Licensed under the terms of CC-BY-SA 3.0. See licenses/CC-BY-SA-3.0.txt
 
 define_ship {
-	name='Utility Flitter',
+	name='Dragonfly',
+	ship_class = 'utility_flitter',
+	manufacturer = 'xian',
 	model='utility_flitter',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,

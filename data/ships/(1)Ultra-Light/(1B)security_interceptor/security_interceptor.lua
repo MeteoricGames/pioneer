@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Security Interceptor',
+	ship_class = 'security_interceptor',
+	manufacturer = 'alders_vectrum',
 	model='security_interceptor',
 	forward_thrust = 8e5,
 	reverse_thrust = 8e5,
