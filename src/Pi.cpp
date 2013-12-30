@@ -16,7 +16,6 @@
 #include "GeoSphere.h"
 #include "Intro.h"
 #include "Lang.h"
-#include "LuaChatForm.h"
 #include "LuaComms.h"
 #include "LuaConsole.h"
 #include "LuaConstants.h"
@@ -55,7 +54,6 @@
 #include "SoundMusic.h"
 #include "Space.h"
 #include "SpaceStation.h"
-#include "SpaceStationView.h"
 #include "Star.h"
 #include "StringF.h"
 #include "SystemInfoView.h"
@@ -106,7 +104,7 @@ Player *Pi::player;
 View *Pi::currentView;
 WorldView *Pi::worldView;
 DeathView *Pi::deathView;
-SpaceStationView *Pi::spaceStationView;
+UIView *Pi::spaceStationView;
 UIView *Pi::infoView;
 SectorView *Pi::sectorView;
 GalacticView *Pi::galacticView;
@@ -183,8 +181,6 @@ static void LuaInit()
 	LuaObject<SystemBody>::RegisterClass();
 	LuaObject<Random>::RegisterClass();
 	LuaObject<Faction>::RegisterClass();
-
-	LuaObject<LuaChatForm>::RegisterClass();
 
 	Pi::luaSerializer = new LuaSerializer();
 	Pi::luaTimer = new LuaTimer();
@@ -694,11 +690,6 @@ void Pi::HandleEvents()
 							break;
 #endif
 
-						case SDLK_m:  // Gimme money!
-							if(Pi::game) {
-								Pi::player->SetMoney(Pi::player->GetMoney() + 10000000);
-							}
-							break;
 						case SDLK_F12:
 						{
 							if(Pi::game) {

@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Armed Transport',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='armed_transport',
 	forward_thrust = 10e5,
 	reverse_thrust = 10e5,

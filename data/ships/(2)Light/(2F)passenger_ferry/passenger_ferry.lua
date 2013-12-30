@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Passenger Ferry',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='passenger_ferry',
 	forward_thrust = 202e5,
 	reverse_thrust = 202e5,

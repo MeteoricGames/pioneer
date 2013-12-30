@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Mining Drone',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='mining_drone',
 	forward_thrust = 52e5,
 	reverse_thrust = 52e5,

@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Personal Fighter',
+	ship_class = 'test',
+	manufacturer = '1',
 	model = 'personal_fighter',
 	forward_thrust = 16e5,
 	reverse_thrust = 16e5,

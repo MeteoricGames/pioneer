@@ -3,6 +3,8 @@
 
 define_ship {
 	name='Cargo Loader',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='cargo_loader',
 	forward_thrust = 120e5,
 	reverse_thrust = 120e5,

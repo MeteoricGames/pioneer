@@ -4,6 +4,8 @@
 --Ships not available for purchase (ambient ships)
 define_wreck_ship {
 	name='Wreck ULCS',
+	ship_class = 'test',
+	manufacturer = '1',
 	model='ulcs_wreck',
 	forward_thrust = 3200e5,
 	reverse_thrust = 3200e5,
