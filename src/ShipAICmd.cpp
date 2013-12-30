@@ -719,6 +719,7 @@ AICmdFlyTo::~AICmdFlyTo()
 	if(m_ship && m_ship->IsType(Object::PLAYER) && m_ship->GetTransitState() != TRANSIT_DRIVE_OFF) {
 		// Transit interrupted
 		float interrupt_velocity = TRANSIT_START_SPEED;
+		//float interrupt_velocity = 1000.0;
 		double s = m_ship->GetVelocity().Length();
 		if(s > interrupt_velocity) {
 			m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -interrupt_velocity));
@@ -1347,7 +1348,10 @@ bool AICmdTransitAround::TimeStepUpdate()
 {
 	if (!ProcessChild()) return false;
 	const double time_step = Pi::game->GetTimeStep();
-	const double transit_altitude = TRANSIT_GRAVITY_RANGE_1 + 8000.0;
+	const double transit_low = std::max<double>(TRANSIT_GRAVITY_RANGE_1 + (m_obstructor->GetPhysRadius() * 0.0019), TRANSIT_GRAVITY_RANGE_1);
+	const double transit_high = std::max<double>(TRANSIT_GRAVITY_RANGE_1 + (m_obstructor->GetPhysRadius() * 0.0059), TRANSIT_GRAVITY_RANGE_1 + 25000.0);
+	const double transit_altitude = transit_low + ((transit_high - transit_low) / 2);
+	const double altitude_correction_speed = std::min<double>(m_ship->GetMaxManeuverSpeed(), 2500.0);
 	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
 		m_ship->GetPosition();
 	vector3d ship_to_target = m_targetPosition - m_ship->GetPosition();
@@ -1364,19 +1368,17 @@ bool AICmdTransitAround::TimeStepUpdate()
 	if(m_obstructor->IsType(Object::TERRAINBODY)) {
 		if(Pi::worldView->IsAltitudeAvailable()) {
 			m_alt = Pi::worldView->GetAltitude();
-			if(m_alt < TRANSIT_GRAVITY_RANGE_1 || m_alt > transit_altitude + 7000.0) { // Transit range is 13km space above gravity bubble
+			if(m_alt < transit_low || m_alt > transit_high) {
 				m_warmUpTime = 2.0;
 				m_state = AITA_ALTITUDE;
 				double curve_factor = abs(m_alt - transit_altitude) / 10000.0;
-				if(m_alt < TRANSIT_GRAVITY_RANGE_1) {
-					//velocity_vector = ((up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+				if(m_alt < transit_low) {
 					velocity_vector = ((up_vector * curve_factor) + velocity_vector).Normalized();
-				} else if(m_alt > transit_altitude + 7000.0) {
-					//velocity_vector = ((-up_vector * curve_factor) + (velocity_vector * 0.2)).Normalized();
+				} else if(m_alt > transit_high) {
 					velocity_vector = (-(up_vector * curve_factor) + velocity_vector).Normalized();
 				}
 				m_ship->SetJuice(20.0);
-				m_ship->AIMatchVel(velocity_vector * m_ship->GetMaxManeuverSpeed() * std::min<double>(1.0, curve_factor));
+				m_ship->AIMatchVel(velocity_vector * altitude_correction_speed * std::min<double>(1.0, curve_factor));
 				m_ship->AIFaceDirection(velocity_vector);
 				m_ship->AIFaceUpdir(up_vector);
 				return false;
@@ -1385,7 +1387,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 	}
 	// Adjust velocity slightly to follow the exact transit altitude arc
 	if(m_alt > transit_altitude) {
-		if(m_alt > transit_altitude + 6000.0) {
+		if(m_alt > transit_altitude + 6000) {
 			velocity_vector = velocity_vector + (-up_vector * 0.005);
 		} else {
 			velocity_vector = velocity_vector + (-up_vector * 0.001);
@@ -1403,7 +1405,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 		m_ship->SetVelocity(velocity_vector * m_ship->GetVelocity().Length());
 	}
 	m_state = AITA_TRANSIT;
-	// 3: Engage transit after 2 seconds to give sound effects enough time to play (TODO)
+	// 3: Engage transit after 2 seconds to give sound effects enough time to play
 	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
 		m_ship->StartTransitDrive();
 	}

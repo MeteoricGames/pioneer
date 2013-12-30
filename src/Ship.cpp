@@ -1316,7 +1316,8 @@ void Ship::StopTransitDrive()
 {
 	if(GetTransitState() != TRANSIT_DRIVE_OFF && IsType(Object::PLAYER)) {
 		// Transit interrupted
-		float interrupt_velocity = GetMaxManeuverSpeed();
+		//float interrupt_velocity = GetMaxManeuverSpeed();
+		float interrupt_velocity = 1000.0;
 		SetVelocity(GetOrient()*vector3d(0, 0, -interrupt_velocity));
 		SetJuice(1.0);
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
