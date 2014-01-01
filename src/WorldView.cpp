@@ -1482,6 +1482,9 @@ void WorldView::UpdateProjectedObjects()
 	// determine projected positions and update labels
 	m_bodyLabels->Clear();
 	m_projectedPos.clear();
+
+	double dist = 9999999999.0; //any high number will do.
+
 	for (Space::BodyIterator i = Pi::game->GetSpace()->BodiesBegin(); i != Pi::game->GetSpace()->BodiesEnd(); ++i) {
 		Body *b = *i;
 
@@ -1497,6 +1500,12 @@ void WorldView::UpdateProjectedObjects()
 				m_bodyLabels->Add((*i)->GetLabel(), sigc::bind(sigc::mem_fun(this, &WorldView::SelectBody), *i, true), float(pos.x), float(pos.y));
 
 			m_projectedPos[b] = pos;
+		}
+
+		// get nearest target for combat
+		if (Pi::KeyState(SDLK_RCTRL) && b->IsType(Object::SHIP) && !b->IsType(Object::PLAYER) && Pi::player->GetPositionRelTo(b).Length() < 10000.0 && Pi::player->GetPositionRelTo(b).Length() < dist) {
+			dist = Pi::player->GetPositionRelTo(b).Length();
+			Pi::player->SetCombatTarget(b);
 		}
 	}
 
@@ -1857,7 +1866,7 @@ void WorldView::Draw()
 
 	// combat target indicator
 	if (Pi::player->TargetInSight())
-		DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, green);
+		DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, yellow);
 	else
 		DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, red);
 
