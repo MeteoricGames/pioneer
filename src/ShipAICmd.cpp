@@ -256,9 +256,9 @@ bool AICmdKill::TimeStepUpdate()
 	float hullDamage = m_ship->GetPercentHull()/100.0;
 	float thullDamage = m_target->GetPercentHull()/100.0;
 
-	if (targpos.Length() >= VICINITY_MIN-8000.0) {
+	if (targpos.Length() >= VICINITY_MIN/3) {
 		m_ship->SetJuice(20.0 * hullDamage);
-		m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 2500));
+		m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
 		ProcessChild(); return false;
 	}
 	else {
