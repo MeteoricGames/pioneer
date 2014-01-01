@@ -281,6 +281,11 @@ public:
 	bool IsInvulnerable() const { return m_invulnerable; }
 	void SetInvulnerable(bool b) { m_invulnerable = b; }
 
+	bool TargetInSight() const { return m_targetInSight; }
+
+	virtual Body *GetCombatTarget() const { return 0; }
+	virtual Body *GetNavTarget() const { return 0; }
+
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
@@ -361,6 +366,8 @@ private:
 
 	double m_thrusterFuel; 	// remaining fuel 0.0-1.0
 	double m_reserveFuel;	// 0-1, fuel not to touch for the current AI program
+
+	bool m_targetInSight;
 
 	int m_dockedWithIndex; // deserialisation
 
