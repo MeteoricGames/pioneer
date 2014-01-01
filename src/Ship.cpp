@@ -995,7 +995,7 @@ void Ship::FireWeapon(int num)
 	const Body *target = GetCombatTarget();
     //fire at target when it's near the center reticle
     //deliberately using ship's dir and not gun's dir
-	if (target && m_targetInSight) {
+	if (target && m_targetInSight && target->GetPositionRelTo(this).Length() <= 5000) {
 
 		vector3d targaccel = (target->GetVelocity() - m_lastVel) / Pi::game->GetTimeStep();
 
