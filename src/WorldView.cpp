@@ -1856,7 +1856,10 @@ void WorldView::Draw()
 	DrawImageIndicator(m_mouseDirIndicator, m_indicatorMousedir.get(), yellow);
 
 	// combat target indicator
-	DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, red);
+	if (Pi::player->TargetInSight())
+		DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, green);
+	else
+		DrawCombatTargetIndicator(m_combatTargetIndicator, m_targetLeadIndicator, red);
 
 	glLineWidth(1.0f);
 
