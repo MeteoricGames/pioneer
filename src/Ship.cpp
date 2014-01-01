@@ -28,6 +28,7 @@
 static const float TONS_HULL_PER_SHIELD = 10.f;
 static const double KINETIC_ENERGY_MULT	= 0.01;
 static const double AIM_CONE = 0.98;
+static const double MAX_AUTO_TARGET_DISTANCE = 5000.0;
 
 void SerializableEquipSet::Save(Serializer::Writer &wr)
 {
@@ -995,7 +996,7 @@ void Ship::FireWeapon(int num)
 	const Body *target = GetCombatTarget();
     //fire at target when it's near the center reticle
     //deliberately using ship's dir and not gun's dir
-	if (target && m_targetInSight && target->GetPositionRelTo(this).Length() <= 5000) {
+	if (target && m_targetInSight && target->GetPositionRelTo(this).Length() <= MAX_AUTO_TARGET_DISTANCE) {
 
 		vector3d targaccel = (target->GetVelocity() - m_lastVel) / Pi::game->GetTimeStep();
 
@@ -1004,7 +1005,7 @@ void Ship::FireWeapon(int num)
 		const double projspeed = lt.speed;
 		double projtime = tdir.Length() / projspeed;
 
-		vector3d leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
+		vector3d leadpos = tdir + targvel*projtime + 0.25*targaccel*projtime*projtime;
 		// second pass
 		projtime = leadpos.Length() / projspeed;
 		leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
@@ -1178,7 +1179,7 @@ void Ship::StaticUpdate(const float timeStep)
 		vector3d tdir = target->GetPositionRelTo(this);
 		const vector3d shipDir = -m.VectorZ();
 
-		if (tdir.Normalized().Dot(shipDir) > AIM_CONE)
+		if (tdir.Normalized().Dot(shipDir) > AIM_CONE && target->GetPositionRelTo(this).Length() <= MAX_AUTO_TARGET_DISTANCE)
 			m_targetInSight = true;
 	}
 
