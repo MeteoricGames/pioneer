@@ -368,6 +368,7 @@ private:
 	double m_reserveFuel;	// 0-1, fuel not to touch for the current AI program
 
 	bool m_targetInSight;
+	vector3d m_lastVel;
 
 	int m_dockedWithIndex; // deserialisation
 

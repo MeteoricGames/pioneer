@@ -228,7 +228,8 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_controller(0),
 	m_thrusterFuel(1.0),
 	m_reserveFuel(0.0),
-	m_targetInSight(false)
+	m_targetInSight(false),
+	m_lastVel(0,0,0)
 {
 	m_flightState = FLYING;
 	m_alertState = ALERT_NONE;
@@ -984,7 +985,7 @@ void Ship::FireWeapon(int num)
 	vector3d dir = m * vector3d(m_gun[num].dir);
 	const vector3d pos = m * vector3d(m_gun[num].pos) + GetPosition();
 
-	m_gun[num].temperature += 0.01f;
+	m_gun[num].temperature += 0.005f;
 
 	Equip::Type t = m_equipment.Get(Equip::SLOT_LASER, num);
 	const LaserType &lt = Equip::lasers[Equip::types[t].tableIndex];
@@ -995,11 +996,13 @@ void Ship::FireWeapon(int num)
     //fire at target when it's near the center reticle
     //deliberately using ship's dir and not gun's dir
 	if (target && m_targetInSight) {
+
+		vector3d targaccel = (target->GetVelocity() - m_lastVel) / Pi::game->GetTimeStep();
+
 		const vector3d tdir = target->GetPositionRelTo(this);
 		const vector3d targvel = target->GetVelocityRelTo(this);
 		const double projspeed = lt.speed;
 		double projtime = tdir.Length() / projspeed;
-		const vector3d targaccel(0,0,0);
 
 		vector3d leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
 		// second pass
@@ -1336,6 +1339,9 @@ void Ship::StaticUpdate(const float timeStep)
 	if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
 		m_cockpit->Update(timeStep);
 	}
+
+	// For Auto target acceleation
+	if (GetCombatTarget() && m_targetInSight) m_lastVel = target->GetVelocity();
 }
 
 void Ship::StartTransitDrive()
