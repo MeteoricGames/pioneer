@@ -1005,7 +1005,7 @@ void Ship::FireWeapon(int num)
 		const double projspeed = lt.speed;
 		double projtime = tdir.Length() / projspeed;
 
-		vector3d leadpos = tdir + targvel*projtime + 0.25*targaccel*projtime*projtime;
+		vector3d leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
 		// second pass
 		projtime = leadpos.Length() / projspeed;
 		leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
@@ -1242,7 +1242,7 @@ void Ship::StaticUpdate(const float timeStep)
 	// lasers
 	for (int i=0; i<ShipType::GUNMOUNT_MAX; i++) {
 		m_gun[i].recharge -= timeStep;
-		float rateCooling = 0.01f;
+		float rateCooling = 0.02f;
 		if (m_equipment.Get(Equip::SLOT_LASERCOOLER) != Equip::NONE)  {
 			rateCooling *= float(Equip::types[ m_equipment.Get(Equip::SLOT_LASERCOOLER) ].pval);
 		}
