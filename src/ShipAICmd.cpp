@@ -253,14 +253,25 @@ bool AICmdKill::TimeStepUpdate()
 	m_lastVel = m_target->GetVelocity();		// may need next frame
 	vector3d leaddir = m_ship->AIGetLeadDir(m_target, targaccel, 0);
 
-	if (targpos.Length() >= VICINITY_MIN+1000.0) {	// if really far from target, intercept
-//		printf("%s started AUTOPILOT\n", m_ship->GetLabel().c_str());
-		m_ship->SetJuice(20.0);
-		m_child = new AICmdFlyTo(m_ship, m_target);
+	float hullDamage = m_ship->GetPercentHull()/100.0;
+	float thullDamage = m_target->GetPercentHull()/100.0;
+
+	if (targpos.Length() >= VICINITY_MIN/3) {
+		m_ship->SetJuice(20.0 * hullDamage);
+		m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
 		ProcessChild(); return false;
 	}
-	else
-		m_ship->SetJuice(1.0);
+	else {
+		// reduce juice based on hulldamage on both parties.
+		if (m_ship->GetJuice() > 1.0) m_ship->SetJuice(1.0 * hullDamage);
+		if (m_target->GetJuice() > 1.0) m_target->SetJuice(1.0 * thullDamage);
+
+		// reduce/increase juice based on distance to target
+		if (targvel.Length() > targpos.Length() * 0.01)
+			m_ship->SetJuice(m_ship->GetJuice() * 0.99 * hullDamage);
+		else
+			m_ship->SetJuice(m_ship->GetJuice() * 1.01 * hullDamage);
+	}
 
 	// turn towards target lead direction, add inaccuracy
 	// trigger recheck when angular velocity reaches zero or after certain time

@@ -27,6 +27,8 @@
 
 static const float TONS_HULL_PER_SHIELD = 10.f;
 static const double KINETIC_ENERGY_MULT	= 0.01;
+static const double AIM_CONE = 0.98;
+static const double MAX_AUTO_TARGET_DISTANCE = 5000.0;
 
 void SerializableEquipSet::Save(Serializer::Writer &wr)
 {
@@ -226,7 +228,9 @@ void Ship::PostLoadFixup(Space *space)
 Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_controller(0),
 	m_thrusterFuel(1.0),
-	m_reserveFuel(0.0)
+	m_reserveFuel(0.0),
+	m_targetInSight(false),
+	m_lastVel(0,0,0)
 {
 	m_flightState = FLYING;
 	m_alertState = ALERT_NONE;
@@ -979,14 +983,36 @@ void Ship::FireWeapon(int num)
 	if (m_flightState != FLYING) return;
 
 	const matrix3x3d &m = GetOrient();
-	const vector3d dir = m * vector3d(m_gun[num].dir);
+	vector3d dir = m * vector3d(m_gun[num].dir);
 	const vector3d pos = m * vector3d(m_gun[num].pos) + GetPosition();
 
-	m_gun[num].temperature += 0.01f;
+	m_gun[num].temperature += 0.005f;
 
 	Equip::Type t = m_equipment.Get(Equip::SLOT_LASER, num);
 	const LaserType &lt = Equip::lasers[Equip::types[t].tableIndex];
 	m_gun[num].recharge = lt.rechargeTime;
+
+
+	const Body *target = GetCombatTarget();
+    //fire at target when it's near the center reticle
+    //deliberately using ship's dir and not gun's dir
+	if (target && m_targetInSight && target->GetPositionRelTo(this).Length() <= MAX_AUTO_TARGET_DISTANCE) {
+
+		vector3d targaccel = (target->GetVelocity() - m_lastVel) / Pi::game->GetTimeStep();
+
+		const vector3d tdir = target->GetPositionRelTo(this);
+		const vector3d targvel = target->GetVelocityRelTo(this);
+		const double projspeed = lt.speed;
+		double projtime = tdir.Length() / projspeed;
+
+		vector3d leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
+		// second pass
+		projtime = leadpos.Length() / projspeed;
+		leadpos = tdir + targvel*projtime + 0.5*targaccel*projtime*projtime;
+
+		dir = leadpos.Normalized();
+	}
+
 	vector3d baseVel = GetVelocity();
 	vector3d dirVel = lt.speed * dir.Normalized();
 
@@ -1146,6 +1172,17 @@ void Ship::StaticUpdate(const float timeStep)
 
 	UpdateAlertState();
 
+	m_targetInSight = false;
+    const Body *target = GetCombatTarget();
+	if (target) {
+		const matrix3x3d &m = GetOrient();
+		vector3d tdir = target->GetPositionRelTo(this);
+		const vector3d shipDir = -m.VectorZ();
+
+		if (tdir.Normalized().Dot(shipDir) > AIM_CONE && target->GetPositionRelTo(this).Length() <= MAX_AUTO_TARGET_DISTANCE)
+			m_targetInSight = true;
+	}
+
 	if(!AIIsActive()) {
 		ApplyThrusterLimits();
 	}
@@ -1205,7 +1242,7 @@ void Ship::StaticUpdate(const float timeStep)
 	// lasers
 	for (int i=0; i<ShipType::GUNMOUNT_MAX; i++) {
 		m_gun[i].recharge -= timeStep;
-		float rateCooling = 0.01f;
+		float rateCooling = 0.02f;
 		if (m_equipment.Get(Equip::SLOT_LASERCOOLER) != Equip::NONE)  {
 			rateCooling *= float(Equip::types[ m_equipment.Get(Equip::SLOT_LASERCOOLER) ].pval);
 		}
@@ -1303,6 +1340,9 @@ void Ship::StaticUpdate(const float timeStep)
 	if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
 		m_cockpit->Update(timeStep);
 	}
+
+	// For Auto target acceleation
+	if (GetCombatTarget() && m_targetInSight) m_lastVel = target->GetVelocity();
 }
 
 void Ship::StartTransitDrive()
