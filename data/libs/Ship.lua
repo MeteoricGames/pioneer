@@ -92,7 +92,7 @@ function Ship:FireMissileAt(missile, target)
 
 	if missile_object then
 		if target then
-			missile_object:AIKamikaze(target)
+			missile_object:AIFlyFormation(target,0,0,0)
 		end
 		-- Let's keep a safe distance before activating this device, shall we ?
 		Timer:CallEvery(2, function ()

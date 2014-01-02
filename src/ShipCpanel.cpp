@@ -273,6 +273,10 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	//XXX hack to keep InfoBanner on
 	Add(m_inflog, 350, -340);
 	m_inflog->ShowAll();
+
+	//XXX hack to always show missiles
+	Add(m_useEquipWidget, 200, 18);
+	m_useEquipWidget->ShowAll();
 }
 
 void ShipCpanel::OnMultiFuncGrabFocus(multifuncfunc_t f)
