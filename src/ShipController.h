@@ -90,8 +90,10 @@ private:
 	bool IsAnyLinearThrusterKeyDown();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();
-	// Perform ray collision detection to determine any possible tunneling collisions involving ship
+	// Perform future collision detection to determine any possible tunneling collisions involving ship
 	void TransitTunnelingTest(const float timeStep);
+	// Perform proximity detection this frame and next frame so space stations can catch transit-ships within range
+	void TransitStationCatch(const float timeStep);
 
 	Body* m_combatTarget;
 	Body* m_navTarget;

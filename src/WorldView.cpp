@@ -337,6 +337,7 @@ void WorldView::SetCamType(enum CamType c)
 			m_activeCameraController = m_cockpitCameraController.get();
 			break;
 	}
+	Pi::cpan->ChangeCamButtonState(m_camType);
 
 	Pi::player->GetPlayerController()->SetMouseForRearView(m_camType == CAM_INTERNAL && m_internalCameraController->GetMode() == InternalCameraController::MODE_REAR);
 
