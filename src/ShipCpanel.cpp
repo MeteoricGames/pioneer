@@ -273,6 +273,10 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	//XXX hack to keep InfoBanner on
 	Add(m_inflog, 350, -340);
 	m_inflog->ShowAll();
+
+	//XXX hack to always show missiles
+	Add(m_useEquipWidget, 200, 18);
+	m_useEquipWidget->ShowAll();
 }
 
 void ShipCpanel::OnMultiFuncGrabFocus(multifuncfunc_t f)
@@ -458,4 +462,10 @@ void ShipCpanel::ClearOverlay()
 		m_overlay[i]->SetText("");
 		m_overlay[i]->SetToolTip("");
 	}
+}
+
+// This is used by WorldView to update camera button when camera type changes
+void ShipCpanel::ChangeCamButtonState(WorldView::CamType cam_type)
+{
+	m_camButton->SetActiveState(static_cast<int>(cam_type));
 }
