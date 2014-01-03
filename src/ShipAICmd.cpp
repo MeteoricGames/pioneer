@@ -258,7 +258,7 @@ bool AICmdKill::TimeStepUpdate()
 
 	if (targpos.Length() >= VICINITY_MIN/3) {
 		m_ship->SetJuice(20.0 * hullDamage);
-		m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
+		m_child = new AICmdFlyTo(m_ship, m_target, double(Pi::rng.Int32(2000, 3000)));
 		ProcessChild(); return false;
 	}
 	else {
