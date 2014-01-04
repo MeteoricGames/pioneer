@@ -43,7 +43,6 @@ private:
 	ShipType m_type;
 
 	vector3d vShipDir;		// current ship direction
-	vector3d vShipYaw;		// current ship yaw vector
 	vector3d vdDir;			// cockpit direction
 	vector3d vdYaw;			// cockpit yaw vector
 	float fInterp;			// for motion interpolation
