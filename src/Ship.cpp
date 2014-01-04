@@ -261,10 +261,6 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 	m_skin.SetPattern(Pi::rng.Int32(0, GetModel()->GetNumPatterns()));
 	m_skin.Apply(GetModel());
 
-	if(!m_type->cockpitName.empty()) {
-		m_cockpit.reset(new ShipCockpit(m_type));
-	}
-
 	Init();
 	SetController(new ShipController());
 }
