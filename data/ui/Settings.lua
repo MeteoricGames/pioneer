@@ -107,6 +107,10 @@ ui.templates.Settings = function (args)
 			Engine.GetPostProcessingEnabled, Engine.SetPostProcessingEnabled,
 			"Post-processing")
 
+		local cockpitCheckBox = optionCheckBox(
+			Engine.GetCockpitEnabled, Engine.SetCockpitEnabled,
+			l.ENABLE_COCKPIT)
+
 		local fullScreenCheckBox = optionCheckBox(
 			Engine.GetFullscreen, Engine.SetFullscreen,
 			l.FULL_SCREEN)
@@ -131,6 +135,7 @@ ui.templates.Settings = function (args)
 				speedLinesCheckBox,
 				targetIndicatorsCheckBox,
 				postProcessingCheckBox,
+				cockpitCheckBox,
 			})))
 	end
 
