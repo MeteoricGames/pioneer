@@ -13,7 +13,6 @@
 #include "Planet.h"
 #include "Serializer.h"
 #include "ShipType.h"
-#include "ShipCockpit.h"
 #include "scenegraph/SceneGraph.h"
 #include "scenegraph/ModelSkin.h"
 #include <list>
@@ -243,7 +242,6 @@ public:
 
 	const SceneGraph::ModelSkin &GetSkin() const { return m_skin; }
 	void SetSkin(const SceneGraph::ModelSkin &skin);
-	const ShipCockpit* GetCockpit() const {return m_cockpit.get();}
 
 	void SetLabel(const std::string &label);
 
@@ -315,7 +313,6 @@ protected:
 	float m_ecmRecharge;
 
 	ShipController *m_controller;
-	std::unique_ptr<ShipCockpit> m_cockpit;
 
 private:
 	float GetECMRechargeTime();

@@ -17,6 +17,7 @@
 #include "SoundMusic.h"
 #include "KeyBindings.h"
 #include "Lang.h"
+#include "Player.h"
 
 /*
  * Interface: Engine
@@ -371,6 +372,23 @@ static int l_engine_set_post_processing(lua_State *l)
 	Pi::config->SetInt("PostProcessing", (enabled ? 1 : 0));
 	Pi::config->Save();
 	Pi::SetPostProcessingEnabled(enabled);
+	return 0;
+}
+static int l_engine_get_cockpit_enabled(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("EnableCockpit") != 0);
+	return 1;
+}
+
+static int l_engine_set_cockpit_enabled(lua_State *l)
+{
+	if (lua_isnone(l, 1))
+		return luaL_error(l, "SetCockpitEnabled takes one boolean argument");
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("EnableCockpit", (enabled ? 1 : 0));
+	Pi::config->Save();
+	Pi::player->InitCockpit();
+	if (enabled) Pi::player->OnCockpitActivated();
 	return 0;
 }
 
@@ -744,6 +762,8 @@ void LuaEngine::Register()
 
 		{ "GetPostProcessingEnabled", l_engine_get_post_processing },
 		{ "SetPostProcessingEnabled", l_engine_set_post_processing },
+		{ "GetCockpitEnabled", l_engine_get_cockpit_enabled },
+		{ "SetCockpitEnabled", l_engine_set_cockpit_enabled },
 
 		{ "GetMasterMuted", l_engine_get_master_muted },
 		{ "SetMasterMuted", l_engine_set_master_muted },

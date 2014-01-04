@@ -190,10 +190,6 @@ void Ship::Init()
 {
 	m_invulnerable = false;
 
-	if(m_type->cockpitName.length() > 0) {
-		m_cockpit.reset(new ShipCockpit(*m_type));
-	}
-
 	m_navLights.reset(new NavLights(GetModel()));
 	m_navLights->SetEnabled(true);
 
@@ -1339,9 +1335,9 @@ void Ship::StaticUpdate(const float timeStep)
 	}
 
 	// Cockpit
-	if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
-		m_cockpit->Update(timeStep);
-	}
+	//if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
+	//	m_cockpit->Update(timeStep);
+	//}
 
 	// For Auto target acceleation
 	if (GetCombatTarget() && m_targetInSight) m_lastVel = target->GetVelocity();
