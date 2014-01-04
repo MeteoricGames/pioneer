@@ -1300,11 +1300,6 @@ void Ship::StaticUpdate(const float timeStep)
 		Sound::PlaySfx("Transit_Finish", 0.20f, 0.20f, false);
 		SetTransitState(TRANSIT_DRIVE_FINISHED);
 	}
-
-	// Cockpit
-	if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
-		m_cockpit->Update(timeStep);
-	}
 }
 
 void Ship::StartTransitDrive()
