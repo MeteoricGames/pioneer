@@ -44,7 +44,7 @@ void ShipCockpit::Update(float timeStep)
 	//---------------------------------------- Acceleration
 	float cur_vel = CalculateSignedForwardVelocity(-cur_dir, Pi::player->GetVelocity()); // Forward is -Z
 	float gforce = Clamp(floorf(((abs(cur_vel) - fShipVel) / timeStep) / 9.8f), -COCKPIT_MAX_GFORCE, COCKPIT_MAX_GFORCE);
-	if(abs(cur_vel) > 500000.0f) { // Limit gforce measurement so we don't get astronomical fluctuations
+	if(abs(cur_vel) > 500000.0f) { // Limit geforce measurement so we don't get astronomical fluctuations
 		gforce = 0.0f;
 	}
 	if(abs(vTranslate.z - fOffset) < 0.001f) {
@@ -196,16 +196,8 @@ float ShipCockpit::EaseOut(float a, float b, float delta)
 float ShipCockpit::EaseIn(float a, float b, float delta)
 {
 	switch(eEasing) {
-		case CLE_CUBIC_EASING:
-			return MathUtil::CubicInterpIn<float>(a, b, delta);
-			break;
-
 		case CLE_QUAD_EASING:
 			return MathUtil::QuadInterpIn<float>(a, b, delta);
-			break;
-
-		case CLE_EXP_EASING:
-			return MathUtil::ExpInterpIn<float>(a, b, delta);
 			break;
 
 		default:

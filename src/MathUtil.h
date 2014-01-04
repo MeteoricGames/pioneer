@@ -32,18 +32,8 @@ inline T QuadInterpOut(T a, T b, T delta) {
 }
 
 template <typename T>
-inline T ExpInterpIn(T a, T b, T delta) {
-	return (b - a) * pow(2, 10 * (delta - 1)) + a;
-}
-
-template <typename T>
 inline T ExpInterpOut(T a, T b, T delta) {
 	return (b - a) * (-pow(2, -10 * delta) + 1) + a;
-}
-
-template <typename T>
-inline T CubicInterpIn(T a, T b, T delta) {
-	return ((b - a) * delta * delta * delta) + a;
 }
 
 template <typename T>
