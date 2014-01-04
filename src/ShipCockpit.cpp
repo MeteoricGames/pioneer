@@ -9,7 +9,7 @@
 
 ShipCockpit::ShipCockpit(const ShipType& ship_type) :
 	m_type(ship_type), matTransform(matrix4x4d::Identity()), vTranslate(vector3d(0.0, 0.0, 0.0)),
-	fRInterp(0.0f), fTInterp(0.0f), fOffset(0.0f), eEasing(CLE_QUAD_EASING)
+	fRInterp(0.0f), fTInterp(0.0f), fGForce(0.0f), fOffset(0.0f), eEasing(CLE_QUAD_EASING)
 {
 	Init();
 }
@@ -35,32 +35,37 @@ void ShipCockpit::Render(Graphics::Renderer *renderer, const Camera *camera, con
 void ShipCockpit::Update(float timeStep)
 {
 	matTransform = matrix4x4d::Identity();
-	vector3d cur_dir = Pi::player->GetOrient().VectorZ().Normalized();
-	if(cur_dir.Dot(vShipDir) < 1.0f) {
-		fRInterp = 0.0f;
-		vShipDir = cur_dir;
-	}
 
 	//---------------------------------------- Acceleration
-	float cur_vel = CalculateSignedForwardVelocity(-cur_dir, Pi::player->GetVelocity()); // Forward is -Z
-	float gforce = Clamp(floorf(((abs(cur_vel) - fShipVel) / timeStep) / 9.8f), -COCKPIT_MAX_GFORCE, COCKPIT_MAX_GFORCE);
-	if(abs(cur_vel) > 500000.0f) { // Limit geforce measurement so we don't get astronomical fluctuations
+	float cur_vel = Pi::player->GetVelocity().Length();
+	float gforce = Clamp(floorf(((cur_vel - fShipVel) / timeStep) / 9.8f), -COCKPIT_MAX_GFORCE, COCKPIT_MAX_GFORCE);
+	if(cur_vel > 500000.0f) { // Limit geforce measurement so we don't get astronomical fluctuations in gforce
 		gforce = 0.0f;
 	}
 	if(abs(vTranslate.z - fOffset) < 0.001f) {
 		fTInterp = 0.0f;
 	}
-	float offset = (gforce > 14.0f? -1.0f : (gforce < -14.0f? 1.0f : 0.0f)) * COCKPIT_ACCEL_OFFSET;
-	fTInterp += timeStep * COCKPIT_ACCEL_INTERP_MULTIPLIER;
-	if(fTInterp > 1.0f) {
-		fTInterp = 1.0f;	
-		vTranslate.z = offset;
+	float offset = (gforce / COCKPIT_MAX_GFORCE) * COCKPIT_ACCEL_OFFSET * 0.25f;
+	//float offset = (gforce > 0.0f? 1.0f : -1.0f) * COCKPIT_ACCEL_OFFSET;
+	if(abs(vTranslate.z - offset) >= 0.001f) {
+		fTInterp += timeStep * COCKPIT_ACCEL_INTERP_MULTIPLIER;
+		if(fTInterp > 1.0f) {
+			fTInterp = 1.0f;	
+			vTranslate.z = offset;
+		} else {
+			vTranslate.z = Ease(vTranslate.z, offset, fTInterp);
+		}
 	}
-	vTranslate.z = EaseIn(vTranslate.z, offset, fTInterp);
 	fOffset = offset;
 	fShipVel = cur_vel;
+	fGForce = gforce;
 
-	//------------------------------------------ Rotation
+	//------------------------------------------ Rotateion
+	vector3d cur_dir = Pi::player->GetOrient().VectorZ().Normalized();
+	if(cur_dir.Dot(vShipDir) < 1.0f) {
+		fRInterp = 0.0f;
+		vShipDir = cur_dir;
+	}
 	// For yaw/pitch
 	vector3d rot_axis = cur_dir.Cross(vdDir).Normalized();
 	vector3d yaw_axis = Pi::player->GetOrient().VectorY().Normalized();
@@ -88,7 +93,7 @@ void ShipCockpit::Update(float timeStep)
 			if(angle > DEG2RAD(COCKPIT_LAG_MAX_ANGLE)) {
 				angle = DEG2RAD(COCKPIT_LAG_MAX_ANGLE);
 			}
-			angle = EaseOut(angle, 0.0, fRInterp);
+			angle = Ease(angle, 0.0, fRInterp);
 			vdDir = cur_dir;
 			if(angle >= 0.0f) {
 				vdDir.ArbRotate(rot_axis, angle);
@@ -125,7 +130,7 @@ void ShipCockpit::Update(float timeStep)
 				angle_yaw = DEG2RAD(COCKPIT_LAG_MAX_ANGLE);
 			}
 			if(dot_yaw < 1.0f) {
-				angle_yaw = EaseOut(angle_yaw, 0.0, fRInterp);
+				angle_yaw = Ease(angle_yaw, 0.0, fRInterp);
 			}
 			vdYaw = yaw_axis;
 			if(angle_yaw >= 0.0f) {
@@ -165,15 +170,11 @@ void ShipCockpit::OnActivated()
 	vdYaw = Pi::player->GetOrient().VectorY().Normalized();
 	vShipDir = vdDir;
 	vShipYaw = vdYaw;
-	fShipVel = CalculateSignedForwardVelocity(-vShipDir, Pi::player->GetVelocity());
+	fShipVel = Pi::player->GetVelocity().Length();
+	fGForce = 0.0f;
 }
 
-float ShipCockpit::CalculateSignedForwardVelocity(vector3d normalized_forward, vector3d velocity) {
-	float velz_cos = velocity.Dot(normalized_forward);
-	return (velz_cos * normalized_forward).Length() * (velz_cos < 0.0? -1.0 : 1.0);
-}
-
-float ShipCockpit::EaseOut(float a, float b, float delta)
+float ShipCockpit::Ease(float a, float b, float delta)
 {
 	switch(eEasing) {
 		case CLE_CUBIC_EASING:
@@ -186,18 +187,6 @@ float ShipCockpit::EaseOut(float a, float b, float delta)
 
 		case CLE_EXP_EASING:
 			return MathUtil::ExpInterpOut<float>(a, b, delta);
-			break;
-
-		default:
-			return MathUtil::LinearInterp<float>(a, b, delta);
-	}
-}
-
-float ShipCockpit::EaseIn(float a, float b, float delta)
-{
-	switch(eEasing) {
-		case CLE_QUAD_EASING:
-			return MathUtil::QuadInterpIn<float>(a, b, delta);
 			break;
 
 		default:
