@@ -136,58 +136,58 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::MISSILE_UNGUIDED,0,
 	  Equip::SLOT_MISSILE, -1, {},
-	  3000, 1, 0, 0, true, 0
+	  3000, 0, 0, 0, true, 0
 	},{
 	  Lang::MISSILE_GUIDED,0,
 	  Equip::SLOT_MISSILE, -1, {},
-	  5000, 1, 0, 0, true, 0
+	  5000, 0, 0, 0, true, 0
 	},{
 	  Lang::MISSILE_SMART,0,
 	  Equip::SLOT_MISSILE, -1, {},
-	  9500, 1, 0, 0, true, 0
+	  9500, 0, 0, 0, true, 0
 	},{
 	  Lang::MISSILE_NAVAL,0,
 	  Equip::SLOT_MISSILE, -1, {},
-	  16000, 1, 0, 0, true, 0
+	  16000, 0, 0, 0, true, 0
 	},{
 	  Lang::ATMOSPHERIC_SHIELDING,
 	  Lang::ATMOSPHERIC_SHIELDING_DESCRIPTION,
 	  Equip::SLOT_ATMOSHIELD, -1, {},
-	  20000, 1, 1, 0, true, 0
+	  20000, 0, 1, 0, true, 0
 	},{
 	  Lang::ECM_BASIC,
 	  Lang::ECM_BASIC_DESCRIPTION,
 	  Equip::SLOT_ECM, -1, {},
-	  600000, 2, 2, 0, true, 5.0,
+	  600000, 1, 2, 0, true, 5.0,
 	},{
 	  Lang::SCANNER,
 	  Lang::SCANNER_DESCRIPTION,
 	  Equip::SLOT_SCANNER, -1, {},
-	  68000, 1, 0, 0, true, 0
+	  68000, 0, 0, 0, true, 0
 	},{
 	  Lang::ECM_ADVANCED,
 	  Lang::ECM_ADVANCED_DESCRIPTION,
 	  Equip::SLOT_ECM, -1, {},
-	  1520000, 2, 3, 0, true, 5.0
+	  1520000, 1, 3, 0, true, 5.0
 	},{
 	  Lang::UNOCCUPIED_CABIN,
 	  Lang::UNOCCUPIED_CABIN_DESCRIPTION,
 	  Equip::SLOT_CABIN, -1, {},
-	  135000, 5, 1, 0, true, 5.0
+	  135000, 3, 1, 0, true, 5.0
 	},{
 	  Lang::PASSENGER_CABIN,0,
 	  Equip::SLOT_CABIN, -1, {},
-	  -135000, 5, 1, 0, false, 5.0
+	  -135000, 3, 1, 0, false, 5.0
 	},{
 	  Lang::SHIELD_GENERATOR,
 	  Lang::SHIELD_GENERATOR_DESCRIPTION,
 	  Equip::SLOT_SHIELD, -1, {},
-	  250000, 4, 1, 0, true, 5.0
+	  250000, 1, 1, 0, true, 5.0
 	},{
 	  Lang::LASER_COOLING_BOOSTER,
 	  Lang::LASER_COOLING_BOOSTER_DESCRIPTION,
 	  Equip::SLOT_LASERCOOLER, -1, {},
-	  38000, 1, 2, 0, true, 0
+	  38000, 0, 2, 0, true, 0
 	},{
 	  Lang::CARGO_LIFE_SUPPORT,
 	  Lang::CARGO_LIFE_SUPPORT_DESCRIPTION,
@@ -197,27 +197,27 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	  Lang::AUTOPILOT,
 	  Lang::AUTOPILOT_DESCRIPTION,
 	  Equip::SLOT_AUTOPILOT, -1, {},
-	  140000, 1, 1, 0, true, 0
+	  140000, 0, 1, 0, true, 0
 	},{
 	  Lang::RADAR_MAPPER,
 	  Lang::RADAR_MAPPER_DESCRIPTION,
 	  Equip::SLOT_RADARMAPPER, -1, {},
-	  90000, 1, 1, 0, true, 0
+	  90000, 0, 1, 0, true, 0
 	},{
 	  Lang::FUEL_SCOOP,
 	  Lang::FUEL_SCOOP_DESCRIPTION,
 	  Equip::SLOT_FUELSCOOP, -1, {},
-	  350000, 6, 1, 0, true, 0
+	  350000, 1, 1, 0, true, 0
 	},{
 	  Lang::CARGO_SCOOP,
 	  Lang::CARGO_SCOOP_DESCRIPTION,
 	  Equip::SLOT_CARGOSCOOP, -1, {},
-	  390000, 7, 1, 0, true, 0
+	  390000, 1, 1, 0, true, 0
 	},{
 	  Lang::HYPERCLOUD_ANALYZER,
 	  Lang::HYPERCLOUD_ANALYZER_DESCRIPTION,
 	  Equip::SLOT_HYPERCLOUD, -1, {},
-	  150000, 1, 1, 0, true, 0
+	  150000, 0, 1, 0, true, 0
 	},{
 	  Lang::HULL_AUTOREPAIR,
 	  Lang::HULL_AUTOREPAIR_DESCRIPTION,
@@ -227,7 +227,7 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	  Lang::SHIELD_ENERGY_BOOSTER,
 	  Lang::SHIELD_ENERGY_BOOSTER_DESCRIPTION,
 	  Equip::SLOT_ENERGYBOOSTER, -1, {},
-	  1000000, 8, 2, 0, true, 0
+	  1000000, 1, 2, 0, true, 0
 	},{
 	  Lang::DRIVE_CLASS1,0,
 	  Equip::SLOT_ENGINE, -1, {Equip::HYDROGEN},
@@ -331,40 +331,40 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	},{
 	  Lang::PULSECANNON_DUAL_1MW,0,
 	  Equip::SLOT_LASER, 2, {},
-	  110000, 4, 2, 0, true, 0
+	  110000, 1, 2, 0, true, 0
 	},{
 	  Lang::PULSECANNON_2MW,0,
 	  Equip::SLOT_LASER, 3, {},
-	  100000, 3, 2, 0, true, 0
+	  100000, 1, 2, 0, true, 0
 	},{
 	  Lang::PULSECANNON_RAPID_2MW,0,
 	  Equip::SLOT_LASER, 4, {},
-	  180000, 7, 2, 0, true, 0
+	  180000, 1, 2, 0, true, 0
 	},{
 	  Lang::PULSECANNON_4MW,0,
 	  Equip::SLOT_LASER, 5, {},
-	  220000, 10, 4, 0, true, 0
+	  220000, 1, 4, 0, true, 0
 	},{
 	  Lang::PULSECANNON_10MW,0,
 	  Equip::SLOT_LASER, 6, {},
-	  490000, 30, 10, 0, true, 0
+	  490000, 2, 10, 0, true, 0
 	},{
 	  Lang::PULSECANNON_20MW,0,
 	  Equip::SLOT_LASER, 7, {},
-	  1200000, 65, 20, 0, true, 0
+	  1200000, 3, 20, 0, true, 0
 	},{
 	  Lang::MININGCANNON_17MW,
 	  Lang::MININGCANNON_17MW_DESCRIPTION,
 	  Equip::SLOT_LASER, 8, {},
-	  1060000, 10, 17, 0, true, 0
+	  1060000, 4, 17, 0, true, 0
 	},{
 	  Lang::SMALL_PLASMA_ACCEL,0,
 	  Equip::SLOT_LASER, 9, {},
-	  12000000, 22, 50, 0, true, 0
+	  12000000, 5, 50, 0, true, 0
 	},{
 	  Lang::LARGE_PLASMA_ACCEL,0,
 	  Equip::SLOT_LASER, 10, {},
-	  39000000, 50, 100, 0, true, 0
+	  39000000, 8, 100, 0, true, 0
 	}
 };
 

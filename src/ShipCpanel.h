@@ -40,6 +40,7 @@ public:
 	void SetOverlayText(OverlayTextPos pos, const std::string &text);
 	void SetOverlayToolTip(OverlayTextPos pos, const std::string &text);
 	void ClearOverlay();
+	void ChangeCamButtonState(WorldView::CamType cam_type);
 
 private:
 	void InitObject();

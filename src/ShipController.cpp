@@ -157,6 +157,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 						m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
 					}
 					TransitTunnelingTest(timeStep);
+					TransitStationCatch(timeStep);
 				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_STOP) {
 					// STOP
 				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
@@ -234,6 +235,47 @@ void PlayerShipController::TransitTunnelingTest(const float timeStep) {
 			if(motion_clamp && desired_distance > 0.0) {
 				m_ship->SetPosition(ship_position + (ship_direction * desired_distance));
 				m_ship->SetVelocity(ship_direction * m_setSpeed);
+			}
+		}
+	}
+}
+
+void PlayerShipController::TransitStationCatch(const float timeStep)
+{
+	if(m_ship->GetFrame()->GetBody()->IsType(Object::SPACESTATION)) {
+		// Check current position and future position
+		Frame* frame = m_ship->GetFrame();
+		Body* station = frame->GetBody();
+		vector3d ship_position = m_ship->GetPositionRelTo(frame);
+		vector3d ship_velocity = m_ship->GetVelocityRelTo(frame);
+		vector3d ship_direction = ship_velocity.Normalized();
+		vector3d station_position = station->GetPosition();
+		vector3d ship_to_station = station_position - ship_position;
+		float heading_check = ship_to_station.Dot(ship_direction);
+		if(heading_check > 0.0f) {
+			double distance = ship_to_station.Length();
+			if(distance <= TRANSIT_STATIONCATCH_DISTANCE) {
+				// Catch!
+				m_ship->StopTransitDrive();
+				SetFlightControlState(CONTROL_MANEUVER);
+			} else {
+				// Determine the closest point to station between current position and future position
+				double ship_step = ship_velocity.Length();
+				vector3d ship_position_future = ship_position + (ship_direction * ship_step);
+				double future_distance = (ship_position_future - station_position).Length();
+				if(heading_check * distance < future_distance) { // cos(heading angle) * distance = closest distance to station along movement vector
+					float heading_angle = acos(heading_check);
+					if(sin(heading_angle) * distance <= TRANSIT_STATIONCATCH_DISTANCE) { // sin(heading angle) * distance = distance between closes point along path and station
+						// Catch!
+						m_setSpeed = m_ship->GetMaxManeuverSpeed();
+						m_ship->StopTransitDrive();
+						SetFlightControlState(CONTROL_MANEUVER);
+						if(future_distance > 0.0) {
+							m_ship->SetPosition(ship_position + (ship_direction * future_distance));
+							m_ship->SetVelocity(ship_direction * m_setSpeed);
+						}
+					}
+				}
 			}
 		}
 	}

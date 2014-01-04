@@ -63,7 +63,9 @@ local spawnPolice = function()
 
 			local ship = Space.SpawnShipDocked("security_interceptor", starport)
 			if ship~=nil then
-				ship:AddEquip('PULSECANNON_1MW')
+				ship:AddEquip('PULSECANNON_DUAL_1MW')
+				ship:AddEquip('LASER_COOLING_BOOSTER')
+				ship:AddEquip('SHIELD_GENERATOR')
 				ship:AddEquip('ATMOSPHERIC_SHIELDING')
 				ship:SetLabel('POLICE')
 				police[ship] = {
