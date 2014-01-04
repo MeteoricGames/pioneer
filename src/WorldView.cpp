@@ -275,9 +275,6 @@ void WorldView::InitObject()
 	m_externalCameraController.reset(new ExternalCameraController(m_camera.get(), Pi::player));
 	m_siderealCameraController.reset(new SiderealCameraController(m_camera.get(), Pi::player));
 	m_cockpitCameraController.reset(new CockpitCameraController(m_camera.get(), Pi::player));
-	if(Pi::player->GetCockpit()) {
-		m_camType = CAM_COCKPIT;
-	}
 	SetCamType(m_camType); //set the active camera
 
 	m_onHyperspaceTargetChangedCon =
