@@ -9,7 +9,7 @@
 
 ShipCockpit::ShipCockpit(const ShipType& ship_type) :
 	m_type(ship_type), matTransform(matrix4x4d::Identity()), vTranslate(vector3d(0.0, 0.0, 0.0)),
-	fRInterp(0.0f), fTInterp(0.0f), fGForce(0.0f), fOffset(0.0f), eEasing(CLE_QUAD_EASING)
+	fRInterp(0.0f), fTInterp(0.0f), fOffset(0.0f), eEasing(CLE_QUAD_EASING)
 {
 	Init();
 }
@@ -44,11 +44,7 @@ void ShipCockpit::Update(float timeStep)
 	//---------------------------------------- Acceleration
 	float cur_vel = CalculateSignedForwardVelocity(-cur_dir, Pi::player->GetVelocity()); // Forward is -Z
 	float gforce = Clamp(floorf(((abs(cur_vel) - fShipVel) / timeStep) / 9.8f), -COCKPIT_MAX_GFORCE, COCKPIT_MAX_GFORCE);
-	if(abs(cur_vel) > 500000.0f ||      // Limit gforce measurement so we don't get astronomical fluctuations
-	   abs(gforce - fGForce) > 100.0) { // Smooth out gforce one frame spikes, sometimes happens when hitting max speed due to the thrust limiters
-		gforce = 0.0f;
-	}
-	if(abs(gforce - fGForce) > 100.0) {
+	if(abs(cur_vel) > 500000.0f) { // Limit gforce measurement so we don't get astronomical fluctuations
 		gforce = 0.0f;
 	}
 	if(abs(vTranslate.z - fOffset) < 0.001f) {
@@ -61,7 +57,6 @@ void ShipCockpit::Update(float timeStep)
 		vTranslate.z = offset;
 	}
 	vTranslate.z = EaseIn(vTranslate.z, offset, fTInterp);
-	fGForce = gforce;
 	fOffset = offset;
 	fShipVel = cur_vel;
 
