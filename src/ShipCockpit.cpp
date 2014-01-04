@@ -8,8 +8,8 @@
 #include "MathUtil.h"
 
 ShipCockpit::ShipCockpit(const ShipType& ship_type) :
-	m_type(ship_type), matTransform(matrix4x4d::Identity()), vTranslate(vector3d(0.0, 0.0, 0.0)),
-	fRInterp(0.0f), fTInterp(0.0f), fGForce(0.0f), fOffset(0.0f), eEasing(CLE_QUAD_EASING)
+	m_type(ship_type), matTransform(matrix4x4d::Identity()), fInterp(0.0f),
+	eEasing(CLE_QUAD_EASING)
 {
 	Init();
 }
@@ -35,35 +35,9 @@ void ShipCockpit::Render(Graphics::Renderer *renderer, const Camera *camera, con
 void ShipCockpit::Update(float timeStep)
 {
 	matTransform = matrix4x4d::Identity();
-
-	//---------------------------------------- Acceleration
-	float cur_vel = Pi::player->GetVelocity().Length();
-	float gforce = Clamp(floorf(((cur_vel - fShipVel) / timeStep) / 9.8f), -COCKPIT_MAX_GFORCE, COCKPIT_MAX_GFORCE);
-	if(cur_vel > 500000.0f) { // Limit geforce measurement so we don't get astronomical fluctuations in gforce
-		gforce = 0.0f;
-	}
-	if(abs(vTranslate.z - fOffset) < 0.001f) {
-		fTInterp = 0.0f;
-	}
-	float offset = (gforce / COCKPIT_MAX_GFORCE) * COCKPIT_ACCEL_OFFSET * 0.25f;
-	//float offset = (gforce > 0.0f? 1.0f : -1.0f) * COCKPIT_ACCEL_OFFSET;
-	if(abs(vTranslate.z - offset) >= 0.001f) {
-		fTInterp += timeStep * COCKPIT_ACCEL_INTERP_MULTIPLIER;
-		if(fTInterp > 1.0f) {
-			fTInterp = 1.0f;	
-			vTranslate.z = offset;
-		} else {
-			vTranslate.z = Ease(vTranslate.z, offset, fTInterp);
-		}
-	}
-	fOffset = offset;
-	fShipVel = cur_vel;
-	fGForce = gforce;
-
-	//------------------------------------------ Rotateion
 	vector3d cur_dir = Pi::player->GetOrient().VectorZ().Normalized();
 	if(cur_dir.Dot(vShipDir) < 1.0f) {
-		fRInterp = 0.0f;
+		fInterp = 0.0f;
 		vShipDir = cur_dir;
 	}
 	// For yaw/pitch
@@ -74,7 +48,7 @@ void ShipCockpit::Update(float timeStep)
 	float angle = acos(dot);
 	// For roll
 	if(yaw_axis.Dot(vShipYaw) < 1.0f) {
-		fRInterp = 0.0f;
+		fInterp = 0.0f;
 		vShipYaw = yaw_axis;
 	}
 	vector3d rot_yaw_axis = yaw_axis.Cross(vdYaw).Normalized();
@@ -83,9 +57,9 @@ void ShipCockpit::Update(float timeStep)
 
 	if(dot < 1.0f || dot_yaw < 1.0f) {
 		// Lag/Recovery interpolation
-		fRInterp += timeStep * COCKPIT_ROTATION_INTERP_MULTIPLIER;
-		if(fRInterp > 1.0f) {
-			fRInterp = 1.0f;
+		fInterp += timeStep * COCKPIT_INTERPOLATION_MULTIPLIER;
+		if(fInterp > 1.0f) {
+			fInterp = 1.0f;
 		}
 
 		// Yaw and Pitch
@@ -93,7 +67,7 @@ void ShipCockpit::Update(float timeStep)
 			if(angle > DEG2RAD(COCKPIT_LAG_MAX_ANGLE)) {
 				angle = DEG2RAD(COCKPIT_LAG_MAX_ANGLE);
 			}
-			angle = Ease(angle, 0.0, fRInterp);
+			angle = Ease(angle, 0.0, fInterp);
 			vdDir = cur_dir;
 			if(angle >= 0.0f) {
 				vdDir.ArbRotate(rot_axis, angle);
@@ -130,7 +104,7 @@ void ShipCockpit::Update(float timeStep)
 				angle_yaw = DEG2RAD(COCKPIT_LAG_MAX_ANGLE);
 			}
 			if(dot_yaw < 1.0f) {
-				angle_yaw = Ease(angle_yaw, 0.0, fRInterp);
+				angle_yaw = Ease(angle_yaw, 0.0, fInterp);
 			}
 			vdYaw = yaw_axis;
 			if(angle_yaw >= 0.0f) {
@@ -151,7 +125,7 @@ void ShipCockpit::Update(float timeStep)
 			}
 		}
 	} else {
-		fRInterp = 0.0f;
+		fInterp = 0.0f;
 	}
 }
 
@@ -159,7 +133,7 @@ void ShipCockpit::RenderCockpit(Graphics::Renderer* renderer, const Camera* came
 {
 	renderer->ClearDepthBuffer();
 	SetFrame(const_cast<Frame*>(frame));
-	Render(renderer, camera, vTranslate, matTransform);
+	Render(renderer, camera, vector3d(0, 0, 0), matTransform);
 	SetFrame(nullptr);
 }
 
@@ -170,8 +144,6 @@ void ShipCockpit::OnActivated()
 	vdYaw = Pi::player->GetOrient().VectorY().Normalized();
 	vShipDir = vdDir;
 	vShipYaw = vdYaw;
-	fShipVel = Pi::player->GetVelocity().Length();
-	fGForce = 0.0f;
 }
 
 float ShipCockpit::Ease(float a, float b, float delta)
