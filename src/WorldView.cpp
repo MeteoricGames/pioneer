@@ -501,16 +501,7 @@ void WorldView::Draw3D()
 	assert(Pi::game);
 	assert(Pi::player);
 	assert(!Pi::player->IsDead());
-	
-	ShipCockpit* cockpit = nullptr;
-	if(GetCamType() == CAM_COCKPIT && Pi::player) {
-		cockpit = const_cast<ShipCockpit*>(Pi::player->GetCockpit());
-	}
-
-	m_camera->Draw(
-		m_renderer, 
-		GetCamType() == CAM_INTERNAL ? Pi::player : 0,
-		cockpit);
+	m_camera->Draw(m_renderer, GetCamType() == CAM_INTERNAL ? Pi::player : 0);
 
 	if (!Pi::DrawGUI) return;
 
