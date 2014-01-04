@@ -196,11 +196,9 @@ void Camera::Draw(Renderer *renderer, const Body *excludeBody, ModelBody* cockpi
 
 	// Render cockpit
 	if(cockpit) {
-		renderer->SetDepthTest(false);
 		cockpit->SetFrame(m_camFrame);
-		cockpit->Render(renderer, this, vector3d(0, 0, 0), matrix4x4d::Identity());
+		cockpit->Render(renderer, this, vector3d(), matrix4x4d::Identity());
 		cockpit->SetFrame(nullptr);
-		renderer->SetDepthTest(true);
 	}
 
 	m_frame->RemoveChild(m_camFrame);
