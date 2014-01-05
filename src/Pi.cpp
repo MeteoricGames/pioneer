@@ -106,6 +106,7 @@ WorldView *Pi::worldView;
 DeathView *Pi::deathView;
 UIView *Pi::spaceStationView;
 UIView *Pi::infoView;
+UIView *Pi::commView;
 SectorView *Pi::sectorView;
 GalacticView *Pi::galacticView;
 UIView *Pi::settingsView;

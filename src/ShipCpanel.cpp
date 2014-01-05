@@ -149,6 +149,13 @@ void ShipCpanel::InitObject()
 	comms_button->SetRenderDimensions(30, 22);
 	Add(comms_button, 312, 56);
 
+	Gui::ImageButton *comms_buttonViewButton = new Gui::ImageButton("icons/comms_f4_on.png");
+	comms_buttonViewButton->SetShortcut(SDLK_c, KMOD_NONE);
+	comms_buttonViewButton->SetToolTip("");
+	comms_buttonViewButton->onClick.connect(sigc::mem_fun(this, &ShipCpanel::OnClickCommView));
+	comms_buttonViewButton->SetRenderDimensions(30.0f, 22.0f);
+	Add(comms_buttonViewButton, 360, 0);
+
 	m_clock = (new Gui::Label(""))->Color(0,204,0);
 	Add(m_clock, 4, 64);
 
@@ -397,6 +404,13 @@ void ShipCpanel::OnClickComms(Gui::MultiStateImageButton *b)
 		Pi::SetView(Pi::worldView);
 		Pi::worldView->ToggleTargetActions();
 	}
+}
+
+void ShipCpanel::OnClickCommView()
+{
+	Pi::BoinkNoise();
+	if (Pi::GetView() != Pi::commView)
+		Pi::SetView(Pi::commView);
 }
 
 void ShipCpanel::OnClickRotationDamping(Gui::MultiStateImageButton *b)
