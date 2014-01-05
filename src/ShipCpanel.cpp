@@ -411,6 +411,8 @@ void ShipCpanel::OnClickCommView()
 	Pi::BoinkNoise();
 	if (Pi::GetView() != Pi::commView)
 		Pi::SetView(Pi::commView);
+	else
+		Pi::SetView(Pi::worldView);
 }
 
 void ShipCpanel::OnClickRotationDamping(Gui::MultiStateImageButton *b)
