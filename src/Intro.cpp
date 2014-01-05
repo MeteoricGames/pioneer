@@ -30,6 +30,28 @@ Intro::Intro(Graphics::Renderer *r, int width, int height)
 	m_lights.push_back(Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f, 0.3f, 1.f), one, one));
 	m_lights.push_back(Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f, -1.f, 0.f), two, Color::BLACK));
 
+	SceneGraph::ModelSkin skin;
+	skin.SetDecal("pioneer");
+	skin.SetLabel(Lang::PIONEER);
+
+	for (std::vector<ShipType::Id>::const_iterator i = ShipType::player_ships.begin(); i != ShipType::player_ships.end(); ++i) {
+		SceneGraph::Model *model = Pi::FindModel(ShipType::types[*i].modelName)->MakeInstance();
+		skin.SetRandomColors(Pi::rng);
+		skin.Apply(model);
+		model->SetThrust(vector3f(0.f, 0.f, -0.6f), vector3f(0.f));
+		const Uint32 numMats = model->GetNumMaterials();
+		for( Uint32 m=0; m<numMats; m++ ) {
+			RefCountedPtr<Graphics::Material> mat = model->GetMaterialByIndex(m);
+			mat->specialParameter0 = nullptr;
+		}
+		m_models.push_back(model);
+	}
+
+	PiRngWrapper rng;
+	std::random_shuffle(m_models.begin(), m_models.end(), rng);
+
+	m_state = STATE_SELECT;
+	m_modelIndex = 0;
 }
 
 Intro::~Intro()
