@@ -50,6 +50,7 @@ local shipClassString = {
 	cargo_hauler        = "CARGO_HAULER",
 	cargo_freighter        = "CARGO_FREIGHTER",
 	cargo_megafreighter        = "CARGO_MEGAFREIGHTER",
+	unknown                    = "",
 }
 
 local shipTable =
@@ -65,13 +66,13 @@ local shipInfo =
 	ui:Expand("VERTICAL")
 
 local function shipClassIcon (shipClass)
-	return shipClass ~= ""
+	return shipClass ~= "unknown"
 		and ui:Image("icons/shipclass/"..shipClass..".png", { "PRESERVE_ASPECT" })
 		or ui:Margin(32)
 end
 
 local function manufacturerIcon (manufacturer)
-	return manufacturer ~= ""
+	return manufacturer ~= "unknown"
 		and ui:Image("icons/manufacturer/"..manufacturer..".png", { "PRESERVE_ASPECT" })
 		or ui:Margin(32)
 end
