@@ -5,6 +5,7 @@
 #include "Frame.h"
 #include "galaxy/StarSystem.h"
 #include "Space.h"
+#include "SpaceStation.h"
 #include "Player.h"
 #include "Pi.h"
 #include "Sfx.h"
@@ -299,14 +300,25 @@ void Camera::CalcShadows(const int lightNum, const Body *b, std::vector<Shadow> 
 	// Look for eclipsing third bodies:
 	for (Space::BodyIterator ib2 = Pi::game->GetSpace()->BodiesBegin(); ib2 != Pi::game->GetSpace()->BodiesEnd(); ++ib2) {
 		Body *b2 = *ib2;
-		if ( b2 == b || b2 == lightBody || !(b2->IsType(Object::PLANET) || b2->IsType(Object::STAR)))
+		if ( b2 == b || b2 == lightBody || !(b2->IsType(Object::PLANET) || b2->IsType(Object::STAR) || b2->IsType(Object::SPACESTATION) ))
 			continue;
 
 		double b2Radius = b2->GetSystemBody()->GetRadius();
-		vector3d b2pos = b2->GetPositionRelTo(b);
-		const double perpDist = lightDir.Dot(b2pos);
+		double bLightPosRelLenght = bLightPos.Length();
 
-		if ( perpDist <= 0 || perpDist > bLightPos.Length())
+		vector3d b2pos = b2->GetPositionRelTo(b);
+
+		double perpDist = lightDir.Dot(b2pos);
+
+		if (b2->IsType(Object::SPACESTATION) && !static_cast<SpaceStation*>(b2)->IsGroundStation()) {
+			// use spacestion aabb.radius
+			b2Radius = static_cast<SpaceStation*>(b2)->GetAabb().GetRadius();
+			// since we're inside a spacestation, skew 50meters towards the lightsource so we cover most.
+			bLightPosRelLenght += 50.0;
+			perpDist += 50.0;
+		}
+
+		if ( perpDist <= 0 || perpDist > bLightPosRelLenght)
 			// b2 isn't between b and lightBody; no eclipse
 			continue;
 
@@ -320,7 +332,7 @@ void Camera::CalcShadows(const int lightNum, const Body *b, std::vector<Shadow> 
 		// disc of radius srad centred at projectedCentre-p. To determine the light intensity at p, we
 		// then just need to estimate the proportion of the light disc being occulted.
 		const double srad = b2Radius / bRadius;
-		const double lrad = (lightRadius/bLightPos.Length())*perpDist / bRadius;
+		const double lrad = (lightRadius/bLightPosRelLenght)*perpDist / bRadius;
 		if (srad / lrad < 0.01) {
 			// any eclipse would have negligible effect - ignore
 			continue;
