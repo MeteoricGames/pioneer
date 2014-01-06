@@ -796,7 +796,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
 			}
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < target_radii && m_ship->GetVelocity().Length() > setspeed) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
 			}
 
@@ -832,9 +832,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 
 		//if (m_target->IsType(Object::PLANET))		target_radii = std::max(m_target->GetSystemBody()->GetRadius()*1.25,10000000.0);//std::max(m_targframe->GetParent()->GetBody()->GetPhysRadius()+5000000.0,5000000.0);
 		if (m_target->IsType(Object::PLANET))		target_radii = VICINITY_MUL*MaxEffectRad(m_target, m_ship)+16000000.0;
-		if (m_target->IsType(Object::SHIP)) {
-			target_radii = 50000;
-		}
+		if (m_target->IsType(Object::SHIP))			target_radii = 50000;
 
 		double setspeed = 0.0;
 		if (m_target->IsType(Object::SHIP)) {
@@ -855,9 +853,9 @@ bool AICmdFlyTo::TimeStepUpdate()
 		}
 
 		//chasing ship.
-		if (m_target->IsType(Object::SHIP) && m_ship->GetPositionRelTo(m_target).Length() <= target_radii &&
+		if (m_target->IsType(Object::SHIP) && m_ship->GetPositionRelTo(m_target).LengthSqr() <= target_radii*target_radii &&
 			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice() == juice_transit) {  
-				m_ship->SetVelocity(m_target->GetVelocityRelTo(m_target)*1.1);
+				m_ship->SetVelocity(m_target->GetVelocityRelTo(m_target)*-1.1);
 				m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame()) - m_ship->GetPositionRelTo(m_ship->GetFrame()));
 				m_ship->SetJuice(juice_high);
 				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
@@ -872,7 +870,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
 			}
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < target_radii && m_ship->GetVelocity().Length() > setspeed) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_STOP);  //for finish transitdrive sound
 			}
 
