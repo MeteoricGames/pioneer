@@ -10,7 +10,7 @@
 namespace Graphics {
 
 PostProcessing::PostProcessing(Renderer *renderer) :
-	mtrlFullscreenQuad(nullptr), mRenderer(renderer)
+	mtrlFullscreenQuad(nullptr), mRenderer(renderer), rtDevice(nullptr)
 {
 	assert(mRenderer != nullptr);
 	Init();
@@ -51,20 +51,21 @@ void PostProcessing::Init()
 	rtMain = mRenderer->CreateRenderTarget(rt_desc);
 }
 
+// rt_device is added so device render target can be changed
 void PostProcessing::BeginFrame()
 {
 	if(bPerformPostProcessing) {
 		mRenderer->SetRenderTarget(rtMain);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	} else {
-		mRenderer->SetRenderTarget(0);
+		mRenderer->SetRenderTarget(rtDevice);
 	}
 }
 
 void PostProcessing::EndFrame()
 {
 	if(bPerformPostProcessing) {
-		mRenderer->SetRenderTarget(0);
+		mRenderer->SetRenderTarget(rtDevice);
 	}
 }
 
@@ -76,7 +77,7 @@ void PostProcessing::Run(PostProcess* pp)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	if(pp == nullptr || pp->GetPassCount() == 0) {
 		// No post-processing
-		mRenderer->SetRenderTarget(0);
+		mRenderer->SetRenderTarget(rtDevice);
 		mtrlFullscreenQuad->texture0 = rtMain->GetColorTexture();
 		mtrlFullscreenQuad->Apply();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -109,7 +110,8 @@ void PostProcessing::Run(PostProcess* pp)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void PostProcessing::SetEnabled(bool enabled) {
+void PostProcessing::SetEnabled(bool enabled) 
+{
 	if(bPerformPostProcessing != enabled) {
 		bPerformPostProcessing = enabled;
 		if(enabled) {
@@ -118,6 +120,11 @@ void PostProcessing::SetEnabled(bool enabled) {
 			// TODO: Release all render target buffers
 		}
 	}
+}
+
+void PostProcessing::SetDeviceRT(RenderTarget* rt_device)
+{
+	rtDevice = rt_device;
 }
 
 }

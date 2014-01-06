@@ -216,19 +216,20 @@ bool RendererGL2::BeginFrame()
 	PROFILE_SCOPED()
 	glClearColor(0,0,0,0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_postprocessing->BeginFrame();
 	return true;
 }
 
-bool RendererGL2::PostProcessFrame(PostProcess* postprocess)
+bool RendererGL2::PostProcessFrame(PostProcess* postprocess, RenderTarget* rt_device)
 {
+	m_postprocessing->SetDeviceRT(rt_device);
+	m_postprocessing->BeginFrame();
 	m_postprocessing->Run(postprocess);
+	m_postprocessing->EndFrame();
 	return true;
 }
 
 bool RendererGL2::EndFrame()
 {
-	m_postprocessing->EndFrame();
 	return true;
 }
 
