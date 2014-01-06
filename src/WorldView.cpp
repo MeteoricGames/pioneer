@@ -1858,20 +1858,6 @@ void WorldView::Draw()
 
 	glLineWidth(1.0f);
 
-	// normal crosshairs
-	if (GetCamType() == CAM_INTERNAL) {
-		switch (m_internalCameraController->GetMode()) {
-			case InternalCameraController::MODE_FRONT:
-				DrawCrosshair(Gui::Screen::GetWidth()/2.0f, Gui::Screen::GetHeight()/2.0f, HUD_CROSSHAIR_SIZE, white);
-				break;
-			case InternalCameraController::MODE_REAR:
-				DrawCrosshair(Gui::Screen::GetWidth()/2.0f, Gui::Screen::GetHeight()/2.0f, HUD_CROSSHAIR_SIZE/2.0f, white);
-				break;
-			default:
-				break;
-		}
-	}
-
 	glPopAttrib();
 
 	m_renderer->SetBlendMode(Graphics::BLEND_SOLID);
