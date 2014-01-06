@@ -796,7 +796,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
 			}
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < target_radii && m_ship->GetVelocity().Length() > setspeed) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
 			}
 
@@ -828,13 +828,11 @@ bool AICmdFlyTo::TimeStepUpdate()
 	}
 	else if (m_target && m_ship && !m_child) {   //vincinty only...  /dock orbiting station    ...vincinity ship.
 		double cspeed = m_ship->GetVelocity().Length();
-		double target_radii = 5000000;
+		double target_radii = 500000;
 
 		//if (m_target->IsType(Object::PLANET))		target_radii = std::max(m_target->GetSystemBody()->GetRadius()*1.25,10000000.0);//std::max(m_targframe->GetParent()->GetBody()->GetPhysRadius()+5000000.0,5000000.0);
 		if (m_target->IsType(Object::PLANET))		target_radii = VICINITY_MUL*MaxEffectRad(m_target, m_ship)+16000000.0;
-		if (m_target->IsType(Object::SHIP)) {
-			target_radii = 500000.0;
-		}
+		if (m_target->IsType(Object::SHIP))			target_radii = 50000;
 
 		double setspeed = 0.0;
 		if (m_target->IsType(Object::SHIP)) {
@@ -854,7 +852,16 @@ bool AICmdFlyTo::TimeStepUpdate()
 			}
 		}
 
-		if (  //start transit drive now...
+		//chasing ship.
+		if (m_target->IsType(Object::SHIP) && m_ship->GetPositionRelTo(m_target).LengthSqr() <= target_radii*target_radii &&
+			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice() == juice_transit) {  
+				m_ship->SetVelocity(m_target->GetVelocityRelTo(m_target)*-1.1);
+				m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame()) - m_ship->GetPositionRelTo(m_ship->GetFrame()));
+				m_ship->SetJuice(juice_high);
+				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
+				return false;
+		}
+		else if (  //start transit drive now...
 			m_ship->GetPositionRelTo(m_target->GetFrame()).Length() > target_radii &&
 			m_ship->GetVelocity().Length() > transit_start_speed && 
 			m_ship->GetFlightState() == Ship::FLYING
@@ -863,8 +870,8 @@ bool AICmdFlyTo::TimeStepUpdate()
 			if (m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
 				m_ship->SetTransitState(TRANSIT_DRIVE_ON);
 			}
-			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < 10000000.0 && m_ship->GetVelocity().Length() > setspeed) {
-				m_ship->SetTransitState(TRANSIT_DRIVE_STOP); //for finish transitdrive sound
+			if (m_ship->GetTransitState() == TRANSIT_DRIVE_ON && m_ship->GetVelocity().Length() < target_radii && m_ship->GetVelocity().Length() > setspeed) {
+				m_ship->SetTransitState(TRANSIT_DRIVE_STOP);  //for finish transitdrive sound
 			}
 
 			m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -setspeed));
@@ -880,24 +887,14 @@ bool AICmdFlyTo::TimeStepUpdate()
 		else if (
 			m_ship->GetPositionRelTo(m_target->GetFrame()).Length() <= target_radii &&
 			m_ship->GetFlightState() == Ship::FLYING && m_ship->GetJuice() == juice_transit
-			//m_ship->GetVelocity().Length() >= 550000
 			)
 		{
-			if (m_target->IsType(Object::SHIP)) {  //chasing ship.
-				m_ship->SetVelocity(m_ship->GetOrient() * vector3d(0, 0, -299000));
-				m_ship->AIFaceDirection(m_target->GetPositionRelTo(m_ship->GetFrame()) - m_ship->GetPositionRelTo(m_ship->GetFrame()));
-				m_ship->SetJuice(juice_high);
-				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
+			double s = m_ship->GetVelocity().Length();
+			if(s > transit_start_speed) {
+				m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
 			}
-			else {
-				//m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -99000));
-				double s = m_ship->GetVelocity().Length();
-				if(s > transit_start_speed) {
-					m_ship->SetVelocity(m_ship->GetOrient()*vector3d(0, 0, -transit_start_speed));
-				}
-				m_ship->SetJuice(juice_high);
-				m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
-			}
+			m_ship->SetJuice(juice_high);
+			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			return false;
 		}
 	}
