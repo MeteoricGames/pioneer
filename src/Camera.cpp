@@ -101,7 +101,7 @@ void Camera::Update()
 	m_sortedBodies.sort();
 }
 
-void Camera::Draw(Renderer *renderer, const Body *excludeBody, ModelBody* cockpit)
+void Camera::Draw(Graphics::Renderer *renderer, const Body *excludeBody, ShipCockpit* cockpit)
 {
 	PROFILE_SCOPED()
 	if (!m_camFrame) return;
@@ -195,10 +195,15 @@ void Camera::Draw(Renderer *renderer, const Body *excludeBody, ModelBody* cockpi
 
 	Sfx::RenderAll(renderer, Pi::game->GetSpace()->GetRootFrame(), m_camFrame);
 
+	// NB: Do any screen space rendering after here:
+	// Things like the cockpit and AR features like hudtrails, space dust etc.
+
 	// Render cockpit
-	if(cockpit) {
-		static_cast<ShipCockpit*>(cockpit)->RenderCockpit(renderer, this, m_camFrame);
-	}
+	// XXX only here because it needs a frame for lighting calc
+	// should really be in WorldView, immediately after camera draw
+	if(cockpit)
+		cockpit->RenderCockpit(renderer, this, m_camFrame);
+
 
 	m_frame->RemoveChild(m_camFrame);
 	delete m_camFrame;

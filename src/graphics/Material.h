@@ -39,6 +39,14 @@ enum EffectType {
 	EFFECT_BLOOM_COMPOSITOR
 };
 
+
+// XXX : there must be a better place to put this
+enum MaterialQuality {
+	HAS_ATMOSPHERE		= 1 << 0,
+	HAS_ECLIPSES		= 1 << 1,
+	HAS_HEAT_GRADIENT   = 1 << 2
+};
+
 // Renderer creates a material that best matches these requirements.
 // EffectType may override some of the other flags.
 class MaterialDescriptor {
@@ -54,7 +62,7 @@ public:
 	bool vertexColors;
 	Sint32 textures; //texture count
 	Uint32 dirLights; //set by rendererGL2 if lighting == true
-	Uint32 quality; // see: Graphics::GL2::AtmosphereQuality in GeoSphereMaterial.h
+	Uint32 quality; // see: Graphics::MaterialQuality
 
 	friend bool operator==(const MaterialDescriptor &a, const MaterialDescriptor &b);
 };
@@ -72,6 +80,7 @@ public:
 	Texture *texture2;
 	Texture *texture3;
 	Texture *texture4;
+	Texture *heatGradient;
 
 	Color diffuse;
 	Color specular;

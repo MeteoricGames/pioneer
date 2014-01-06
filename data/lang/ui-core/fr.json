@@ -175,6 +175,18 @@
       "description" : "",
       "message" : "V_delta"
    },
+   "DELTA_V_EMPTY" : {
+      "description" : "Delta-v capacity of a ship with no cargo or upgrades",
+      "message" : "Delta-v (empty)"
+   },
+   "DELTA_V_FULL" : {
+      "description" : "Delta-v capacity of a ship with maximum cargo",
+      "message" : "Delta-v (full)"
+   },
+   "DELTA_V_MAX" : {
+      "description" : "Delta-v capacity of a ship with cargo bay fully loaded with propellant",
+      "message" : "Delta-v (max)"
+   },
    "DESCENT_TO_GROUND_SPEED" : {
       "description" : "",
       "message" : "Vitesse de descente"
@@ -223,13 +235,17 @@
       "description" : "",
       "message" : "Fonction"
    },
+   "ENABLE_COCKPIT" : {
+      "description" : "",
+      "message" : "Enable cockpit (EXPERIMENTAL)"
+   },
    "ENABLE_JOYSTICK" : {
       "description" : "",
       "message" : "Activer  joystick"
    },
    "ENGINEERING" : {
       "description" : "",
-      "message" : "Ingénierie"
+      "message" : "Engineering:"
    },
    "EQUIPMENT" : {
       "description" : "",
@@ -571,8 +587,12 @@
       "description" : "",
       "message" : "Bloquer"
    },
-   "NAME" : {
-      "description" : "",
+   "NAME_OBJECT" : {
+      "description" : "For an item or object",
+      "message" : "Nom"
+   },
+   "NAME_PERSON" : {
+      "description" : "For a person",
       "message" : "Nom"
    },
    "NAVIGATION" : {

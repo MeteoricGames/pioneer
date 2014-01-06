@@ -16,8 +16,8 @@
       "message" : "Allegiance:"
    },
    "ALT" : {
-      "description" : "",
-      "message" : "\"alt \""
+      "description" : "Alt key on keyboard",
+      "message" : "Alt"
    },
    "ALT_IN_KM" : {
       "description" : "",
@@ -272,8 +272,8 @@
       "message" : "\" Carbon Monoxide atmosphere\""
    },
    "CTRL" : {
-      "description" : "",
-      "message" : "\"ctrl \""
+      "description" : "Ctrl key on keyboard",
+      "message" : "Ctrl"
    },
    "CURRENT_SYSTEM" : {
       "description" : "",
@@ -896,8 +896,8 @@
       "message" : "Message from %sender:"
    },
    "META" : {
-      "description" : "",
-      "message" : "\"meta \""
+      "description" : "'Meta' key on keyboard",
+      "message" : "Meta"
    },
    "METAL_ALLOYS" : {
       "description" : "",
@@ -1023,8 +1023,12 @@
       "description" : "",
       "message" : "%speed{f.0} m/s rel-to %frame"
    },
-   "NAME" : {
-      "description" : "",
+   "NAME_OBJECT" : {
+      "description" : "For an item or object",
+      "message" : "Name"
+   },
+   "NAME_PERSON" : {
+      "description" : "For a person",
       "message" : "Name"
    },
    "NARCOTICS" : {
@@ -1476,8 +1480,8 @@
       "message" : "Shield strength: %shields{f.2}"
    },
    "SHIFT" : {
-      "description" : "",
-      "message" : "\"shift \""
+      "description" : "Shift key on keyboard",
+      "message" : "Shift"
    },
    "SHIP" : {
       "description" : "",

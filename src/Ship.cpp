@@ -29,6 +29,7 @@ static const float TONS_HULL_PER_SHIELD = 10.f;
 static const double KINETIC_ENERGY_MULT	= 0.01;
 static const double AIM_CONE = 0.98;
 static const double MAX_AUTO_TARGET_DISTANCE = 5000.0;
+HeatGradientParameters_t Ship::s_heatGradientParams;
 
 void SerializableEquipSet::Save(Serializer::Writer &wr)
 {
@@ -186,13 +187,23 @@ void Ship::InitGun(const char *tag, int num)
 	}
 }
 
+void Ship::InitMaterials()
+{
+	SceneGraph::Model *pModel = GetModel();
+	assert(pModel);
+	const Uint32 numMats = pModel->GetNumMaterials();
+	for( Uint32 m=0; m<numMats; m++ ) {
+		RefCountedPtr<Graphics::Material> mat = pModel->GetMaterialByIndex(m);
+		mat->heatGradient = Graphics::TextureBuilder::Decal("textures/heat_gradient.png").GetOrCreateTexture(Pi::renderer, "model");
+		mat->specialParameter0 = &s_heatGradientParams;
+	}
+	s_heatGradientParams.heatingAmount = 0.0f;
+	s_heatGradientParams.heatingNormal = vector3f(0.0f, -1.0f, 0.0f);
+}
+
 void Ship::Init()
 {
 	m_invulnerable = false;
-
-	if(m_type->cockpitName.length() > 0) {
-		m_cockpit.reset(new ShipCockpit(*m_type));
-	}
 
 	m_navLights.reset(new NavLights(GetModel()));
 	m_navLights->SetEnabled(true);
@@ -215,6 +226,8 @@ void Ship::Init()
 
 	InitGun("tag_gunmount_0", 0);
 	InitGun("tag_gunmount_1", 1);
+
+	InitMaterials();
 }
 
 void Ship::PostLoadFixup(Space *space)
@@ -1339,9 +1352,9 @@ void Ship::StaticUpdate(const float timeStep)
 	}
 
 	// Cockpit
-	if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
-		m_cockpit->Update(timeStep);
-	}
+	//if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
+	//	m_cockpit->Update(timeStep);
+	//}
 
 	// For Auto target acceleation
 	if (GetCombatTarget() && m_targetInSight) m_lastVel = target->GetVelocity();
@@ -1415,6 +1428,12 @@ void Ship::Render(Graphics::Renderer *renderer, const Camera *camera, const vect
 
 	//angthrust negated, for some reason
 	GetModel()->SetThrust(vector3f(m_thrusters), -vector3f(m_angThrusters));
+
+	matrix3x3f mt;
+	matrix3x3dtof(viewTransform.InverseOf().GetOrient(), mt);
+	s_heatGradientParams.heatingMatrix = mt;
+	s_heatGradientParams.heatingNormal = vector3f(GetVelocity().Normalized());
+	s_heatGradientParams.heatingAmount = Clamp(GetHullTemperature(),0.0,1.0);
 
 	//strncpy(params.pText[0], GetLabel().c_str(), sizeof(params.pText));
 	RenderModel(renderer, camera, viewCoords, viewTransform);
