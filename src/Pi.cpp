@@ -920,15 +920,15 @@ void Pi::TombStoneLoop()
 		Pi::renderer->GetWindow()->SetGrab(false);
 
 		// render the scene
-		//Pi::BeginRenderTarget();
+		Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
 		tombstone->Draw(_time);				
 		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
 		Pi::renderer->EndFrame();
 		Gui::Draw();
-		//Pi::EndRenderTarget();
+		Pi::EndRenderTarget();
 
-		//Pi::DrawRenderTarget();
+		Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		Pi::frameTime = 0.001f*(SDL_GetTicks() - last_time);
@@ -1017,7 +1017,7 @@ void Pi::Start()
 				while (SDL_PollEvent(&event)) {}
 		}
 
-		//Pi::BeginRenderTarget();
+		Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
 		intro->Draw(_time);		
 		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
@@ -1025,10 +1025,10 @@ void Pi::Start()
 
 		ui->Update();
 		ui->Draw();
-		//Pi::EndRenderTarget();
+		Pi::EndRenderTarget();
 
 		// render the rendertarget texture
-		//Pi::DrawRenderTarget();
+		Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		Pi::frameTime = 0.001f*(SDL_GetTicks() - last_time);
@@ -1154,7 +1154,7 @@ void Pi::MainLoop()
 			}
 		}
 
-		//Pi::BeginRenderTarget();
+		Pi::BeginRenderTarget();
 
 		Pi::renderer->BeginFrame();
 		Pi::renderer->SetTransform(matrix4x4f::Identity());
@@ -1215,8 +1215,8 @@ void Pi::MainLoop()
 		}
 #endif
 
-		//Pi::EndRenderTarget();
-		//Pi::DrawRenderTarget();
+		Pi::EndRenderTarget();
+		Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		// game exit will have cleared Pi::game. we can't continue.
