@@ -13,7 +13,6 @@
 #include "Planet.h"
 #include "Serializer.h"
 #include "ShipType.h"
-#include "ShipCockpit.h"
 #include "scenegraph/SceneGraph.h"
 #include "scenegraph/ModelSkin.h"
 #include <list>
@@ -25,6 +24,12 @@ class ShipController;
 class CargoBody;
 class Missile;
 namespace Graphics { class Renderer; }
+
+struct HeatGradientParameters_t {
+	matrix3x3f heatingMatrix;
+	vector3f heatingNormal; // normalised
+	float heatingAmount; // 0.0 to 1.0 used for `u` component of heatGradient texture
+};
 
 struct shipstats_t {
 	int used_capacity;
@@ -243,7 +248,6 @@ public:
 
 	const SceneGraph::ModelSkin &GetSkin() const { return m_skin; }
 	void SetSkin(const SceneGraph::ModelSkin &skin);
-	const ShipCockpit* GetCockpit() const {return m_cockpit.get();}
 
 	void SetLabel(const std::string &label);
 
@@ -315,7 +319,6 @@ protected:
 	float m_ecmRecharge;
 
 	ShipController *m_controller;
-	std::unique_ptr<ShipCockpit> m_cockpit;
 
 private:
 	float GetECMRechargeTime();
@@ -330,6 +333,7 @@ private:
 	void OnEquipmentChange(Equip::Type e);
 	void EnterHyperspace();
 	void InitGun(const char *tag, int num);
+	void InitMaterials();
 
 	bool m_invulnerable;
 
@@ -375,6 +379,8 @@ private:
 
 	SceneGraph::Animation *m_landingGearAnimation;
 	std::unique_ptr<NavLights> m_navLights;
+
+	static HeatGradientParameters_t s_heatGradientParams;
 };
 
 

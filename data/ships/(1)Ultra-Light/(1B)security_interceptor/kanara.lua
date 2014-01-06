@@ -6,7 +6,6 @@ define_ship {
 	ship_class = 'test',
 	manufacturer = 'alders_vectrum',
 	model='security_interceptor',
-	cockpit='passenger_shuttle_cockpit',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,
 	up_thrust = 6e5,
