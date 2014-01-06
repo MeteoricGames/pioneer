@@ -21,6 +21,7 @@ namespace Graphics {
 		void EndFrame();
 		void Run(PostProcess* pp = nullptr);
 		void SetEnabled(bool enabled);
+		void SetDeviceRT(RenderTarget* rt_device);
 
 	protected:
 
@@ -32,6 +33,7 @@ namespace Graphics {
 		
 		std::unique_ptr<Material> mtrlFullscreenQuad;
 		unsigned int uScreenQuadBufferId;
+		RenderTarget* rtDevice;
 		RenderTarget* rtMain;
 		Renderer* mRenderer;
 		bool bPerformPostProcessing;

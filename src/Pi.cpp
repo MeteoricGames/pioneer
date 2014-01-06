@@ -70,6 +70,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/Light.h"
 #include "graphics/Renderer.h"
+#include "graphics/PostProcessing.h"
 #include "graphics/PostProcess.h"
 #include "graphics/gl2/HorizontalBlurMaterial.h"
 #include "gui/Gui.h"
@@ -922,7 +923,7 @@ void Pi::TombStoneLoop()
 		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
 		tombstone->Draw(_time);				
-		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
 		Pi::renderer->EndFrame();
 		Gui::Draw();
 		//Pi::EndRenderTarget();
@@ -1019,7 +1020,7 @@ void Pi::Start()
 		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
 		intro->Draw(_time);		
-		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
 		Pi::renderer->EndFrame();
 
 		ui->Update();
@@ -1176,9 +1177,9 @@ void Pi::MainLoop()
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
 		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
-			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr, Pi::renderTarget);
 		} else {
-			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
 		}
 
 		Pi::renderer->EndFrame();

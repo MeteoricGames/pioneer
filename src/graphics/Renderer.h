@@ -97,7 +97,7 @@ public:
 
 	virtual bool BeginFrame() = 0;
 	virtual bool EndFrame() = 0;
-	virtual bool PostProcessFrame(PostProcess* postprocess = nullptr) = 0;
+	virtual bool PostProcessFrame(PostProcess* postprocess = nullptr, RenderTarget* rt_device = nullptr) = 0;
 	//traditionally gui happens between endframe and swapbuffers
 	virtual bool SwapBuffers() = 0;
 

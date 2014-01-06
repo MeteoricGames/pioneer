@@ -45,7 +45,7 @@ public:
 	virtual bool GetNearFarRange(float &near, float &far) const;
 
 	virtual bool BeginFrame();
-	virtual bool PostProcessFrame(PostProcess* postprocess);
+	virtual bool PostProcessFrame(PostProcess* postprocess, RenderTarget* rt_device);
 	virtual bool EndFrame();
 	virtual bool SwapBuffers();
 
