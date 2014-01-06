@@ -1351,8 +1351,8 @@ SystemBody::AtmosphereParameters SystemBody::CalcAtmosphereParams() const
 	if (T < 1)
 		T = 165;
 
-	// XXX just use earth's composition for now
-	const double M = 0.02897f; // in kg/mol
+	// We have two kinds of atmosphere: Earth-like and gas giant (hydrogen/helium)
+	const double M = type == TYPE_PLANET_GAS_GIANT ? 0.0023139903 : 0.02897f; // in kg/mol
 
 	float atmosScaleHeight = static_cast<float>(GAS_CONSTANT_R*T/(M*g));
 
