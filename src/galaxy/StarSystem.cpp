@@ -1356,14 +1356,6 @@ SystemBody::AtmosphereParameters SystemBody::CalcAtmosphereParams() const
 
 	float atmosScaleHeight = static_cast<float>(GAS_CONSTANT_R*T/(M*g));
 
-	// XXX temporary hack to fix small scale heights for gas giant atmospheres which are
-	// a result of using Earth atmosphere properties, as well as due to using
-	// a made up density value at the gas giant terrain 'surface'.
-	// This uses a minimum scale height as a fraction of gas giant radius based on
-	// Earth's scale height relative to its radius.
-	if (type == TYPE_PLANET_GAS_GIANT)
-		atmosScaleHeight = std::max(atmosScaleHeight*10.f, static_cast<float>((0.02*8000.0/EARTH_RADIUS)*GetRadius()));
-
 	// min of 2.0 corresponds to a scale height of 1/20 of the planet's radius,
 	params.atmosInvScaleHeight = std::max(20.0f, static_cast<float>(GetRadius() / atmosScaleHeight));
 	// integrate atmospheric density between surface and this radius. this is 10x the scale
