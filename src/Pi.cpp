@@ -920,15 +920,17 @@ void Pi::TombStoneLoop()
 		Pi::renderer->GetWindow()->SetGrab(false);
 
 		// render the scene
-		Pi::BeginRenderTarget();
+		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
+		Pi::renderer->BeginPostProcessing();
 		tombstone->Draw(_time);				
-		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 		Gui::Draw();
-		Pi::EndRenderTarget();
+		//Pi::EndRenderTarget();
 
-		Pi::DrawRenderTarget();
+		//Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		Pi::frameTime = 0.001f*(SDL_GetTicks() - last_time);
@@ -1017,18 +1019,20 @@ void Pi::Start()
 				while (SDL_PollEvent(&event)) {}
 		}
 
-		Pi::BeginRenderTarget();
+		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
+		Pi::renderer->BeginPostProcessing();
 		intro->Draw(_time);		
-		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
+		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 
 		ui->Update();
 		ui->Draw();
-		Pi::EndRenderTarget();
+		//Pi::EndRenderTarget();
 
 		// render the rendertarget texture
-		Pi::DrawRenderTarget();
+		//Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		Pi::frameTime = 0.001f*(SDL_GetTicks() - last_time);
@@ -1154,9 +1158,10 @@ void Pi::MainLoop()
 			}
 		}
 
-		Pi::BeginRenderTarget();
+		//Pi::BeginRenderTarget();
 
 		Pi::renderer->BeginFrame();
+		Pi::renderer->BeginPostProcessing();
 		Pi::renderer->SetTransform(matrix4x4f::Identity());
 
 		/* Calculate position for this rendered frame (interpolated between two physics ticks */
@@ -1176,12 +1181,13 @@ void Pi::MainLoop()
 
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
-		if(currentView == settingsView || currentView == infoView || currentView == sectorView) {
-			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr, Pi::renderTarget);
+		if(currentView == settingsView || currentView == infoView || currentView == sectorView || currentView == spaceStationView) {
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
 		} else {
-			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr, Pi::renderTarget);
+			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		}
 
+		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 
 		if( DrawGUI ) {
@@ -1215,8 +1221,8 @@ void Pi::MainLoop()
 		}
 #endif
 
-		Pi::EndRenderTarget();
-		Pi::DrawRenderTarget();
+		//Pi::EndRenderTarget();
+		//Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		// game exit will have cleared Pi::game. we can't continue.
