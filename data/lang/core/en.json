@@ -95,6 +95,18 @@
       "description" : "",
       "message" : "Autopilot on"
    },
+   "AUTOPILOT_OFF" : {
+      "description" : "",
+      "message" : "Autopilot off"
+   },
+   "AUTOPILOT_UNAVAILABLE" : {
+      "description" : "",
+      "message" : "Autopilot unavailable"
+   },
+   "AUTOPILOT_ENTER_SCOOP_ORBIT_AROUND" : {
+      "description" : "",
+      "message" : "Autopilot enter scoop orbit"
+   },
    "AXIAL_TILT" : {
       "description" : "",
       "message" : "Axial tilt"
