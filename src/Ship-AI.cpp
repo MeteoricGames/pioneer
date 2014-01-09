@@ -34,6 +34,40 @@ void Ship::AIModelCoordsMatchAngVel(vector3d desiredAngVel, double softness)
 	SetAngThrusterState(thrust);
 }
 
+void Ship::AIModelCoordsMatchAngVelLocked(vector3d desiredAngVel, double softness)
+{	
+	double rot_damping = 1.0;
+	double angle;
+	double spd = GetVelocity().Length();
+	if(spd > 1.0) {
+		angle = acos(GetVelocity().Normalized().Dot(-GetOrient().VectorZ().Normalized()));
+		if(angle < 0.00001 || _isnan(angle)) {
+			angle = 0.0;
+		}
+		if(angle > 0.05) {
+			const double max_angle = 0.15;
+			double af = 1.0;
+			if(angle <= max_angle) af = (1 / (max_angle - angle));
+			rot_damping = std::min<double>((1.0 / spd) * 250.0 * af, 1.0);
+		}
+	}
+	double angAccel = m_type->angThrust / GetAngularInertia();
+	desiredAngVel.x *= rot_damping;
+	desiredAngVel.y *= rot_damping;
+	const double softTimeStep = Pi::game->GetTimeStep() * softness;
+
+	vector3d angVel = desiredAngVel - GetAngVelocity() * GetOrient();
+	vector3d thrust;
+	for (int axis=0; axis<3; axis++) {
+		if (angAccel * softTimeStep >= fabs(angVel[axis])) {
+			thrust[axis] = angVel[axis] / (softTimeStep * angAccel);
+		} else {
+			thrust[axis] = (angVel[axis] > 0.0 ? 1.0 : -1.0);
+		}
+	}
+	SetAngThrusterState(thrust);
+}
+
 
 void Ship::AIModelCoordsMatchSpeedRelTo(const vector3d v, const Ship *other)
 {
@@ -234,7 +268,7 @@ bool Ship::AIChangeVelBy(const vector3d &diffvel)
 	vector3d thrust(diffvel2.x / maxFrameAccel.x,
 					diffvel2.y / maxFrameAccel.y,
 					diffvel2.z / maxFrameAccel.z);
-	SetThrusterState(thrust);			// use clamping
+	SetThrusterState(thrust);			// use clamping	
 	if (thrust.x*thrust.x > 1.0 || thrust.y*thrust.y > 1.0 || thrust.z*thrust.z > 1.0) return false;
 	return true;
 }

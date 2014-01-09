@@ -192,6 +192,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	OS::EnableFPE();
 	m_ship->AITimeStep(timeStep);
 	OS::DisableFPE();
+
 }
 
 void PlayerShipController::TransitTunnelingTest(const float timeStep) {
@@ -319,7 +320,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 
 		// have to use this function. SDL mouse position event is bugged in windows
 		int mouseMotion[2];
-		SDL_GetRelativeMouseState (mouseMotion+0, mouseMotion+1);	// call to flush
+		SDL_GetRelativeMouseState (&mouseMotion[0], &mouseMotion[1]);	// call to flush
 		if (Pi::MouseButtonState(SDL_BUTTON_RIGHT))
 		{
 			int x,y;
@@ -392,40 +393,43 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 				m_ship->SetGunState(Pi::worldView->GetActiveWeapon(), 1);
 		}
 
-		if (KeyBindings::yawLeft.IsActive()) wantAngVel.y += 1.0;
-		if (KeyBindings::yawRight.IsActive()) wantAngVel.y += -1.0;
-		if (KeyBindings::pitchDown.IsActive()) wantAngVel.x += -1.0;
-		if (KeyBindings::pitchUp.IsActive()) wantAngVel.x += 1.0;
-		if (KeyBindings::rollLeft.IsActive()) wantAngVel.z += 1.0;
-		if (KeyBindings::rollRight.IsActive()) wantAngVel.z -= 1.0;
+		// Keyboard controls ADWS and QE
+		if (KeyBindings::yawLeft.IsActive()) wantAngVel.y = 1.0;
+		if (KeyBindings::yawRight.IsActive()) wantAngVel.y = -1.0;
+		if (KeyBindings::pitchDown.IsActive()) wantAngVel.x = -1.0;
+		if (KeyBindings::pitchUp.IsActive()) wantAngVel.x = 1.0;
+		if (KeyBindings::rollLeft.IsActive()) wantAngVel.z = 1.0;
+		if (KeyBindings::rollRight.IsActive()) wantAngVel.z = -1.0;
 
+		// Should not matter since low thrust power is removed in Paragon
 		if (KeyBindings::thrustLowPower.IsActive())
 			angThrustSoftness = 50.0;
 
+		// Joystick controls
 		vector3d changeVec;
 		changeVec.x = KeyBindings::pitchAxis.GetValue();
 		changeVec.y = KeyBindings::yawAxis.GetValue();
 		changeVec.z = KeyBindings::rollAxis.GetValue();
-
 		// Deadzone more accurate
 		for (int axis=0; axis<3; axis++) {
 				if (fabs(changeVec[axis]) < m_joystickDeadzone)
 					changeVec[axis]=0.0;
 				else
 					changeVec[axis] = changeVec[axis] * 2.0;
-		}
-		
+		}		
 		wantAngVel += changeVec;
 
 		if (wantAngVel.Length() >= 0.001 || force_rotation_damping || m_rotationDamping) {
-			if (Pi::game->GetTimeAccel()!=Game::TIMEACCEL_1X) {
+			if (Pi::game->GetTimeAccel() != Game::TIMEACCEL_1X) {
 				for (int axis=0; axis<3; axis++)
 					wantAngVel[axis] = wantAngVel[axis] * Pi::game->GetInvTimeAccelRate();
 			}
-
-			m_ship->AIModelCoordsMatchAngVel(wantAngVel, angThrustSoftness);
+			
+			//m_ship->AIModelCoordsMatchAngVel(wantAngVel, angThrustSoftness);
+			m_ship->AIModelCoordsMatchAngVelLocked(wantAngVel, angThrustSoftness);
 		}
 
+		// For mouse
 		if (m_mouseActive) m_ship->AIFaceDirection(m_mouseDir);
 
 	}
