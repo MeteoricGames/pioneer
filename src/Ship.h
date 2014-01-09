@@ -213,6 +213,7 @@ public:
 	void AIAccelToModelRelativeVelocity(const vector3d v);
 	void AIModelCoordsMatchAngVel(vector3d desiredAngVel, double softness);
 	void AIModelCoordsMatchSpeedRelTo(const vector3d v, const Ship *);
+	void AIModelCoordsMatchAngVelLocked(vector3d desiredAngVel, double softness);
 
 	void AIClearInstructions();
 	bool AIIsActive() { return m_curAICmd ? true : false; }
