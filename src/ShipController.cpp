@@ -302,6 +302,8 @@ static double clipmouse(double cur, double inp)
 void PlayerShipController::PollControls(const float timeStep, const bool force_rotation_damping)
 {
 	static bool stickySpeedKey = false;
+	static bool rightMouseButtonPrevState = false;
+	static bool mouseFlightToggle = false;
 
 	CheckControlsLock();
 	if (m_controlsLocked) return;
@@ -320,7 +322,15 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		// have to use this function. SDL mouse position event is bugged in windows
 		int mouseMotion[2];
 		SDL_GetRelativeMouseState (mouseMotion+0, mouseMotion+1);	// call to flush
-		if (Pi::MouseButtonState(SDL_BUTTON_RIGHT))
+		bool rightMouseButtonState = Pi::MouseButtonState(SDL_BUTTON_RIGHT);
+		if(rightMouseButtonState) {
+			if(!rightMouseButtonPrevState) {
+				mouseFlightToggle = !mouseFlightToggle;
+			}
+		}
+		rightMouseButtonPrevState = rightMouseButtonState;
+		
+		if (mouseFlightToggle)
 		{
 			int x,y;
 			SDL_GetMouseState(&x,&y);
