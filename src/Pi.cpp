@@ -70,6 +70,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/Light.h"
 #include "graphics/Renderer.h"
+#include "graphics/TextureBuilder.h"
 #include "graphics/PostProcessing.h"
 #include "graphics/PostProcess.h"
 #include "graphics/gl2/HorizontalBlurMaterial.h"
@@ -78,6 +79,7 @@
 #include "scenegraph/Lua.h"
 #include "ui/Context.h"
 #include "ui/Lua.h"
+#include "MouseCursor.h"
 #include <algorithm>
 #include <sstream>
 
@@ -147,6 +149,7 @@ Graphics::PostProcess* Pi::m_guiPP;
 Graphics::RenderTarget *Pi::renderTarget;
 RefCountedPtr<Graphics::Texture> Pi::renderTexture;
 std::unique_ptr<Graphics::Drawables::TexturedQuad> Pi::renderQuad;
+MouseCursor* Pi::mouseCursor = nullptr;
 
 #if WITH_OBJECTVIEWER
 ObjectViewerView *Pi::objectViewerView;
@@ -238,6 +241,7 @@ static void draw_progress(UI::Gauge *gauge, UI::Label *label, float progress)
 	Pi::renderer->ClearScreen();
 	Pi::ui->Update();
 	Pi::ui->Draw();
+
 	Pi::renderer->SwapBuffers();
 }
 
@@ -624,6 +628,9 @@ void Pi::Init()
 	m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
 	m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR, Graphics::PP_PASS_COMPOSE);
 	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
+
+	// Mouse cursor
+	mouseCursor = new MouseCursor();
 }
 
 bool Pi::IsConsoleActive()
@@ -1028,11 +1035,18 @@ void Pi::Start()
 		Pi::renderer->EndFrame();
 
 		ui->Update();
-		ui->Draw();
+		ui->Draw();		
+		
+		if(mouseCursor) {
+			mouseCursor->Update();
+			mouseCursor->Draw(Pi::renderer);
+		}
+		
 		//Pi::EndRenderTarget();
 
 		// render the rendertarget texture
 		//Pi::DrawRenderTarget();
+
 		Pi::renderer->SwapBuffers();
 
 		Pi::frameTime = 0.001f*(SDL_GetTicks() - last_time);
@@ -1189,7 +1203,7 @@ void Pi::MainLoop()
 
 		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
-
+		
 		if( DrawGUI ) {
 			Gui::Draw();
 		} else if (game && game->IsNormalSpace()) {
@@ -1209,6 +1223,11 @@ void Pi::MainLoop()
 				Gui::Screen::PopFont();
 				Gui::Screen::LeaveOrtho();
 			}
+		}
+
+		if(Pi::mouseCursor) {
+			Pi::mouseCursor->Update();
+			Pi::mouseCursor->Draw(Pi::renderer);
 		}
 
 #if WITH_DEVKEYS
@@ -1397,12 +1416,20 @@ float Pi::JoystickAxisState(int joystick, int axis) {
 void Pi::SetMouseGrab(bool on)
 {
 	if (!doingMouseGrab && on) {
-		SDL_ShowCursor(0);
+		if(Pi::mouseCursor) {
+			Pi::mouseCursor->SetVisible(false);
+		} else {
+			SDL_ShowCursor(0);
+		}
 		Pi::renderer->GetWindow()->SetGrab(true);
 		doingMouseGrab = true;
 	}
 	else if(doingMouseGrab && !on) {
-		SDL_ShowCursor(1);
+		if(Pi::mouseCursor) {
+			Pi::mouseCursor->SetVisible(true);
+		} else {
+			SDL_ShowCursor(1);
+		}
 		Pi::renderer->GetWindow()->SetGrab(false);
 		doingMouseGrab = false;
 	}
