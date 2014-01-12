@@ -40,6 +40,7 @@ namespace Graphics { class Renderer; class PostProcess; }
 namespace SceneGraph { class Model; }
 namespace Sound { class MusicPlayer; }
 namespace UI { class Context; }
+class MouseCursor;
 
 #if WITH_OBJECTVIEWER
 class ObjectViewerView;
@@ -166,6 +167,7 @@ public:
 	static ModelCache *modelCache;
 	static Intro *intro;
 	static SDLGraphics *sdl;
+	static MouseCursor* mouseCursor;
 
 #if WITH_OBJECTVIEWER
 	static ObjectViewerView *objectViewerView;
