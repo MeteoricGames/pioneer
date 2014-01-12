@@ -33,7 +33,9 @@ PlayerShipController::PlayerShipController() :
 	m_setSpeed(0.0),
 	m_flightControlState(CONTROL_MANEUVER),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
-	m_mouseDir(0.0)
+	m_mouseDir(0.0),
+	m_mouseFlightToggle(false),
+	m_prevRightMouseButtonState(false)
 {
 	float deadzone = Pi::config->Float("JoystickDeadzone");
 	m_joystickDeadzone = deadzone * deadzone;
@@ -302,8 +304,6 @@ static double clipmouse(double cur, double inp)
 void PlayerShipController::PollControls(const float timeStep, const bool force_rotation_damping)
 {
 	static bool stickySpeedKey = false;
-	static bool rightMouseButtonPrevState = false;
-	static bool mouseFlightToggle = false;
 
 	CheckControlsLock();
 	if (m_controlsLocked) return;
@@ -324,13 +324,13 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		SDL_GetRelativeMouseState (mouseMotion+0, mouseMotion+1);	// call to flush
 		bool rightMouseButtonState = Pi::MouseButtonState(SDL_BUTTON_RIGHT);
 		if(rightMouseButtonState) {
-			if(!rightMouseButtonPrevState) {
-				mouseFlightToggle = !mouseFlightToggle;
+			if(!m_prevRightMouseButtonState) {
+				m_mouseFlightToggle = !m_mouseFlightToggle;
 			}
 		}
-		rightMouseButtonPrevState = rightMouseButtonState;
+		m_prevRightMouseButtonState = rightMouseButtonState;
 		
-		if (mouseFlightToggle)
+		if (m_mouseFlightToggle)
 		{
 			int x,y;
 			SDL_GetMouseState(&x,&y);

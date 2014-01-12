@@ -113,6 +113,8 @@ private:
 	int m_navTargetIndex;
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
+	bool m_mouseFlightToggle;
+	bool m_prevRightMouseButtonState;
 
 	sigc::connection m_connRotationDampingToggleKey;
 	sigc::connection m_fireMissileKey;
