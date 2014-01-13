@@ -10,18 +10,18 @@ MouseCursor::MouseCursor() : m_visible(true), m_type(MCT_NORMAL), m_pos(vector2f
 {
 	Gui::TexturedQuad *normal_cursor, *flight_cursor;
 
-	Graphics::TextureBuilder b = Graphics::TextureBuilder::UI("mouse_normal.png");
+	Graphics::TextureBuilder b = Graphics::TextureBuilder::UI("icons/mouse_normal.png");
 	normal_cursor = new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui"));
 	m_vCursor.push_back(normal_cursor);
 	const Graphics::TextureDescriptor &d = b.GetDescriptor();
-	m_vHotspot.push_back(vector2f(20.0f/64.0f, 6.0f/64.0f));
+	m_vHotspot.push_back(vector2f(3.0f/33.0f, 3.0f/33.0f));
 	m_vSize.push_back(vector2f(d.dataSize.x * d.texSize.x, d.dataSize.y * d.texSize.y));
 
-	b = Graphics::TextureBuilder::UI("mouse_flight.png");
+	b = Graphics::TextureBuilder::UI("icons/mouse_follow.png");
 	flight_cursor = new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui"));
 	m_vCursor.push_back(flight_cursor);
 	const Graphics::TextureDescriptor &d2 = b.GetDescriptor();
-	m_vHotspot.push_back(vector2f(20.0f/64.0f, 6.0f/64.0f));
+	m_vHotspot.push_back(vector2f(16.0f/33.0f, 16.0f/33.0f));
 	m_vSize.push_back(vector2f(d2.dataSize.x * d2.texSize.x, d2.dataSize.y * d2.texSize.y));
 
 	SDL_ShowCursor(0);
