@@ -74,12 +74,12 @@ for i = 1,#buttonDefs do
 end
 
 local menu = 
-	ui:Grid(1, { 0.2, 0.6, 0.2 })
+	ui:Grid(1, { 0.35, 0.45, 0.2 })
 		:SetRow(0, {
 			ui:Grid({ 0.1, 0.8, 0.1 }, 1)
 				:SetCell(1, 0,
 					ui:Align("MIDDLE",
-						ui:Label("Paragon"):SetFont("HEADING_XLARGE")
+						ui:Image("icons/menu_logo.png", { "PRESERVE_ASPECT" })
 					)
 				)
 		})

@@ -337,6 +337,10 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 			SDL_GetMouseState(&x,&y);
 			x-=Pi::renderer->GetWindow()->GetWidth()/2;
 			y-=Pi::renderer->GetWindow()->GetHeight()/2;
+
+			if((x < 0 && x > -MOUSE_FLIGHT_DEADZONE_X) || (x > 0 && x < MOUSE_FLIGHT_DEADZONE_X)) x = 0;
+			if((y < 0 && y > -MOUSE_FLIGHT_DEADZONE_Y) || (y > 0 && y < MOUSE_FLIGHT_DEADZONE_Y)) y = 0;
+
 			const matrix3x3d &rot = m_ship->GetOrient();
 			if (!m_mouseActive) {
 				m_mouseDir = -rot.VectorZ(); // in world space
