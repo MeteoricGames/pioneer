@@ -85,7 +85,7 @@ local playAmbient = function ()
 	end
 end
 
-Event.Register("onGameStart", function ()
+Event.Register("onGameInit", function ()
 	music = {}
 
 	-- get all the interesting songs by category
@@ -97,7 +97,13 @@ Event.Register("onGameStart", function ()
 			table.insert(music[category], key)
 		end
 	end
+end)
 
+Event.Register("onMainMenu", function ()
+	playRandomSongFromCategory("mainmenu")
+end)
+
+Event.Register("onGameStart", function ()
 	playAmbient()
 end)
 

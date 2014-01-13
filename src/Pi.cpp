@@ -1020,6 +1020,10 @@ void Pi::Start()
 	if(Pi::mouseCursor) {
 		Pi::mouseCursor->Reset();
 	}
+	
+	LuaEvent::Queue("onGameInit");
+	LuaEvent::Queue("onMainMenu");
+	LuaEvent::Emit();
 
 	while (!Pi::game) {
 		SDL_Event event;
@@ -1068,6 +1072,8 @@ void Pi::Start()
 	ui->Layout(); // UI does important things on layout, like updating keyboard shortcuts
 
 	delete Pi::intro; Pi::intro = 0;
+
+	Pi::musicPlayer.Stop();
 
 	InitGame();
 	StartGame();
