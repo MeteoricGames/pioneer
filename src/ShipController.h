@@ -28,6 +28,10 @@ enum FlightButtonStatus {
 	FLIGHT_BUTTON_ON			= 2,
 };
 
+// Mouse flight deadzone is in pixels offset from center of screen
+static const int MOUSE_FLIGHT_DEADZONE_X = 40;
+static const int MOUSE_FLIGHT_DEADZONE_Y = 30;
+
 // only AI
 class ShipController
 {
