@@ -48,6 +48,7 @@ local shipClassString = {
 	utility_tender        = "UTILITY_TENDER",
 	utility_ship        = "UTILITY_SHIP",
 	utility_controller        = "UTILITY_CONTROLLER",
+	light_tanker        = "LIGHT_TANKER",
 	cargo_loader        = "CARGO_LOADER",
 	cargo_hauler        = "CARGO_HAULER",
 	cargo_freighter        = "CARGO_FREIGHTER",
