@@ -11,6 +11,7 @@
 #include "Space.h"
 #include "WorldView.h"
 #include "OS.h"
+#include "MouseCursor.h"
 
 void ShipController::StaticUpdate(float timeStep)
 {
@@ -360,8 +361,15 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 				matrix3x3d mrot = matrix3x3d::RotateY(m_mouseX) * matrix3x3d::RotateX(m_mouseY);
 				m_mouseDir = (rot * (mrot * objDir)).Normalized();
 			}
+			if(Pi::mouseCursor) {
+				Pi::mouseCursor->SetType(MCT_FLIGHT);
+			}
+		} else { 
+			m_mouseActive = false;
+			if(Pi::mouseCursor) {
+				Pi::mouseCursor->SetType(MCT_NORMAL);
+			}
 		}
-		else m_mouseActive = false;
 
 		if (m_flightControlState == CONTROL_MANEUVER) {
 			double oldSpeed = m_setSpeed;

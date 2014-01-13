@@ -694,6 +694,9 @@ void Pi::SetView(View *v)
 	if (currentView) currentView->Detach();
 	currentView = v;
 	if (currentView) currentView->Attach();
+	if(Pi::mouseCursor) {
+		Pi::mouseCursor->Reset();
+	}
 }
 
 void Pi::OnChangeDetailLevel()
@@ -922,6 +925,9 @@ void Pi::TombStoneLoop()
 	std::unique_ptr<Tombstone> tombstone(new Tombstone(Pi::renderer, Graphics::GetScreenWidth(), Graphics::GetScreenHeight()));
 	Uint32 last_time = SDL_GetTicks();
 	float _time = 0;
+	if(Pi::mouseCursor) {
+		Pi::mouseCursor->Reset();
+	}
 	do {
 		Pi::HandleEvents();
 		Pi::renderer->GetWindow()->SetGrab(false);
@@ -1010,6 +1016,10 @@ void Pi::Start()
 
 	Uint32 last_time = SDL_GetTicks();
 	float _time = 0;
+
+	if(Pi::mouseCursor) {
+		Pi::mouseCursor->Reset();
+	}
 
 	while (!Pi::game) {
 		SDL_Event event;
@@ -1111,6 +1121,10 @@ void Pi::MainLoop()
 	double currentTime = 0.001 * double(SDL_GetTicks());
 	double accumulator = Pi::game->GetTimeStep();
 	Pi::gameTickAlpha = 0;
+
+	if(Pi::mouseCursor) {
+		Pi::mouseCursor->Reset();
+	}
 
 	while (Pi::game) {
 		PROFILE_SCOPED()
@@ -1416,18 +1430,14 @@ float Pi::JoystickAxisState(int joystick, int axis) {
 void Pi::SetMouseGrab(bool on)
 {
 	if (!doingMouseGrab && on) {
-		if(Pi::mouseCursor) {
-			Pi::mouseCursor->SetVisible(false);
-		} else {
+		if(!Pi::mouseCursor) {
 			SDL_ShowCursor(0);
 		}
 		Pi::renderer->GetWindow()->SetGrab(true);
 		doingMouseGrab = true;
 	}
 	else if(doingMouseGrab && !on) {
-		if(Pi::mouseCursor) {
-			Pi::mouseCursor->SetVisible(true);
-		} else {
+		if(!Pi::mouseCursor) {
 			SDL_ShowCursor(1);
 		}
 		Pi::renderer->GetWindow()->SetGrab(false);

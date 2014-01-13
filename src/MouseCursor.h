@@ -7,6 +7,12 @@
 #include "libs.h"
 #include "gui/Gui.h"
 
+enum MouseCursorType
+{
+	MCT_NORMAL,
+	MCT_FLIGHT,
+};
+
 class MouseCursor
 {
 public:
@@ -16,15 +22,18 @@ public:
 	void Update();
 	void Draw(Graphics::Renderer* renderer);
 	void SetVisible(bool visible);
+	void SetType(MouseCursorType type);
+	void Reset();
 
 private:
 	MouseCursor(const MouseCursor&);
 	MouseCursor& operator=(MouseCursor&);
 
-	std::unique_ptr<Gui::TexturedQuad> m_cursor;
-	vector2f m_size;
+	std::vector<Gui::TexturedQuad*> m_vCursor;
+	std::vector<vector2f> m_vSize;
+	std::vector<vector2f> m_vHotspot;
 	vector2f m_pos;
-	vector2f m_hotspot;
+	MouseCursorType m_type;
 	bool m_visible;
 
 protected:
