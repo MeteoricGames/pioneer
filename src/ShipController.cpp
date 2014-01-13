@@ -345,7 +345,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 			}
 			vector3d objDir = m_mouseDir * rot;
 
-			const double radiansPerPixel = 0.00002 * m_fovY;
+			const double radiansPerPixel = 0.00001 * m_fovY;
 			const int maxMotion = std::max(abs(x), abs(y));
 			const double accel = Clamp(maxMotion / 100.0, 0.0, 0.1);
 
