@@ -11,6 +11,7 @@ local Comms = import("Comms")
 local InfoFace = import("ui/InfoFace")
 
 local l = Lang.GetResource("ui-core")
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 -- XXX for LAUNCH_PERMISSION_DENIED_BUSY, still needed by WorldView
 local lcore = Lang.GetResource("core")
@@ -36,7 +37,7 @@ local lobby = function (tab)
 		ui:Grid({48,4,48},1)
 			:SetColumn(0, {
 				ui:VBox(10):PackEnd({
-					ui:Label(station.label):SetFont("HEADING_LARGE"),
+					ui:Label(station.label):SetFont("HEADING_LARGE"):SetColor(c),
 					ui:Expand(),
 					ui:Align("MIDDLE", launchButton),
 				})
