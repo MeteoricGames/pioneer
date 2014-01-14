@@ -10,6 +10,7 @@ local SmallLabeledButton = import("ui/SmallLabeledButton")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
+local c = { r = 0.0, g = 0.86, b = 1.0 }
 
 local personalInfo = function ()
 	local player = Character.persistent.player
@@ -20,7 +21,7 @@ local personalInfo = function ()
 	-- for updating the entire face
 	local faceWidgetContainer = ui:Margin(0, "ALL", faceWidget)
 
-	local nameEntry = ui:TextEntry(player.name):SetFont("HEADING_LARGE")
+	local nameEntry = ui:TextEntry(player.name):SetFont("HEADING_LARGE"):SetColor(c)
 	nameEntry.onChange:Connect(function (newName)
 		player.name = newName
         faceWidget:UpdateInfo(player)
@@ -44,13 +45,13 @@ local personalInfo = function ()
 		ui:Grid({48,4,48},1)
 			:SetColumn(0, {
 				ui:Table():AddRows({
-					ui:Label(l.COMBAT):SetFont("HEADING_LARGE"),
+					ui:Label(l.COMBAT):SetFont("HEADING_LARGE"):SetColor(c),
 					ui:Table():SetColumnSpacing(10):AddRows({
 						{ l.RATING, l[player:GetCombatRating()] },
 						{ l.KILLS,  string.format('%d',player.killcount) },
 					}),
 					"",
-					ui:Label(l.MILITARY):SetFont("HEADING_LARGE"),
+					ui:Label(l.MILITARY):SetFont("HEADING_LARGE"):SetColor(c),
 					ui:Table():SetColumnSpacing(10):AddRows({
 						{ l.ALLEGIANCE, l.NONE }, -- XXX
 						{ l.RANK,      l.NONE }, -- XXX
