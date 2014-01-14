@@ -21,6 +21,15 @@ public:
 		return 1;
 	}
 
+	static int l_set_color(lua_State *l)
+	{
+		TextEntry *te = LuaObject<UI::TextEntry>::CheckFromLua(1);
+		Color c = Color::FromLuaTable(l, 2);
+		te->SetColor(c);
+		lua_pushvalue(l, 1);
+		return 1;
+	}
+
 	static int l_attr_text(lua_State *l)
 	{
 		TextEntry *te = LuaObject<UI::TextEntry>::CheckFromLua(1);
@@ -54,6 +63,7 @@ template <> void LuaObject<UI::TextEntry>::RegisterClass()
 
 	static const luaL_Reg l_methods[] = {
 		{ "SetText",  LuaTextEntry::l_set_text },
+		{ "SetColor", LuaTextEntry::l_set_color },
 		{ 0, 0 }
 	};
 
