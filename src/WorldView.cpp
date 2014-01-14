@@ -218,7 +218,8 @@ void WorldView::InitObject()
 	Add(m_bodyLabels, 0, 0);
 
 	{
-		m_pauseText = new Gui::Label(std::string("#f7f") + Lang::PAUSED);
+		m_pauseText = new Gui::Label(std::string("#0f3") + Lang::PAUSED);
+		m_pauseText->Color(Color::PARAGON_GREEN);
 		float w, h;
 		Gui::Screen::MeasureString(Lang::PAUSED, w, h);
 		Add(m_pauseText, 0.5f * (Gui::Screen::GetWidth() - w), 100);
@@ -357,7 +358,8 @@ void WorldView::UpdateCameraName()
 	const std::string cameraName(m_activeCameraController->GetName());
 
 	Gui::Screen::PushFont("OverlayFont");
-	m_showCameraName = new Gui::Label("#ff0"+cameraName);
+	m_showCameraName = new Gui::Label("#0f3"+cameraName);
+	m_showCameraName->Color(Color::PARAGON_GREEN);
 	Gui::Screen::PopFont();
 
 	float w, h;
