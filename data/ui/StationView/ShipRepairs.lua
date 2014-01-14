@@ -14,6 +14,7 @@ local Character = import("Character")
 
 local l = Lang.GetResource("ui-core")
 local ui = Engine.ui
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local getRepairCost = function (percent, shipDef)
 	-- repairing 1% hull damage costs 0.1% of ship price
@@ -30,11 +31,11 @@ local getRepairMessage = function (damage, price)
 end
 
 local shipRepairs = function (args)
-	local messageLabel = ui:Label('')
-	local feedbackLabel = ui:Label('')
+	local messageLabel = ui:Label(''):SetColor(c)
+	local feedbackLabel = ui:Label(''):SetColor(c)
 	local repairButtons = ui:VBox(5)
-	local repair1Label = ui:Label('')
-	local repairAllLabel = ui:Label('')
+	local repair1Label = ui:Label(''):SetColor(c)
+	local repairAllLabel = ui:Label(''):SetColor(c)
 	local repair1Btn = ui:Button(ui:Expand('HORIZONTAL', repair1Label))
 	local repairAllBtn = ui:Button(ui:Expand('HORIZONTAL', repairAllLabel))
 
@@ -102,7 +103,7 @@ local shipRepairs = function (args)
 					feedbackLabel,
 					ui:Expand("VERTICAL"),
 					ui:HBox(5):PackEnd({
-						ui:Label(l.HULL_INTEGRITY),
+						ui:Label(l.HULL_INTEGRITY):SetColor(c),
 						integrityGauge,
 					})
 				})
