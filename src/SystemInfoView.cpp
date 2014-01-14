@@ -55,9 +55,9 @@ void SystemInfoView::OnBodyViewed(SystemBody *b)
 	outer->Add(col2, 300, 0);
 
 #define _add_label_and_value(label, value) { \
-	Gui::Label *l = (new Gui::Label(label))->Color(255,255,0); \
+	Gui::Label *l = (new Gui::Label(label))->Color(Color::PARAGON_BLUE); \
 	col1->PackEnd(l); \
-	l = (new Gui::Label(value))->Color(255,255,0); \
+	l = (new Gui::Label(value))->Color(Color::PARAGON_BLUE); \
 	col2->PackEnd(l); \
 }
 
@@ -66,7 +66,7 @@ void SystemInfoView::OnBodyViewed(SystemBody *b)
 	{
 		Gui::Label *l = new Gui::Label(b->name + ": " + b->GetAstroDescription() +
 			(multiple ? (std::string(" (")+b->parent->name + ")") : ""));
-		l->Color(255,255,0);
+		l->Color(Color::PARAGON_BLUE);
 		m_infoBox->PackStart(l);
 	}
 
@@ -278,7 +278,7 @@ void SystemInfoView::SystemChanged(const SystemPath &path)
 		std::string _info =
 			Lang::UNEXPLORED_SYSTEM_STAR_INFO_ONLY;
 
-		Gui::Label *l = (new Gui::Label(_info))->Color(255,255,0);
+		Gui::Label *l = (new Gui::Label(_info))->Color(Color::PARAGON_BLUE);
 		m_sbodyInfoTab->Add(l, 35, 300);
 
 		ShowAll();
@@ -289,9 +289,15 @@ void SystemInfoView::SystemChanged(const SystemPath &path)
 	Gui::Fixed *demographicsTab = new Gui::Fixed();
 
 	m_tabs = new Gui::Tabbed();
-	m_tabs->AddPage(new Gui::Label(Lang::PLANETARY_INFO), m_sbodyInfoTab);
-	m_tabs->AddPage(new Gui::Label(Lang::ECONOMIC_INFO), m_econInfoTab);
-	m_tabs->AddPage(new Gui::Label(Lang::DEMOGRAPHICS), demographicsTab);
+	Gui::Label *planetary_info = new Gui::Label(Lang::PLANETARY_INFO);
+	planetary_info->Color(Color::PARAGON_BLUE);
+	Gui::Label *economic_info = new Gui::Label(Lang::ECONOMIC_INFO);
+	economic_info->Color(Color::PARAGON_BLUE);
+	Gui::Label *demographics = new Gui::Label(Lang::DEMOGRAPHICS);
+	demographics->Color(Color::PARAGON_BLUE);
+	m_tabs->AddPage(planetary_info, m_sbodyInfoTab);
+	m_tabs->AddPage(economic_info, m_econInfoTab);
+	m_tabs->AddPage(demographics, demographicsTab);
 	Add(m_tabs, 0, 0);
 
 	m_sbodyInfoTab->onMouseButtonEvent.connect(sigc::mem_fun(this, &SystemInfoView::OnClickBackground));
@@ -338,7 +344,7 @@ void SystemInfoView::SystemChanged(const SystemPath &path)
 		Gui::VScrollPortal *portal = new Gui::VScrollPortal(730);
 		scroll->SetAdjustment(&portal->vscrollAdjust);
 
-		Gui::Label *l = (new Gui::Label(_info))->Color(255,255,0);
+		Gui::Label *l = (new Gui::Label(_info))->Color(Color::PARAGON_BLUE);
 		m_infoBox->PackStart(l);
 		portal->Add(m_infoBox);
 		scrollBox->PackStart(scroll);
@@ -365,11 +371,11 @@ void SystemInfoView::SystemChanged(const SystemPath &path)
 		m_econMajExport = new Gui::Label("");
 		m_econMinExport = new Gui::Label("");
 		m_econIllegal = new Gui::Label("");
-		m_econMajImport->Color(255,255,0);
-		m_econMinImport->Color(255,255,0);
-		m_econMajExport->Color(255,255,0);
-		m_econMinExport->Color(255,255,0);
-		m_econIllegal->Color(255,255,0);
+		m_econMajImport->Color(Color::PARAGON_BLUE);
+		m_econMinImport->Color(Color::PARAGON_BLUE);
+		m_econMajExport->Color(Color::PARAGON_BLUE);
+		m_econMinExport->Color(Color::PARAGON_BLUE);
+		m_econIllegal->Color(Color::PARAGON_BLUE);
 		f->Add(m_econMajImport, 0, 0);
 		f->Add(m_econMinImport, 150, 0);
 		f->Add(m_econMajExport, 300, 0);
@@ -388,18 +394,18 @@ void SystemInfoView::SystemChanged(const SystemPath &path)
 
 		const float YSEP = Gui::Screen::GetFontHeight() * 1.2f;
 
-		col1->Add((new Gui::Label(Lang::SYSTEM_TYPE))->Color(255,255,0), 0, 0);
+		col1->Add((new Gui::Label(Lang::SYSTEM_TYPE))->Color(Color::PARAGON_BLUE), 0, 0);
 		col2->Add(new Gui::Label(m_system->GetShortDescription()), 0, 0);
 
-		col1->Add((new Gui::Label(Lang::GOVERNMENT_TYPE))->Color(255,255,0), 0, 2*YSEP);
+		col1->Add((new Gui::Label(Lang::GOVERNMENT_TYPE))->Color(Color::PARAGON_BLUE), 0, 2*YSEP);
 		col2->Add(new Gui::Label(m_system->GetSysPolit().GetGovernmentDesc()), 0, 2*YSEP);
 
-		col1->Add((new Gui::Label(Lang::ECONOMY_TYPE))->Color(255,255,0), 0, 3*YSEP);
+		col1->Add((new Gui::Label(Lang::ECONOMY_TYPE))->Color(Color::PARAGON_BLUE), 0, 3*YSEP);
 		col2->Add(new Gui::Label(m_system->GetSysPolit().GetEconomicDesc()), 0, 3*YSEP);
 
-		col1->Add((new Gui::Label(Lang::ALLEGIANCE))->Color(255,255,0), 0, 4*YSEP);
+		col1->Add((new Gui::Label(Lang::ALLEGIANCE))->Color(Color::PARAGON_BLUE), 0, 4*YSEP);
 		col2->Add(new Gui::Label(m_system->GetFaction()->name.c_str()), 0, 4*YSEP);
-		col1->Add((new Gui::Label(Lang::POPULATION))->Color(255,255,0), 0, 5*YSEP);
+		col1->Add((new Gui::Label(Lang::POPULATION))->Color(Color::PARAGON_BLUE), 0, 5*YSEP);
 		std::string popmsg;
 		fixed pop = m_system->GetTotalPop();
 		if (pop >= fixed(1,1)) { popmsg = stringf(Lang::OVER_N_BILLION, formatarg("population", pop.ToInt32())); }
@@ -408,10 +414,10 @@ void SystemInfoView::SystemChanged(const SystemPath &path)
 		else { popmsg = Lang::NO_REGISTERED_INHABITANTS; }
 		col2->Add(new Gui::Label(popmsg), 0, 5*YSEP);
 
-		col1->Add((new Gui::Label(Lang::SECTOR_COORDINATES))->Color(255,255,0), 0, 6*YSEP);
+		col1->Add((new Gui::Label(Lang::SECTOR_COORDINATES))->Color(Color::PARAGON_BLUE), 0, 6*YSEP);
 		col2->Add(new Gui::Label(stringf("%0{d}, %1{d}, %2{d}", path.sectorX, path.sectorY, path.sectorZ)), 0, 6*YSEP);
 
-		col1->Add((new Gui::Label(Lang::SYSTEM_NUMBER))->Color(255,255,0), 0, 7*YSEP);
+		col1->Add((new Gui::Label(Lang::SYSTEM_NUMBER))->Color(Color::PARAGON_BLUE), 0, 7*YSEP);
 		col2->Add(new Gui::Label(stringf("%0", path.systemIndex)), 0, 7*YSEP);
 	}
 
