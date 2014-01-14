@@ -11,6 +11,7 @@ local InfoGauge = import("ui/InfoGauge")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local econTrade = function ()
 
@@ -43,8 +44,8 @@ local econTrade = function ()
 				if slot == "CARGO" then
 					local count = Game.player:GetEquipCount(slot, type)
 					if count > 0 then
-						table.insert(cargoNameColumn, ui:Label(et.name))
-						table.insert(cargoQuantityColumn, ui:Label(count.."t"))
+						table.insert(cargoNameColumn, ui:Label(et.name):SetColor(c))
+						table.insert(cargoQuantityColumn, ui:Label(count.."t"):SetColor(c))
 
 						local jettisonButton = SmallLabeledButton.New(l.JETTISON)
 						jettisonButton.button.onClick:Connect(function ()
@@ -61,7 +62,7 @@ local econTrade = function ()
 		-- Function returns a UI with which to populate the cargo list widget
 		return
 			ui:VBox(10):PackEnd({
-				ui:Label(l.CARGO):SetFont("HEADING_LARGE"),
+				ui:Label(l.CARGO):SetFont("HEADING_LARGE"):SetColor(c),
 				ui:Scroller():SetInnerWidget(
 					ui:Grid(3,1)
 						:SetColumn(0, { ui:VBox():PackEnd(cargoNameColumn) })
@@ -81,7 +82,7 @@ local econTrade = function ()
 	cargoGauge:SetValue(player.usedCargo/player.freeCapacity)
 
 	local fuelGauge = InfoGauge.New({
-		label          = ui:NumberLabel("PERCENT"),
+		label          = ui:NumberLabel("PERCENT"):SetColor(c),
 		warningLevel   = 0.1,
 		criticalLevel  = 0.05,
 		levelAscending = false,
@@ -119,26 +120,26 @@ local econTrade = function ()
 						ui:Grid(2,1)
 							:SetColumn(0, {
 								ui:VBox():PackEnd({
-									ui:Label(l.CASH..":"),
+									ui:Label(l.CASH..":"):SetColor(c),
 									ui:Margin(10),
-									ui:Label(l.CARGO_SPACE..":"),
-									ui:Label(l.CABINS..":"),
+									ui:Label(l.CARGO_SPACE..":"):SetColor(c),
+									ui:Label(l.CABINS..":"):SetColor(c),
 									ui:Margin(10),
 								})
 							})
 							:SetColumn(1, {
 								ui:VBox():PackEnd({
-									ui:Label(string.format("$%.2f", cash)),
+									ui:Label(string.format("$%.2f", cash)):SetColor(c),
 									ui:Margin(10),
 									cargoGauge.widget,
-									ui:Grid(2,1):SetRow(0, { ui:Label(l.TOTAL..totalCabins), ui:Label(l.USED..": "..usedCabins) }),
+									ui:Grid(2,1):SetRow(0, { ui:Label(l.TOTAL..totalCabins):SetColor(c), ui:Label(l.USED..": "..usedCabins):SetColor(c) }),
 									ui:Margin(10),
 								})
 							}),
 						ui:Grid({50,10,40},1)
 							:SetRow(0, {
 								ui:HBox(5):PackEnd({
-									ui:Label(l.FUEL..":"),
+									ui:Label(l.FUEL..":"):SetColor(c),
 									fuelGauge,
 								}),
 								nil,
