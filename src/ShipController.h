@@ -91,6 +91,7 @@ public:
 	sigc::signal<void> onRotationDampingChanged;
 
 	bool GetMouseFlightMode() const { return m_mouseFlightToggle; }
+	bool GetMouseFlightZeroOffset() const { return m_mouseFlightZeroOffset; }
 
 private:
 	bool IsAnyAngularThrusterKeyDown();
@@ -120,7 +121,8 @@ private:
 	int m_navTargetIndex;
 	int m_setSpeedTargetIndex;
 	vector3d m_mouseDir;
-	bool m_mouseFlightToggle;
+	bool m_mouseFlightToggle;		// when true mouse flight is active
+	bool m_mouseFlightZeroOffset;	// when true mouse flight is active but mouse is in deadzone (zero offset)
 	bool m_prevRightMouseButtonState;
 
 	sigc::connection m_connRotationDampingToggleKey;

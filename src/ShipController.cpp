@@ -37,6 +37,7 @@ PlayerShipController::PlayerShipController() :
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
 	m_mouseDir(0.0),
 	m_mouseFlightToggle(false),
+	m_mouseFlightZeroOffset(true),
 	m_prevRightMouseButtonState(false)
 {
 	float deadzone = Pi::config->Float("JoystickDeadzone");
@@ -94,7 +95,7 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	matrix4x4d m;
 	double current_velocity;
 	bool any_linthrust_keydown = IsAnyLinearThrusterKeyDown();
-	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || m_mouseActive;
+	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || !GetMouseFlightZeroOffset();
 
 	// Get altitude from WorldView (that's where altitude is being calculated for UI display
 	// and since it's a bit expensive retrieving it is better than calculating it twice per frame)
@@ -367,6 +368,12 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 				}
 			}
 
+			if(x == 0 && y == 0) {
+				m_mouseFlightZeroOffset = true;
+			} else {
+				m_mouseFlightZeroOffset = false;
+			}
+
 			const matrix3x3d &rot = m_ship->GetOrient();
 			if (!m_mouseActive) {
 				m_mouseDir = -rot.VectorZ(); // in world space
@@ -396,6 +403,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 			}
 		} else { 
 			m_mouseActive = false;
+			m_mouseFlightZeroOffset = true;
 			if(Pi::mouseCursor) {
 				Pi::mouseCursor->SetType(MCT_NORMAL);
 			}
