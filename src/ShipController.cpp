@@ -339,8 +339,33 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 			x-=Pi::renderer->GetWindow()->GetWidth()/2;
 			y-=Pi::renderer->GetWindow()->GetHeight()/2;
 
-			if((x < 0 && x > -MOUSE_FLIGHT_DEADZONE_X) || (x > 0 && x < MOUSE_FLIGHT_DEADZONE_X)) x = 0;
-			if((y < 0 && y > -MOUSE_FLIGHT_DEADZONE_Y) || (y > 0 && y < MOUSE_FLIGHT_DEADZONE_Y)) y = 0;
+			if(x < 0) {
+				if(x > -MOUSE_FLIGHT_DEADZONE_X) {
+					x = 0;
+				} else {
+					x += MOUSE_FLIGHT_DEADZONE_X;
+				}
+			} else if(x > 0) {
+				if(x < MOUSE_FLIGHT_DEADZONE_X) {
+					x = 0;
+				} else {
+					x -= MOUSE_FLIGHT_DEADZONE_X;
+				}
+			}
+
+			if(y < 0) {
+				if(y > -MOUSE_FLIGHT_DEADZONE_Y) {
+					y = 0;
+				} else {
+					y += MOUSE_FLIGHT_DEADZONE_Y;
+				}
+			} else if(y > 0) {
+				if(y < MOUSE_FLIGHT_DEADZONE_Y) {
+					y = 0;
+				} else {
+					y -= MOUSE_FLIGHT_DEADZONE_Y;
+				}
+			}
 
 			const matrix3x3d &rot = m_ship->GetOrient();
 			if (!m_mouseActive) {
