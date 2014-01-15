@@ -66,16 +66,6 @@ typedef std::vector<std::pair<MaterialDescriptor, GL2::Program*> >::const_iterat
 GL2::MultiProgram *vtxColorProg;
 GL2::MultiProgram *flatColorProg;
 
-// for post-processing
-Material* texFullscreenQuadMtrl = nullptr;
-Material* hblurMtrl = nullptr;
-Material* vblurMtrl = nullptr;
-Material* bloomMtrl = nullptr;
-RenderTarget* scenePassRT = nullptr;
-RenderTarget* hblurPassRT = nullptr;
-RenderTarget* vblurPassRT = nullptr;
-GLuint uScreenQuadBufferId = 0;
-
 RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 : Renderer(window, window->GetWidth(), window->GetHeight())
 , m_numDirLights(0)
@@ -125,81 +115,11 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 
 	// Init post processing
 	m_postprocessing.reset(new PostProcessing(this));
-
-	// Init quad used for rendering
-	const float screenquad_vertices [] = {
-		-1.0f,	-1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		-1.0f,	 1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		 1.0f,	 1.0f, 0.0f,
-		-1.0f,   1.0f, 0.0f
-	};
-	glGenBuffers(1, &uScreenQuadBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
-	glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(float), screenquad_vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// Init postprocessing materials
-	MaterialDescriptor tfquad_mtrl_desc;
-	tfquad_mtrl_desc.effect = EFFECT_TEXTURED_FULLSCREEN_QUAD;
-	texFullscreenQuadMtrl = CreateMaterial(tfquad_mtrl_desc);
-	MaterialDescriptor hblur_mtrl_desc;
-	hblur_mtrl_desc.effect = EFFECT_HORIZONTAL_BLUR;
-	hblurMtrl = CreateMaterial(hblur_mtrl_desc);
-	MaterialDescriptor vblur_mtrl_desc;
-	vblur_mtrl_desc.effect = EFFECT_VERTICAL_BLUR;
-	vblurMtrl = CreateMaterial(vblur_mtrl_desc);
-	MaterialDescriptor bloom_mtrl_desc;
-	bloom_mtrl_desc.effect = EFFECT_BLOOM_COMPOSITOR;
-	bloomMtrl = CreateMaterial(bloom_mtrl_desc);
-
-	// Init render targets
-	RenderTargetDesc scene_rt_desc(
-		window->GetWidth(), window->GetHeight(), 
-		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_DEPTH,
-		true);
-	scenePassRT = CreateRenderTarget(scene_rt_desc);
-	//
-	RenderTargetDesc hblur_rt_desc(
-		window->GetWidth(), window->GetHeight(),
-		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_NONE,
-		false);
-	hblurPassRT = CreateRenderTarget(hblur_rt_desc);
-	//
-	RenderTargetDesc vblur_rt_desc(
-		window->GetWidth(), window->GetHeight(),
-		TextureFormat::TEXTURE_RGB_888, TextureFormat::TEXTURE_NONE,
-		false);
-	vblurPassRT = CreateRenderTarget(vblur_rt_desc);
 }
 
 RendererGL2::~RendererGL2()
 {
 	while (!m_programs.empty()) delete m_programs.back().second, m_programs.pop_back();
-	if(texFullscreenQuadMtrl) {
-		delete texFullscreenQuadMtrl;
-	}
-	
-	glDeleteBuffers(1, &uScreenQuadBufferId);
-	if(hblurMtrl) {
-		delete hblurMtrl;
-	}
-	if(vblurMtrl) {
-		delete vblurMtrl;
-	}
-	if(bloomMtrl) {
-		delete bloomMtrl;
-	}
-	if(scenePassRT) {
-		delete scenePassRT;
-	}
-	if(hblurPassRT) {
-		delete hblurPassRT;
-	}
-	if(vblurPassRT) {
-		delete vblurPassRT;
-	}
 }
 
 bool RendererGL2::GetNearFarRange(float &near, float &far) const
