@@ -1,3 +1,6 @@
+// Copyright © 2013-14 Meteoric Games Ltd
+// Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
 #ifndef _GL2_HORIZONTAL_BLUR_MATERIAL_H_
 #define _GL2_HORIZONTAL_BLUR_MATERIAL_H_
 
