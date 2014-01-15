@@ -92,8 +92,13 @@ local menu =
 				} )
 		})
 		:SetRow(2, {
-			ui:Grid({ 0.1, 0.8, 0.1 }, 1)
+			ui:Grid({0.05, 0.3, 0.55, 0.1}, 1)
 				:SetCell(1, 0,
+					ui:Align("LEFT",
+						ui:Image("icons/developer_logo.png", { "PRESERVE_ASPECT" })
+					)
+				)
+				:SetCell(2, 0,
 					ui:Align("RIGHT",
 						ui:Label("(build: "..Engine.version..")"):SetFont("HEADING_XSMALL")
 					)
