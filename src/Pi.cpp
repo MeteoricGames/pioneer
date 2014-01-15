@@ -445,9 +445,9 @@ void Pi::Init()
 	label->SetFont(UI::Widget::FONT_HEADING_NORMAL);
 	UI::Gauge *gauge = Pi::ui->Gauge();
 	Pi::ui->GetTopLayer()->SetInnerWidget(
-		Pi::ui->Margin(10, UI::Margin::HORIZONTAL)->SetInnerWidget(
+		Pi::ui->Margin(10)->SetInnerWidget(
 			Pi::ui->Expand()->SetInnerWidget(
-				Pi::ui->Align(UI::Align::MIDDLE)->SetInnerWidget(
+			Pi::ui->Align(UI::Align::BOTTOM)->SetInnerWidget(
 					box->PackEnd(UI::WidgetSet(
 						label,
 						gauge
