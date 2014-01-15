@@ -410,7 +410,7 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		if (KeyBindings::thrustLeft.IsActive()) m_ship->SetThrusterState(0, -linearThrustPower);
 		if (KeyBindings::thrustRight.IsActive()) m_ship->SetThrusterState(0, linearThrustPower);
 
-		if (KeyBindings::fireLaser.IsActive() || (Pi::MouseButtonState(SDL_BUTTON_LEFT) && Pi::MouseButtonState(SDL_BUTTON_RIGHT))) {
+		if (KeyBindings::fireLaser.IsActive() || (Pi::MouseButtonState(SDL_BUTTON_LEFT) && m_mouseFlightToggle)) {
 				//XXX worldview? madness, ask from ship instead
 				m_ship->SetGunState(Pi::worldView->GetActiveWeapon(), 1);
 		}
