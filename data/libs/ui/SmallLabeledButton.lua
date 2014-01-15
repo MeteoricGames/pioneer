@@ -7,10 +7,12 @@ local ui = Engine.ui
 
 local SmallLabeledButton = {}
 
+local c = {r = 0.0, g = 0.86, b = 1.0}
+
 function SmallLabeledButton.New (text)
 	local self = {
 		button = ui:SmallButton(),
-		label  = ui:Label(text),
+		label  = ui:Label(text):SetColor(c),
 	}
 	self.widget = ui:HBox(10):PackEnd({ self.button, self.label })
 

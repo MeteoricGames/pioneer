@@ -7,6 +7,8 @@ local Face = import("UI.Game.Face")
 
 local ui = Engine.ui
 
+local c = {r = 0.0, g = 0.86, b = 1.0}
+
 local testCharacter = function (character)
 	if not (character and (type(character)=='table') and (getmetatable(character).class == 'Character'))
 	then
@@ -20,8 +22,8 @@ local setFaceInfo = function (face, character)
 			ui:Expand("HORIZONTAL"):SetInnerWidget(
 				ui:Gradient({r=0.1,g=0.1,b=0.1,a=0.8}, {r=0.0,g=0.0,b=0.1,a=0.0}, "HORIZONTAL"):SetInnerWidget(
 					ui:Margin(20):SetInnerWidget(ui:VBox():PackEnd({
-						ui:Label(character.name):SetFont("HEADING_NORMAL"),
-						ui:Label(character.title or ''):SetFont("HEADING_SMALL"),
+						ui:Label(character.name):SetFont("HEADING_NORMAL"):SetColor(c),
+						ui:Label(character.title or ''):SetFont("HEADING_SMALL"):SetColor(c),
 					}))
 				)
 			)

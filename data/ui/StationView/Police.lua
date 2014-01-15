@@ -15,6 +15,7 @@ local SmallLabeledButton = import("ui/SmallLabeledButton")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core")
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local crimeStrings = {
 	TRADING_ILLEGAL_GOODS = l.TRADING_ILLEGAL_GOODS,
@@ -37,7 +38,7 @@ local police = function (tab)
 	local infoBox = ui:VBox(10)
 	if #crimes > 0 then
 		infoBox:PackEnd({
-			ui:Label(l.CRIMINAL_RECORD):SetFont("HEADING_LARGE"),
+			ui:Label(l.CRIMINAL_RECORD):SetFont("HEADING_LARGE"):SetColor(c),
 			ui:VBox():PackEnd(
 				utils.build_table(utils.map(function (k,v) return k,crimeStrings[v] end, pairs(crimes)))
 			),

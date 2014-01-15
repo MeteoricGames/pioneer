@@ -18,6 +18,7 @@ local SmallLabeledButton = import("ui/SmallLabeledButton")
 local ui = Engine.ui
 
 local l = Lang.GetResource("ui-core")
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 -- XXX equipment strings are in core. this sucks
 local lcore = Lang.GetResource("core")
@@ -137,8 +138,8 @@ shipTable.onRowClicked:Connect(function (row)
 			ui:HBox():PackEnd({
 				ui:Align("LEFT",
 					ui:VBox():PackEnd({
-						ui:Label(def.name):SetFont("HEADING_LARGE"),
-						ui:Label(shipClassString[def.shipClass]):SetFont("HEADING_SMALL"),
+						ui:Label(def.name):SetFont("HEADING_LARGE"):SetColor(c),
+						ui:Label(shipClassString[def.shipClass]):SetFont("HEADING_SMALL"):SetColor(c),
 					})
 				),
 				ui:Expand("HORIZONTAL", ui:Align("RIGHT", manufacturerIcon(def.manufacturer))),
@@ -149,7 +150,7 @@ shipTable.onRowClicked:Connect(function (row)
 				ui:Expand("HORIZONTAL", ui:Align("RIGHT", buyButton)),
 			}),
 			ModelSpinner.New(ui, def.modelName, currentShipOnSale.skin),
-			ui:Label(l.HYPERDRIVE_FITTED.." "..lcore[def.defaultHyperdrive]):SetFont("SMALL"),
+			ui:Label(l.HYPERDRIVE_FITTED.." "..lcore[def.defaultHyperdrive]):SetFont("SMALL"):SetColor(c),
 			ui:Margin(10, "VERTICAL",
 				ui:Grid(2,1)
 					:SetFont("SMALL")

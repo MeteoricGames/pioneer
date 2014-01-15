@@ -62,9 +62,12 @@ UI::Widget *GetWidget(UI::Context *c, lua_State *l, int idx)
 
 		return w;
 	}
-
-	if (lua_isstring(l, idx))
-		return c->Label(lua_tostring(l, idx));
+	if (lua_isstring(l, idx)) {
+		UI::Label* table_label = c->Label(lua_tostring(l, idx));
+		table_label->SetColor(Color::PARAGON_BLUE);
+		return table_label;
+	}	
+		//return c->Label(lua_tostring(l, idx));
 
 	return 0;
 }

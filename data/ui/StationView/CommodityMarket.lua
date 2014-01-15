@@ -13,6 +13,7 @@ local EquipmentTableWidgets = import("EquipmentTableWidgets")
 local ui = Engine.ui
 
 local l = Lang.GetResource("ui-core")
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local commodityMarket = function (args)
 	local stationTable, shipTable = EquipmentTableWidgets.Pair({
@@ -24,13 +25,13 @@ local commodityMarket = function (args)
 		ui:Grid({48,4,48},1)
 			:SetColumn(0, {
 				ui:VBox():PackEnd({
-					ui:Label(l.AVAILABLE_FOR_PURCHASE):SetFont("HEADING_LARGE"),
+					ui:Label(l.AVAILABLE_FOR_PURCHASE):SetFont("HEADING_LARGE"):SetColor(c),
 					ui:Expand():SetInnerWidget(stationTable),
 				})
 			})
 			:SetColumn(2, {
 				ui:VBox():PackEnd({
-					ui:Label(l.IN_CARGO_HOLD):SetFont("HEADING_LARGE"),
+					ui:Label(l.IN_CARGO_HOLD):SetFont("HEADING_LARGE"):SetColor(c),
 					ui:Expand():SetInnerWidget(shipTable),
 				})
 			})

@@ -34,6 +34,7 @@ SystemView::SystemView()
 
 	Gui::Screen::PushFont("OverlayFont");
 	m_objectLabels = new Gui::LabelSet();
+	m_objectLabels->SetLabelColor(Color::PARAGON_BLUE);
 	Add(m_objectLabels, 0, 0);
 	Gui::Screen::PopFont();
 
@@ -242,14 +243,14 @@ void SystemView::PutBody(const SystemBody *b, const vector3d &offset, const matr
 		const double t0 = Pi::game->GetTime();
 		Orbit playerOrbit = Pi::player->ComputeOrbit();
 		PutOrbit(&playerOrbit, offset, Color::RED, b->GetRadius());
-		PutSelectionBox(offset + playerOrbit.OrbitalPosAtTime(m_time - t0)* double(m_zoom), Color::RED);
+		PutSelectionBox(offset + playerOrbit.OrbitalPosAtTime(m_time - t0)* double(m_zoom), Color::PARAGON_GREEN);
 	}
 
 	if (b->children.size()) {
 		for(std::vector<SystemBody*>::const_iterator kid = b->children.begin(); kid != b->children.end(); ++kid) {
 			if (is_zero_general((*kid)->orbit.GetSemiMajorAxis())) continue;
 			if ((*kid)->orbit.GetSemiMajorAxis() * m_zoom < ROUGH_SIZE_OF_TURD) {
-				PutOrbit(&((*kid)->orbit), offset, Color(0, 255, 0, 255));
+				PutOrbit(&((*kid)->orbit), offset, Color::PARAGON_BLUE);
 			}
 
 			// not using current time yet
