@@ -166,17 +166,17 @@ void SectorView::InitObject()
 	Gui::Button *b = new Gui::SolidButton();
 	b->onClick.connect(sigc::mem_fun(this, &SectorView::GotoCurrentSystem));
 	hbox->PackEnd(b);
-	hbox->PackEnd((new Gui::Label(Lang::CURRENT_SYSTEM))->Color(255, 255, 255));
+	hbox->PackEnd((new Gui::Label(Lang::CURRENT_SYSTEM))->Color(Color::PARAGON_BLUE));
 	systemBox->PackEnd(hbox);
 	hbox = new Gui::HBox();
 	hbox->SetSpacing(5.0f);
-	m_currentSystemLabels.systemName = (new Gui::Label(""))->Color(255, 255, 0);
-	m_currentSystemLabels.distance = (new Gui::Label(""))->Color(255, 0, 0);
+	m_currentSystemLabels.systemName = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_currentSystemLabels.distance = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
 	hbox->PackEnd(m_currentSystemLabels.systemName);
 	hbox->PackEnd(m_currentSystemLabels.distance);
 	systemBox->PackEnd(hbox);
-	m_currentSystemLabels.starType = (new Gui::Label(""))->Color(255, 0, 255);
-	m_currentSystemLabels.shortDesc = (new Gui::Label(""))->Color(255, 0, 255);
+	m_currentSystemLabels.starType = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
+	m_currentSystemLabels.shortDesc = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
 	systemBox->PackEnd(m_currentSystemLabels.starType);
 	systemBox->PackEnd(m_currentSystemLabels.shortDesc);
 	locationsBox->PackEnd(systemBox);
@@ -187,17 +187,17 @@ void SectorView::InitObject()
 	b = new Gui::SolidButton();
 	b->onClick.connect(sigc::mem_fun(this, &SectorView::GotoSelectedSystem));
 	hbox->PackEnd(b);
-	hbox->PackEnd((new Gui::Label(Lang::SELECTED_SYSTEM))->Color(255, 255, 255));
+	hbox->PackEnd((new Gui::Label(Lang::SELECTED_SYSTEM))->Color(Color::PARAGON_BLUE));
 	systemBox->PackEnd(hbox);
 	hbox = new Gui::HBox();
 	hbox->SetSpacing(5.0f);
-	m_selectedSystemLabels.systemName = (new Gui::Label(""))->Color(255, 255, 0);
-	m_selectedSystemLabels.distance = (new Gui::Label(""))->Color(255, 0, 0);
+	m_selectedSystemLabels.systemName = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_selectedSystemLabels.distance = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
 	hbox->PackEnd(m_selectedSystemLabels.systemName);
 	hbox->PackEnd(m_selectedSystemLabels.distance);
 	systemBox->PackEnd(hbox);
-	m_selectedSystemLabels.starType = (new Gui::Label(""))->Color(255, 0, 255);
-	m_selectedSystemLabels.shortDesc = (new Gui::Label(""))->Color(255, 0, 255);
+	m_selectedSystemLabels.starType = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
+	m_selectedSystemLabels.shortDesc = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
 	systemBox->PackEnd(m_selectedSystemLabels.starType);
 	systemBox->PackEnd(m_selectedSystemLabels.shortDesc);
 	locationsBox->PackEnd(systemBox);
@@ -208,19 +208,19 @@ void SectorView::InitObject()
 	b = new Gui::SolidButton();
 	b->onClick.connect(sigc::mem_fun(this, &SectorView::GotoHyperspaceTarget));
 	hbox->PackEnd(b);
-	hbox->PackEnd((new Gui::Label(Lang::HYPERSPACE_TARGET))->Color(255, 255, 255));
-    m_hyperspaceLockLabel = (new Gui::Label(""))->Color(255, 255, 255);
+	hbox->PackEnd((new Gui::Label(Lang::HYPERSPACE_TARGET))->Color(Color::PARAGON_BLUE));
+    m_hyperspaceLockLabel = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
     hbox->PackEnd(m_hyperspaceLockLabel);
 	systemBox->PackEnd(hbox);
 	hbox = new Gui::HBox();
 	hbox->SetSpacing(5.0f);
-	m_targetSystemLabels.systemName = (new Gui::Label(""))->Color(255, 255, 0);
-	m_targetSystemLabels.distance = (new Gui::Label(""))->Color(255, 0, 0);
+	m_targetSystemLabels.systemName = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_targetSystemLabels.distance = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
 	hbox->PackEnd(m_targetSystemLabels.systemName);
 	hbox->PackEnd(m_targetSystemLabels.distance);
 	systemBox->PackEnd(hbox);
-	m_targetSystemLabels.starType = (new Gui::Label(""))->Color(255, 0, 255);
-	m_targetSystemLabels.shortDesc = (new Gui::Label(""))->Color(255, 0, 255);
+	m_targetSystemLabels.starType = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
+	m_targetSystemLabels.shortDesc = (new Gui::Label(""))->Color(Color::PARAGON_BLUE);
 	systemBox->PackEnd(m_targetSystemLabels.starType);
 	systemBox->PackEnd(m_targetSystemLabels.shortDesc);
 	locationsBox->PackEnd(systemBox);
@@ -234,7 +234,7 @@ void SectorView::InitObject()
 	m_drawSystemLegButton = (new Gui::ToggleButton());
 	m_drawSystemLegButton->SetPressed(false); // TODO: replace with var
 	hbox->PackEnd(m_drawSystemLegButton);
-	Gui::Label *label = (new Gui::Label(Lang::DRAW_VERTICAL_LINES))->Color(255, 255, 255);
+	Gui::Label *label = (new Gui::Label(Lang::DRAW_VERTICAL_LINES))->Color(Color::PARAGON_BLUE);
 	hbox->PackEnd(label);
 	filterBox->PackEnd(hbox);
 	// 2.2 Draw planet labels
@@ -243,7 +243,7 @@ void SectorView::InitObject()
 	m_drawOutRangeLabelButton = new Gui::ToggleButton();
 	m_drawOutRangeLabelButton->SetPressed(false); // TODO: replace with var
 	hbox->PackEnd(m_drawOutRangeLabelButton);
-	label = (new Gui::Label(Lang::DRAW_OUT_RANGE_LABELS))->Color(255, 255, 255);
+	label = (new Gui::Label(Lang::DRAW_OUT_RANGE_LABELS))->Color(Color::PARAGON_BLUE);
 	hbox->PackEnd(label);
 	filterBox->PackEnd(hbox);
 

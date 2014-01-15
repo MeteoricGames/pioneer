@@ -18,6 +18,7 @@ public:
 
 	TextEntry *SetText(const std::string &text);
 	const std::string &GetText() const { return m_label->GetText(); }
+	TextEntry *SetColor(const Color &c) { if(m_label) { m_label->SetColor(c); } return this; }
 
 	virtual bool IsSelectable() const { return true; }
 

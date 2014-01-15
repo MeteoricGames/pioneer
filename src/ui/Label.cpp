@@ -31,7 +31,7 @@ void Label::Layout()
 
 void Label::Draw()
 {
-	static const Color disabledColor(204, 204, 204, 255);
+	static const Color disabledColor(163, 163, 163, 255);
 	GetContext()->GetFont(GetFont())->RenderString(m_text.c_str(), 0.0f, 0.0f, IsDisabled() ? disabledColor : m_color);
 }
 

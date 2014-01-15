@@ -13,6 +13,8 @@ local SmartTable = import("ui/SmartTable")
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
 
+local c = {r = 0.0, g = 0.86, b = 1.0}
+
 -- we keep MissionList to remember players preferences
 -- (now it is column he wants to sort by)
 local MissionList 
@@ -21,7 +23,7 @@ local missions = function (tabGroup)
 	local MissionScreen = ui:Expand()
 
 	if #Character.persistent.player.missions == 0 then
-		return MissionScreen:SetInnerWidget( ui:Label(l.NO_MISSIONS) )
+		return MissionScreen:SetInnerWidget( ui:Label(l.NO_MISSIONS):SetColor(c) )
 	end
 
 	local rowspec = {7,8,9,9,5,5,5} -- 7 columns
@@ -68,7 +70,7 @@ local missions = function (tabGroup)
 		-- Format the distance label
 		local playerSystem = Game.system or Game.player:GetHyperspaceTarget()
 		local dist = playerSystem:DistanceTo(mission.location)
-		local distLabel = ui:Label(string.format('%.2f %s', dist, l.LY))
+		local distLabel = ui:Label(string.format('%.2f %s', dist, l.LY)):SetColor(c)
 		local hyperjumpStatus = Game.player:GetHyperspaceDetails(mission.location)
 		if hyperjumpStatus == 'CURRENT_SYSTEM' then
 			distLabel:SetColor({ r = 0.0, g = 1.0, b = 0.2 }) -- green
@@ -84,7 +86,7 @@ local missions = function (tabGroup)
 									  :PackEnd(distLabel)
 		
 		-- Format Due info
-		local dueLabel = ui:Label(Format.Date(mission.due))
+		local dueLabel = ui:Label(Format.Date(mission.due)):SetColor(c)
 		local days = math.max(0, (mission.due - Game.time) / (24*60*60))
 		local daysLabel = ui:Label(string.format(l.D_DAYS_LEFT, days)):SetColor({ r = 1.0, g = 0.0, b = 1.0 }) -- purple
 		local dueBox = ui:VBox(2):PackEnd(dueLabel):PackEnd(daysLabel)
@@ -92,7 +94,7 @@ local missions = function (tabGroup)
 		local moreButton = SmallLabeledButton.New(l.MORE_INFO)
 		moreButton.button.onClick:Connect(function ()
 			MissionScreen:SetInnerWidget(ui:VBox(10)
-				:PackEnd({ui:Label(l.MISSION_DETAILS):SetFont('HEADING_LARGE')})
+				:PackEnd({ui:Label(l.MISSION_DETAILS):SetFont('HEADING_LARGE'):SetColor(c)})
 				:PackEnd((mission:GetClick())(mission)))
 		end)
 

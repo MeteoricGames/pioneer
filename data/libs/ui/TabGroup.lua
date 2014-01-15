@@ -6,6 +6,7 @@ local Engine = import("Engine")
 local normalColor = { r=0.5, g=0.5, b=0.5, a=1.0 }
 local hoverColor  = { r=0.8, g=0.8, b=0.8, a=1.0 }
 local activeColor = { r=1.0, g=1.0, b=1.0, a=1.0 }
+local paragonBlue = { r = 0.0, g = 0.86, b = 1.0 }
 
 local ui = Engine.ui
 
@@ -26,7 +27,7 @@ function TabGroup.New ()
 	}
 
 	self.header    = ui:HBox(10)
-	self.title     = ui:Label(""):SetFont("HEADING_XLARGE")
+	self.title     = ui:Label(""):SetFont("HEADING_XLARGE"):SetColor(paragonBlue)
 	self.titleArea = ui:Expand("HORIZONTAL"):SetInnerWidget(ui:Align("RIGHT"):SetInnerWidget(self.title))
 	self.body      = ui:Expand()
 	self.footer    = ui:Margin(0)

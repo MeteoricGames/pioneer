@@ -7,11 +7,13 @@ local ui = Engine.ui
 
 local InfoGauge = {}
 
+local c = {r = 0.0, g = 0.86, b = 1.0}
+
 function InfoGauge.New (args)
 	args = args or {}
 
 	local formatter = args.formatter or function (v) return string.format("%.2f / 1.00", v) end
-	local label = args.label or ui:Label(formatter(0))
+	local label = args.label or ui:Label(formatter(0)):SetColor(c)
 
 	local warningLevel = args.warningLevel
 	local criticalLevel = args.criticalLevel

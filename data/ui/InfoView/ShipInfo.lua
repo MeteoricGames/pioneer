@@ -12,6 +12,8 @@ local ModelSpinner = import("UI.Game.ModelSpinner")
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
 
+local c = {r = 0.0, g = 0.86, b = 1.0}
+
 local shipInfo = function (args)
 	local shipDef = ShipDef[Game.player.shipId]
 
@@ -46,18 +48,18 @@ local shipInfo = function (args)
 				if count > 1 then
 					if type == "SHIELD_GENERATOR" then
 						table.insert(equipItems,
-							ui:Label(string.interp(l.N_SHIELD_GENERATORS, { quantity = string.format("%d", count) })))
+							ui:Label(string.interp(l.N_SHIELD_GENERATORS, { quantity = string.format("%d", count) })):SetColor(c))
 					elseif type == "PASSENGER_CABIN" then
 						table.insert(equipItems,
-							ui:Label(string.interp(l.N_OCCUPIED_PASSENGER_CABINS, { quantity = string.format("%d", count) })))
+							ui:Label(string.interp(l.N_OCCUPIED_PASSENGER_CABINS, { quantity = string.format("%d", count) })):SetColor(c))
 					elseif type == "UNOCCUPIED_CABIN" then
 						table.insert(equipItems,
-							ui:Label(string.interp(l.N_UNOCCUPIED_PASSENGER_CABINS, { quantity = string.format("%d", count) })))
+							ui:Label(string.interp(l.N_UNOCCUPIED_PASSENGER_CABINS, { quantity = string.format("%d", count) })):SetColor(c))
 					else
-						table.insert(equipItems, ui:Label(et.name))
+						table.insert(equipItems, ui:Label(et.name):SetColor(c))
 					end
 				else
-					table.insert(equipItems, ui:Label(et.name))
+					table.insert(equipItems, ui:Label(et.name):SetColor(c))
 				end
 			end
 		end
@@ -97,13 +99,13 @@ local shipInfo = function (args)
 						{ l.CREW_CABINS..":",  ShipDef[Game.player.shipId].maxCrew },
 					}),
 					"",
-					ui:Label(l.EQUIPMENT):SetFont("HEADING_LARGE"),
+					ui:Label(l.EQUIPMENT):SetFont("HEADING_LARGE"):SetColor(c),
 					ui:Table():AddRows(equipItems),
 				})
 			})
 			:SetColumn(2, {
 				ui:VBox(10)
-					:PackEnd(ui:Label(shipDef.name):SetFont("HEADING_LARGE"))
+					:PackEnd(ui:Label(shipDef.name):SetFont("HEADING_LARGE"):SetColor(c))
 					:PackEnd(ModelSpinner.New(ui, shipDef.modelName, Game.player:GetSkin()))
 			})
 end

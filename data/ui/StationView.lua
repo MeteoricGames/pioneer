@@ -12,6 +12,7 @@ local TabGroup = import("ui/TabGroup")
 local InfoGauge = import("ui/InfoGauge")
 
 local l = Lang.GetResource("ui-core")
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local lobby           = import("StationView/Lobby")
 local bulletinBoard   = import("StationView/BulletinBoard")
@@ -34,12 +35,12 @@ ui.templates.StationView = function (args)
 
 	local player = Game.player
 
-	local cashLabel = ui:NumberLabel("MONEY")
+	local cashLabel = ui:NumberLabel("MONEY"):SetColor(c)
 	cashLabel:Bind("value", player, "cash")
 
 	local cargoGauge = ui:Gauge()
-	local cargoUsedLabel = ui:NumberLabel("INTEGER")
-	local cargoTotalLabel = ui:NumberLabel("MASS_TONNES")
+	local cargoUsedLabel = ui:NumberLabel("INTEGER"):SetColor(c)
+	local cargoTotalLabel = ui:NumberLabel("MASS_TONNES"):SetColor(c)
 	local function cargoUpdate ()
 		cargoGauge:SetUpperValue(player.totalCargo)
 		cargoGauge:SetValue(player.usedCargo)
@@ -51,8 +52,8 @@ ui.templates.StationView = function (args)
 	cargoUpdate()
 
 	local cabinGauge = ui:Gauge()
-	local cabinUsedLabel = ui:NumberLabel("INTEGER")
-	local cabinTotalLabel = ui:NumberLabel("INTEGER")
+	local cabinUsedLabel = ui:NumberLabel("INTEGER"):SetColor(c)
+	local cabinTotalLabel = ui:NumberLabel("INTEGER"):SetColor(c)
 	local function cabinUpdate ()
 		cabinGauge:SetUpperValue(player.totalCabins)
 		cabinGauge:SetValue(player.usedCabins)

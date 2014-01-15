@@ -13,6 +13,7 @@ local SmallLabeledButton = import("ui/SmallLabeledButton")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 -- Anti-abuse feature - this locks out the piloting commands based on a timer.
 -- It knows when the crew were last checked for a piloting skill, and prevents
@@ -41,7 +42,7 @@ local crewRoster = function ()
 	-- The crew will each be tested in turn for suitability, and the first
 	-- to respond well will be tasked with the job.
 	local taskCrew = function ()
-		local feedback = ui:Label('') -- Would prefer MultiLineText
+		local feedback = ui:Label(''):SetColor(c) -- Would prefer MultiLineText
 
 		-- Very local function used by functions in crewTasks
 		local testCrewMember = function (attribute,playerOK)
@@ -160,11 +161,11 @@ local crewRoster = function ()
 		headergrid:SetRow(0,
 		{
 			-- Headers
-			ui:Label(l.NAME_PERSON):SetFont("HEADING_NORMAL"),
-			ui:Label(l.POSITION):SetFont("HEADING_NORMAL"),
-			ui:Label(l.WAGE):SetFont("HEADING_NORMAL"),
-			ui:Label(l.OWED):SetFont("HEADING_NORMAL"),
-			ui:Label(l.NEXT_PAID):SetFont("HEADING_NORMAL"),
+			ui:Label(l.NAME_PERSON):SetFont("HEADING_NORMAL"):SetColor(c),
+			ui:Label(l.POSITION):SetFont("HEADING_NORMAL"):SetColor(c),
+			ui:Label(l.WAGE):SetFont("HEADING_NORMAL"):SetColor(c),
+			ui:Label(l.OWED):SetFont("HEADING_NORMAL"):SetColor(c),
+			ui:Label(l.NEXT_PAID):SetFont("HEADING_NORMAL"):SetColor(c),
 		})
 
 		-- Create a row for each crew member
@@ -181,22 +182,22 @@ local crewRoster = function ()
 			owedTotal = owedTotal + crewOwed
 
 			crewlistbox:PackEnd(ui:Grid(rowspec,1):SetRow(0, {
-				ui:Label(crewMember.name),
-				ui:Label(crewMember.title or l.GENERAL_CREW),
-				ui:Label(Format.Money(crewWage)):SetColor({ r = 0.0, g = 1.0, b = 0.2 }), -- green
-				ui:Label(Format.Money(crewOwed)):SetColor({ r = 1.0, g = 0.0, b = 0.0 }), -- red
-				ui:Label(Format.Date(crewMember.contract and crewMember.contract.payday or 0)),
+				ui:Label(crewMember.name):SetColor(c),
+				ui:Label(crewMember.title or l.GENERAL_CREW):SetColor(c),
+				ui:Label(Format.Money(crewWage)):SetColor(c), 
+				ui:Label(Format.Money(crewOwed)):SetColor(c), 
+				ui:Label(Format.Date(crewMember.contract and crewMember.contract.payday or 0)):SetColor(c),
 				moreButton.widget,
 			}))
 		end
 		crewlistbox:PackEnd(ui:Grid(rowspec,1):SetRow(0, {
-			ui:Label(""), -- first column, empty
-			ui:Label(l.TOTAL):SetFont("HEADING_NORMAL"):SetColor({ r = 1.0, g = 1.0, b = 0.0 }), -- yellow
-			ui:Label(Format.Money(wageTotal)):SetColor({ r = 0.0, g = 1.0, b = 0.2 }), -- green
-			ui:Label(Format.Money(owedTotal)):SetColor({ r = 1.0, g = 0.0, b = 0.0 }), -- red
+			ui:Label(""):SetColor(c), -- first column, empty
+			ui:Label(l.TOTAL):SetFont("HEADING_NORMAL"):SetColor(c), 
+			ui:Label(Format.Money(wageTotal)):SetColor(c),
+			ui:Label(Format.Money(owedTotal)):SetColor(c),
 		}))
 
-		local taskCrewButton = ui:Button():SetInnerWidget(ui:Label(l.GIVE_ORDERS_TO_CREW))
+		local taskCrewButton = ui:Button():SetInnerWidget(ui:Label(l.GIVE_ORDERS_TO_CREW):SetColor(c))
 		taskCrewButton.onClick:Connect(taskCrew)
 
 		return ui:VBox(10):PackEnd({
@@ -237,30 +238,30 @@ local crewRoster = function ()
 		-- Set left hand side of page: General information about the Character
 		:SetColumn(0, {
 			ui:VBox(20):PackEnd({
-				ui:Label(crewMember.name):SetFont("HEADING_LARGE"),
-				ui:Label(l.QUALIFICATION_SCORES):SetFont("HEADING_NORMAL"),
+				ui:Label(crewMember.name):SetFont("HEADING_LARGE"):SetColor(c),
+				ui:Label(l.QUALIFICATION_SCORES):SetFont("HEADING_NORMAL"):SetColor(c),
 				-- Table of crew scores:
 				ui:Grid(2,1)
 					:SetColumn(0, {
 						ui:VBox():PackEnd({
-							ui:Label(l.ENGINEERING),
-							ui:Label(l.PILOTING),
-							ui:Label(l.NAVIGATION),
-							ui:Label(l.SENSORS),
+							ui:Label(l.ENGINEERING):SetColor(c),
+							ui:Label(l.PILOTING):SetColor(c),
+							ui:Label(l.NAVIGATION):SetColor(c),
+							ui:Label(l.SENSORS):SetColor(c),
 						})
 					})
 					:SetColumn(1, {
 						ui:VBox():PackEnd({
-							ui:Label(crewMember.engineering),
-							ui:Label(crewMember.piloting),
-							ui:Label(crewMember.navigation),
-							ui:Label(crewMember.sensors),
+							ui:Label(crewMember.engineering):SetColor(c),
+							ui:Label(crewMember.piloting):SetColor(c),
+							ui:Label(crewMember.navigation):SetColor(c),
+							ui:Label(crewMember.sensors):SetColor(c),
 						})
 					}),
 				-- Things we can do with this crew member
 				--  (as long as they're not the player!)
 				-- returning nil if crewMember is player
-				not crewMember.player and ui:Label(l.EMPLOYMENT):SetFont("HEADING_NORMAL") or nil,
+				not crewMember.player and ui:Label(l.EMPLOYMENT):SetFont("HEADING_NORMAL"):SetColor(c) or nil,
 				not crewMember.player and ui:Grid(2,1)
 					:SetColumn(0, {
 						ui:VBox():PackEnd({
