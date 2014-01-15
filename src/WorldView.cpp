@@ -1028,7 +1028,7 @@ void WorldView::Update()
 	// show state-appropriate buttons
 	RefreshButtonStateAndVisibility();
 
-	if (Pi::MouseButtonState(SDL_BUTTON_RIGHT)) {
+	if(Pi::MouseButtonState(SDL_BUTTON_RIGHT) || Pi::player->GetPlayerController()->GetMouseFlightMode()) {
 		// when controlling your ship with the mouse you don't want to pick targets
 		m_bodyLabels->SetLabelsClickable(false);
 	} else {

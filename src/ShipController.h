@@ -90,6 +90,8 @@ public:
 
 	sigc::signal<void> onRotationDampingChanged;
 
+	bool GetMouseFlightMode() const { return m_mouseFlightToggle; }
+
 private:
 	bool IsAnyAngularThrusterKeyDown();
 	bool IsAnyLinearThrusterKeyDown();
