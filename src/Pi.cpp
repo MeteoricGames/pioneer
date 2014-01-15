@@ -445,7 +445,38 @@ void Pi::Init()
 	UI::Label *label = Pi::ui->Label("");
 	label->SetFont(UI::Widget::FONT_HEADING_NORMAL);
 	UI::Gauge *gauge = Pi::ui->Gauge();
-	Pi::ui->GetTopLayer()->SetInnerWidget(
+
+	// Background layer
+	UI::Layer *background_layer = Pi::ui->NewLayer();
+	// Parse all images
+	FileSystem::FileSourceFS fs(FileSystem::GetDataDir());
+	FileSystem::FileEnumerator fe(fs, "images");
+	std::vector<std::string> bg_files;
+	while(!fe.Finished()) {
+		const FileSystem::FileInfo& fi = fe.Current();
+		if(static_cast<int>(fi.GetType()) == 1) {
+			const std::string& fname = fi.GetName();
+			unsigned int r = fname.rfind(".png");
+			if(r != std::string::npos && r == fname.size() - 4) {
+				bg_files.push_back(fname);
+			}
+		}
+		fe.Next();
+	}
+	if(bg_files.size() > 0) {
+		srand(time(nullptr));
+		background_layer->SetInnerWidget(
+			Pi::ui->Align(UI::Align::MIDDLE)->SetInnerWidget(
+				Pi::ui->Expand()->SetInnerWidget(
+					Pi::ui->Image("images/" + bg_files[rand() % bg_files.size()], UI::Image::PRESERVE_ASPECT)
+				)
+			)
+		);
+	}
+
+	// Gauge layer
+	UI::Layer *gauge_layer = Pi::ui->NewLayer();
+	gauge_layer->SetInnerWidget(
 		Pi::ui->Margin(10)->SetInnerWidget(
 			Pi::ui->Expand()->SetInnerWidget(
 			Pi::ui->Align(UI::Align::BOTTOM)->SetInnerWidget(
@@ -507,6 +538,8 @@ void Pi::Init()
 		if (config->Int("MusicMuted")) GetMusicPlayer().SetEnabled(false);
 	}
 	draw_progress(gauge, label, 1.0f);
+
+	Pi::ui->DropAllLayers();
 
 	OS::NotifyLoadEnd();
 
