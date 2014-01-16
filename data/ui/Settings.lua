@@ -12,13 +12,14 @@ local AxisBindingCapture = import("UI.Game.AxisBindingCapture")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local optionCheckBox = function (getter, setter, caption)
 	local cb = ui:CheckBox()
 	local initial = getter()
 	cb:SetState(initial)
 	cb.onClick:Connect(function () setter(cb.isChecked); end)
-	return ui:HBox(5):PackEnd({cb, ui:Label(caption)})
+	return ui:HBox(5):PackEnd({cb, ui:Label(caption):SetColor(c)})
 end
 
 local optionListOrDropDown = function (widget, getter, setter, settingCaption, captions, values)
@@ -36,7 +37,7 @@ local optionListOrDropDown = function (widget, getter, setter, settingCaption, c
 	list.onOptionSelected:Connect(function ()
 		setter(values[list.selectedIndex])
 	end)
-	return ui:VBox(5):PackEnd({ui:Label(settingCaption), list})
+	return ui:VBox(5):PackEnd({ui:Label(settingCaption):SetColor(c), list})
 end
 
 local optionDropDown = function (getter, setter, settingCaption, captions, values)
@@ -120,7 +121,7 @@ ui.templates.Settings = function (args)
 
 		return ui:Grid({1,1}, 1)
 			:SetCell(0,0, ui:Margin(5, 'ALL', ui:VBox(5):PackEnd({
-				ui:Label(l.VIDEO_CONFIGURATION_RESTART_GAME_TO_APPLY),
+				ui:Label(l.VIDEO_CONFIGURATION_RESTART_GAME_TO_APPLY):SetColor(c),
 				modeDropDown,
 				aaDropDown,
 				fullScreenCheckBox,
@@ -143,10 +144,10 @@ ui.templates.Settings = function (args)
 		local volumeSlider = function (caption, getter, setter)
 			local initial_value = getter()
 			local slider = ui:HSlider()
-			local label = ui:Label(caption .. " " .. math.floor(initial_value * 100))
+			local label = ui:Label(caption .. " " .. math.floor(initial_value * 100)):SetColor(c)
 			slider:SetValue(initial_value)
 			slider.onValueChanged:Connect(function (new_value)
-					label:SetText(caption .. " " .. math.floor(new_value * 100))
+					label:SetText(caption .. " " .. math.floor(new_value * 100)):SetColor(c)
 					setter(new_value)
 				end)
 			return ui:VBox():PackEnd({label, slider})
@@ -172,7 +173,7 @@ ui.templates.Settings = function (args)
 	end
 
 	local captureDialog = function (captureWidget, label, onOk)
-		local captureLabel = ui:Label(l.PRESS_A_KEY_OR_CONTROLLER_BUTTON)
+		local captureLabel = ui:Label(l.PRESS_A_KEY_OR_CONTROLLER_BUTTON):SetColor(c)
 		local capture = captureWidget.New(ui)
 		local curBinding, curDescription
 
@@ -183,21 +184,21 @@ ui.templates.Settings = function (args)
 			curDescription = capture.bindingDescription
 		end)
 
-		local okButton = ui:Button(ui:Label(l.OK):SetFont("HEADING_NORMAL"))
+		local okButton = ui:Button(ui:Label(l.OK):SetFont("HEADING_NORMAL"):SetColor(c))
 		okButton.onClick:Connect(function()
 			print('Capture: ' .. (curBinding or 'nil') .. ' (' .. (curDescription or 'nil') .. ')')
 			onOk(curBinding, curDescription)
 			ui:DropLayer()
 		end)
 
-		local clearButton = ui:Button(ui:Label(l.CLEAR):SetFont("HEADING_NORMAL"))
+		local clearButton = ui:Button(ui:Label(l.CLEAR):SetFont("HEADING_NORMAL"):SetColor(c))
 		clearButton.onClick:Connect(function()
 			curBinding = nil
 			curDescription = nil
 			captureLabel:SetText('')
 		end)
 
-		local cancelButton = ui:Button(ui:Label(l.CANCEL):SetFont("HEADING_NORMAL"))
+		local cancelButton = ui:Button(ui:Label(l.CANCEL):SetFont("HEADING_NORMAL"):SetColor(c))
 		cancelButton.onClick:Connect(function()
 			ui:DropLayer()
 		end)
@@ -207,8 +208,8 @@ ui.templates.Settings = function (args)
 				ui:Align("MIDDLE",
 					ui:Background(
 						ui:VBox(10)
-							:PackEnd(ui:Label(l.CHANGE_BINDING):SetFont("HEADING_NORMAL"))
-							:PackEnd(ui:Label(label))
+							:PackEnd(ui:Label(l.CHANGE_BINDING):SetFont("HEADING_NORMAL"):SetColor(c))
+							:PackEnd(ui:Label(label):SetColor(c))
 							:PackEnd(ui:Align("MIDDLE", capture))
 							:PackEnd(ui:HBox(5):PackEnd({okButton,clearButton,cancelButton}))
 					)
@@ -230,7 +231,7 @@ ui.templates.Settings = function (args)
 		local descriptions = { info.bindingDescription1, info.bindingDescription2 }
 		local buttons = { SmallLabeledButton.New(''), SmallLabeledButton.New('') }
 
-		grid:SetCell(0, row, ui:Label(info.label))
+		grid:SetCell(0, row, ui:Label(info.label):SetColor(c))
 		grid:SetCell(1, row, buttons[1])
 
 		local updateUI = function ()
@@ -278,7 +279,7 @@ ui.templates.Settings = function (args)
 	local initAxisBindingControls = function (grid, row, info)
 		local button = SmallLabeledButton.New(info.bindingDescription1 or '')
 
-		grid:SetCell(0, row, ui:Label(info.label))
+		grid:SetCell(0, row, ui:Label(info.label):SetColor(c))
 		grid:SetCell(1, row, button)
 		grid:ClearCell(2, row)
 
@@ -298,16 +299,16 @@ ui.templates.Settings = function (args)
 		}))
 
 		local box = ui:VBox()
-		box:PackEnd(ui:Label(l.CONTROL_OPTIONS):SetFont('HEADING_LARGE'))
+		box:PackEnd(ui:Label(l.CONTROL_OPTIONS):SetFont('HEADING_LARGE'):SetColor(c))
 		box:PackEnd(options)
 
 		local pages = Engine.GetKeyBindings()
 		for page_idx = 1, #pages do
 			local page = pages[page_idx]
-			box:PackEnd(ui:Label(page.label):SetFont('HEADING_LARGE'))
+			box:PackEnd(ui:Label(page.label):SetFont('HEADING_LARGE'):SetColor(c))
 			for group_idx = 1, #page do
 				local group = page[group_idx]
-				box:PackEnd(ui:Margin(10, 'LEFT', ui:Label(group.label):SetFont('HEADING_NORMAL')))
+				box:PackEnd(ui:Margin(10, 'LEFT', ui:Label(group.label):SetFont('HEADING_NORMAL'):SetColor(c)))
 				local grid = ui:Grid(3, #group)
 				-- grid columns: Action, Binding 1, Binding 2
 				for i = 1, #group do
@@ -342,7 +343,7 @@ ui.templates.Settings = function (args)
 	do
 		local items = args.closeButtons
 		for i = 1, #items do
-			local btn = ui:Button():SetInnerWidget(ui:Label(items[i].text))
+			local btn = ui:Button():SetInnerWidget(ui:Label(items[i].text):SetColor(c))
 			btn.onClick:Connect(items[i].onClick)
 			close_buttons[i] = btn
 		end

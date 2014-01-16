@@ -23,6 +23,7 @@ DropDown::DropDown(Context *context) : Container(context), m_popupWantToggle(fal
 
 	m_container = c->Background();
 	m_label = c->Label("");
+	m_label->SetColor(Color::PARAGON_BLUE);
 	m_icon = c->Icon("ArrowDown");
 	m_icon->SetColor(normalColor);
 	m_container->SetInnerWidget(

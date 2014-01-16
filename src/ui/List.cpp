@@ -35,7 +35,9 @@ List *List::AddOption(const std::string &text)
 	int index = m_optionBackgrounds.size();
 
 	ColorBackground *background = c->ColorBackground(Color(0,0,0, m_selected == index ? c->GetSkin().AlphaSelect_ub() : c->GetSkin().AlphaNormal_ub()));
-	vbox->PackEnd(background->SetInnerWidget(c->Label(text)));
+	UI::Label *label = c->Label(text);
+	label->SetColor(Color::PARAGON_BLUE);
+	vbox->PackEnd(background->SetInnerWidget(label));
 
 	background->onMouseOver.connect(sigc::bind(sigc::mem_fun(this, &List::HandleOptionMouseOver), index));
 	background->onMouseOut.connect(sigc::bind(sigc::mem_fun(this, &List::HandleOptionMouseOut), index));
