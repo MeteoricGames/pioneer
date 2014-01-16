@@ -444,6 +444,7 @@ void Pi::Init()
 	UI::Box *box = Pi::ui->VBox(5);
 	UI::Label *label = Pi::ui->Label("");
 	label->SetFont(UI::Widget::FONT_HEADING_NORMAL);
+	label->SetColor(Color::PARAGON_BLUE);
 	UI::Gauge *gauge = Pi::ui->Gauge();
 
 	// Background layer
