@@ -11,6 +11,7 @@ local ErrorScreen = import("ErrorScreen")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local setupPlayerShip = function ()
 	Game.player:SetShipType("personal_skiff")
@@ -66,7 +67,7 @@ local buttonDefs = {
 local buttonSet = {}
 for i = 1,#buttonDefs do
 	local def = buttonDefs[i]
-	local button = ui:Button(ui:HBox():PackEnd(ui:Label(def[1])))
+	local button = ui:Button(ui:HBox():PackEnd(ui:Label(def[1]):SetColor(c)))
 	button.onClick:Connect(def[2])
 	if i < 10 then button:AddShortcut(i) end
 	if i == 10 then button:AddShortcut("0") end
@@ -100,7 +101,7 @@ local menu =
 				)
 				:SetCell(2, 0,
 					ui:Align("RIGHT",
-						ui:Label("(build: "..Engine.version..")"):SetFont("HEADING_XSMALL")
+						ui:Label("(build: "..Engine.version..")"):SetFont("HEADING_XSMALL"):SetColor(c)
 					)
 				)
 		})
