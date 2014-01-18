@@ -55,6 +55,7 @@ private:
 	void OnChangeInfoView(Gui::MultiStateImageButton *b);
 	void OnClickTimeaccel(Game::TimeAccel val);
 	void OnClickComms(Gui::MultiStateImageButton *b);
+	void OnClickCommView();
 	void OnDockingClearanceExpired(const SpaceStation *);
 	void OnClickRotationDamping(Gui::MultiStateImageButton *b);
 

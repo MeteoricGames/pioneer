@@ -614,6 +614,7 @@ void Game::CreateViews()
 	Pi::systemInfoView = new SystemInfoView();
 	Pi::spaceStationView = new UIView("StationView");
 	Pi::infoView = new UIView("InfoView");
+	Pi::commView = new UIView("CommView");
 	Pi::deathView = new DeathView();
 	Pi::settingsView = new UIView("SettingsInGame");
 
@@ -655,6 +656,7 @@ void Game::LoadViews(Serializer::Reader &rd)
 	Pi::systemInfoView = new SystemInfoView();
 	Pi::spaceStationView = new UIView("StationView");
 	Pi::infoView = new UIView("InfoView");
+	Pi::commView = new UIView("CommView");
 	Pi::deathView = new DeathView();
 	Pi::settingsView = new UIView("SettingsInGame");
 
@@ -683,6 +685,7 @@ void Game::DestroyViews()
 	delete Pi::settingsView;
 	delete Pi::deathView;
 	delete Pi::infoView;
+	delete Pi::commView;
 	delete Pi::spaceStationView;
 	delete Pi::systemInfoView;
 	delete Pi::systemView;
@@ -695,6 +698,7 @@ void Game::DestroyViews()
 	Pi::settingsView = 0;
 	Pi::deathView = 0;
 	Pi::infoView = 0;
+	Pi::commView = 0;
 	Pi::spaceStationView = 0;
 	Pi::systemInfoView = 0;
 	Pi::systemView = 0;

@@ -161,6 +161,7 @@ public:
 	static DeathView *deathView;
 	static UIView *spaceStationView;
 	static UIView *infoView;
+	static UIView *commView;
 	static LuaConsole *luaConsole;
 	static ShipCpanel *cpan;
 	static Sound::MusicPlayer &GetMusicPlayer() { return musicPlayer; }
