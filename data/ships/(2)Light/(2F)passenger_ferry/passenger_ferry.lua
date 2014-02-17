@@ -8,11 +8,11 @@ define_ship {
 	model='passenger_ferry',
 	forward_thrust = 202e5,
 	reverse_thrust = 202e5,
-	up_thrust = 66e5,
-	down_thrust = 66e5,
-	left_thrust = 66e5,
-	right_thrust = 66e5,
-	angular_thrust = 660e5,
+	up_thrust = 2020e5,
+	down_thrust = 2020e5,
+	left_thrust = 2020e5,
+	right_thrust = 2020e5,
+	angular_thrust = 75e5,
 	max_cargo = 120,
 	max_missile = 1,
 	max_laser = 0,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 57273e3,
 	price = 500000,
 	hyperdrive_class = 3,
+	-- Paragon Flight System
+    max_maneuver_speed = 500,
 }

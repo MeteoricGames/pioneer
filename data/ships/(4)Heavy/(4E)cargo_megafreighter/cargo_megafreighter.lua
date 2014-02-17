@@ -9,11 +9,11 @@ define_ship {
 	model='cargo_megafreighter',
 	forward_thrust = 427180e5,
 	reverse_thrust = 427180e5,
-	up_thrust = 180000e5,
-	down_thrust = 180000e5,
-	left_thrust = 180000e5,
-	right_thrust = 180000e5,
-	angular_thrust = 1800000e5,
+	up_thrust = 4271800e5,
+	down_thrust = 4271800e5,
+	left_thrust = 4271800e5,
+	right_thrust = 4271800e5,
+	angular_thrust = 4271800e5,
 	max_cargo = 256308,
 	max_laser = 0,
 	max_missile = 0,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 55123e3,
 	price = 0,
 	hyperdrive_class = 20,
+	-- Paragon Flight System
+    max_maneuver_speed = 100,
 }

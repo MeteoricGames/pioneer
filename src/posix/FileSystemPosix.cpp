@@ -12,8 +12,8 @@
 #include <unistd.h>
 
 // on unix this is set from configure
-#ifndef PIONEER_DATA_DIR
-#define PIONEER_DATA_DIR "data"
+#ifndef PARAGON_DATA_DIR
+#define PARAGON_DATA_DIR "data"
 #endif
 
 #ifdef _XCODE
@@ -73,12 +73,12 @@ namespace FileSystem {
         {
             path = appbundlepath;
             path += '/';
-            path += PIONEER_DATA_DIR;
+            path += PARAGON_DATA_DIR;
         }
         CFRelease(resourcesURL);
         return path;
 #else
-        return absolute_path(std::string(PIONEER_DATA_DIR));
+        return absolute_path(std::string(PARAGON_DATA_DIR));
 #endif
     }
 

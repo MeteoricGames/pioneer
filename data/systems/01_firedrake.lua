@@ -3,8 +3,8 @@
 
 local s = CustomSystem:new('Firedrake', { 'STAR_K' })
 	:govtype('CISSOCDEM')
-	:short_desc('First off-earth colony. Industrial world with indigenous life.')
-	:long_desc([[Lying out beyond the Istrian Marches, Firedrake is a low population system, mainly concerned witht he mining and processing of rare Earths. Relatively prosperous, Firedrake played a leading role in the formation of the Mantle League. A key resource centre in this part of space, it is heavily garrisoned against possible incursions by Union forces in the event of all out war.]])
+	:short_desc('Remote colony with large amounts of heavy industry')
+	:long_desc([[A remote heavy industry and mining colony on the far edges of the western territories, Firedrake is a local centre of commerce in this remote part of American space.]])
 
 
 local epserid = CustomSystemBody:new('Firedrake', 'STAR_K')

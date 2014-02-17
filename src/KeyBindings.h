@@ -112,6 +112,7 @@ namespace KeyBindings {
 
 	void InitBindings();
 	void UpdateBindings();
+	void ResetBindingsToDefault();
 
 	void DispatchSDLEvent(const SDL_Event *event);
 

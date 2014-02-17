@@ -419,7 +419,30 @@ void DispatchSDLEvent(const SDL_Event *event) {
 	}
 }
 
+// Key bindings
+struct SDefaultKeyBinding {
+	KeyAction keyAction;
+	std::string bindName;
+	Uint32 defaultKey1;
+	Uint32 defaultKey2;
+};
+struct SDefaultAxisBinding {
+	AxisBinding axisBinding;
+	std::string bindName;
+	std::string defaultAxis;
+};
+std::vector<SDefaultKeyBinding> vDefaultKeyBindings;
+std::vector<SDefaultAxisBinding> vDefaultAxisBindings;
+
 void InitKeyBinding(KeyAction &kb, const std::string &bindName, Uint32 defaultKey1, Uint32 defaultKey2) {
+	// Add to default bindings
+	SDefaultKeyBinding dkb;
+	dkb.keyAction = kb;
+	dkb.bindName = bindName;
+	dkb.defaultKey1 = defaultKey1;
+	dkb.defaultKey2 = defaultKey2;
+	vDefaultKeyBindings.push_back(dkb);
+	// Process
 	std::string keyName = Pi::config->String(bindName.c_str());
 	if (keyName.length() == 0) {
 		if (defaultKey1 && defaultKey2) {
@@ -436,6 +459,13 @@ void InitKeyBinding(KeyAction &kb, const std::string &bindName, Uint32 defaultKe
 }
 
 void InitAxisBinding(AxisBinding &ab, const std::string &bindName, const std::string &defaultAxis) {
+	// Add to default bindings
+	SDefaultAxisBinding dab;
+	dab.axisBinding = ab;
+	dab.bindName = bindName;
+	dab.defaultAxis = defaultAxis;
+	vDefaultAxisBindings.push_back(dab);
+	// Process
 	std::string axisName = Pi::config->String(bindName.c_str());
 	if (axisName.length() == 0) {
 		axisName = defaultAxis;
@@ -460,6 +490,30 @@ void UpdateBindings()
 
 void InitBindings()
 {
+	UpdateBindings();
+	Pi::config->Save();
+}
+
+void ResetBindingsToDefault()
+{
+	std::string name;
+	for(unsigned int i = 0; i < vDefaultKeyBindings.size(); ++i) {
+		const SDefaultKeyBinding& d = vDefaultKeyBindings[i];
+		if (d.defaultKey1 && d.defaultKey2) {
+			name = stringf("Key%0{u},Key%1{u}", d.defaultKey1, d.defaultKey2);
+		} else if (d.defaultKey1 || d.defaultKey2) {
+			Uint32 k = (d.defaultKey1 | d.defaultKey2); // only one of them is non-zero, so this gets the non-zero value
+			name = stringf("Key%0{u}", k);
+		} else { 
+			continue; 
+		}		
+		Pi::config->SetString(d.bindName.c_str(), name.c_str());
+	}
+	for(unsigned int i = 0; i < vDefaultAxisBindings.size(); ++i) {
+		const SDefaultAxisBinding& d = vDefaultAxisBindings[i];
+		name = d.defaultAxis;
+		Pi::config->SetString(d.bindName.c_str(), d.defaultAxis.c_str());
+	}
 	UpdateBindings();
 	Pi::config->Save();
 }

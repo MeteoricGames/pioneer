@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>CB8F2ADB-9F55-45D1-AC2A-281DA71E470F</string>
+	<key>IDESourceControlProjectName</key>
+	<string>paragon</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>FC4EAA04-C24F-458D-9FFE-7E903C758B32</key>
+		<string>https://github.com/ParagonDevelopmentTeam/paragon.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>osx/paragon.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>FC4EAA04-C24F-458D-9FFE-7E903C758B32</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/ParagonDevelopmentTeam/paragon.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>FC4EAA04-C24F-458D-9FFE-7E903C758B32</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FC4EAA04-C24F-458D-9FFE-7E903C758B32</string>
+			<key>IDESourceControlWCCName</key>
+			<string>paragon</string>
+		</dict>
+	</array>
+</dict>
+</plist>

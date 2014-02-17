@@ -8,10 +8,10 @@ define_ship {
 	model = 'military_fighter',
 	forward_thrust = 16e5,
 	reverse_thrust = 16e5,
-	up_thrust = 8e5,
-	down_thrust = 8e5,
-	left_thrust = 8e5,
-	right_thrust = 8e5,
+	up_thrust = 160e5,
+	down_thrust = 160e5,
+	left_thrust = 160e5,
+	right_thrust = 160e5,
 	angular_thrust = 80e5,
 	max_cargo = 9,
 	max_missile = 8,
@@ -25,6 +25,8 @@ define_ship {
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 120000e3,
-	price = 1,
+	price = 0,
 	hyperdrive_class = 0,
+	-- Paragon Flight System
+    max_maneuver_speed = 1000,
 }

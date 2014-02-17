@@ -11,6 +11,7 @@
 namespace Graphics {
 	class Renderer;
 	class PostProcess;
+	class RenderTarget;
 
 	class PostProcessing
 	{
@@ -33,10 +34,10 @@ namespace Graphics {
 		void Init();
 		
 		std::unique_ptr<Material> mtrlFullscreenQuad;
-		unsigned int uScreenQuadBufferId;
+		unsigned int uScreenQuadBufferId;		
+		Renderer* mRenderer;
 		RenderTarget* rtDevice;
 		RenderTarget* rtMain;
-		Renderer* mRenderer;
 		bool bPerformPostProcessing;
 	};
 }

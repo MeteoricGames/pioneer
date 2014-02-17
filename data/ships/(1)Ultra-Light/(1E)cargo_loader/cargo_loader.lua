@@ -8,11 +8,11 @@ define_ship {
 	model='cargo_loader',
 	forward_thrust = 120e5,
 	reverse_thrust = 120e5,
-	up_thrust = 40e5,
-	down_thrust = 40e5,
-	left_thrust = 40e5,
-	right_thrust = 40e5,
-	angular_thrust = 400e5,
+	up_thrust = 1200e5,
+	down_thrust = 1200e5,
+	left_thrust = 1200e5,
+	right_thrust = 1200e5,
+	angular_thrust = 30e5,
 	max_cargo = 120,
 	max_laser = 0,
 	max_missile = 0,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 80000e3,
 	price = 160000,
 	hyperdrive_class = 3,
+	-- Paragon Flight System
+    max_maneuver_speed = 450,
 }

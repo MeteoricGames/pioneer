@@ -8,11 +8,11 @@ define_ship {
 	model='mining_pod',
 	forward_thrust = 21e5,
 	reverse_thrust = 21e5,
-	up_thrust = 7e5,
-	down_thrust = 7e5,
-	left_thrust = 7e5,
-	right_thrust = 7e5,
-	angular_thrust = 70e5,
+	up_thrust = 210e5,
+	down_thrust = 210e5,
+	left_thrust = 210e5,
+	right_thrust = 210e5,
+	angular_thrust = 2e5,
 	max_cargo = 21,
 	max_laser = 0,
 	max_missile = 0,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 80000e3,
 	price = 150000,
 	hyperdrive_class = 1,
+	-- Paragon Flight System
+    max_maneuver_speed = 500,
 }

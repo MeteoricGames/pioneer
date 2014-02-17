@@ -403,6 +403,14 @@
       "description" : "",
       "message" : "Inactive"
    },
+   "RESET_ALL_TO_DEFAULT" : {
+	  "description" : "",
+	  "message" : "Reset all to default"
+   },
+   "RESET_CONTROLS" : {
+	  "descripton" : "",
+	  "message" : "Reset controls"
+   },
    "INVERT_MOUSE_Y" : {
       "description" : "",
       "message" : "Invert Mouse Y"
@@ -829,7 +837,7 @@
    },
    "START_AT_NEW_HOPE" : {
       "description" : "",
-      "message" : "Start at Firedrake"
+      "message" : "New Game"
    },
    "STATION_MANAGER" : {
       "description" : "",

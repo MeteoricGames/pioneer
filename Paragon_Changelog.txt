@@ -81,3 +81,26 @@ Alpha 3
 * Persistent nebulas appear on a per sector basis
 * add support for formation flying
 
+Alpha 4
+
+*Large numbers of new ships
+*Added Cockpits
+*Added shader support
+*Added Bloom Shader
+*New atmospheric Fog Shader
+*New in-game HUD
+*Improvements to user interface screens
+*New GUI Icons
+*Re-textured older ships
+*Singificantly improved autopilot and transit drive
+*Ship speed limits
+*Added Nebula backgrounds set on a regional basis
+*Added proper mouse flight support
+*Space stations now cast shadows
+*New city generation based on planet size, atmosphere and population
+*Mac compatibility restored
+*New jump drives
+*Much much more!
+
+
+

@@ -13,9 +13,12 @@ MeterBar::MeterBar(float width, const char *label, const ::Color &graphCol)
 	m_requestedWidth = width;
 	m_barValue = 0;
 	m_barColor = graphCol;
+	Gui::Screen::PushFont("OverlayFont");
 	m_label = new Gui::Label(label);
+	m_label->Color(Color::PARAGON_GREEN);
 	Add(m_label, METERBAR_PADDING, METERBAR_PADDING + METERBAR_BAR_HEIGHT);
 	m_label->Show();
+	Gui::Screen::PopFont();
 }
 
 void MeterBar::Draw()

@@ -45,19 +45,15 @@ static char  **gArgv;
 {
     if ([[sender title] isEqualToString:@"Homepage"])
     {
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://pioneerspacesim.net/"]];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://paragongame.com/"]];
     }
     else if ([[sender title] isEqualToString:@"Issue Tracker"])
     {
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/pioneerspacesim/pioneer/issues"]];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/ParagonDevelopmentTeam/pioneer/issues"]];
     }
     else if ([[sender title] isEqualToString:@"pioneer Forums"])
     {
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://pioneerspacesim.net/forum"]];
-    }
-    else if ([[sender title] isEqualToString:@"Chat with the dev team"])
-    {
-        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://pioneerspacesim.net/irc"]];
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://forum.paragongame.com/"]];
     }
 }
 
@@ -66,7 +62,7 @@ static char  **gArgv;
     NSDictionary *options;
     NSImage *img;
 
-    img = [NSImage imageNamed: @"pioneer-logo.icns"];
+    img = [NSImage imageNamed: @"paragon-logo.icns"];
     options = [NSDictionary dictionaryWithObjectsAndKeys:
                img, @"ApplicationIcon",
                @"Copyright (C) 2011 - See AUTHORS.txt", @"Copyright",
