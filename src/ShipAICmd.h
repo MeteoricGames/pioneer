@@ -114,6 +114,7 @@ public:
 	AICmdFlyTo(Ship *ship, Frame *targframe, const vector3d &posoff, double endvel, bool tangent);
 	AICmdFlyTo(Ship *ship, Body *target);
 	AICmdFlyTo(Ship *ship, Body *target, double dist);
+	AICmdFlyTo(Ship *ship, Body *target, float speed);
 	virtual ~AICmdFlyTo();
 
 	virtual void GetStatusText(char *str) {
@@ -134,6 +135,7 @@ public:
 		wr.Double(m_endvel);
 		wr.Bool(m_tangent);
 		wr.Int32(m_state);
+		wr.Double(m_speed);
 	}
 	AICmdFlyTo(Serializer::Reader &rd) : AICommand(rd, CMD_FLYTO) {
 		m_targetIndex = rd.Int32();
@@ -143,6 +145,7 @@ public:
 		m_endvel = rd.Double();
 		m_tangent = rd.Bool();
 		m_state = rd.Int32();
+		m_speed = rd.Double();
 	}
 	virtual void PostLoadFixup(Space *space) {
 		AICommand::PostLoadFixup(space);
@@ -158,6 +161,7 @@ public:
 private:
 	Body *m_target;		// target for vicinity. Either this or targframe is 0
 	double m_dist;		// vicinity distance
+	double m_speed;		// max speed for use in convois.
 	Frame *m_targframe;	// target frame for waypoint
 	vector3d m_posoff;	// offset in target frame
 	double m_endvel;	// target speed in direction of motion at end of path, positive only

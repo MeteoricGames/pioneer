@@ -1198,6 +1198,26 @@ static int l_ship_ai_fly_to_close(lua_State *l)
 	return 0;
 }
 
+//XXX Docs
+static int l_ship_ai_fly_to_maxspeed(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	if (s->GetFlightState() == Ship::HYPERSPACE)
+		return luaL_error(l, "Ship:AIFlyToMaxSpeed() cannot be called on a ship in hyperspace");
+	Body *target = LuaObject<Body>::CheckFromLua(2);
+	double speed = 100;
+	if (lua_isnumber(l, 3)) {
+		speed = double(luaL_checknumber(l, 3));
+		if (speed < 0.0f ) {
+			pi_lua_warn(l,
+				"argument out of range: Ship{%s}:dist(%g)",
+				s->GetLabel().c_str(), speed);
+		}
+	}
+	s->AIFlyTo(target,(float)speed);
+	return 0;
+}
+
 /*
  * Method: AIFlyFormation
  *
@@ -1461,6 +1481,7 @@ template <> void LuaObject<Ship>::RegisterClass()
 		{ "AIKamikaze",         l_ship_ai_kamikaze           },
 		{ "AIFire",				l_ship_ai_fire	             },
 		{ "AIFlyTo",            l_ship_ai_fly_to             },
+		{ "AIFlyToMaxSpeed",    l_ship_ai_fly_to_maxspeed    },
 		{ "AIFlyToClose",       l_ship_ai_fly_to_close       },
 		{ "AIFlyFormation",     l_ship_ai_fly_formation      },
 		{ "AIDockWith",         l_ship_ai_dock_with          },

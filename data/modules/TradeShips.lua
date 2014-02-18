@@ -352,6 +352,25 @@ local getAcceptableShips = function ()
 	)))
 end
 
+local convoi = function (starport)
+	local lead = Space.SpawnShipNear("cargo_megafreighter", starport, 2, 3)
+	lead:SetLabel(Ship.MakeRandomLabel())
+
+	c = {}
+	c[1] = Space.SpawnShipNear("cargo_megafreighter", starport, 20, 30)
+	c[1]:SetLabel(Ship.MakeRandomLabel())
+
+	c[1]:AIFlyFormation(lead,0,0,2300)
+	for a=2,4,1 do
+		c[a] = Space.SpawnShipNear("cargo_megafreighter", starport, 20*a, 20*a)
+		c[a]:SetLabel(Ship.MakeRandomLabel())
+		local x,y,z = c[a-1]:GetPos()
+		c[a]:SetPos(c[a-1],x,y,z+2300)
+		c[a]:AIFlyFormation(c[a-1],0,0,2300)
+	end
+	lead:AIFlyToMaxSpeed(starport,1)
+end
+
 local spawnInitialShips = function (game_start)
 	-- check if the current system can be traded in
 	starports = Space.GetBodies(function (body) return body.superType == 'STARPORT' end)
@@ -514,6 +533,15 @@ local spawnInitialShips = function (game_start)
 		end
 	end
 
+	--make some convois
+	for i=1,#starports,1 do
+		if #starports > 0 and Game.system.population > 0 and #imports > 0 and #exports > 0 and Engine.rand:Integer(0,1) > 0 then
+			if starports[i].type == 'STARPORT_ORBITAL' then
+				convoi(starports[i])
+			end
+		end
+	end
+
 	return num_trade_ships
 end
 
@@ -557,6 +585,7 @@ local spawnReplacementFast = function ()
 		local ship_name = ship_names[Engine.rand:Integer(1, #ship_names)]
 
 		local ship = Space.SpawnShipNear(ship_name, Game.player, 15, 25) -- 10mkm - 1AU
+		ship:SetLabel(Ship.MakeRandomLabel())
 		trade_ships[ship] = {
 			status		= 'inbound',
 			starport	= starport,
@@ -579,6 +608,7 @@ local spawnReplacementFast = function ()
 		local ship_name = ship_names[Engine.rand:Integer(1, #ship_names)]
 		local ship = Space.SpawnShipDocked(ship_name, starport)
 		if ship ~= nil then
+			ship:SetLabel(Ship.MakeRandomLabel())
 			trade_ships[ship] = {
 				status		= 'docked',
 				starport	= starport,

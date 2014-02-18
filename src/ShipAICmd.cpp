@@ -260,7 +260,7 @@ bool AICmdKill::TimeStepUpdate()
 
 	if (targpos.Length() >= VICINITY_MIN/3) {
 		m_ship->SetJuice(20.0 * hullDamage);
-		m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
+		m_child = new AICmdFlyTo(m_ship, m_target, double(Pi::rng.Int32(2000, 3000)));
 		ProcessChild(); return false;
 	}
 	else {
@@ -690,7 +690,7 @@ extern double calc_ivel(double dist, double vel, double acc);
 // Fly to vicinity of body
 AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target) : AICommand(ship, CMD_FLYTO)
 {
-	m_frame = 0; m_state = -6; m_lockhead = true; m_endvel = 0; m_tangent = false;
+	m_frame = 0; m_state = -6; m_lockhead = true; m_endvel = 0; m_tangent = false; m_speed=0;
 	if (!target->IsType(Object::TERRAINBODY)) m_dist = VICINITY_MIN;
 	else m_dist = VICINITY_MUL*MaxEffectRad(target, ship);
 
@@ -712,7 +712,7 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target) : AICommand(ship, CMD_FLYTO)
 // Fly to close dist of body
 AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, double dist) : AICommand(ship, CMD_FLYTO)
 {
-	m_frame = 0; m_state = -6; m_lockhead = true; m_endvel = 0; m_tangent = false;
+	m_frame = 0; m_state = -6; m_lockhead = true; m_endvel = 0; m_tangent = false; m_speed=0;
 	if (!target->IsType(Object::TERRAINBODY)) m_dist = dist;
 	if (target->IsType(Object::PLANET)) {
 		Body *body = ship->GetFrame()->GetBody();
@@ -725,6 +725,24 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, double dist) : AICommand(ship, 
 			}
 		}
 	}
+	m_target = target; m_targframe = 0;
+}
+
+// Fly to at certain speed
+AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, float speed) : AICommand(ship, CMD_FLYTO)
+{
+	m_speed = speed;
+	m_frame = 0; m_state = -6; m_lockhead = true; m_endvel = 0; m_tangent = false;
+	if (!target->IsType(Object::TERRAINBODY)) m_dist = VICINITY_MIN;
+	else m_dist = VICINITY_MUL*MaxEffectRad(target, ship);
+
+	if (target->IsType(Object::SPACESTATION) && static_cast<SpaceStation*>(target)->IsGroundStation()) {
+		m_posoff = target->GetPosition() + VICINITY_MIN * target->GetOrient().VectorY();
+		m_posoff.x+=Pi::rng.Int32(-500, 500);
+	//	m_posoff += 500.0 * target->GetOrient().VectorX();
+		m_targframe = target->GetFrame(); m_target = 0;
+	}
+	else { m_target = target; m_targframe = 0; }
 	m_target = target; m_targframe = 0;
 }
 
@@ -753,6 +771,7 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Frame *targframe, const vector3d &posoff, dou
 	m_endvel = endvel;
 	m_tangent = tangent;
 	m_frame = 0; m_state = -6; m_lockhead = true;
+	m_speed=0;
 }
 
 bool AICmdFlyTo::TimeStepUpdate()
@@ -900,6 +919,12 @@ bool AICmdFlyTo::TimeStepUpdate()
 			m_ship->SetTransitState(TRANSIT_DRIVE_OFF);
 			return false;
 		}
+	}
+
+	//Check for convoi speed and adjust juice & speed.
+	if (m_speed > 0 && m_ship->GetVelocity().Length() > m_speed) {
+		m_ship->SetVelocity(m_ship->GetVelocity()*0.99);
+		m_ship->SetJuice(1.0);
 	}
 
 	if (!m_target && !m_targframe) return true;			// deleted object
@@ -1494,6 +1519,7 @@ bool AICmdFormation::TimeStepUpdate()
 	vector3d targaccel = forient * m_target->GetLastForce() / m_target->GetMass();
 	relvel -= targaccel * Pi::game->GetTimeStep();
 	double maxdecel = m_ship->GetAccelFwd() + targaccel.Dot(reldir);
+	maxdecel*=0.2; //smooth drifting when going into formation.
 	if (maxdecel < 0.0) maxdecel = 0.0;
 
 	// linear thrust
