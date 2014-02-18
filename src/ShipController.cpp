@@ -337,8 +337,14 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		{
 			int x,y;
 			SDL_GetMouseState(&x,&y);
-			x-=Pi::renderer->GetWindow()->GetWidth()/2;
-			y-=Pi::renderer->GetWindow()->GetHeight()/2;
+
+			// Box-in mouse location for mouse flight to make horizontal and vertical extent and value equivalent
+			float smallest_dimension = std::min<int>(Pi::renderer->GetWindow()->GetWidth(), 
+				Pi::renderer->GetWindow()->GetHeight()) / 2;
+			x -= Pi::renderer->GetWindow()->GetWidth() / 2;
+			y -= Pi::renderer->GetWindow()->GetHeight() / 2;
+			x = Clamp<int>(x, -smallest_dimension, smallest_dimension);
+			y = Clamp<int>(y, -smallest_dimension, smallest_dimension);
 
 			if(x < 0) {
 				if(x > -MOUSE_FLIGHT_DEADZONE_X) {
@@ -367,6 +373,9 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 					y -= MOUSE_FLIGHT_DEADZONE_Y;
 				}
 			}
+
+			x *= (1000.0f / smallest_dimension);
+			y *= (1000.0f / smallest_dimension);
 
 			if(x == 0 && y == 0) {
 				m_mouseFlightZeroOffset = true;

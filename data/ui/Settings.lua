@@ -14,6 +14,9 @@ local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
 local c = {r = 0.0, g = 0.86, b = 1.0}
 
+local keyBindings = {}
+local axisBindings = {}
+
 local optionCheckBox = function (getter, setter, caption)
 	local cb = ui:CheckBox()
 	local initial = getter()
@@ -48,7 +51,7 @@ local optionList = function (getter, setter, settingCaption, captions, values)
 	return optionListOrDropDown('List', getter, setter, settingCaption, captions, values)
 end
 
-ui.templates.Settings = function (args)
+ui.templates.Settings = function (args)	
 	local videoTemplate = function()
 		local videoModes = Engine.GetVideoModeList()
 		local videoModeLabels = {}
@@ -147,7 +150,7 @@ ui.templates.Settings = function (args)
 			local label = ui:Label(caption .. " " .. math.floor(initial_value * 100)):SetColor(c)
 			slider:SetValue(initial_value)
 			slider.onValueChanged:Connect(function (new_value)
-					label:SetText(caption .. " " .. math.floor(new_value * 100)):SetColor(c)
+					label:SetText(caption .. " " .. math.floor(new_value * 100))
 					setter(new_value)
 				end)
 			return ui:VBox():PackEnd({label, slider})
@@ -217,6 +220,58 @@ ui.templates.Settings = function (args)
 			)
 		return dialog
 	end
+	
+	local resetDialog = function ()	
+		local okButton = ui:Button(ui:Label("RESET"):SetFont("HEADING_NORMAL"):SetColor(c))
+		okButton.onClick:Connect(
+			function()
+				Engine.ResetKeyBindings()
+				-- Update all displayed bindings
+				local pages = Engine.GetKeyBindings()
+				for page_idx = 1, #pages do
+					local page = pages[page_idx]
+					for group_idx = 1, #page do
+						local group = page[group_idx]
+						for i = 1, #group do
+							local info = group[i]
+							if info.id then
+								if keyBindings[info.id] then
+									if keyBindings[info.id][1] then
+										keyBindings[info.id][1].label:SetText(info.bindingDescription1 or '')
+										if keyBindings[info.id][2] then
+											keyBindings[info.id][2].label:SetText(info.bindingDescription2 or '')
+										end
+									end
+								elseif axisBindings[info.id] then
+									axisBindings[info.id].label:SetText(info.bindingDescription1 or '')
+								end
+							end
+						end
+					end
+				end				
+				ui:DropLayer()
+			end
+		)
+		local cancelButton = ui:Button(ui:Label("CANCEL"):SetFont("HEADING_NORMAL"):SetColor(c))
+		cancelButton.onClick:Connect(
+			function()
+				ui:DropLayer()
+			end
+		)
+		
+		local dialog = 
+			ui:ColorBackground(0, 0, 0, 0.5,
+				ui:Align("MIDDLE",
+					ui:Background(
+						ui:VBox(10)
+							:PackEnd(ui:Label(l.RESET_ALL_TO_DEFAULT .. "?"):SetFont("HEADING_NORMAL"):SetColor(c))
+							:PackEnd(ui:Label(" "):SetFont("HEADING_NORMAL"))
+							:PackEnd(ui:HBox(10):PackEnd({okButton, cancelButton}))
+						)
+					)
+				)
+		return dialog
+	end
 
 	local captureKeyDialog = function (label, onOk)
 		return captureDialog(KeyBindingCapture, label, onOk)
@@ -230,6 +285,8 @@ ui.templates.Settings = function (args)
 		local bindings = { info.binding1, info.binding2 }
 		local descriptions = { info.bindingDescription1, info.bindingDescription2 }
 		local buttons = { SmallLabeledButton.New(''), SmallLabeledButton.New('') }
+		
+		keyBindings[info.id] = {buttons[1], buttons[2]}
 
 		grid:SetCell(0, row, ui:Label(info.label):SetColor(c))
 		grid:SetCell(1, row, buttons[1])
@@ -278,6 +335,8 @@ ui.templates.Settings = function (args)
 
 	local initAxisBindingControls = function (grid, row, info)
 		local button = SmallLabeledButton.New(info.bindingDescription1 or '')
+		
+		axisBindings[info.id] = button
 
 		grid:SetCell(0, row, ui:Label(info.label):SetColor(c))
 		grid:SetCell(1, row, button)
@@ -293,10 +352,31 @@ ui.templates.Settings = function (args)
 	end
 
 	local controlsTemplate = function()
-		local options = ui:Margin(10, 'LEFT', ui:VBox():PackEnd({
-			optionCheckBox(Engine.GetMouseYInverted, Engine.SetMouseYInverted, l.INVERT_MOUSE_Y),
-			optionCheckBox(Engine.GetJoystickEnabled, Engine.SetJoystickEnabled, l.ENABLE_JOYSTICK),
-		}))
+		
+		local btn_reset_bindings = ui:Button():SetInnerWidget(ui:Label(l.RESET_CONTROLS):SetColor(c))
+		local reset_dialog = resetDialog()
+		btn_reset_bindings.onClick:Connect(
+			function()
+				ui:NewLayer(reset_dialog)
+			end
+		)
+		
+		local options = ui:Grid(2, 1):
+			SetCell(0, 0,
+				ui:Margin(10, 'LEFT', 
+					ui:VBox():PackEnd({
+						optionCheckBox(Engine.GetMouseYInverted, Engine.SetMouseYInverted, l.INVERT_MOUSE_Y),
+						optionCheckBox(Engine.GetJoystickEnabled, Engine.SetJoystickEnabled, l.ENABLE_JOYSTICK)
+					})
+				)
+			):
+			SetCell(1, 0,
+				ui:Align('RIGHT', 
+					ui:Margin(15, 'RIGHT',
+						btn_reset_bindings
+					)
+				)
+			)
 
 		local box = ui:VBox()
 		box:PackEnd(ui:Label(l.CONTROL_OPTIONS):SetFont('HEADING_LARGE'):SetColor(c))

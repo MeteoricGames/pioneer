@@ -181,8 +181,10 @@ void WorldView::InitObject()
 	m_launchButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_launchButton, 0.0f, 2);
 
-	m_flightStatus = (new Gui::Label(""))->Color(0, 255, 0);
+	Gui::Screen::PushFont("OverlayFont");
+	m_flightStatus = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
 	m_rightRegion2->Add(m_flightStatus, 2, 0);
+	Gui::Screen::PopFont();
 
 #if WITH_DEVKEYS
 	Gui::Screen::PushFont("ConsoleFont");
@@ -194,11 +196,11 @@ void WorldView::InitObject()
 	m_hudHyperspaceInfo = (new Gui::Label(""))->Color(s_hudTextColor);
 	Add(m_hudHyperspaceInfo, Gui::Screen::GetWidth()*0.4f, Gui::Screen::GetHeight()*0.3f);
 
-	m_hudHullTemp = new Gui::MeterBar(100.0f, Lang::HULL_TEMP, Color(255,0,0,204));
-	m_hudWeaponTemp = new Gui::MeterBar(100.0f, Lang::WEAPON_TEMP, Color(255,128,0,204));
-	m_hudHullIntegrity = new Gui::MeterBar(100.0f, Lang::HULL_INTEGRITY, Color(255,255,0,204));
-	m_hudShieldIntegrity = new Gui::MeterBar(100.0f, Lang::SHIELD_INTEGRITY, Color(255,255,0,204));
-	m_hudFuelGauge = new Gui::MeterBar(100.f, Lang::FUEL, Color(255, 255, 0, 204));
+	m_hudHullTemp = new Gui::MeterBar(100.0f, Lang::HULL_TEMP, Color::PARAGON_GREEN);
+	m_hudWeaponTemp = new Gui::MeterBar(100.0f, Lang::WEAPON_TEMP, Color::PARAGON_GREEN);
+	m_hudHullIntegrity = new Gui::MeterBar(100.0f, Lang::HULL_INTEGRITY, Color::PARAGON_GREEN);
+	m_hudShieldIntegrity = new Gui::MeterBar(100.0f, Lang::SHIELD_INTEGRITY, Color::PARAGON_GREEN);
+	m_hudFuelGauge = new Gui::MeterBar(100.f, Lang::FUEL, Color::PARAGON_GREEN);
 	Add(m_hudFuelGauge, 5.0f, Gui::Screen::GetHeight() - 104.0f);
 	Add(m_hudHullTemp, 5.0f, Gui::Screen::GetHeight() - 144.0f);
 	Add(m_hudWeaponTemp, 5.0f, Gui::Screen::GetHeight() - 184.0f);
@@ -210,10 +212,10 @@ void WorldView::InitObject()
 	Add(m_hudTargetHullIntegrity, Gui::Screen::GetWidth() - 105.0f, 5.0f);
 	Add(m_hudTargetShieldIntegrity, Gui::Screen::GetWidth() - 105.0f, 45.0f);
 
+	Gui::Screen::PushFont("OverlayFont");
 	m_hudTargetInfo = (new Gui::Label(""))->Color(s_hudTextColor);
 	Add(m_hudTargetInfo, 0, 85.0f);
 
-	Gui::Screen::PushFont("OverlayFont");
 	m_bodyLabels = new Gui::LabelSet();
 	m_bodyLabels->SetLabelColor(Color(0, 219, 255, 230));
 	Add(m_bodyLabels, 0, 0);
@@ -225,12 +227,13 @@ void WorldView::InitObject()
 		Gui::Screen::MeasureString(Lang::PAUSED, w, h);
 		Add(m_pauseText, 0.5f * (Gui::Screen::GetWidth() - w), 100);
 	}
-	Gui::Screen::PopFont();
 
-	m_navTargetIndicator.label = (new Gui::Label(""))->Color(0, 255, 0);
-	m_navVelIndicator.label = (new Gui::Label(""))->Color(0, 255, 0);
+	m_navTargetIndicator.label = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_navVelIndicator.label = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
 	m_combatTargetIndicator.label = new Gui::Label(""); // colour set dynamically
 	m_targetLeadIndicator.label = new Gui::Label("");
+
+	Gui::Screen::PopFont();
 
 	// these labels are repositioned during Draw3D()
 	Add(m_navTargetIndicator.label, 0, 0);
@@ -587,9 +590,25 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 	bool is_outside_gravity_bubble = false;
 	bool is_outside_gravity_bubble_2 = false;
-	if(!m_bAltitudeAvailable) {
-		is_outside_gravity_bubble = true;
-		is_outside_gravity_bubble_2 = true;
+	if(!m_bAltitudeAvailable && Pi::player->GetFlightState() != Ship::HYPERSPACE) {
+		// Check for space station bubble
+		const Frame* player_frame = Pi::player->GetFrame();
+		if(player_frame && player_frame->GetBody() && player_frame->GetBody()->IsType(Object::SPACESTATION)) {
+			double distance = (Pi::player->GetFrame()->GetBody()->GetPosition() - Pi::player->GetPosition()).Length();
+			if(distance <= TRANSIT_GRAVITY_RANGE_1) {
+				is_outside_gravity_bubble = false;
+			} else {
+				is_outside_gravity_bubble = true;
+			}
+			if(distance <= TRANSIT_GRAVITY_RANGE_2) {
+				is_outside_gravity_bubble_2 = false;
+			} else {
+				is_outside_gravity_bubble_2 = true;
+			}
+		} else {
+			is_outside_gravity_bubble = true;
+			is_outside_gravity_bubble_2 = true;
+		}
 	} else if(m_altitude > TRANSIT_GRAVITY_RANGE_1) {
 		is_outside_gravity_bubble = true;
 		if(m_altitude > TRANSIT_GRAVITY_RANGE_2) {
@@ -1137,6 +1156,7 @@ void WorldView::HideTargetActions()
 Gui::Button *WorldView::AddCommsOption(std::string msg, int ypos, int optnum)
 {
 	Gui::Label *l = new Gui::Label(msg);
+	l->Color(Color::PARAGON_BLUE);
 	m_commsOptions->Add(l, 50, float(ypos));
 
 	char buf[8];
@@ -1161,7 +1181,9 @@ void WorldView::AddCommsNavOption(std::string msg, Body *target)
 	Gui::HBox *hbox = new Gui::HBox();
 	hbox->SetSpacing(5);
 
-	Gui::Label *l = new Gui::Label(msg);
+	Gui::Screen::PushFont("OverlayFont");
+	Gui::Label *l = (new Gui::Label(msg))->Color(Color::PARAGON_BLUE);
+	Gui::Screen::PopFont();
 	hbox->PackStart(l);
 
 	Gui::Button *b = new Gui::SolidButton();
@@ -1175,7 +1197,9 @@ void WorldView::BuildCommsNavOptions()
 {
 	std::map< Uint32,std::vector<SystemBody*> > groups;
 
-	m_commsNavOptions->PackEnd(new Gui::Label(std::string("#ff0")+std::string(Lang::NAVIGATION_TARGETS_IN_THIS_SYSTEM)+std::string("\n")));
+	Gui::Screen::PushFont("OverlayFont");
+	m_commsNavOptions->PackEnd((new Gui::Label(std::string(Lang::NAVIGATION_TARGETS_IN_THIS_SYSTEM)+std::string("\n")))->Color(Color::PARAGON_BLUE));	
+	Gui::Screen::PopFont();
 
 	for ( std::vector<SystemBody*>::const_iterator i = Pi::game->GetSpace()->GetStarSystem()->m_spaceStations.begin();
 	      i != Pi::game->GetSpace()->GetStarSystem()->m_spaceStations.end(); ++i) {
@@ -1184,7 +1208,7 @@ void WorldView::BuildCommsNavOptions()
 	}
 
 	for ( std::map< Uint32,std::vector<SystemBody*> >::const_iterator i = groups.begin(); i != groups.end(); ++i ) {
-		m_commsNavOptions->PackEnd(new Gui::Label("#f0f" + Pi::game->GetSpace()->GetStarSystem()->m_bodies[(*i).first]->name));
+		m_commsNavOptions->PackEnd((new Gui::Label(Pi::game->GetSpace()->GetStarSystem()->m_bodies[(*i).first]->name))->Color(Color::PARAGON_BLUE));
 
 		for ( std::vector<SystemBody*>::const_iterator j = (*i).second.begin(); j != (*i).second.end(); ++j) {
 			SystemPath path = Pi::game->GetSpace()->GetStarSystem()->GetPathOf(*j);
@@ -1299,6 +1323,8 @@ static void player_target_hypercloud(HyperspaceCloud *cloud)
 
 void WorldView::UpdateCommsOptions()
 {
+	Gui::Screen::PushFont("OverlayFont");
+
 	m_commsOptions->DeleteAllChildren();
 	m_commsNavOptions->DeleteAllChildren();
 
@@ -1315,13 +1341,13 @@ void WorldView::UpdateCommsOptions()
 	int ypos = 0;
 	int optnum = 1;
 	if (!(navtarget || comtarget)) {
-		m_commsOptions->Add(new Gui::Label("#0f0"+std::string(Lang::NO_TARGET_SELECTED)), 16, float(ypos));
+		m_commsOptions->Add((new Gui::Label(std::string(Lang::NO_TARGET_SELECTED)))->Color(Color::PARAGON_BLUE), 16, float(ypos));
 	}
 
 	const bool hasAutopilot = (Pi::player->m_equipment.Get(Equip::SLOT_AUTOPILOT) == Equip::AUTOPILOT) && (Pi::player->GetFlightState() == Ship::FLYING);
 
 	if (navtarget) {
-		m_commsOptions->Add(new Gui::Label("#0f0"+navtarget->GetLabel()), 16, float(ypos));
+		m_commsOptions->Add((new Gui::Label(navtarget->GetLabel()))->Color(Color::PARAGON_BLUE), 16, float(ypos));
 		ypos += 32;
 		if (navtarget->IsType(Object::SPACESTATION)) {
 			SpaceStation *pStation = static_cast<SpaceStation *>(navtarget);
@@ -1391,12 +1417,14 @@ void WorldView::UpdateCommsOptions()
 		}
 	}
 	if (comtarget && hasAutopilot) {
-		m_commsOptions->Add(new Gui::Label("#f00"+comtarget->GetLabel()), 16, float(ypos));
+		m_commsOptions->Add((new Gui::Label(comtarget->GetLabel()))->Color(Color::PARAGON_BLUE), 16, float(ypos));
 		ypos += 32;
 		button = AddCommsOption(stringf(Lang::AUTOPILOT_FLY_TO_VICINITY_OF, formatarg("target", comtarget->GetLabel())), ypos, optnum++);
 		button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flyto), comtarget));
 		ypos += 32;
 	}
+
+	Gui::Screen::PopFont();
 }
 
 void WorldView::SelectBody(Body *target, bool reselectIsDeselect)
@@ -1523,9 +1551,9 @@ void WorldView::UpdateProjectedObjects()
 			HideIndicator(m_velIndicator);
 
 		// navtarget distance/target square indicator (displayed with navtarget label)
-		double dist = (navtarget->GetTargetIndicatorPosition(cam_frame)
+		double dist2 = (navtarget->GetTargetIndicatorPosition(cam_frame)
 			- Pi::player->GetPositionRelTo(cam_frame)).Length();
-		m_navTargetIndicator.label->SetText(format_distance(dist).c_str());
+		m_navTargetIndicator.label->SetText(format_distance(dist2).c_str());
 		UpdateIndicator(m_navTargetIndicator, navtarget->GetTargetIndicatorPosition(cam_frame));
 
 		// velocity relative to navigation target
@@ -1546,8 +1574,8 @@ void WorldView::UpdateProjectedObjects()
 				HideIndicator(m_navVelIndicator);
 			}
 
-			assert(m_navTargetIndicator.side != INDICATOR_HIDDEN);
-			assert(m_navVelIndicator.side != INDICATOR_HIDDEN);
+			//assert(m_navTargetIndicator.side != INDICATOR_HIDDEN);
+			//assert(m_navVelIndicator.side != INDICATOR_HIDDEN);
 			SeparateLabels(m_navTargetIndicator.label, m_navVelIndicator.label);
 		} else
 			HideIndicator(m_navVelIndicator);
@@ -1565,10 +1593,10 @@ void WorldView::UpdateProjectedObjects()
 	if (enemy) {
 		char buf[128];
 		const vector3d targpos = enemy->GetInterpPositionRelTo(Pi::player) * cam_rot;
-		const double dist = targpos.Length();
+		const double dist2 = targpos.Length();
 		const vector3d targScreenPos = enemy->GetInterpPositionRelTo(cam_frame);
 
-		snprintf(buf, sizeof(buf), "%.0fm", dist);
+		snprintf(buf, sizeof(buf), "%.0fm", dist2);
 		m_combatTargetIndicator.label->SetText(buf);
 		UpdateIndicator(m_combatTargetIndicator, targScreenPos);
 
@@ -1600,7 +1628,7 @@ void WorldView::UpdateProjectedObjects()
 			double raccel =
 				Pi::player->GetShipType()->linThrust[ShipType::THRUSTER_REVERSE] / Pi::player->GetMass();
 
-			double c = Clamp(vel / sqrt(2.0 * raccel * dist), -1.0, 1.0);
+			double c = Clamp(vel / sqrt(2.0 * raccel * dist2), -1.0, 1.0);
 			float r = float(0.2+(c+1.0)*0.4);
 			float b = float(0.2+(1.0-c)*0.4);
 

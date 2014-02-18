@@ -6,13 +6,14 @@ define_ship {
 	ship_class = 'personal_skiff',
 	manufacturer = 'alders_vectrum',
 	model='personal_skiff',
+	cockpit='default_cockpit',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,
-	up_thrust = 3e5,
-	down_thrust = 3e5,
-	left_thrust = 3e5,
-	right_thrust = 3e5,
-	angular_thrust = 30e5,
+	up_thrust = 90e5,
+	down_thrust = 90e5,
+	left_thrust = 90e5,
+	right_thrust = 90e5,
+	angular_thrust = 1e5,
 	max_cargo = 3,
 	max_laser = 0,
 	max_missile = 0,
@@ -29,6 +30,6 @@ define_ship {
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 120000e3,
 	price = 40000,
-        -- Paragon Flight System
-        max_maneuver_speed = 20000,
+    -- Paragon Flight System
+    max_maneuver_speed = 600,
 }

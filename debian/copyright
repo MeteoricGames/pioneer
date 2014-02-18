@@ -1,6 +1,6 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Name: pioneer
-Source: https://github.com/tomm/pioneer.git
+Upstream-Name: paragon
+Source: https://github.com/ParagonDevelopmentTeam/pioneer.git
 
 Files: *
 Copyright: 2011 .. <..@..>

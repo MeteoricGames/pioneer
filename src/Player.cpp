@@ -23,7 +23,6 @@ static Sound::Event s_soundHyperdrive;
 Player::Player(ShipType::Id shipId): Ship(shipId)
 {
 	SetController(new PlayerShipController());
-	InitCockpit();
 }
 
 void Player::Save(Serializer::Writer &wr, Space *space)
@@ -35,7 +34,12 @@ void Player::Load(Serializer::Reader &rd, Space *space)
 {
 	Pi::player = this;
 	Ship::Load(rd, space);
+}
+
+void Player::Init()
+{
 	InitCockpit();
+	Ship::Init();
 }
 
 void Player::InitCockpit()

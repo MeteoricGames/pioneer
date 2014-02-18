@@ -8,11 +8,11 @@ define_ship {
 	model='utility_tender',
 	forward_thrust = 1190e5,
 	reverse_thrust = 1190e5,
-	up_thrust = 310e5,
-	down_thrust = 310e5,
-	left_thrust = 310e5,
-	right_thrust = 310e5,
-	angular_thrust = 3100e5,
+	up_thrust = 11900e5,
+	down_thrust = 11900e5,
+	left_thrust = 11900e5,
+	right_thrust = 11900e5,
+	angular_thrust = 500e5,
 	max_cargo = 672,
 	max_missile = 1,
 	max_laser = 0,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 57273e3,
 	price = 450000,
 	hyperdrive_class = 9,
+	-- Paragon Flight System
+    max_maneuver_speed = 350,
 }

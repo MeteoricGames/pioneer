@@ -1,3 +1,4 @@
+/src/paragon
 build/
 bin/
 lib/
@@ -54,3 +55,5 @@ Thumbs.db
 gmon.out
 .project
 .cproject
+
+*.aps

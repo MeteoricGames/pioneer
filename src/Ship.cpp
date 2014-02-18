@@ -1352,11 +1352,6 @@ void Ship::StaticUpdate(const float timeStep)
 		SetTransitState(TRANSIT_DRIVE_FINISHED);
 	}
 
-	// Cockpit
-	//if(GetCockpit() && Pi::worldView && Pi::worldView->GetCamType() == WorldView::CAM_COCKPIT) {
-	//	m_cockpit->Update(timeStep);
-	//}
-
 	// For Auto target acceleation
 	if (GetCombatTarget() && m_targetInSight) m_lastVel = target->GetVelocity();
 }

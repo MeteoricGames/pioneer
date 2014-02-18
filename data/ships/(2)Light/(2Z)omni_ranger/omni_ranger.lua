@@ -8,11 +8,11 @@ define_ship {
 	model='omni_ranger',
 	forward_thrust = 538e5,
 	reverse_thrust = 538e5,
-	up_thrust = 180e5,
-	down_thrust = 180e5,
-	left_thrust = 180e5,
-	right_thrust = 180e5,
-	angular_thrust = 1800e5,
+	up_thrust = 5380e5,
+	down_thrust = 5380e5,
+	left_thrust = 5380e5,
+	right_thrust = 5380e5,
+	angular_thrust = 500e5,
 	max_cargo = 324,
 	max_missile = 1,
 	max_laser = 2,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 57273e3,
 	price = 700000,
 	hyperdrive_class = 6,
+	-- Paragon Flight System
+    max_maneuver_speed = 600,
 }
