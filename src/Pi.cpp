@@ -691,7 +691,7 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
 
 	// Mouse cursor
-	mouseCursor = new MouseCursor();
+	mouseCursor = new MouseCursor(renderer);
 }
 
 bool Pi::IsConsoleActive()
@@ -1133,7 +1133,7 @@ void Pi::Start()
 		
 		if(mouseCursor) {
 			mouseCursor->Update();
-			mouseCursor->Draw(Pi::renderer);
+			mouseCursor->Draw();
 		}
 		
 		//Pi::EndRenderTarget();
@@ -1330,7 +1330,7 @@ void Pi::MainLoop()
 
 		if(Pi::mouseCursor) {
 			Pi::mouseCursor->Update();
-			Pi::mouseCursor->Draw(Pi::renderer);
+			Pi::mouseCursor->Draw();
 		}
 
 		// XXX don't draw the UI during death obviously a hack, and still

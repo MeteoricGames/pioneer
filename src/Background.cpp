@@ -127,12 +127,18 @@ void UniverseBox::Init()
 	m_material->texture0 = m_cubemap;
 	m_model->AddSurface(RefCountedPtr<Surface>(new Surface(TRIANGLES, box, m_material)));
 	SetIntensity(1.0f);
+	
+	Graphics::RenderStateDesc rsd;
+	rsd.blendMode = Graphics::BlendMode::BLEND_SOLID;
+	rsd.depthTest = false;
+	rsd.depthWrite = false;
+	m_cubeRS = m_renderer->CreateRenderState(rsd);
 }
 
 void UniverseBox::Draw()
 {
 	if(m_cubemap) {
-		m_renderer->DrawStaticMesh(m_model, rs);
+		m_renderer->DrawStaticMesh(m_model, m_cubeRS);
 	}
 }
 
@@ -181,6 +187,11 @@ void Starfield::Init()
 	m_material.Reset(m_renderer->CreateMaterial(desc));
 	m_material->emissive = Color::WHITE;
 	m_model->AddSurface(RefCountedPtr<Surface>(new Surface(POINTS, stars, m_material)));
+		
+	Graphics::RenderStateDesc rsd;
+	rsd.blendMode = Graphics::BlendMode::BLEND_SOLID;
+	rsd.depthTest = false;
+	m_starfieldRS = m_renderer->CreateRenderState(rsd);
 }
 
 void Starfield::Fill(Random &rand)
@@ -205,11 +216,11 @@ void Starfield::Fill(Random &rand)
 	}
 }
 
-void Starfield::Draw(Graphics::RenderState *rs)
+void Starfield::Draw()
 {
 	// XXX would be nice to get rid of the Pi:: stuff here
 	if (!Pi::game || Pi::player->GetFlightState() != Ship::HYPERSPACE) {
-		m_renderer->DrawStaticMesh(m_model.get(), rs);
+		m_renderer->DrawStaticMesh(m_model.get(), m_starfieldRS);
 	} else {
 		// roughly, the multiplier gets smaller as the duration gets larger.
 		// the time-looking bits in this are completely arbitrary - I figured
@@ -230,7 +241,7 @@ void Starfield::Draw(Graphics::RenderState *rs)
 			m_hyperVtx[i*2+1] = v;
 			m_hyperCol[i*2+1] = va->diffuse[i];
 		}
-		m_renderer->DrawLines(BG_STAR_MAX*2, m_hyperVtx, m_hyperCol, rs);
+		m_renderer->DrawLines(BG_STAR_MAX*2, m_hyperVtx, m_hyperCol, m_starfieldRS);
 	}
 }
 
@@ -369,11 +380,8 @@ void Container::Draw(const matrix4x4d &transform)
 	//m_milkyWay.Draw(renderer);
 	// squeeze the starfield a bit to get more density near horizon
 	matrix4x4d starTrans = transform * matrix4x4d::ScaleMatrix(1.0, 0.4, 1.0);
-	renderer->SetTransform(starTrans);
-		// squeeze the starfield a bit to get more density near horizon
-		matrix4x4d starTrans = transform * matrix4x4d::ScaleMatrix(1.0, 0.4, 1.0);
-		m_renderer->SetTransform(starTrans);
-	m_starField.Draw(renderer);
+	m_renderer->SetTransform(starTrans);
+	m_starField.Draw();
 }
 
 void Container::SetIntensity(float intensity)
@@ -386,7 +394,7 @@ void Container::SetIntensity(float intensity)
 
 void Container::SetDrawFlags(const Uint32 flags)
 {
-	m_drawFlags = flags;
+	//m_drawFlags = flags;
 }
 
 } //namespace Background

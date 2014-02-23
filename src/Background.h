@@ -39,7 +39,7 @@ namespace Background
 		UniverseBox(Graphics::Renderer *r);
 		~UniverseBox();
 
-		void Draw(Graphics::RenderState *rs);
+		void Draw();
 		void LoadCubeMap(Random* randomizer = nullptr);
 
 		virtual void SetIntensity(float intensity) override;
@@ -60,7 +60,7 @@ namespace Background
 	public:
 		//does not Fill the starfield
 		Starfield(Graphics::Renderer *r, Random &rand);
-		void Draw(Graphics::RenderState*);
+		void Draw();
 		//create or recreate the starfield
 		void Fill(Random &rand);
 
@@ -72,6 +72,7 @@ namespace Background
 		//hyperspace animation vertex data
 		vector3f m_hyperVtx[BG_STAR_MAX*2];
 		Color m_hyperCol[BG_STAR_MAX*2];
+		Graphics::RenderState* m_starfieldRS;
 	};
 
 	class MilkyWay : public BackgroundElement
@@ -99,6 +100,7 @@ namespace Background
 		void Refresh(Random &rand);
 
 		void SetIntensity(float intensity);
+		void SetDrawFlags(const Uint32 flags);
 
 	private:
 		Graphics::Renderer *m_renderer;

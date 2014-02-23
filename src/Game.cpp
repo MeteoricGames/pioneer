@@ -413,7 +413,7 @@ void Game::SwitchToHyperspace()
 	// create hyperspace :)
 	m_space.reset(new Space(this));
 
-	m_space->GetBackground()->SetDrawFlags( Background::Container::DRAW_STARS );
+	//m_space->GetBackground()->SetDrawFlags( Background::Container::DRAW_STARS );
 
 	// put the player in it
 	m_player->SetFrame(m_space->GetRootFrame());
@@ -550,7 +550,7 @@ void Game::SwitchToNormalSpace()
 	}
 	m_hyperspaceClouds.clear();
 
-	m_space->GetBackground()->SetDrawFlags( Background::Container::DRAW_SKYBOX | Background::Container::DRAW_STARS );
+	//m_space->GetBackground()->SetDrawFlags( Background::Container::DRAW_SKYBOX | Background::Container::DRAW_STARS );
 
 	m_state = STATE_NORMAL;
 }

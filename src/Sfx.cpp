@@ -25,6 +25,7 @@ Graphics::Material *Sfx::smokeParticle = 0;
 Graphics::Material *Sfx::explotionParticle = 0;
 Graphics::RenderState *Sfx::alphaState = nullptr;
 Graphics::RenderState *Sfx::additiveAlphaState = nullptr;
+Graphics::RenderState *Sfx::alphaOneState = nullptr;
 
 Sfx::Sfx()
 {
@@ -127,14 +128,13 @@ void Sfx::Render(Renderer *renderer, const matrix4x4d &ftransform)
 
 			renderer->SetTransform(matrix4x4d::Translation(fpos));
 			//explotionParticle->diffuse = Color(255, 255, 0, (1.0f-(m_age/3.5f))*255);
-			renderer->SetBlendMode(BLEND_ALPHA_ONE);
 			float spriteframe=m_age*20+1;
 			std::string fname="explotion/image"+std::to_string(static_cast<int>(spriteframe))+".png";
 			explotionParticle->texture0 = Graphics::TextureBuilder::Billboard(fname).GetOrCreateTexture(renderer, "billboard");
 			//face camera
 			matrix4x4f trans = trans.Identity();
 			renderer->SetTransform(trans);
-			renderer->DrawPointSprites(1, &pos, explotionParticle, m_speed);
+			renderer->DrawPointSprites(1, &pos, alphaOneState, explotionParticle, m_speed);
 			break;
 
 		} case TYPE_DAMAGE: {
@@ -263,6 +263,8 @@ void Sfx::Init(Graphics::Renderer *r)
 	alphaState = r->CreateRenderState(rsd);
 	rsd.blendMode = Graphics::BLEND_ALPHA_ONE;
 	additiveAlphaState = r->CreateRenderState(rsd);
+	rsd.depthWrite = true;
+	alphaOneState = r->CreateRenderState(rsd);
 
 	Graphics::MaterialDescriptor desc;
 	RefCountedPtr<Graphics::Material> explosionMat(r->CreateMaterial(desc));

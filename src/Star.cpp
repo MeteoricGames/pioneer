@@ -101,9 +101,9 @@ void Star::Render(Graphics::Renderer *renderer, const Camera *camera, const vect
 	vb.Add(vector3f(0.f, lf*size, 0.01f), dark);
 	vc.Add(vector3f(0.f, lf, 0.015f), dark);
  
-	renderer->DrawTriangles(&vc, Graphics::vtxColorMaterial, TRIANGLE_FAN);
-	renderer->DrawTriangles(&vb, Graphics::vtxColorMaterial, TRIANGLE_FAN); 
-	renderer->DrawTriangles(&va, Graphics::vtxColorMaterial, TRIANGLE_FAN);
+	renderer->DrawTriangles(&vc, m_haloState, Graphics::vtxColorMaterial, TRIANGLE_FAN);
+	renderer->DrawTriangles(&vb, m_haloState, Graphics::vtxColorMaterial, TRIANGLE_FAN); 
+	renderer->DrawTriangles(&va, m_haloState, Graphics::vtxColorMaterial, TRIANGLE_FAN);
 
 	TerrainBody::Render(renderer, camera, viewCoords, viewTransform);
 }

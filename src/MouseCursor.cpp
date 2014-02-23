@@ -6,7 +6,9 @@
 #include "graphics/Renderer.h"
 #include "graphics/TextureBuilder.h"
 
-MouseCursor::MouseCursor() : m_visible(true), m_type(MCT_NORMAL), m_pos(vector2f(0.0f, 0.0f))
+MouseCursor::MouseCursor(Graphics::Renderer* renderer) : m_renderer(renderer), 
+	m_visible(true), m_type(MCT_NORMAL), 
+	m_pos(vector2f(0.0f, 0.0f))
 {
 	Gui::TexturedQuad *normal_cursor, *flight_cursor;
 
@@ -25,6 +27,10 @@ MouseCursor::MouseCursor() : m_visible(true), m_type(MCT_NORMAL), m_pos(vector2f
 	m_vSize.push_back(vector2f(d2.dataSize.x * d2.texSize.x, d2.dataSize.y * d2.texSize.y));
 
 	SDL_ShowCursor(0);
+
+	Graphics::RenderStateDesc rsd;
+	rsd.blendMode = Graphics::BlendMode::BLEND_ALPHA;
+	m_cursorRS = m_renderer->CreateRenderState(rsd);
 }
 
 MouseCursor::~MouseCursor()
@@ -43,23 +49,25 @@ void MouseCursor::Update()
 	m_pos.y = abs_mouse_state[1];
 }
 
-void MouseCursor::Draw(Graphics::Renderer* renderer)
+void MouseCursor::Draw()
 {
 	if(m_visible) {
 		int c = static_cast<int>(m_type);
-		matrix4x4f modelMatrix = renderer->GetCurrentModelView();
-		matrix4x4f projMatrix = renderer->GetCurrentProjection();
+		matrix4x4f modelMatrix = m_renderer->GetCurrentModelView();
+		matrix4x4f projMatrix = m_renderer->GetCurrentProjection();
 
-		renderer->SetOrthographicProjection(0, 
-			renderer->GetWindow()->GetWidth(), 
-			renderer->GetWindow()->GetHeight(), 0, -1, 1);
-		renderer->SetTransform(matrix4x4d::Identity());
-		renderer->SetBlendMode(Graphics::BLEND_ALPHA);
-		m_vCursor[c]->Draw(renderer, m_pos + vector2f(-m_vHotspot[c].x * m_vSize[c].x, -m_vHotspot[c].y * m_vSize[c].y), m_vSize[c]);
-		renderer->SetBlendMode(Graphics::BLEND_SOLID);
+		m_renderer->SetOrthographicProjection(0, 
+			m_renderer->GetWindow()->GetWidth(), 
+			m_renderer->GetWindow()->GetHeight(), 0, -1, 1);
+		m_renderer->SetTransform(matrix4x4d::Identity());
+		m_renderer->SetRenderState(m_cursorRS);
+		m_vCursor[c]->Draw(m_renderer, 
+			m_pos + vector2f(-m_vHotspot[c].x * m_vSize[c].x, 
+			-m_vHotspot[c].y * m_vSize[c].y),
+			m_vSize[c]);
 
-		renderer->SetProjection(projMatrix);
-		renderer->SetTransform(modelMatrix);
+		m_renderer->SetProjection(projMatrix);
+		m_renderer->SetTransform(modelMatrix);
 	}
 }
 

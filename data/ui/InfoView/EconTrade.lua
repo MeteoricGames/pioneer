@@ -140,8 +140,11 @@ local econTrade = function ()
 								ui:VBox():PackEnd({
 									ui:Label(string.format("$%.2f", cash)):SetColor(c),
 									ui:Margin(10),
-									ui:Margin(0, "HORIZONTAL",
-									ui:Grid(2,1):SetRow(0, { ui:Label(l.TOTAL..totalCabins):SetColor(c), ui:Label(l.USED..": "..usedCabins):SetColor(c) }),
+									ui:Margin(0, "HORIZONTAL", ui:Grid(2,1):
+										SetRow(0, { 
+											ui:Label(l.TOTAL..totalCabins):SetColor(c), 
+											ui:Label(l.USED..": "..usedCabins):SetColor(c) 
+										})),
 									ui:Margin(10),
 								})
 							}),

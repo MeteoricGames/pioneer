@@ -16,11 +16,11 @@ enum MouseCursorType
 class MouseCursor
 {
 public:
-	MouseCursor();
+	MouseCursor(Graphics::Renderer* renderer);
 	virtual ~MouseCursor();
 
 	void Update();
-	void Draw(Graphics::Renderer* renderer);
+	void Draw();
 	void SetVisible(bool visible);
 	void SetType(MouseCursorType type);
 	void Reset();
@@ -29,6 +29,8 @@ private:
 	MouseCursor(const MouseCursor&);
 	MouseCursor& operator=(MouseCursor&);
 
+	Graphics::Renderer* m_renderer;
+	Graphics::RenderState* m_cursorRS;
 	std::vector<Gui::TexturedQuad*> m_vCursor;
 	std::vector<vector2f> m_vSize;
 	std::vector<vector2f> m_vHotspot;
