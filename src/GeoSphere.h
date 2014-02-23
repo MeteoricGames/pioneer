@@ -10,6 +10,7 @@
 #include "Random.h"
 #include "Camera.h"
 #include "galaxy/StarSystem.h"
+#include "graphics/RenderState.h"
 #include "graphics/Material.h"
 #include "terrain/Terrain.h"
 #include "GeoPatchID.h"
@@ -43,7 +44,7 @@ public:
 		// Fractals absolutely MUST return heights >= 0.0 (one planet radius)
 		// otherwise atmosphere and other things break.
 		if (h < 0.0) {
-			fprintf(stderr, "GetHeight({ %f, %f, %f }) returned %f\n", p.x, p.y, p.z, h);
+			Output("GetHeight({ %f, %f, %f }) returned %f\n", p.x, p.y, p.z, h);
 			m_terrain->DebugDump();
 			assert(h >= 0.0);
 		}
@@ -100,6 +101,8 @@ private:
 	static RefCountedPtr<GeoPatchContext> s_patchContext;
 
 	void SetUpMaterials();
+	Graphics::RenderState *m_surfRenderState;
+	Graphics::RenderState *m_atmosRenderState;
 	std::unique_ptr<Graphics::Material> m_surfaceMaterial;
 	std::unique_ptr<Graphics::Material> m_atmosphereMaterial;
 	//special parameters for shaders

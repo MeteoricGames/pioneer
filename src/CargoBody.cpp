@@ -10,6 +10,7 @@
 #include "EnumStrings.h"
 #include "collider/collider.h"
 #include "scenegraph/SceneGraph.h"
+#include "scenegraph/ModelSkin.h"
 
 void CargoBody::Save(Serializer::Writer &wr, Space *space)
 {
@@ -37,6 +38,11 @@ void CargoBody::Init()
 	colors.push_back(Color(255, 198, 64));
 	colors.push_back(Color(0, 222, 255));
 	colors.push_back(Color(255, 255, 255));
+
+	SceneGraph::ModelSkin skin;
+	skin.SetColors(colors);
+	skin.SetDecal("pioneer");
+	skin.Apply(GetModel());
 	GetModel()->SetColors(colors);
 
 	Properties().Set("type", EnumStrings::GetString("EquipType", m_type));
@@ -50,7 +56,7 @@ CargoBody::CargoBody(Equip::Type t)
 	SetMass(1.0);
 }
 
-bool CargoBody::OnDamage(Object *attacker, float kgDamage)
+bool CargoBody::OnDamage(Object *attacker, float kgDamage, const CollisionContact& contactData)
 {
 	m_hitpoints -= kgDamage*0.001f;
 	if (m_hitpoints < 0) {
@@ -73,6 +79,12 @@ bool CargoBody::OnCollision(Object *b, Uint32 flags, double relVel)
 
 void CargoBody::Render(Graphics::Renderer *r, const Camera *camera, const vector3d &viewCoords, const matrix4x4d &viewTransform)
 {
-	GetModel()->SetLabel(Equip::types[m_type].name);
 	RenderModel(r, camera, viewCoords, viewTransform);
+}
+
+void CargoBody::SetLabel(const std::string &label)
+{
+	assert(GetModel());
+	GetModel()->SetLabel(label);
+	Body::SetLabel(label);
 }

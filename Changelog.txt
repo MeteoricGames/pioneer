@@ -1,15 +1,97 @@
+February 2014
+
+   * New features
+     * New "Octagon" ground station (#2704)
+     * Now any star in a multiple system can be the hyperjump target (#2712)
+     * Rewrote console on the new UI (#2726)
+     * Characters have reputation, which is required by missions (#2675)
+
+   * Minor changes and tweaks
+     * Added landing tag points to all ships (#2703)
+     * Draw sectorview stars with sphere imposters (#2713)
+     * New UI now available as an overlay in all views (#2716)
+     * Quicksave can now be loaded directly from main menu
+     * Paste support for text entry widgets (ie console)
+     * Improve skybox, restore star rendering (#2736)
+     * New wheels up/down icon (#2754)
+     * The `console.lua` script is now run at each game start (#2746)
+     * Config values can be overidden on the command line
+
+   * Script and UI API changes
+     * Model.SetDebugFlags for adding debug effects to model drawing
+     * ModelSpinner.model to get the spinner model
+     * UI.Image:SetHeightLines to help set image height against text
+     * hasprop method to see if the named property exists (#2734)
+
+   * Model changes
+     * Removed two_sided material property, it didn't handle lighting correctly (#2697)
+
+   * Fixes
+     * Complain about custom systems with wrong number of stars (#2718,#2720)
+     * Fixing thruster tags (#2721)
+     * Fix run-away terrain threads when ending the game (#2707,#2722)
+     * Fix Lua error from TradeShips when colliding and hyperjumping (#2701,#2731)
+     * Reset mouse grab state on game exit (#2739)
+     * Fix a potent bug when destroying copies of invalid LuaRefs (#2745)
+     * Fix English in Taxi missions (#2752)
+     * Fix various glitches and an assertion in system info view (#2741,#2743,#2755)
+     * Fix that rotation state of bodies was not saved/loaded properly (#2733,#2738)
+     * Fix pattern for Xylophis (#2723,#2759)
+     * Render to texture Skybox alpha fix (#2763)
+     * Remove Lua timers at game exit (#1962)
+
+   * Internal changes
+     * Moved model debug effects (wireframe, collision mesh) out of
+       ModelViewer and onto Model, and exposed via SetDebugFlags
+     * Handle blend/depth/cull render states as stateset objects (#2697)
+     * Removed redundant shader cleanup (#2708)
+     * Split camera state into a separate class (#2714)
+     * Sector and star system cache improvements (#2706)
+     * Generation of explored flag moved from StarSystem to Sector (#2744)
+
 January 2014
 
    * New features
      * New ships "Malabar" and "Vatakara" (#2599)
      * Show hull heating effect in atmosphere (#2550)
-     * Initial cockpit support (experimental) (#2603, #2614)
+     * Shield meshes with hit effects (#2491)
+     * Show trails behind ships (#2529)
+     * Skybox support (#2570)
+     * Initial cockpit support (experimental) (#2603, #2614, #2679)
 
    * Minor changes and tweaks
+     * Ship stat balancing (#2620, #2673)
      * Atmospheres in gas giants are much deeper (#2609, #1395)
      * New "free software" charity on the bulletin board (#2611)
-     * Change start ship to Xylophis
+     * Change start ships and initial equipment (#2696)
      * Add delta-v data to ship market (#2616)
+     * Earth start position now starts at 13:00 (Pioneer time) (#2615)
+     * Misc. tweaks for the intro animation (#2649)
+     * Improve the sector view map, giving more navigation info (#2640)
+     * Improve cargo and cabin use gauges, easier to understand (#2657, #2648)
+     * Key bindings of sector view are now configurable (#2542)
+     * Advert type icons in the bulletin board (#2668)
+     * Remove unnecessary colon from ship empty weight description (#2682)
+     * Show min/max crew in shipmarket (#2681)
+     * Show labels on stations and cargo models (#2680)
+     * Show decals on models (#2680)
+     * Improve error reporting (#2694)
+     * Xylophis textures updated (#2700)
+     * Don't allow cargo to be jettisoned wile docked (#2699)
+
+   * Script and UI API changes
+     * Game.StartGame now takes an optional start_time argument (#2615)
+     * New method, Random:Normal gives a random number with normal
+       distribution (#2651)
+     * New method, SpaceStation:SetEquipmentPrice to override equip/cargo
+       price at station (#2654)
+     * New method, ChatForm:ClearFace removes face without clearing whole form
+       (#2663)
+
+   * Model changes
+     * Modelviewer: Show bounding box when showing collision mesh (#2664)
+     * "Landing" tag-point to define where the bottom of the ship is for the
+       landing collision test (#2695, #2656)
 
    * Fixes
      * Fix label positioning in orbit and galaxy views (#2608, #2576)
@@ -18,9 +100,23 @@ January 2014
      * Fix Taxi "group of one" mission (#2623, #2628)
      * Fix Taxi and Delivery assassins never spawning (#2622, #2624)
      * Reset table scroll position when it goes off screen (#2629)
+     * Clean up station state correctly between games (#2631)
+     * Fix TradeShips crash when trying to launch after failing to add fuel or
+       cargo (#2634)
+     * Fix ship pattern selection (#2645)
+     * Fix shipyard adding ships faster than it sells them (#2653, #2650)
+     * Fix that fuel was not displayed as percentage after load (#2659, #2660)
+     * Clear chat form face when showing crew candidate list (#2663, #2647)
+     * Calculate a sane mousewheel scroll step for scrollable regions
 
    * Internal changes
      * Render screen to texture in preparation for post-processing effects (#2525)
+     * Various code cleanups (#2621)
+     * Serializer Reader class can now load data from any file source (#2646)
+     * Expose models to Lua, move pattern methods from ModelSkin to Model (2645)
+     * Add initial model binary converter/loader (#2643)
+     * Replace GatherTransforms with a visitor (#2686)
+     * RefCounted(Ptr) with atomic counter and allowing const correctness (#2688)
 
 December 2013
 

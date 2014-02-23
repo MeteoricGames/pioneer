@@ -30,9 +30,6 @@
     <ClCompile Include="..\..\src\EquipType.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\FaceVideoLink.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Frame.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -205,9 +202,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\LuaSystemPath.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ShipSpinnerWidget.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ChatForm.cpp">
@@ -405,10 +399,22 @@
     <ClCompile Include="..\..\src\SpeedLines.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Shields.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\ShipCockpit.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\MouseCursor.cpp">
+          <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\LuaModelBody.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Sensors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\HudTrail.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -444,9 +450,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\EquipType.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\FaceVideoLink.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\fixed.h">
@@ -621,9 +624,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\LuaMusic.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ShipSpinnerWidget.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\ChatForm.h">
@@ -827,10 +827,19 @@
     <ClInclude Include="..\..\src\SpeedLines.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Shields.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\ShipCockpit.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\MouseCursor.h">
+          <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Sensors.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\HudTrail.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

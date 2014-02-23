@@ -37,7 +37,6 @@ noinst_HEADERS = \
 	EquipSet.h \
 	EquipType.h \
 	FaceGenManager.h \
-	FaceVideoLink.h \
 	Factions.h \
 	FileSystem.h \
 	FontCache.h \
@@ -47,6 +46,7 @@ noinst_HEADERS = \
 	GalacticView.h \
 	Game.h \
 	GeoSphere.h \
+	HudTrail.h \
 	HyperspaceCloud.h \
 	IniConfig.h \
 	Intro.h \
@@ -109,17 +109,18 @@ noinst_HEADERS = \
 	RefCounted.h \
 	SDLWrappers.h \
 	SectorView.h \
+	Sensors.h \
 	Serializer.h \
 	StringF.h \
 	StringRange.h \
 	Sfx.h \
+	Shields.h \
 	Ship.h \
 	ShipAICmd.h \
 	ShipCockpit.h \
 	ShipController.h \
 	ShipCpanel.h \
 	ShipCpanelMultiFuncDisplays.h \
-	ShipSpinnerWidget.h \
 	ShipType.h \
 	Sound.h \
 	SoundMusic.h \
@@ -164,7 +165,6 @@ pioneer_SOURCES	= \
 	EnumStrings.cpp \
 	EquipType.cpp \
 	FaceGenManager.cpp \
-	FaceVideoLink.cpp \
 	Factions.cpp \
 	FileSourceZip.cpp \
 	FileSystem.cpp \
@@ -178,6 +178,7 @@ pioneer_SOURCES	= \
 	GeoPatchID.cpp \
 	GeoPatchJobs.cpp \
 	GeoSphere.cpp \
+	HudTrail.cpp \
 	HyperspaceCloud.cpp \
 	IniConfig.cpp \
 	Intro.cpp \
@@ -205,6 +206,7 @@ pioneer_SOURCES	= \
 	LuaFixed.cpp \
 	LuaManager.cpp \
 	LuaMissile.cpp \
+	LuaModelBody.cpp \
 	LuaMusic.cpp \
 	LuaNameGen.cpp \
 	LuaObject.cpp \
@@ -242,9 +244,11 @@ pioneer_SOURCES	= \
 	PropertyMap.cpp \
 	SDLWrappers.cpp \
 	SectorView.cpp \
+	Sensors.cpp \
 	Serializer.cpp \
 	StringF.cpp \
 	Sfx.cpp \
+	Shields.cpp \
 	Ship-AI.cpp \
 	Ship.cpp \
 	ShipAICmd.cpp \
@@ -252,7 +256,6 @@ pioneer_SOURCES	= \
 	ShipController.cpp \
 	ShipCpanel.cpp \
 	ShipCpanelMultiFuncDisplays.cpp \
-	ShipSpinnerWidget.cpp \
 	ShipType.cpp \
 	Sound.cpp \
 	SoundMusic.cpp \
@@ -403,9 +406,9 @@ if !HAVE_LUA
 textstress_LDADD += ../contrib/lua/liblua.a
 endif
 
-INCLUDES = -isystem @top_srcdir@/contrib
+AM_CPPFLAGS += -isystem @top_srcdir@/contrib
 if !HAVE_LUA
-INCLUDES += -isystem @top_srcdir@/contrib/lua
+AM_CPPFLAGS += -isystem @top_srcdir@/contrib/lua
 endif
 
 if BUILD_WIN32

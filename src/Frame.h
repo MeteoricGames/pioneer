@@ -28,13 +28,14 @@ public:
 	~Frame();
 	static void Serialize(Serializer::Writer &wr, Frame *f, Space *space);
 	static void PostUnserializeFixup(Frame *f, Space *space);
-	static Frame *Unserialize(Serializer::Reader &rd, Space *space, Frame *parent);
+	static Frame *Unserialize(Serializer::Reader &rd, Space *space, Frame *parent, double at_time);
 	const std::string &GetLabel() const { return m_label; }
 	void SetLabel(const char *label) { m_label = label; }
 
 	void SetPosition(const vector3d &pos) { m_pos = pos; }
 	vector3d GetPosition() const { return m_pos; }
-	void SetOrient(const matrix3x3d &m) { m_orient = m; }
+	void SetInitialOrient(const matrix3x3d &m, double time);
+	void SetOrient(const matrix3x3d &m, double time);
 	const matrix3x3d &GetOrient() const { return m_orient; }
 	const matrix3x3d &GetInterpOrient() const { return m_interpOrient; }
 	void SetVelocity(const vector3d &vel) { m_vel = vel; }
@@ -88,7 +89,6 @@ public:
 	matrix3x3d GetInterpOrientRelTo(const Frame *relTo) const;
 
 	static void GetFrameTransform(const Frame *fFrom, const Frame *fTo, matrix4x4d &m);
-	static void GetFrameRenderTransform(const Frame *fFrom, const Frame *fTo, matrix4x4d &m);
 
 	Sfx *m_sfx;			// the last survivor. actually m_children is pretty grim too.
 
@@ -104,6 +104,7 @@ private:
 	vector3d m_pos;
 	vector3d m_oldPos;
 	vector3d m_interpPos;
+	matrix3x3d m_initialOrient;
 	matrix3x3d m_orient;
 	matrix3x3d m_interpOrient;
 	vector3d m_vel; // note we don't use this to move frame. rather,

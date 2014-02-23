@@ -389,12 +389,24 @@ static void _add_children_to_sbody(lua_State *L, CustomSystemBody *sbody)
 		lua_pop(L, 1);
 		LUA_DEBUG_CHECK(L, 0);
 
-		//printf("add-children-to-body adding %s to %s\n", kid->name.c_str(), sbody->name.c_str());
+		//Output("add-children-to-body adding %s to %s\n", kid->name.c_str(), sbody->name.c_str());
 
 		sbody->children.push_back(kid);
 	}
-	//printf("add-children-to-body done for %s\n", sbody->name.c_str());
+	//Output("add-children-to-body done for %s\n", sbody->name.c_str());
 	LUA_DEBUG_END(L, 0);
+}
+
+static int count_stars(CustomSystemBody* csb)
+{
+	if (!csb)
+		return 0;
+	int count = 0;
+	if (csb->type >= SystemBody::TYPE_STAR_MIN && csb->type <= SystemBody::TYPE_STAR_MAX)
+		++count;
+	for (CustomSystemBody* child : csb->children)
+		count += count_stars(child);
+	return count;
 }
 
 static int l_csys_bodies(lua_State *L)
@@ -416,6 +428,13 @@ static int l_csys_bodies(lua_State *L)
 
 	cs->sBody = *primary_ptr;
 	*primary_ptr = 0;
+	if (cs->sBody) {
+		int star_count = count_stars(cs->sBody);
+		if (star_count != cs->numStars)
+			return luaL_error(L, "expected %d star(s) in system %s, but found %d (did you forget star types in CustomSystem:new?)",
+				cs->numStars, cs->name.c_str(), star_count);
+		// XXX Someday, we should check the other star types as well, but we do not use them anyway now.
+	}
 
 	lua_settop(L, 1);
 	return 1;
@@ -435,7 +454,7 @@ static int l_csys_add_to_sector(lua_State *L)
 	(*csptr)->sectorZ = z;
 	(*csptr)->pos = vector3f(*v);
 
-	//printf("l_csys_add_to_sector: %s added to %d, %d, %d\n", (*csptr)->name.c_str(), x, y, z);
+	//Output("l_csys_add_to_sector: %s added to %d, %d, %d\n", (*csptr)->name.c_str(), x, y, z);
 
 	s_sectorMap[SystemPath(x, y, z)].push_back(*csptr);
 	*csptr = 0;

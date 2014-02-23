@@ -7,7 +7,6 @@
 #include "LOD.h"
 #include "Parser.h"
 #include "SceneGraph.h"
-#include "StaticGeometry.h"
 #include "StringF.h"
 #include "utils.h"
 #include "graphics/Renderer.h"
@@ -116,16 +115,9 @@ namespace {
 
 namespace SceneGraph {
 Loader::Loader(Graphics::Renderer *r, bool logWarnings)
-: m_renderer(r)
-, m_model(0)
+: BaseLoader(r)
 , m_doLog(logWarnings)
 , m_mostDetailedLod(false)
-{
-	Graphics::Texture *sdfTex = Graphics::TextureBuilder("fonts/label3d.png", Graphics::LINEAR_CLAMP, true, true, true).GetOrCreateTexture(r, "model");
-	m_labelFont.Reset(new Text::DistanceFieldFont("fonts/sdf_definition.txt", sdfTex));
-}
-
-Loader::~Loader()
 {
 }
 
@@ -164,7 +156,7 @@ Model *Loader::LoadModel(const std::string &shortname, const std::string &basepa
 					Parser p(fileSource, fpath, m_curPath);
 					p.Parse(&modelDefinition);
 				} catch (ParseError &err) {
-					fprintf(stderr, "%s\n", err.what());
+					Output("%s\n", err.what());
 					throw LoadingError(err.what());
 				}
 				modelDefinition.name = shortname;
@@ -192,55 +184,10 @@ Model *Loader::CreateModel(ModelDefinition &def)
 	for(std::vector<MaterialDefinition>::const_iterator it = def.matDefs.begin();
 		it != def.matDefs.end(); ++it)
 	{
-		//Build material descriptor
-		assert(!(*it).name.empty());
-		const std::string &diffTex = (*it).tex_diff;
-		const std::string &specTex = (*it).tex_spec;
-		const std::string &glowTex = (*it).tex_glow;
-
-		Graphics::MaterialDescriptor matDesc;
-		matDesc.lighting = !it->unlit;
-		matDesc.alphaTest = it->alpha_test;
-		matDesc.twoSided = it->two_sided;
-
-		if ((*it).use_pattern) {
-			patternsUsed = true;
-			matDesc.usePatterns = true;
-		}
-
-		//diffuse texture is a must. Will create a white dummy texture if one is not supplied
-		matDesc.textures = 1;
-		matDesc.specularMap = !specTex.empty();
-		matDesc.glowMap = !glowTex.empty();
-		matDesc.quality = Graphics::HAS_HEAT_GRADIENT;
-
-		//Create material and set parameters
-		RefCountedPtr<Material> mat(m_renderer->CreateMaterial(matDesc));
-		mat->diffuse = (*it).diffuse;
-		mat->specular = (*it).specular;
-		mat->emissive = (*it).emissive;
-		mat->shininess = (*it).shininess;
-
-		//semitransparent material
-		//the node must be marked transparent when using this material
-		//and should not be mixed with opaque materials
-		if ((*it).opacity < 100)
-			mat->diffuse.a = (float((*it).opacity) / 100.f) * 255;
-
-		if (!diffTex.empty())
-			mat->texture0 = Graphics::TextureBuilder::Model(diffTex).GetOrCreateTexture(m_renderer, "model");
-		else
-			mat->texture0 = Graphics::TextureBuilder::GetWhiteTexture(m_renderer);
-		if (!specTex.empty())
-			mat->texture1 = Graphics::TextureBuilder::Model(specTex).GetOrCreateTexture(m_renderer, "model");
-		if (!glowTex.empty())
-			mat->texture2 = Graphics::TextureBuilder::Model(glowTex).GetOrCreateTexture(m_renderer, "model");
-		//texture3 is reserved for pattern
-		//texture4 is reserved for color gradient
-
-		model->m_materials.push_back(std::make_pair((*it).name, mat));
+		if (it->use_pattern) patternsUsed = true;
+		ConvertMaterialDefinition(*it);
 	}
-	//printf("Loaded %d materials\n", int(model->m_materials.size()));
+	//Output("Loaded %d materials\n", int(model->m_materials.size()));
 
 	//load meshes
 	//"mesh" here refers to a "mesh xxx.yyy"
@@ -290,7 +237,7 @@ Model *Loader::CreateModel(ModelDefinition &def)
 					model->GetRoot()->AddChild(mesh.Get());
 			} catch (LoadingError &err) {
 				delete model;
-				fprintf(stderr, "%s\n", err.what());
+				Output("%s\n", err.what());
 				throw;
 			}
 		}
@@ -328,38 +275,10 @@ Model *Loader::CreateModel(ModelDefinition &def)
 	m_model->UpdateAnimations();
 
 	//find usable pattern textures from the model directory
-	if (patternsUsed) {
-		FindPatterns(model->m_patterns);
-
-		if (model->m_patterns.empty()) {
-			model->m_patterns.push_back(Pattern());
-			Pattern &dumpat = m_model->m_patterns.back();
-			dumpat.name = "Dummy";
-			dumpat.texture = RefCountedPtr<Graphics::Texture>(Graphics::TextureBuilder::GetWhiteTexture(m_renderer));
-		}
-
-		//set up some noticeable default colors
-		std::vector<Color> colors;
-		colors.push_back(Color::RED);
-		colors.push_back(Color::GREEN);
-		colors.push_back(Color::BLUE);
-		model->SetColors(colors);
-		model->SetPattern(0);
-	}
+	if (patternsUsed)
+		SetUpPatterns();
 
 	return model;
-}
-
-void Loader::FindPatterns(PatternContainer &output)
-{
-	for (FileSystem::FileEnumerator files(FileSystem::gameDataFiles, m_curPath); !files.Finished(); files.Next()) {
-		const FileSystem::FileInfo &info = files.Current();
-		if (info.IsFile()) {
-			const std::string &name = info.GetName();
-			if (ends_with_ci(name, ".png") && starts_with(name, "pattern"))
-				output.push_back(Pattern(name, m_curPath, m_renderer));
-		}
-	}
 }
 
 RefCountedPtr<Node> Loader::LoadMesh(const std::string &filename, const AnimList &animDefs)
@@ -437,22 +356,6 @@ bool Loader::CheckKeysInRange(const aiNodeAnim *chan, double start, double end)
 	return (posKeysInRange > 0 || rotKeysInRange > 0 || sclKeysInRange > 0);
 }
 
-RefCountedPtr<Graphics::Material> Loader::GetDecalMaterial(unsigned int index)
-{
-	assert(index <= Model::MAX_DECAL_MATERIALS);
-	RefCountedPtr<Graphics::Material> &decMat = m_model->m_decalMaterials[index-1];
-	if (!decMat.Valid()) {
-		Graphics::MaterialDescriptor matDesc;
-		matDesc.textures = 1;
-		matDesc.lighting = true;
-		decMat.Reset(m_renderer->CreateMaterial(matDesc));
-		decMat->texture0 = Graphics::TextureBuilder::GetTransparentTexture(m_renderer);
-		decMat->specular = Color::BLACK;
-		decMat->diffuse = Color::WHITE;
-	}
-	return decMat;
-}
-
 void Loader::AddLog(const std::string &msg)
 {
 	if (m_doLog) m_logMessages.push_back(msg);
@@ -515,12 +418,17 @@ void Loader::ConvertAiMeshes(std::vector<RefCountedPtr<StaticGeometry> > &geoms,
 		}
 		assert(mat.Valid());
 
+		Graphics::RenderStateDesc rsd;
 		//turn on alpha blending and mark entire node as transparent
 		//(all importers split by material so far)
 		if (mat->diffuse.a < 255) {
 			geom->SetNodeMask(NODE_TRANSPARENT);
 			geom->m_blendMode = Graphics::BLEND_ALPHA;
+			rsd.blendMode = Graphics::BLEND_ALPHA;
+			rsd.depthWrite = false;
 		}
+
+		geom->SetRenderState(m_renderer->CreateRenderState(rsd));
 
 		const Graphics::AttributeSet vtxAttribs =
 			Graphics::ATTRIB_POSITION |
@@ -570,7 +478,7 @@ void Loader::ConvertAnimations(const aiScene* scene, const AnimList &animDefs, N
 	//This is very limited, and all animdefs are processed for all
 	//meshes, potentially leading to duplicate and wrongly split animations
 	if (animDefs.empty() || scene->mNumAnimations == 0) return;
-	if (scene->mNumAnimations > 1) printf("File has %d animations, treating as one animation\n", scene->mNumAnimations);
+	if (scene->mNumAnimations > 1) Output("File has %d animations, treating as one animation\n", scene->mNumAnimations);
 
 	std::vector<Animation*> &animations = m_model->m_animations;
 
@@ -835,6 +743,12 @@ void Loader::ConvertNodes(aiNode *node, Group *_parent, std::vector<RefCountedPt
 				geom->SetNodeMask(NODE_TRANSPARENT);
 				geom->m_blendMode = Graphics::BLEND_ALPHA;
 				geom->GetMesh(0)->GetSurface(0)->SetMaterial(GetDecalMaterial(numDecal));
+				geom->SetNodeFlags(geom->GetNodeFlags() | NODE_DECAL);
+				Graphics::RenderStateDesc rsd;
+				rsd.blendMode = Graphics::BLEND_ALPHA;
+				rsd.depthWrite = false;
+				//XXX add polygon offset to decal state
+				geom->SetRenderState(m_renderer->CreateRenderState(rsd));
 			}
 
 			parent->AddChild(geom.Get());
@@ -922,4 +836,5 @@ unsigned int Loader::GetGeomFlagForNodeName(const std::string &nodename)
 	//anything else is static collision
 	return 0x0;
 }
-}
+
+} //namespace

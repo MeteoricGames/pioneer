@@ -24,6 +24,8 @@
 #endif
 
 void Error(const char *format, ...) __attribute((format(printf,1,2))) __attribute((noreturn));
+void Warning(const char *format, ...)  __attribute((format(printf,1,2)));
+void Output(const char *format, ...)  __attribute((format(printf,1,2)));
 
 std::string string_join(std::vector<std::string> &v, std::string sep);
 std::string format_date(double time);
@@ -105,7 +107,7 @@ inline bool ends_with_ci(const std::string &s, const std::string &t) {
 }
 
 // add a few things that MSVC is missing
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER < 1800)
 
 // round & roundf. taken from http://cgit.freedesktop.org/mesa/mesa/tree/src/gallium/auxiliary/util/u_math.h
 static inline double round(double x)
@@ -117,7 +119,7 @@ static inline float roundf(float x)
 {
    return x >= 0.0f ? floorf(x + 0.5f) : ceilf(x - 0.5f);
 }
-#endif /* _MSC_VER */
+#endif /* _MSC_VER < 1800 */
 
 static inline Uint32 ceil_pow2(Uint32 v)
 {

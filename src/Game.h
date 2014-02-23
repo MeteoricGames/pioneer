@@ -23,10 +23,10 @@ public:
 	static void SaveGame(const std::string &filename, Game *game);
 
 	// start docked in station referenced by path
-	Game(const SystemPath &path);
+	Game(const SystemPath &path, double time = 0.0);
 
 	// start at position relative to body referenced by path
-	Game(const SystemPath &path, const vector3d &pos);
+	Game(const SystemPath &path, const vector3d &pos, double time = 0.0);
 
 	// load game
 	Game(Serializer::Reader &rd);
@@ -59,6 +59,8 @@ public:
 	double GetHyperspaceDuration() const { return m_hyperspaceDuration; }
 	double GetHyperspaceEndTime() const { return m_hyperspaceEndTime; }
 	double GetHyperspaceArrivalProbability() const;
+	const SystemPath& GetHyperspaceDest() const { return m_hyperspaceDest; }
+	const SystemPath& GetHyperspaceSource() const { return m_hyperspaceSource; }
 
 	enum TimeAccel {
 		TIMEACCEL_PAUSED,
@@ -105,6 +107,7 @@ private:
 
 	std::list<HyperspaceCloud*> m_hyperspaceClouds;
 	SystemPath m_hyperspaceSource;
+	SystemPath m_hyperspaceDest;
 	double m_hyperspaceProgress;
 	double m_hyperspaceDuration;
 	double m_hyperspaceEndTime;

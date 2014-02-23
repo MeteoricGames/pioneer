@@ -18,6 +18,7 @@
 #include "GLDebug.h"
 #include "gl2/GeoSphereMaterial.h"
 #include "gl2/GL2Material.h"
+#include "gl2/GL2RenderState.h"
 #include "gl2/GL2RenderTarget.h"
 #include "gl2/MultiMaterial.h"
 #include "gl2/Program.h"
@@ -28,6 +29,8 @@
 #include "gl2/TexturedFullscreenQuad.h"
 #include "gl2/HorizontalBlurMaterial.h"
 #include "gl2/VerticalBlurMaterial.h"
+#include "gl2/ShieldMaterial.h"
+#include "gl2/SphereImpostorMaterial.h"
 #include "gl2/BloomCompositorMaterial.h"
 #include <stddef.h> //for offsetof
 #include <ostream>
@@ -78,6 +81,7 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 , m_useCompressedTextures(false)
 , m_invLogZfarPlus1(0.f)
 , m_activeRenderTarget(0)
+, m_activeRenderState(nullptr)
 , m_matrixMode(MatrixMode::MODELVIEW)
 {
 	m_viewportStack.push(Viewport());
@@ -85,17 +89,15 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	const bool useDXTnTextures = vs.useTextureCompression && glewIsSupported("GL_EXT_texture_compression_s3tc");
 	m_useCompressedTextures = useDXTnTextures;
 
-	glShadeModel(GL_SMOOTH);
+	//XXX bunch of fixed function states here!
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glAlphaFunc(GL_GREATER, 0.5f);
 
 	glMatrixMode(GL_MODELVIEW);
 	m_modelViewStack.push(matrix4x4f::Identity());
@@ -121,6 +123,8 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 RendererGL2::~RendererGL2()
 {
 	while (!m_programs.empty()) delete m_programs.back().second, m_programs.pop_back();
+	for (auto state : m_renderStates)
+		delete state.second;
 }
 
 bool RendererGL2::GetNearFarRange(float &near, float &far) const
@@ -201,11 +205,20 @@ bool RendererGL2::SwapBuffers()
 			ss << glerr_to_string(err) << '\n';
 			err = glGetError();
 		}
-		OS::Error("%s", ss.str().c_str());
+		Error("%s", ss.str().c_str());
 	}
 #endif
 
 	GetWindow()->SwapBuffers();
+	return true;
+}
+
+bool RendererGL2::SetRenderState(RenderState *rs)
+{
+	if (m_activeRenderState != rs) {
+		static_cast<GL2::RenderState*>(rs)->Apply();
+		m_activeRenderState = rs;
+	}
 	return true;
 }
 
@@ -224,6 +237,8 @@ bool RendererGL2::SetRenderTarget(RenderTarget *rt)
 
 bool RendererGL2::ClearScreen()
 {
+	m_activeRenderState = nullptr;
+	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	return true;
@@ -231,6 +246,8 @@ bool RendererGL2::ClearScreen()
 
 bool RendererGL2::ClearDepthBuffer()
 {
+	m_activeRenderState = nullptr;
+	glDepthMask(GL_TRUE);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	return true;
@@ -260,7 +277,6 @@ bool RendererGL2::SetTransform(const matrix4x4d &m)
 	matrix4x4f mf;
 	matrix4x4dtof(m, mf);
 	return SetTransform(mf);
-	return true;
 }
 
 bool RendererGL2::SetTransform(const matrix4x4f &m)
@@ -310,73 +326,9 @@ bool RendererGL2::SetProjection(const matrix4x4f &m)
 	return true;
 }
 
-bool RendererGL2::SetBlendMode(BlendMode m)
-{
-	switch (m) {
-	case BLEND_SOLID:
-		glDisable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ZERO);
-		break;
-	case BLEND_ADDITIVE:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		break;
-	case BLEND_ALPHA:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-	case BLEND_ALPHA_ONE:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		break;
-	case BLEND_ALPHA_PREMULT:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-	case BLEND_SET_ALPHA:
-		glEnable(GL_BLEND);
-		glBlendFuncSeparate(GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ZERO);
-		break;
-	case BLEND_DEST_ALPHA:
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-	default:
-		return false;
-	}
-	return true;
-}
-
-bool RendererGL2::SetDepthTest(bool enabled)
-{
-	if (enabled)
-		glEnable(GL_DEPTH_TEST);
-	else
-		glDisable(GL_DEPTH_TEST);
-	return true;
-}
-
-bool RendererGL2::SetDepthWrite(bool enabled)
-{
-	if (enabled)
-		glDepthMask(GL_TRUE);
-	else
-		glDepthMask(GL_FALSE);
-	return true;
-}
-
 bool RendererGL2::SetWireFrameMode(bool enabled)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, enabled ? GL_LINE : GL_FILL);
-	return true;
-}
-
-bool RendererGL2::SetLightsEnabled(const bool enabled) {
-	// XXX move lighting out to shaders
-	if( enabled ) {
-		glEnable(GL_LIGHTING);
-	} else {
-		glDisable(GL_LIGHTING);
-	}
 	return true;
 }
 
@@ -434,13 +386,16 @@ bool RendererGL2::SetScissor(bool enabled, const vector2f &pos, const vector2f &
 	return true;
 }
 
-bool RendererGL2::DrawLines(int count, const vector3f *v, const Color *c, LineType t)
+bool RendererGL2::DrawLines(int count, const vector3f *v, const Color *c, RenderState* state, LineType t)
 {
 	PROFILE_SCOPED()
 	if (count < 2 || !v) return false;
 
+	SetRenderState(state);
+
 	vtxColorProg->Use();
 	vtxColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(vector3f), v);
@@ -453,14 +408,17 @@ bool RendererGL2::DrawLines(int count, const vector3f *v, const Color *c, LineTy
 	return true;
 }
 
-bool RendererGL2::DrawLines(int count, const vector3f *v, const Color &c, LineType t)
+bool RendererGL2::DrawLines(int count, const vector3f *v, const Color &c, RenderState *state, LineType t)
 {
 	PROFILE_SCOPED()
 	if (count < 2 || !v) return false;
 
+	SetRenderState(state);
+
 	flatColorProg->Use();
 	flatColorProg->diffuse.Set(c);
 	flatColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(vector3f), v);
 	glDrawArrays(t, 0, count);
@@ -470,36 +428,35 @@ bool RendererGL2::DrawLines(int count, const vector3f *v, const Color &c, LineTy
 	return true;
 }
 
-bool RendererGL2::DrawLines2D(int count, const vector2f *v, const Color &c, LineType t)
+bool RendererGL2::DrawLines2D(int count, const vector2f *v, const Color &c, Graphics::RenderState* state, LineType t)
 {
 	if (count < 2 || !v) return false;
+
+	SetRenderState(state);
 
 	flatColorProg->Use();
 	flatColorProg->diffuse.Set(c);
 	flatColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
-	glPushAttrib(GL_LIGHTING_BIT);
-	glDisable(GL_LIGHTING);
 
-	glColor4ub(c.r, c.g, c.b, c.a);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(2, GL_FLOAT, sizeof(vector2f), v);
 	glDrawArrays(t, 0, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	flatColorProg->Unuse();
-	glColor4ub(1.f, 1.f, 1.f, 1.f);
-
-	glPopAttrib();
 
 	return true;
 }
 
-bool RendererGL2::DrawPoints(int count, const vector3f *points, const Color *colors, float size)
+bool RendererGL2::DrawPoints(int count, const vector3f *points, const Color *colors, Graphics::RenderState *state, float size)
 {
 	if (count < 1 || !points || !colors) return false;
 
-	glPointSize(size);
 	vtxColorProg->Use();
 	vtxColorProg->invLogZfarPlus1.Set(m_invLogZfarPlus1);
+
+	SetRenderState(state);
+
+	glPointSize(size);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, points);
@@ -510,14 +467,14 @@ bool RendererGL2::DrawPoints(int count, const vector3f *points, const Color *col
 	vtxColorProg->Unuse();
 	glPointSize(1.f); // XXX wont't be necessary
 
-	glPopAttrib();
-
 	return true;
 }
 
-bool RendererGL2::DrawTriangles(const VertexArray *v, Material *m, PrimitiveType t)
+bool RendererGL2::DrawTriangles(const VertexArray *v, RenderState *rs, Material *m, PrimitiveType t)
 {
 	if (!v || v->position.size() < 3) return false;
+
+	SetRenderState(rs);
 
 	m->Apply();
 	EnableClientStates(v);
@@ -530,12 +487,14 @@ bool RendererGL2::DrawTriangles(const VertexArray *v, Material *m, PrimitiveType
 	return true;
 }
 
-bool RendererGL2::DrawSurface(const Surface *s)
+bool RendererGL2::DrawSurface(const Surface *s, RenderState *rs)
 {
 	if (!s || !s->GetVertices() || s->GetNumIndices() < 3) return false;
 
 	const Material *m = s->GetMaterial().Get();
 	const VertexArray *v = s->GetVertices();
+
+	SetRenderState(rs);
 
 	const_cast<Material*>(m)->Apply();
 	EnableClientStates(v);
@@ -548,11 +507,10 @@ bool RendererGL2::DrawSurface(const Surface *s)
 	return true;
 }
 
-bool RendererGL2::DrawPointSprites(int count, const vector3f *positions, Material *material, float size)
+bool RendererGL2::DrawPointSprites(int count, const vector3f *positions, RenderState *rs, Material *material, float size)
 {
 	if (count < 1 || !material || !material->texture0) return false;
 
-	SetDepthWrite(false);
 	VertexArray va(ATTRIB_POSITION | ATTRIB_UV0, count * 6);
 
 	matrix4x4f rot(GetCurrentModelView());
@@ -579,16 +537,17 @@ bool RendererGL2::DrawPointSprites(int count, const vector3f *positions, Materia
 		va.Add(pos+rotv3, vector2f(0.f, 1.f)); //bottom left
 		va.Add(pos+rotv2, vector2f(1.f, 1.f)); //bottom right
 	}
-	DrawTriangles(&va, material);
-	SetBlendMode(BLEND_SOLID);
-	SetDepthWrite(true);
+
+	DrawTriangles(&va, rs, material);
 
 	return true;
 }
 
-bool RendererGL2::DrawStaticMesh(StaticMesh *t)
+bool RendererGL2::DrawStaticMesh(StaticMesh *t, RenderState *rs)
 {
 	if (!t) return false;
+
+	SetRenderState(rs);
 
 	//Approach:
 	//on first render, buffer vertices from all surfaces to a vbo
@@ -677,7 +636,7 @@ bool RendererGL2::BufferStaticMesh(StaticMesh *mesh)
 	bool background = false;
 	bool model = false;
 	//XXX does this really have to support every case. I don't know.
-	if (set == (ATTRIB_POSITION | ATTRIB_NORMAL | ATTRIB_UV0) || set == (ATTRIB_POSITION | ATTRIB_UV0)) {
+	if ((set & ~ATTRIB_NORMAL) == (ATTRIB_POSITION | ATTRIB_UV0)) {
 		model = true;
 	} else if (set == (ATTRIB_POSITION | ATTRIB_DIFFUSE)) {
 		background = true;
@@ -793,9 +752,6 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 	case EFFECT_FRESNEL_SPHERE:
 		mat = new GL2::FresnelColourMaterial();
 		break;
-	case EFFECT_SKYBOX:
-		mat = new GL2::SkyboxMaterial();
-		break;
 	case EFFECT_TEXTURED_FULLSCREEN_QUAD:
 		mat = new GL2::TexturedFullscreenQuad();
 		break;
@@ -808,12 +764,20 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 	case EFFECT_BLOOM_COMPOSITOR:
 		mat = new GL2::BloomCompositorMaterial();
 		break;
+	case EFFECT_SHIELD:
+		mat = new GL2::ShieldMaterial();
+		break;
+	case EFFECT_SKYBOX:
+		mat = new GL2::SkyboxMaterial();
+		break;
+	case EFFECT_SPHEREIMPOSTOR:
+		mat = new GL2::SphereImpostorMaterial();
+		break;
 	default:
 		if (desc.lighting)
 			mat = new GL2::LitMultiMaterial();
 		else
 			mat = new GL2::MultiMaterial();
-		mat->twoSided = desc.twoSided; //other mats don't care about this
 	}
 
 	mat->m_renderer = this;
@@ -827,11 +791,11 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 
 bool RendererGL2::ReloadShaders()
 {
-	printf("Reloading " SIZET_FMT " programs...\n", m_programs.size());
+	Output("Reloading " SIZET_FMT " programs...\n", m_programs.size());
 	for (ProgramIterator it = m_programs.begin(); it != m_programs.end(); ++it) {
 		it->second->Reload();
 	}
-	printf("Done.\n");
+	Output("Done.\n");
 
 	return true;
 }
@@ -861,6 +825,19 @@ GL2::Program* RendererGL2::GetOrCreateProgram(GL2::Material *mat)
 Texture *RendererGL2::CreateTexture(const TextureDescriptor &descriptor)
 {
 	return new TextureGL(descriptor, m_useCompressedTextures);
+}
+
+RenderState *RendererGL2::CreateRenderState(const RenderStateDesc &desc)
+{
+	const uint32_t hash = lookup3_hashlittle(&desc, sizeof(RenderStateDesc), 0);
+	auto it = m_renderStates.find(hash);
+	if (it != m_renderStates.end())
+		return it->second;
+	else {
+		auto *rs = new GL2::RenderState(desc);
+		m_renderStates[hash] = rs;
+		return rs;
+	}
 }
 
 RenderTarget *RendererGL2::CreateRenderTarget(const RenderTargetDesc &desc)

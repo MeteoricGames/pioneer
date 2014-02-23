@@ -8,11 +8,12 @@
 #include "libs.h"
 #include "gui/Gui.h"
 #include "gui/GuiWidget.h"
-#include "View.h"
+#include "UIView.h"
 #include "Serializer.h"
 #include "SpeedLines.h"
 #include "Background.h"
 #include "EquipType.h"
+#include "Camera.h"
 #include "CameraController.h"
 
 class Body;
@@ -22,7 +23,7 @@ class Ship;
 class NavTunnelWidget;
 namespace Gui { class TexturedQuad; }
 
-class WorldView: public View {
+class WorldView: public UIView {
 public:
 	friend class NavTunnelWidget;
 	WorldView();
@@ -168,6 +169,7 @@ private:
 	Gui::LabelSet *m_bodyLabels;
 	std::map<Body*,vector3d> m_projectedPos;
 
+	RefCountedPtr<CameraContext> m_cameraContext;
 	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<InternalCameraController> m_internalCameraController;
 	std::unique_ptr<ExternalCameraController> m_externalCameraController;
@@ -186,17 +188,19 @@ private:
 	std::unique_ptr<Gui::TexturedQuad> m_reticle;
 	vector2f m_reticleSize;
 	vector2f m_reticlePos;
+	Graphics::RenderState *m_blendState;
 };
 
 class NavTunnelWidget: public Gui::Widget {
 public:
-	NavTunnelWidget(WorldView *worldView);
+	NavTunnelWidget(WorldView *worldView, Graphics::RenderState*);
 	virtual void Draw();
 	virtual void GetSizeRequested(float size[2]);
 	void DrawTargetGuideSquare(const vector2f &pos, const float size, const Color &c);
 
 private:
 	WorldView *m_worldView;
+	Graphics::RenderState *m_renderState;
 };
 
 #endif /* _WORLDVIEW_H */

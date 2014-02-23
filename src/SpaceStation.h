@@ -12,7 +12,6 @@
 #include "Serializer.h"
 #include "ShipType.h"
 #include "SpaceStationType.h"
-#include "scenegraph/ModelSkin.h"
 
 #define MAX_DOCKING_PORTS		240	//256-(0x10), 0x10 is used because the collision surfaces use it as an identifying flag
 
@@ -44,6 +43,8 @@ public:
 	virtual const SystemBody *GetSystemBody() const { return m_sbody; }
 	virtual void PostLoadFixup(Space *space);
 	virtual void NotifyRemoved(const Body* const removedBody);
+
+	virtual void SetLabel(const std::string &label);
 
 	// should call Ship::Undock and Ship::SetDockedWith instead
 	// Returns true on success, false if permission denied

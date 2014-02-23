@@ -32,8 +32,8 @@ void Frame::Serialize(Serializer::Writer &wr, Frame *f, Space *space)
 	wr.Double(f->m_radius);
 	wr.String(f->m_label);
 	wr.Vector3d(f->m_pos);
-	for (int i=0; i<9; i++) wr.Double(f->m_orient[i]);
 	wr.Double(f->m_angSpeed);
+	for (int i=0; i<9; i++) wr.Double(f->m_initialOrient[i]);
 	wr.Int32(space->GetIndexForSystemBody(f->m_sbody));
 	wr.Int32(space->GetIndexForBody(f->m_astroBody));
 	wr.Int32(f->m_children.size());
@@ -42,7 +42,7 @@ void Frame::Serialize(Serializer::Writer &wr, Frame *f, Space *space)
 	Sfx::Serialize(wr, f);
 }
 
-Frame *Frame::Unserialize(Serializer::Reader &rd, Space *space, Frame *parent)
+Frame *Frame::Unserialize(Serializer::Reader &rd, Space *space, Frame *parent, double at_time)
 {
 	Frame *f = new Frame();
 	f->m_parent = parent;
@@ -50,13 +50,15 @@ Frame *Frame::Unserialize(Serializer::Reader &rd, Space *space, Frame *parent)
 	f->m_radius = rd.Double();
 	f->m_label = rd.String();
 	f->m_pos = rd.Vector3d();
-	for (int i=0; i<9; i++) f->m_orient[i] = rd.Double();
 	f->m_angSpeed = rd.Double();
+	matrix3x3d orient;
+	for (int i=0; i<9; i++) orient[i] = rd.Double();
+	f->SetInitialOrient(orient, at_time);
 	f->m_sbody = space->GetSystemBodyByIndex(rd.Int32());
 	f->m_astroBodyIndex = rd.Int32();
 	f->m_vel = vector3d(0.0);
 	for (int i=rd.Int32(); i>0; --i) {
-		f->m_children.push_back(Unserialize(rd, space, f));
+		f->m_children.push_back(Unserialize(rd, space, f, at_time));
 	}
 	Sfx::Unserialize(rd, f);
 
@@ -84,6 +86,7 @@ void Frame::Init(Frame *parent, const char *label, unsigned int flags)
 	m_vel = vector3d(0.0);
 	m_angSpeed = 0.0;
 	m_orient = matrix3x3d::Identity();
+	m_initialOrient = matrix3x3d::Identity();
 	ClearMovement();
 	m_collisionSpace = new CollisionSpace();
 	if (m_parent) m_parent->AddChild(this);
@@ -200,13 +203,6 @@ void Frame::GetFrameTransform(const Frame *fFrom, const Frame *fTo, matrix4x4d &
 	m = forient; m.SetTranslate(fpos);
 }
 
-void Frame::GetFrameRenderTransform(const Frame *fFrom, const Frame *fTo, matrix4x4d &m)
-{
-	matrix3x3d forient = fFrom->GetInterpOrientRelTo(fTo);
-	vector3d fpos = fFrom->GetInterpPositionRelTo(fTo);
-	m = forient; m.SetTranslate(fpos);
-}
-
 void Frame::ClearMovement()
 {
 	UpdateRootRelativeVars();
@@ -232,15 +228,37 @@ void Frame::UpdateOrbitRails(double time, double timestep)
 	else m_pos = m_pos + m_vel * timestep;
 	
 	// update frame rotation
-	double ang = m_angSpeed * timestep;		// hmm. cumulative inaccuracy? worse!
+	double ang = fmod(m_angSpeed * time, 2.0 * M_PI);
 	if (!is_zero_exact(ang)) {			// frequently used with e^-10 etc
 		matrix3x3d rot = matrix3x3d::RotateY(-ang);		// RotateY is backwards
-		m_orient = m_orient * rot;		// angvel always +y
+		m_orient = m_initialOrient * rot;		// angvel always +y
 	}
 	UpdateRootRelativeVars();			// update root-relative pos/vel/orient
 
 	for (ChildIterator it = m_children.begin(); it != m_children.end(); ++it)
 		(*it)->UpdateOrbitRails(time, timestep);
+}
+
+void Frame::SetInitialOrient(const matrix3x3d &m, double time) {
+	m_initialOrient = m;
+	double ang = fmod(m_angSpeed * time, 2.0 * M_PI);
+	if (!is_zero_exact(ang)) {			// frequently used with e^-10 etc
+		matrix3x3d rot = matrix3x3d::RotateY(-ang);		// RotateY is backwards
+		m_orient = m_initialOrient * rot;		// angvel always +y
+	} else {
+		m_orient = m_initialOrient;
+	}
+}
+
+void Frame::SetOrient(const matrix3x3d &m, double time) {
+	m_orient = m;
+	double ang = fmod(m_angSpeed * time, 2.0 * M_PI);
+	if (!is_zero_exact(ang)) {			// frequently used with e^-10 etc
+		matrix3x3d rot = matrix3x3d::RotateY(ang);		// RotateY is backwards
+		m_initialOrient = m_orient * rot;		// angvel always +y
+	} else {
+		m_initialOrient = m_orient;
+	}
 }
 
 void Frame::UpdateRootRelativeVars()

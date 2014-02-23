@@ -7,14 +7,14 @@
 
 #include "libs.h"
 #include "gui/Gui.h"
-#include "View.h"
+#include "UIView.h"
 #include <vector>
 
 class StarSystem;
 class SystemBody;
 namespace Graphics { class Renderer; }
 
-class SystemInfoView: public View {
+class SystemInfoView: public UIView {
 public:
 	SystemInfoView();
 	virtual void Update();
@@ -25,16 +25,27 @@ protected:
 private:
 	class BodyIcon : public Gui::ImageRadioButton {
 	public:
-		BodyIcon(const char* img);
+		BodyIcon(const char* img, Graphics::Renderer*);
 		virtual void Draw();
 		virtual void OnActivate();
-		void SetRenderer(Graphics::Renderer *r) { m_renderer = r; }
 		bool HasStarport() { return m_hasStarport; }
 		void SetHasStarport() { m_hasStarport = true; }
+		void SetSelectColor(const Color& color) { m_selectColor = color; }
 	private:
 		Graphics::Renderer *m_renderer;
+		Graphics::RenderState *m_renderState;
 		bool m_hasStarport;
+		Color m_selectColor;
+
 	};
+
+	enum RefreshType {
+		REFRESH_NONE,
+		REFRESH_SELECTED,
+		REFRESH_ALL
+	};
+
+	RefreshType NeedsRefresh();
 	void SystemChanged(const SystemPath &path);
 	void UpdateEconomyTab();
 	void OnBodyViewed(SystemBody *b);
@@ -50,9 +61,11 @@ private:
 	Gui::Fixed *m_sbodyInfoTab, *m_econInfoTab;
 	Gui::Tabbed *m_tabs;
 	RefCountedPtr<StarSystem> m_system;
-	bool m_refresh;
+	SystemPath m_selectedBodyPath;
+	RefreshType m_refresh;
 	//map is not enough to associate icons as each tab has their own
 	std::vector<std::pair<std::string, BodyIcon*> > m_bodyIcons;
+	Graphics::RenderState *m_solidState;
 };
 
 #endif /* _SYSTEMINFOVIEW_H */

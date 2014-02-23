@@ -16,8 +16,17 @@ public:
 		SceneGraph::ModelSkin noskin, *skin = &noskin;
 		if (lua_gettop(l) > 2)
 			skin = LuaObject<SceneGraph::ModelSkin>::CheckFromLua(3);
+		unsigned int pattern = 0;
+		if (lua_gettop(l) > 3 && !lua_isnoneornil(l, 4))
+			pattern = luaL_checkinteger(l, 4) - 1; // Lua counts from 1
 		SceneGraph::Model *model = Pi::FindModel(name);
-		LuaObject<ModelSpinner>::PushToLua(new ModelSpinner(c, model, *skin));
+		LuaObject<ModelSpinner>::PushToLua(new ModelSpinner(c, model, *skin, pattern));
+		return 1;
+	}
+
+	static int l_attr_model(lua_State *l) {
+		ModelSpinner *ms = LuaObject<ModelSpinner>::CheckFromLua(1);
+		LuaObject<SceneGraph::Model>::PushToLua(ms->GetModel());
 		return 1;
 	}
 
@@ -38,6 +47,11 @@ template <> void LuaObject<GameUI::ModelSpinner>::RegisterClass()
         { 0, 0 }
 	};
 
-	LuaObjectBase::CreateClass(s_type, l_parent, l_methods, 0, 0);
+	static const luaL_Reg l_attrs[] = {
+		{ "model", LuaModelSpinner::l_attr_model },
+        { 0, 0 }
+	};
+
+	LuaObjectBase::CreateClass(s_type, l_parent, l_methods, l_attrs, 0);
 	LuaObjectBase::RegisterPromotion(l_parent, s_type, LuaObject<GameUI::ModelSpinner>::DynamicCastPromotionTest);
 }

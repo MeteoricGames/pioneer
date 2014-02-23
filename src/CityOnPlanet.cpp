@@ -15,6 +15,7 @@
 #include "graphics/Graphics.h"
 #include "scenegraph/Model.h"
 #include "scenegraph/SceneGraph.h"
+#include "scenegraph/ModelSkin.h"
 #include <set>
 
 static const unsigned int DEFAULT_NUM_BUILDINGS = 1000;
@@ -185,7 +186,7 @@ static void lookupBuildingListModels(citybuildinglist_t *list)
 		}
 	}
 	assert(!models.empty());
-	//printf("Got %d buildings of tag %s\n", models.size(), list->modelTagName);
+	//Output("Got %d buildings of tag %s\n", models.size(), list->modelTagName);
 	list->buildings = new citybuilding_t[models.size()];
 	list->numBuildings = models.size();
 
@@ -197,7 +198,7 @@ static void lookupBuildingListModels(citybuildinglist_t *list)
 		const double maxx = std::max(fabs(aabb.max.x), fabs(aabb.min.x));
 		const double maxy = std::max(fabs(aabb.max.z), fabs(aabb.min.z));
 		list->buildings[i].xzradius = sqrt(maxx*maxx + maxy*maxy);
-		//printf("%s: %f\n", list->buildings[i].modelname, list->buildings[i].xzradius);
+		//Output("%s: %f\n", list->buildings[i].modelname, list->buildings[i].xzradius);
 	}
 }
 
@@ -250,8 +251,8 @@ void CityOnPlanet::SetCityModelPatterns(const SystemPath &path)
 		SceneGraph::Model *m = (*it);
 		if (!m->SupportsPatterns()) continue;
 		skin.SetRandomColors(rand);
-		skin.SetPattern(rand.Int32(0, m->GetNumPatterns()));
 		skin.Apply(m);
+		m->SetPattern(rand.Int32(0, m->GetNumPatterns()));
 	}
 }
 
@@ -360,11 +361,10 @@ CityOnPlanet::CityOnPlanet(Planet *planet, SpaceStation *station, const Uint32 s
 	AddStaticGeomsToCollisionSpace();
 }
 
-void CityOnPlanet::Render(Graphics::Renderer *r, const Camera *camera, const SpaceStation *station, const vector3d &viewCoords, const matrix4x4d &viewTransform)
+void CityOnPlanet::Render(Graphics::Renderer *r, const Graphics::Frustum &frustum, const SpaceStation *station, const vector3d &viewCoords, const matrix4x4d &viewTransform)
 {
 	// Early frustum test of whole city.
 	const vector3d stationPos = viewTransform * (station->GetPosition() + m_realCentre);
-	const Graphics::Frustum frustum = camera->GetFrustum();
 	//modelview seems to be always identity
 	if (!frustum.TestPoint(stationPos, m_clipRadius))
 		return;

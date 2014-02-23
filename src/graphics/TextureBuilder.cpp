@@ -14,12 +14,12 @@
 namespace Graphics {
 
 TextureBuilder::TextureBuilder(const SDLSurfacePtr &surface, TextureSampleMode sampleMode, bool generateMipmaps, bool potExtend, bool forceRGBA, bool compressTextures) :
-    m_surface(surface), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_prepared(false), m_textureType(TEXTURE_2D)
+    m_surface(surface), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_textureType(TEXTURE_2D), m_prepared(false)
 {
 }
 
 TextureBuilder::TextureBuilder(const std::string &filename, TextureSampleMode sampleMode, bool generateMipmaps, bool potExtend, bool forceRGBA, bool compressTextures, TextureType textureType) :
-    m_filename(filename), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_prepared(false), m_textureType(textureType)
+    m_filename(filename), m_sampleMode(sampleMode), m_generateMipmaps(generateMipmaps), m_potExtend(potExtend), m_forceRGBA(forceRGBA), m_compressTextures(compressTextures), m_textureType(textureType), m_prepared(false)
 {
 }
 
@@ -156,14 +156,14 @@ void TextureBuilder::PrepareSurface()
 			unsigned long height = ceil_pow2(m_surface->h);
 
 			if (width != virtualWidth || height != virtualHeight)
-				fprintf(stderr, "WARNING: texture '%s' is not power-of-two and may not display correctly\n", m_filename.c_str());
+				Output("WARNING: texture '%s' is not power-of-two and may not display correctly\n", m_filename.c_str());
 		}
 	} else {
 		switch(m_dds.GetTextureFormat()) {
 		case PicoDDS::FORMAT_DXT1: targetTextureFormat = TEXTURE_DXT1; break;
 		case PicoDDS::FORMAT_DXT5: targetTextureFormat = TEXTURE_DXT5; break;
 		default:
-			fprintf(stderr, "ERROR: DDS texture with invalid format '%s' (only DXT1 and DXT5 are supported)\n", m_filename.c_str());
+			Output("ERROR: DDS texture with invalid format '%s' (only DXT1 and DXT5 are supported)\n", m_filename.c_str());
 			assert(false);
 			return;
 		}
@@ -191,8 +191,7 @@ static size_t LoadDDSFromFile(const std::string &filename, PicoDDS::DDSImage& dd
 {
 	RefCountedPtr<FileSystem::FileData> filedata = FileSystem::gameDataFiles.ReadFile(filename);
 	if (!filedata) {
-		fprintf(stderr, "LoadDDSFromFile: %s: could not read file\n", filename.c_str());
-		assert(0);
+		Output("LoadDDSFromFile: %s: could not read file\n", filename.c_str());
 		return 0;
 	}
 
@@ -212,27 +211,11 @@ void TextureBuilder::LoadSurface()
 			s = LoadSurfaceFromFile("textures/unknown.png"); 
 		}
 	} else if(m_textureType == TEXTURE_CUBE_MAP) {
-		int idx = m_filename.find_last_of('.');
-		assert(idx != std::string::npos); // Error: filename incorrect, should be "file.ext"
-		// Loads cube map based on SpaceScape format: cubemap_sideN.png/.jpg
-		std::string cube_right = m_filename.substr(0, idx) + "_right1" + m_filename.substr(idx);
-		std::string cube_left = m_filename.substr(0, idx) + "_left2" + m_filename.substr(idx);
-		std::string cube_top = m_filename.substr(0, idx) + "_top3" + m_filename.substr(idx);
-		std::string cube_bottom = m_filename.substr(0, idx) + "_bottom4" + m_filename.substr(idx);
-		std::string cube_front = m_filename.substr(0, idx) + "_front5" + m_filename.substr(idx);
-		std::string cube_back = m_filename.substr(0, idx) + "_back6" + m_filename.substr(idx);
-		m_cubemap.clear();
-		m_cubemap.push_back(LoadSurfaceFromFile(cube_right));
-		m_cubemap.push_back(LoadSurfaceFromFile(cube_left));
-		m_cubemap.push_back(LoadSurfaceFromFile(cube_top));
-		m_cubemap.push_back(LoadSurfaceFromFile(cube_bottom));
-		m_cubemap.push_back(LoadSurfaceFromFile(cube_front));
-		m_cubemap.push_back(LoadSurfaceFromFile(cube_back));
-		assert(m_cubemap[0] && m_cubemap[1] && m_cubemap[2] && m_cubemap[3] && m_cubemap[4] && m_cubemap[5]);
-		s = m_cubemap[0];
+		Output("LoadSurface: %s: cannot load non-DDS cubemaps\n", m_filename.c_str());
 	}
 
 	// XXX if we can't load the fallback texture, then what?
+	assert(s);
 	m_surface = s;
 }
 
