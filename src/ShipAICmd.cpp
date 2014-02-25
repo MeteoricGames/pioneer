@@ -6,6 +6,7 @@
 #include "Ship.h"
 #include "ShipAICmd.h"
 #include "Pi.h"
+#include "WorldView.h"
 #include "Player.h"
 #include "perlin.h"
 #include "Frame.h"
@@ -717,13 +718,14 @@ AICmdFlyTo::AICmdFlyTo(Ship *ship, Body *target, double dist) : AICommand(ship, 
 	if (!target->IsType(Object::TERRAINBODY)) m_dist = dist;
 	if (target->IsType(Object::PLANET)) {
 		Body *body = ship->GetFrame()->GetBody();
-		if (body && body->IsType(Object::TERRAINBODY))
+		if (body && body->IsType(Object::TERRAINBODY)) {
 			// if not within physradius, flyto physradius -1000 first
 			if (m_ship->GetPositionRelTo(target).Length()>target->GetPhysRadius()+1000.0)
 					m_dist = target->GetPhysRadius()-1000.0;
 			else { //flyto distance.
 				m_dist = static_cast<Planet *>(target)->GetTerrainHeight(ship->GetPosition().Normalized())+dist;
 			}
+		}
 	}
 	m_target = target; m_targframe = 0;
 }
@@ -780,7 +782,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 			target_radii = std::max(m_targframe->GetBody()->GetSystemBody()->GetRadius() * 1.25, 10000000.0);
 		}
 
-		double setspeed = std::min((double)m_ship->GetPositionRelTo(m_targframe).Length() / 1.0 - target_radii, 
+		double setspeed = std::min(static_cast<double>(m_ship->GetPositionRelTo(m_targframe).Length()) / 1.0 - target_radii, 
 			std::min(cspeed * 1.05, transit_max_speed));
 
 		if ( //check for sound transit start
@@ -840,9 +842,9 @@ bool AICmdFlyTo::TimeStepUpdate()
 
 		double setspeed = 0.0;
 		if (m_target->IsType(Object::SHIP)) {
-			setspeed = std::min((double)m_ship->GetPositionRelTo(m_target).Length() / 1.0 - target_radii, std::min(cspeed * 1.05, transit_max_speed));
+			setspeed = std::min(static_cast<double>(m_ship->GetPositionRelTo(m_target).Length()) / 1.0 - target_radii, std::min(cspeed * 1.05, transit_max_speed));
 		} else {
-			setspeed = std::min((double)m_ship->GetPositionRelTo(m_target->GetFrame()).Length() / 1.0 - target_radii,std::min(cspeed * 1.05, transit_max_speed));
+			setspeed = std::min(static_cast<double>(m_ship->GetPositionRelTo(m_target->GetFrame()).Length()) / 1.0 - target_radii,std::min(cspeed * 1.05, transit_max_speed));
 		}
 
 		if ( //check for sound transit start
@@ -1365,7 +1367,7 @@ bool AICmdTransitAround::TimeStepUpdate()
 	const double transit_low = std::max<double>(TRANSIT_GRAVITY_RANGE_1 + (m_obstructor->GetPhysRadius() * 0.0019), TRANSIT_GRAVITY_RANGE_1);
 	const double transit_high = std::max<double>(TRANSIT_GRAVITY_RANGE_1 + (m_obstructor->GetPhysRadius() * 0.0059), TRANSIT_GRAVITY_RANGE_1 + 25000.0);
 	const double transit_altitude = transit_low + ((transit_high - transit_low) / 2);
-	const double altitude_correction_speed = std::min<double>(m_ship->GetMaxManeuverSpeed(), 2500.0);
+	const double altitude_correction_speed = 10000.0; //std::min<double>(m_ship->GetMaxManeuverSpeed(), 2500.0);
 	vector3d ship_to_obstructor = m_obstructor->GetPositionRelTo(m_ship->GetFrame()) - 
 		m_ship->GetPosition();
 	vector3d ship_to_target = m_targetPosition - m_ship->GetPosition();
@@ -1378,27 +1380,34 @@ bool AICmdTransitAround::TimeStepUpdate()
 		m_warmUpTime = 2.0;
 		return true;
 	}
+
 	// 2: determine suitable altitude and move towards it
-	if(m_obstructor->IsType(Object::TERRAINBODY)) {
+	const double th = transit_altitude + 6000.0;
+	const double tl = transit_altitude - 6000.0;
+	if(m_state != AITA_TRANSIT && m_obstructor->IsType(Object::TERRAINBODY)) {
 		if(Pi::worldView->IsAltitudeAvailable()) {
 			m_alt = Pi::worldView->GetAltitude();
-			if(m_alt < transit_low || m_alt > transit_high) {
+			if(m_alt < tl || m_alt > th) {
 				m_warmUpTime = 2.0;
 				m_state = AITA_ALTITUDE;
 				double curve_factor = abs(m_alt - transit_altitude) / 10000.0;
-				if(m_alt < transit_low) {
-					velocity_vector = ((up_vector * curve_factor) + velocity_vector).Normalized();
-				} else if(m_alt > transit_high) {
-					velocity_vector = (-(up_vector * curve_factor) + velocity_vector).Normalized();
+				if(m_alt < tl) {
+					//velocity_vector = ((up_vector * curve_factor) + velocity_vector).Normalized();
+					velocity_vector = up_vector.Normalized();
+				} else if(m_alt > th) {
+					//velocity_vector = (-(up_vector * curve_factor) + velocity_vector).Normalized();
+					velocity_vector = -up_vector.Normalized();
 				}
 				m_ship->SetJuice(20.0);
 				m_ship->AIMatchVel(velocity_vector * altitude_correction_speed * std::min<double>(1.0, curve_factor));
+				//m_ship->AIMatchVel(velocity_vector * altitude_correction_speed);
 				m_ship->AIFaceDirection(velocity_vector);
 				m_ship->AIFaceUpdir(up_vector);
 				return false;
 			}
 		}
 	}
+
 	// Adjust velocity slightly to follow the exact transit altitude arc
 	if(m_alt > transit_altitude) {
 		if(m_alt > transit_altitude + 6000) {
@@ -1419,18 +1428,20 @@ bool AICmdTransitAround::TimeStepUpdate()
 		m_ship->SetVelocity(velocity_vector * m_ship->GetVelocity().Length());
 	}
 	m_state = AITA_TRANSIT;
+
 	// 3: Engage transit after 2 seconds to give sound effects enough time to play
 	if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
 		m_ship->StartTransitDrive();
 	}
-	if(m_warmUpTime > 0.0) {
-		m_warmUpTime -= time_step;
+	//if(m_warmUpTime > 0.0) {
+		//m_warmUpTime -= time_step;
 		// Issue: transit around is a very fast operation (by design). Waiting for 2 seconds
 		// before engaging transit will cause problems if the ship is coming too fast, it won't
 		// have enough time to adjust it's direction before slamming into the planet or 
 		// completely overshooting the transit range.
 		//return false;
-	}
+	//}
+
 	// 4: follow flight tangent at Transit speed
 	m_ship->SetJuice(std::max<double>(80.0, m_ship->GetVelocity().Length() * 0.008));
 

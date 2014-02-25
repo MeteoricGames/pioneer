@@ -53,7 +53,7 @@ void ShipCockpit::Update(float timeStep)
 	   abs(gforce - m_gForce) > 100.0) { // Smooth out gforce one frame spikes, sometimes happens when hitting max speed due to the thrust limiters
 		gforce = 0.0f;
 	}
-	if(abs(gforce - m_gForce) > 100.0) {
+	if((gforce > 0 && m_gForce < 0) || (m_gForce > 0 && gforce < 0)) {
 		gforce = 0.0f;
 	}
 	if(abs(m_translate.z - m_offset) < 0.001f) {

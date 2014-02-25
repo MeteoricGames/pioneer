@@ -4,13 +4,13 @@ EXTRA_DIST = \
 	SDLMain.nib/designable.nib \
 	SDLMain.nib/keyedobjects.nib \
 	main.cpp \
-	pioneer-logo.icns \
-	pioneer-logo.png \
-	pioneer.xcodeproj/project.pbxproj \
-	pioneer.xcodeproj/project.xcworkspace/contents.xcworkspacedata \
-	pioneer/en.lproj/Credits.rtf \
-	pioneer/en.lproj/InfoPlist.strings \
-	pioneer/pioneer-Info.plist \
-	pioneer/pioneer-Prefix.pch
+	paragon-logo.icns \
+	paragon-logo.png \
+	paragon.xcodeproj/project.pbxproj \
+	paragon.xcodeproj/project.xcworkspace/contents.xcworkspacedata \
+	paragon/en.lproj/Credits.rtf \
+	paragon/en.lproj/InfoPlist.strings \
+	paragon/paragon-Info.plist \
+	paragon/paragon-Prefix.pch
 
 include $(top_srcdir)/Makefile.common

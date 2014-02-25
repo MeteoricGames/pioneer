@@ -1,9 +1,10 @@
 -- Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+-- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
-local f = Faction:new('Core Union')
-	:description_short('The historical birthplace of humankind')
-	:description('Centered on Earth, the Core Union is an alliance of "free" worlds that holds sway over most of humanities colonies')
+local f = Faction:new('United Systems of America')
+	:description_short('One of the two interstellar superpowers.')
+	:description('The United Systems of America is the successor state to the United States of America, founded primarily by American colonists, it is one of the most powerful colonial groupings, retaining its Earth age status as a superpower.')
 	:homeworld(0,0,0,0,4)
 	:foundingDate(2510)
 	:expansionRate(0.2)

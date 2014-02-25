@@ -8,11 +8,11 @@ define_ship {
 	model='utility_flitter',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,
-	up_thrust = 3e5,
-	down_thrust = 3e5,
-	left_thrust = 3e5,
-	right_thrust = 3e5,
-	angular_thrust = 30e5,
+	up_thrust = 120e5,
+	down_thrust = 120e5,
+	left_thrust = 120e5,
+	right_thrust = 120e5,
+	angular_thrust = 1e5,
 	max_cargo = 5,
 	max_laser = 0,
 	max_missile = 0,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 80000e3,
 	price = 140000,
 	hyperdrive_class = 0,
+	-- Paragon Flight System
+    max_maneuver_speed = 500,
 }

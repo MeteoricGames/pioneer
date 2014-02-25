@@ -6,13 +6,14 @@ define_ship {
 	ship_class = 'omni_scout',
 	manufacturer = 'alders_vectrum',
 	model='omni_scout2',
+	cockpit='omni_scout2_cockpit',
 	forward_thrust = 165e5,
 	reverse_thrust = 165e5,
-	up_thrust = 55e5,
-	down_thrust = 55e5,
-	left_thrust = 55e5,
-	right_thrust = 55e5,
-	angular_thrust = 550e5,
+	up_thrust = 1650e5,
+	down_thrust = 1650e5,
+	left_thrust = 1650e5,
+	right_thrust = 1650e5,
+	angular_thrust = 1650e5,
 	max_cargo = 99,
 	max_laser = 2,
 	max_missile = 4,
@@ -26,6 +27,8 @@ define_ship {
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 65000e3,
-	price = 200000,
+	price = 220000,
 	hyperdrive_class = 3,
+	-- Paragon Flight System
+    max_maneuver_speed = 800,
 }

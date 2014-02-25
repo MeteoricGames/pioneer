@@ -72,6 +72,7 @@ static const double TRANSIT_DRIVE_1_SPEED = 299000.0;
 static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
 static const float TRANSIT_START_TIME = 2.0; // Allows sound to play first then the drive kicks in
 static const double TRANSIT_STATIONCATCH_DISTANCE = 20000.0;
+static const double TAKEOFF_THRUSTER_POWER = 0.1;
 
 class Ship: public DynamicBody {
 	friend class ShipController; //only controllers need access to AITimeStep
@@ -308,6 +309,9 @@ public:
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
+
+	virtual void Init();
+
 	void RenderLaserfire();
 	void ApplyThrusterLimits();
 		
@@ -338,7 +342,6 @@ private:
 	float GetECMRechargeTime();
 	void DoThrusterSounds() const;
 	void FireWeapon(int num);
-	void Init();
 	bool IsFiringLasers();
 	void TestLanded();
 	void UpdateAlertState();

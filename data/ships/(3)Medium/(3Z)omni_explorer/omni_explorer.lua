@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 55123e3,
 	price = 3400000,
 	hyperdrive_class = 13,
+	-- Paragon Flight System
+    max_maneuver_speed = 400,
 }

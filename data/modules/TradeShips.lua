@@ -705,6 +705,7 @@ local onFrameChanged = function (ship)
 			dist= ship:DistanceTo(getMyStarport(ship)) end)
 		Timer:CallAt(Game.time+2, function () 
 			if ship==nil then return end
+			if getMyStarport(ship)==nil then return end
 			delta=dist-ship:DistanceTo(getMyStarport(ship)) 
 			print('delta: '..delta..',dist: '..dist)
 			if delta~=nil and delta > 0 and delta < 50000000 then

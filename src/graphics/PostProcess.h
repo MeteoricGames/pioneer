@@ -7,6 +7,7 @@
 
 #include "libs.h"
 #include "RenderTarget.h"
+#include "Material.h"
 
 namespace Graphics {
 	class WindowSDL;

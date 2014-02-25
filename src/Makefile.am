@@ -13,7 +13,7 @@ AM_CFLAGS += $(WARN_CFLAGS)
 AM_CPPFLAGS += $(WARN_CPPFLAGS)
 AM_CXXFLAGS += $(STD_CXXFLAGS) $(WARN_CXXFLAGS)
 
-bin_PROGRAMS = pioneer
+bin_PROGRAMS = paragon
 noinst_HEADERS = \
 	Aabb.h \
 	AmbientSounds.h \
@@ -90,6 +90,7 @@ noinst_HEADERS = \
 	ModelCache.h \
 	ModManager.h \
 	ModelViewer.h \
+	MouseCursor.h \
 	NavLights.h \
 	Object.h \
 	ObjectViewerView.h \
@@ -149,7 +150,7 @@ noinst_HEADERS = \
 	vector3.h \
 	enum_table.h
 
-pioneer_SOURCES	= \
+paragon_SOURCES	= \
 	AmbientSounds.cpp \
 	Background.cpp \
 	Body.cpp \
@@ -232,6 +233,7 @@ pioneer_SOURCES	= \
 	ModelCache.cpp \
 	ModManager.cpp \
 	ModelViewer.cpp \
+	MouseCursor.cpp \
 	NavLights.cpp \
 	ObjectViewerView.cpp \
 	Orbit.cpp \
@@ -276,7 +278,7 @@ pioneer_SOURCES	= \
 	utils.cpp \
 	enum_table.cpp
 
-pioneer_LDADD = \
+paragon_LDADD = \
 	collider/libcollider.a \
 	gui/libgui.a \
 	graphics/libgraphics.a \
@@ -292,27 +294,27 @@ pioneer_LDADD = \
 	../contrib/glew/libglew.a \
 	../contrib/profiler/libprofiler.a
 
-pioneer_LDADD += \
+paragon_LDADD += \
 	$(FREETYPE_LIBS) $(GL_LIBS) \
 	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(VORBIS_LIBS) \
 	$(PNG_LIBS) $(ASSIMP_LIBS) $(EXTRA_LIBS)
 
 if BUILD_WIN32
-pioneer_LDFLAGS = -Wl,-Map=pioneer.map
+paragon_LDFLAGS = -Wl,-Map=paragon.map
 endif
 
 if !HAVE_LUA
-pioneer_LDADD += ../contrib/lua/liblua.a
+paragon_LDADD += ../contrib/lua/liblua.a
 endif
 
 if DO_STRIP
-PIONEER_V_STRIP = $(PIONEER_V_STRIP_@AM_V@)
-PIONEER_V_STRIP_ = $(PIONEER_V_STRIP_@AM_DEFAULT_V@)
-PIONEER_V_STRIP_0 = @echo "  STRIP   " $<;
-PIONEER_V_STRIP_1 =
+PARAGON_V_STRIP = $(PARAGON_V_STRIP_@AM_V@)
+PARAGON_V_STRIP_ = $(PARAGON_V_STRIP_@AM_DEFAULT_V@)
+PARAGON_V_STRIP_0 = @echo "  STRIP   " $<;
+PARAGON_V_STRIP_1 =
 
 all-local: $(bin_PROGRAMS)
-	$(PIONEER_V_STRIP)$(STRIP) $(bin_PROGRAMS)
+	$(PARAGON_V_STRIP)$(STRIP) $(bin_PROGRAMS)
 endif
 
 
@@ -412,17 +414,17 @@ AM_CPPFLAGS += -isystem @top_srcdir@/contrib/lua
 endif
 
 if BUILD_WIN32
-    pioneer_LDADD += win32/libwin32.a $(MINGW_LIBS)
+    paragon_LDADD += win32/libwin32.a $(MINGW_LIBS)
 endif
 
 if BUILD_POSIX
-    pioneer_LDADD += posix/libposix.a
+    paragon_LDADD += posix/libposix.a
 endif
 
 if HAVE_WINDRES
 # note: this can't be correctly packed into libwin32.a
 SUFFIXES = .rc
-pioneer_SOURCES += win32/pioneer.rc
+paragon_SOURCES += win32/paragon.rc
 .rc.o:
 	$(AM_V_GEN)$(MXE_WINDRES) $< $@
 endif

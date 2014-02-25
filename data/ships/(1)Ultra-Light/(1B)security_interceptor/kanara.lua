@@ -8,10 +8,10 @@ define_ship {
 	model='security_interceptor',
 	forward_thrust = 9e5,
 	reverse_thrust = 9e5,
-	up_thrust = 6e5,
-	down_thrust = 6e5,
-	left_thrust = 6e5,
-	right_thrust = 6e5,
+	up_thrust = 90e5,
+	down_thrust = 90e5,
+	left_thrust = 90e5,
+	right_thrust = 90e5,
 	angular_thrust = 10e5,
 	max_cargo = 6,
 	max_missile = 2,
@@ -28,5 +28,5 @@ define_ship {
 	price = 0,
 	hyperdrive_class = 0,
 	-- Paragon Flight System
-    max_maneuver_speed = 350,
+    max_maneuver_speed = 700,
 }

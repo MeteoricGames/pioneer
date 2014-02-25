@@ -48,6 +48,7 @@ public:
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
+	virtual void Init() override;
 
 	virtual void OnEnterSystem();
 	virtual void OnEnterHyperspace();

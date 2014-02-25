@@ -707,6 +707,12 @@ static int l_engine_set_key_binding(lua_State *l)
 	return luaL_error(l, "Invalid binding ID given to Engine.SetKeyBinding");
 }
 
+static int l_engine_reset_key_bindings(lua_State *l)
+{
+	KeyBindings::ResetBindingsToDefault();
+	return 0;
+}
+
 static int l_engine_get_mouse_y_inverted(lua_State *l)
 {
 	lua_pushboolean(l, Pi::config->Int("InvertMouseY") != 0);
@@ -811,6 +817,7 @@ void LuaEngine::Register()
 
 		{ "GetKeyBindings", l_engine_get_key_bindings },
 		{ "SetKeyBinding", l_engine_set_key_binding },
+		{ "ResetKeyBindings", l_engine_reset_key_bindings },
 		{ "GetMouseYInverted", l_engine_get_mouse_y_inverted },
 		{ "SetMouseYInverted", l_engine_set_mouse_y_inverted },
 		{ "GetJoystickEnabled", l_engine_get_joystick_enabled },

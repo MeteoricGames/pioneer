@@ -8,10 +8,10 @@ define_ship {
 	model='omni_scout',
 	forward_thrust = 165e5,
 	reverse_thrust = 165e5,
-	up_thrust = 55e5,
-	down_thrust = 55e5,
-	left_thrust = 55e5,
-	right_thrust = 55e5,
+	up_thrust = 1650e5,
+	down_thrust = 1650e5,
+	left_thrust = 1650e5,
+	right_thrust = 1650e5,
 	angular_thrust = 550e5,
 	max_cargo = 99,
 	max_laser = 2,
@@ -28,4 +28,6 @@ define_ship {
 	effective_exhaust_velocity = 65000e3,
 	price = 200000,
 	hyperdrive_class = 3,
+	-- Paragon Flight System
+    max_maneuver_speed = 700,
 }
