@@ -21,6 +21,7 @@
 #include "StringF.h"
 #include "galaxy/StarSystem.h"
 #include "graphics/Graphics.h"
+#include "scenegraph/ModelSkin.h"
 #include <algorithm>
 
 void SpaceStation::Init()
@@ -69,6 +70,9 @@ void SpaceStation::Save(Serializer::Writer &wr, Space *space)
 void SpaceStation::Load(Serializer::Reader &rd, Space *space)
 {
 	ModelBody::Load(rd, space);
+
+	m_oldAngDisplacement = 0.0;
+
 	int num = rd.Int32();
 	if (num > Equip::TYPE_MAX) throw SavedGameCorruptException();
 	const Uint32 numShipDocking = rd.Int32();
@@ -165,12 +169,18 @@ void SpaceStation::InitStation()
 	if (!GetModel())
 		SetModel(m_type->modelName.c_str());
 
-	m_navLights.reset(new NavLights(GetModel(), 2.2f));
+	SceneGraph::Model *model = GetModel();
+
+	m_navLights.reset(new NavLights(model, 2.2f));
 	m_navLights->SetEnabled(true);
 
 	if (ground) SetClipRadius(CITY_ON_PLANET_RADIUS);		// overrides setmodel
 
-	m_doorAnimation = GetModel()->FindAnimation("doors");
+	m_doorAnimation = model->FindAnimation("doors");
+
+	SceneGraph::ModelSkin skin;
+	skin.SetDecal("pioneer");
+	skin.Apply(model);
 }
 
 SpaceStation::~SpaceStation()
@@ -512,7 +522,7 @@ void SpaceStation::TimeStepUpdate(const float timeStep)
 			m_navLights->SetColor(i+1, NavLights::NAVLIGHT_YELLOW);
 			continue;
 		}
-		if (dt.ship->GetFlightState() == Ship::FLYING)
+		if (dt.ship->GetFlightState() != Ship::DOCKED && dt.ship->GetFlightState() != Ship::DOCKING)
 			continue;
 		PositionDockedShip(dt.ship, i);
 		m_navLights->SetColor(i+1, NavLights::NAVLIGHT_RED); //docked
@@ -566,12 +576,19 @@ void SpaceStation::Render(Graphics::Renderer *r, const Camera *camera, const vec
 		if (!m_adjacentCity) {
 			m_adjacentCity = new CityOnPlanet(planet, this, m_sbody->seed);
 		}
-		m_adjacentCity->Render(r, camera, this, viewCoords, viewTransform);
+		m_adjacentCity->Render(r, camera->GetContext()->GetFrustum(), this, viewCoords, viewTransform);
 
 		RenderModel(r, camera, viewCoords, viewTransform, false);
 
 		ResetLighting(r, oldLights, oldAmbient);
 	}
+}
+
+void SpaceStation::SetLabel(const std::string &label)
+{
+	assert(GetModel());
+	GetModel()->SetLabel(label);
+	Body::SetLabel(label);
 }
 
 // find an empty position for a static ship and mark it as used. these aren't

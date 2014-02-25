@@ -13,6 +13,7 @@ namespace Graphics {
 	class Renderer;
 	class VertexArray;
 	class Material;
+	class RenderState;
 }
 
 namespace SceneGraph {
@@ -25,6 +26,8 @@ public:
 	virtual void Accept(NodeVisitor &v);
 	virtual const char *GetTypeName() const { return "Thruster"; }
 	virtual void Render(const matrix4x4f &trans, const RenderData *rd);
+	virtual void Save(NodeDatabase&) override;
+	static Thruster *Load(NodeDatabase&);
 
 private:
 	static Graphics::VertexArray* CreateThrusterGeometry();
@@ -33,6 +36,7 @@ private:
 	RefCountedPtr<Graphics::Material> m_glowMat;
 	std::unique_ptr<Graphics::VertexArray> m_tVerts;
 	std::unique_ptr<Graphics::VertexArray> m_glowVerts;
+	Graphics::RenderState *m_renderState;
 	bool linearOnly;
 	vector3f dir;
 	vector3f pos;

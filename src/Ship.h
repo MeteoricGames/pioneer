@@ -10,13 +10,16 @@
 #include "DynamicBody.h"
 #include "EquipSet.h"
 #include "galaxy/SystemPath.h"
+#include "HudTrail.h"
 #include "NavLights.h"
 #include "Planet.h"
+#include "Sensors.h"
 #include "Serializer.h"
 #include "ShipType.h"
 #include "scenegraph/SceneGraph.h"
 #include "scenegraph/ModelSkin.h"
 #include <list>
+#include <unordered_map>
 
 class SpaceStation;
 class HyperspaceCloud;
@@ -80,6 +83,8 @@ public:
 	Ship() {} //default constructor used before Load
 	virtual ~Ship();
 
+	virtual void SetFrame(Frame *f);
+
 	void SetController(ShipController *c); //deletes existing
 	ShipController *GetController() const { return m_controller; }
 	virtual bool IsPlayerShip() const { return false; } //XXX to be replaced with an owner check
@@ -129,13 +134,14 @@ public:
 
 	virtual void NotifyRemoved(const Body* const removedBody);
 	virtual bool OnCollision(Object *o, Uint32 flags, double relVel);
-	virtual bool OnDamage(Object *attacker, float kgDamage);
+	virtual bool OnDamage(Object *attacker, float kgDamage, const CollisionContact& contactData);
 
 	enum FlightState { // <enum scope='Ship' name=ShipFlightState public>
 		FLYING,     // open flight (includes autopilot)
 		DOCKING,    // in docking animation
 		DOCKED,     // docked with station
 		LANDED,     // rough landed (not docked)
+		JUMPING,    // between space and hyperspace ;)
 		HYPERSPACE, // in hyperspace
 	};
 
@@ -165,12 +171,14 @@ public:
 		HYPERJUMP_OK,
 		HYPERJUMP_CURRENT_SYSTEM,
 		HYPERJUMP_NO_DRIVE,
+		HYPERJUMP_INITIATED,
 		HYPERJUMP_DRIVE_ACTIVE,
 		HYPERJUMP_OUT_OF_RANGE,
 		HYPERJUMP_INSUFFICIENT_FUEL,
 		HYPERJUMP_SAFETY_LOCKOUT
 	};
 
+	HyperjumpStatus GetHyperspaceDetails(const SystemPath &src, const SystemPath &dest, int &outFuelRequired, double &outDurationSecs);
 	HyperjumpStatus GetHyperspaceDetails(const SystemPath &dest, int &outFuelRequired, double &outDurationSecs);
 	HyperjumpStatus CheckHyperspaceTo(const SystemPath &dest, int &outFuelRequired, double &outDurationSecs);
 	HyperjumpStatus CheckHyperspaceTo(const SystemPath &dest) {
@@ -289,9 +297,14 @@ public:
 	void SetInvulnerable(bool b) { m_invulnerable = b; }
 
 	bool TargetInSight() const { return m_targetInSight; }
+	Sensors *GetSensors() const { return m_sensors.get(); }
 
 	virtual Body *GetCombatTarget() const { return 0; }
 	virtual Body *GetNavTarget() const { return 0; }
+	Uint8 GetRelations(Body *other) const; //0=hostile, 50=neutral, 100=ally
+	void SetRelations(Body *other, Uint8 percent);
+
+	double GetLandingPosOffset() const { return m_landingMinOffset; }
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
@@ -341,6 +354,8 @@ private:
 
 	bool m_invulnerable;
 
+	static const float DEFAULT_SHIELD_COOLDOWN_TIME;
+	float m_shieldCooldown;
 	shipstats_t m_stats;
 	const ShipType *m_type;
 	SceneGraph::ModelSkin m_skin;
@@ -379,12 +394,17 @@ private:
 	bool m_targetInSight;
 	vector3d m_lastVel;
 
+	double m_landingMinOffset;	// offset from the centre of the ship used during docking
+
 	int m_dockedWithIndex; // deserialisation
 
 	SceneGraph::Animation *m_landingGearAnimation;
 	std::unique_ptr<NavLights> m_navLights;
 
 	static HeatGradientParameters_t s_heatGradientParams;
+
+	std::unique_ptr<Sensors> m_sensors;
+	std::unordered_map<Body*, Uint8> m_relationsMap;
 };
 
 

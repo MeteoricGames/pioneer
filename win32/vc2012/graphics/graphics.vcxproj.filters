@@ -45,6 +45,12 @@
     <ClCompile Include="..\..\..\src\graphics\WindowSDL.cpp" />
     <ClCompile Include="..\..\..\src\graphics\PostProcess.cpp" />
     <ClCompile Include="..\..\..\src\graphics\PostProcessing.cpp" />
+    <ClCompile Include="..\..\..\src\graphics\gl2\ShieldMaterial.cpp">
+      <Filter>gl2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl2\GL2RenderState.cpp">
+      <Filter>gl2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
@@ -94,11 +100,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\WindowSDL.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\TexturedFullscreenQuad.h">
+          <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\ShieldMaterial.h">
       <Filter>gl2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\gl2\SkyboxMaterial.h">
+          <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\GL2RenderState.h">
       <Filter>gl2</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\RenderState.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\HorizontalBlurMaterial.h">
       <Filter>gl2</Filter>
     </ClInclude>

@@ -6,11 +6,12 @@
 
 #include "Body.h"
 #include "Serializer.h"
+#include "graphics/Material.h"
+#include "graphics/RenderState.h"
 
 class Frame;
 namespace Graphics {
 	class Renderer;
-	class Material;
 	namespace Drawables {
 		class Sphere3D;
 	}
@@ -35,12 +36,14 @@ public:
 	//create shared models
 	static void Init(Graphics::Renderer *r);
 	static void Uninit();
-	static Graphics::Drawables::Sphere3D *shieldEffect;
 	static Graphics::Drawables::Sphere3D *explosionEffect;
 	static Graphics::Material *damageParticle;
 	static Graphics::Material *ecmParticle;
 	static Graphics::Material *smokeParticle;
 	static Graphics::Material *explotionParticle;
+	static Graphics::RenderState *alphaState;
+	static Graphics::RenderState *additiveAlphaState;
+	static Graphics::RenderState *alphaOneState;
 
 private:
 	static Sfx *AllocSfxInFrame(Frame *f);

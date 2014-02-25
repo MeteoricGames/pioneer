@@ -125,7 +125,7 @@
    },
    "CAMERA_BOTTOM_VIEW" : {
       "description" : "",
-      "message" : "Bottom camera"
+      "message" : "Onderste camera"
    },
    "CAMERA_FRONT_VIEW" : {
       "description" : "",
@@ -145,7 +145,7 @@
    },
    "CAMERA_TOP_VIEW" : {
       "description" : "",
-      "message" : "Top camera"
+      "message" : "Bovenaanzicht"
    },
    "CANT_SAVE_IN_HYPERSPACE" : {
       "description" : "",
@@ -193,7 +193,7 @@
    },
    "CARGO_SCOOP_DESCRIPTION" : {
       "description" : "",
-      "message" : "Permits scooping cargo pods from space."
+      "message" : "Laat toe om vrachtmodules op te scheppen uit de ruimte."
    },
    "CH4_ATMOSPHERE" : {
       "description" : "",
@@ -233,7 +233,7 @@
    },
    "COMPUTER_HEADING_CONTROL" : {
       "description" : "",
-      "message" : "Computer heading control"
+      "message" : "Computer richting besturing"
    },
    "COMPUTER_SPEED_CONTROL" : {
       "description" : "",
@@ -334,6 +334,10 @@
    "DRAW_OUT_RANGE_LABELS" : {
       "description" : "",
       "message" : "Label out-of-range systems"
+   },
+   "DRAW_UNINHABITED_LABELS" : {
+      "description" : "",
+      "message" : "Label uninhabited systems"
    },
    "DRAW_VERTICAL_LINES" : {
       "description" : "",
@@ -477,7 +481,7 @@
    },
    "FIRE_MISSILE" : {
       "description" : "",
-      "message" : "Fire missile"
+      "message" : "Raket afvuren"
    },
    "FOLLOWING_SELECTION" : {
       "description" : "",
@@ -493,7 +497,7 @@
    },
    "FUEL" : {
       "description" : "",
-      "message" : "Fuel"
+      "message" : "Brandstof"
    },
    "FUEL_SCOOP" : {
       "description" : "",
@@ -517,7 +521,7 @@
    },
    "GAME_LOAD_CANNOT_OPEN" : {
       "description" : "",
-      "message" : "Dit bestand kon niet worden geladen vanwege foutief toegwezen bestandspermissies."
+      "message" : "Dit bestand kon niet worden geladen vanwege foutief toegewezen bestandspermissies."
    },
    "GAME_LOAD_CORRUPT" : {
       "description" : "",
@@ -525,7 +529,7 @@
    },
    "GAME_LOAD_WRONG_VERSION" : {
       "description" : "",
-      "message" : "This saved game cannot be loaded because it was created by a different version of Pioneer."
+      "message" : "Dit opgeslagen spel kan niet geladen worden omdat het was gecreëerd door een andere versie van Pioneer."
    },
    "GAME_SAVED_TO" : {
       "description" : "",
@@ -533,7 +537,11 @@
    },
    "GAME_SAVE_CANNOT_WRITE" : {
       "description" : "",
-      "message" : "This saved game file could not be written because of a system error."
+      "message" : "Dit opgeslagen spelbestand kon niet beschreven worden vanwege een systeemfout."
+   },
+   "GENERAL_VIEW_CONTROLS" : {
+      "description" : "",
+      "message" : "General View Controls"
    },
    "GOVERNMENT_TYPE" : {
       "description" : "",
@@ -557,7 +565,7 @@
    },
    "HEADING_LOCK_BACKWARD" : {
       "description" : "",
-      "message" : "Heading Lock (aft)"
+      "message" : "Richtingslot (achter)"
    },
    "HEADING_LOCK_FORWARD" : {
       "description" : "",
@@ -787,6 +795,70 @@
       "description" : "",
       "message" : "Handmatige besturingsmode"
    },
+   "MAP_LOCK_HYPERSPACE_TARGET" : {
+      "description" : "",
+      "message" : "Lock Hyperspace Target"
+   },
+   "MAP_TOGGLE_INFO_PANEL" : {
+      "description" : "",
+      "message" : "Toggle Info Panel"
+   },
+   "MAP_TOGGLE_SELECTION_FOLLOW_VIEW" : {
+      "description" : "",
+      "message" : "Toggle Selection Following View"
+   },
+   "MAP_VIEW_ROTATE_DOWN" : {
+      "description" : "",
+      "message" : "Rotate View Down"
+   },
+   "MAP_VIEW_ROTATE_LEFT" : {
+      "description" : "",
+      "message" : "Rotate View Left"
+   },
+   "MAP_VIEW_ROTATE_RIGHT" : {
+      "description" : "",
+      "message" : "Rotate View Right"
+   },
+   "MAP_VIEW_ROTATE_UP" : {
+      "description" : "",
+      "message" : "Rotate View Up"
+   },
+   "MAP_VIEW_SHIFT_BACKWARD" : {
+      "description" : "",
+      "message" : "Shift View Backwards"
+   },
+   "MAP_VIEW_SHIFT_DOWN" : {
+      "description" : "",
+      "message" : "Shift View Down"
+   },
+   "MAP_VIEW_SHIFT_FORWARD" : {
+      "description" : "",
+      "message" : "Shift View Forwards"
+   },
+   "MAP_VIEW_SHIFT_LEFT" : {
+      "description" : "",
+      "message" : "Shift View Left"
+   },
+   "MAP_VIEW_SHIFT_RIGHT" : {
+      "description" : "",
+      "message" : "Shift View Right"
+   },
+   "MAP_VIEW_SHIFT_UP" : {
+      "description" : "",
+      "message" : "Shift View Up"
+   },
+   "MAP_WARP_TO_CURRENT_SYSTEM" : {
+      "description" : "",
+      "message" : "Warp to Current System"
+   },
+   "MAP_WARP_TO_HYPERSPACE_TARGET" : {
+      "description" : "",
+      "message" : "Warp to Hyperspace Target"
+   },
+   "MAP_WARP_TO_SELECTED_SYSTEM" : {
+      "description" : "",
+      "message" : "Warp to Selected System"
+   },
    "MASS" : {
       "description" : "",
       "message" : "Massa"
@@ -913,11 +985,11 @@
    },
    "MONTH_MAR" : {
       "description" : "",
-      "message" : "Mar"
+      "message" : "Mrt"
    },
    "MONTH_MAY" : {
       "description" : "",
-      "message" : "May"
+      "message" : "Mei"
    },
    "MONTH_NOV" : {
       "description" : "",
@@ -925,7 +997,7 @@
    },
    "MONTH_OCT" : {
       "description" : "",
-      "message" : "Oct"
+      "message" : "Okt"
    },
    "MONTH_SEP" : {
       "description" : "",
@@ -1005,11 +1077,11 @@
    },
    "NUMBER_DAYS" : {
       "description" : "",
-      "message" : "%days{f.0} days"
+      "message" : "%days{f.0} dagen"
    },
    "NUMBER_G" : {
       "description" : "",
-      "message" : "%acceleration{f.1} G"
+      "message" : "%versnelling{f.1} G"
    },
    "NUMBER_HOURS" : {
       "description" : "",
@@ -1093,7 +1165,7 @@
    },
    "PASSENGER_CABIN" : {
       "description" : "",
-      "message" : "Occupied Passenger Cabin"
+      "message" : "Bezette Passagiers Cabine"
    },
    "PAUSED" : {
       "description" : "",
@@ -1235,6 +1307,10 @@
       "description" : "",
       "message" : "Reset"
    },
+   "RESET_ORIENTATION_AND_ZOOM" : {
+      "description" : "",
+      "message" : "Reset Orientation and Zoom"
+   },
    "ROBOTS" : {
       "description" : "",
       "message" : "Robots"
@@ -1265,15 +1341,15 @@
    },
    "ROTATE_LEFT" : {
       "description" : "",
-      "message" : "Rotate Left"
+      "message" : "Roteer Linksom"
    },
    "ROTATE_RIGHT" : {
       "description" : "",
-      "message" : "Rotate Right"
+      "message" : "Roteer Rechtsom"
    },
    "ROTATE_UP" : {
       "description" : "",
-      "message" : "Rotate Up"
+      "message" : "Roteer Omhoog"
    },
    "ROTATIONAL_PERIOD" : {
       "description" : "",
@@ -1309,7 +1385,7 @@
    },
    "SCREENSHOT_FILENAME_TEMPLATE" : {
       "description" : "",
-      "message" : "screenshot%index{d08}.png"
+      "message" : "schermdump%index{d08}.png"
    },
    "SCUTUM_CENTAURUS_ARM" : {
       "description" : "",
@@ -1319,9 +1395,17 @@
       "description" : "",
       "message" : "Zoek"
    },
+   "SEARCH_MAP" : {
+      "description" : "",
+      "message" : "Search Map"
+   },
    "SECTOR_COORDINATES" : {
       "description" : "",
       "message" : "Sector coördinaten:"
+   },
+   "SECTOR_MAP_VIEW" : {
+      "description" : "",
+      "message" : "Sector Map View"
    },
    "SECTOR_X_Y_Z" : {
       "description" : "",
@@ -1629,7 +1713,7 @@
    },
    "SYSTEM" : {
       "description" : "",
-      "message" : "System"
+      "message" : "Systeem"
    },
    "SYSTEM_NUMBER" : {
       "description" : "",
@@ -1717,7 +1801,7 @@
    },
    "TOGGLE_ROTATION_DAMPING" : {
       "description" : "",
-      "message" : "Toggle rotation damping"
+      "message" : "Schakel rotatie demping"
    },
    "TOGGLE_SCAN_MODE" : {
       "description" : "",
@@ -1757,11 +1841,11 @@
    },
    "UNOCCUPIED_CABIN" : {
       "description" : "",
-      "message" : "Extra Passenger Cabin"
+      "message" : "Extra Passagierscabine"
    },
    "UNOCCUPIED_CABIN_DESCRIPTION" : {
       "description" : "",
-      "message" : "Required for transport of a single passenger"
+      "message" : "Benodigd voor transport van een enkele passagier"
    },
    "USE_LOW_THRUST" : {
       "description" : "",

@@ -55,6 +55,14 @@
       "description" : "",
       "message" : "Cabins"
    },
+   "CABIN_FREE" : {
+      "description" : "",
+      "message" : "{amount} free"
+   },
+   "CABIN_USED" : {
+      "description" : "",
+      "message" : "{amount} used"
+   },
    "CANCEL" : {
       "description" : "",
       "message" : "Cancel"
@@ -74,6 +82,14 @@
    "CARGO_SPACE" : {
       "description" : "",
       "message" : "Cargo space"
+   },
+   "CARGO_T_FREE" : {
+      "description" : "",
+      "message" : "{amount}t free"
+   },
+   "CARGO_T_USED" : {
+      "description" : "",
+      "message" : "{amount}t used"
    },
    "CASH" : {
       "description" : "",
@@ -151,6 +167,10 @@
       "description" : "",
       "message" : "Could not load game: "
    },
+   "CREDIBLE" : {
+      "description" : "For player reputation",
+      "message" : "Credible"
+   },
    "CREW_CABINS" : {
       "description" : "",
       "message" : "Crew cabins"
@@ -198,6 +218,10 @@
    "DISMISS" : {
       "description" : "",
       "message" : "Dismiss"
+   },
+   "DISPLAY_HUD_TRAILS" : {
+      "description" : "",
+      "message" : "Display HUD trails"
    },
    "DISPLAY_NAV_TUNNELS" : {
       "description" : "",
@@ -271,6 +295,14 @@
       "description" : "",
       "message" : "Exit this game"
    },
+   "EXPERIENCED" : {
+      "description" : "For player reputation",
+      "message" : "Experienced"
+   },
+   "EXPERT" : {
+      "description" : "For player reputation",
+      "message" : "Expert"
+   },
    "FAILED" : {
       "description" : "",
       "message" : "Failed"
@@ -296,7 +328,7 @@
       "message" : "Fractal detail"
    },
    "FREE" : {
-      "description" : "",
+      "description" : "Used in Ship Information view as in Capacity: 10t (5t free)",
       "message" : "free"
    },
    "FRONT_WEAPON" : {
@@ -403,9 +435,17 @@
       "description" : "",
       "message" : "Inactive"
    },
+   "INCOMPETENT" : {
+      "description" : "For player reputation",
+      "message" : "Incompetent"
+   },
    "RESET_ALL_TO_DEFAULT" : {
 	  "description" : "",
 	  "message" : "Reset all to default"
+   },
+   "INEXPERIENCED" : {
+      "description" : "For player reputation",
+      "message" : "Inexperienced"
    },
    "RESET_CONTROLS" : {
 	  "descripton" : "",
@@ -516,12 +556,20 @@
       "message" : "Mass"
    },
    "MASTER" : {
-      "description" : "",
+      "description" : "For player reputation",
+      "message" : "Master"
+   },
+   "MASTER_VOL" : {
+      "description" : "Master sound in settings option",
       "message" : "Master:"
    },
    "MAX" : {
       "description" : "",
       "message" : "max"
+   },
+   "MAXIMUM_CREW" : {
+      "description" : "",
+      "message" : "Maximum crew"
    },
    "MEDIUM" : {
       "description" : "",
@@ -614,6 +662,10 @@
    "NEXT_PAID" : {
       "description" : "",
       "message" : "Next paid"
+   },
+   "NOBODY" : {
+      "description" : "For player reputation",
+      "message" : "Nobody"
    },
    "NONE" : {
       "description" : "",
@@ -723,9 +775,17 @@
       "description" : "",
       "message" : "Price"
    },
+   "PROFESSIONAL" : {
+      "description" : "For player reputation",
+      "message" : "Professional"
+   },
    "QUALIFICATION_SCORES" : {
       "description" : "",
       "message" : "Qualification scores"
+   },
+   "QUICKLOAD" : {
+      "description" : "",
+      "message" : "Quickload"
    },
    "QUIT" : {
       "description" : "",
@@ -747,9 +807,17 @@
       "description" : "",
       "message" : "Refuel"
    },
+   "RELIABLE" : {
+      "description" : "For player reputation",
+      "message" : "Reliable"
+   },
    "REPAIR_X_HULL_DAMAGE_FOR_X" : {
       "description" : "",
       "message" : "Repair {damage}% hull damage for {price}"
+   },
+   "REPUTATION" : {
+      "description" : "",
+      "message" : "Reputation"
    },
    "REQUEST_LAUNCH" : {
       "description" : "",
@@ -875,6 +943,10 @@
       "description" : "",
       "message" : "Trading illegal goods"
    },
+   "TRUSTWORTHY" : {
+      "description" : "For player reputation",
+      "message" : "Trustworthy"
+   },
    "TYPE" : {
       "description" : "",
       "message" : "Type"
@@ -882,6 +954,10 @@
    "UNLAWFUL_WEAPONS_DISCHARGE" : {
       "description" : "",
       "message" : "Unlawful weapons discharge"
+   },
+   "UNRELIABLE" : {
+      "description" : "",
+      "message" : "Unreliable"
    },
    "UP_ACCEL" : {
       "description" : "",
@@ -917,7 +993,7 @@
    },
    "WEIGHT_EMPTY" : {
       "description" : "",
-      "message" : "Weight empty:"
+      "message" : "Weight empty"
    },
    "WEIGHT_FULLY_LOADED" : {
       "description" : "",

@@ -335,6 +335,10 @@
       "description" : "",
       "message" : "Label out-of-range systems"
    },
+   "DRAW_UNINHABITED_LABELS" : {
+      "description" : "",
+      "message" : "Label uninhabited systems"
+   },
    "DRAW_VERTICAL_LINES" : {
       "description" : "",
       "message" : "Desenhar linhas verticais"
@@ -401,7 +405,7 @@
    },
    "EARTH_FEDERATION_DEMOCRACY" : {
       "description" : "",
-      "message" : "Earth Federation Democracy"
+      "message" : "Democracia da Federação da Terra"
    },
    "ECCENTRICITY" : {
       "description" : "",
@@ -535,6 +539,10 @@
       "description" : "",
       "message" : "Não foi possível guardar o jogo porque ocorreu um erro de sistema."
    },
+   "GENERAL_VIEW_CONTROLS" : {
+      "description" : "",
+      "message" : "General View Controls"
+   },
    "GOVERNMENT_TYPE" : {
       "description" : "",
       "message" : "Tipo de governo:"
@@ -605,7 +613,7 @@
    },
    "HYPERCLOUD_ANALYZER" : {
       "description" : "",
-      "message" : "Hypercloud Analyzer"
+      "message" : "Analisador da Hipernuvem"
    },
    "HYPERCLOUD_ANALYZER_DESCRIPTION" : {
       "description" : "",
@@ -657,7 +665,7 @@
    },
    "IMPERIAL_RULE" : {
       "description" : "",
-      "message" : "Imperial Rule"
+      "message" : "Regra Imperial"
    },
    "INCREASE_SCAN_RANGE" : {
       "description" : "",
@@ -697,7 +705,7 @@
    },
    "JOY" : {
       "description" : "",
-      "message" : "Joy"
+      "message" : "diversão"
    },
    "JOYSTICK_INPUT" : {
       "description" : "",
@@ -787,6 +795,70 @@
       "description" : "",
       "message" : "Modo de controlo manual"
    },
+   "MAP_LOCK_HYPERSPACE_TARGET" : {
+      "description" : "",
+      "message" : "Lock Hyperspace Target"
+   },
+   "MAP_TOGGLE_INFO_PANEL" : {
+      "description" : "",
+      "message" : "Toggle Info Panel"
+   },
+   "MAP_TOGGLE_SELECTION_FOLLOW_VIEW" : {
+      "description" : "",
+      "message" : "Toggle Selection Following View"
+   },
+   "MAP_VIEW_ROTATE_DOWN" : {
+      "description" : "",
+      "message" : "Rotate View Down"
+   },
+   "MAP_VIEW_ROTATE_LEFT" : {
+      "description" : "",
+      "message" : "Rotate View Left"
+   },
+   "MAP_VIEW_ROTATE_RIGHT" : {
+      "description" : "",
+      "message" : "Rotate View Right"
+   },
+   "MAP_VIEW_ROTATE_UP" : {
+      "description" : "",
+      "message" : "Rotate View Up"
+   },
+   "MAP_VIEW_SHIFT_BACKWARD" : {
+      "description" : "",
+      "message" : "Shift View Backwards"
+   },
+   "MAP_VIEW_SHIFT_DOWN" : {
+      "description" : "",
+      "message" : "Shift View Down"
+   },
+   "MAP_VIEW_SHIFT_FORWARD" : {
+      "description" : "",
+      "message" : "Shift View Forwards"
+   },
+   "MAP_VIEW_SHIFT_LEFT" : {
+      "description" : "",
+      "message" : "Shift View Left"
+   },
+   "MAP_VIEW_SHIFT_RIGHT" : {
+      "description" : "",
+      "message" : "Shift View Right"
+   },
+   "MAP_VIEW_SHIFT_UP" : {
+      "description" : "",
+      "message" : "Shift View Up"
+   },
+   "MAP_WARP_TO_CURRENT_SYSTEM" : {
+      "description" : "",
+      "message" : "Warp to Current System"
+   },
+   "MAP_WARP_TO_HYPERSPACE_TARGET" : {
+      "description" : "",
+      "message" : "Warp to Hyperspace Target"
+   },
+   "MAP_WARP_TO_SELECTED_SYSTEM" : {
+      "description" : "",
+      "message" : "Warp to Selected System"
+   },
    "MASS" : {
       "description" : "",
       "message" : "Massa"
@@ -833,7 +905,7 @@
    },
    "MININGCANNON_17MW" : {
       "description" : "",
-      "message" : "17MW blast-mining cannon"
+      "message" : "Canhão de mineração de 17MW"
    },
    "MININGCANNON_17MW_DESCRIPTION" : {
       "description" : "",
@@ -1009,7 +1081,7 @@
    },
    "NUMBER_G" : {
       "description" : "",
-      "message" : "%acceleration{f.1} G"
+      "message" : "%aceleração{f.1} G"
    },
    "NUMBER_HOURS" : {
       "description" : "",
@@ -1235,6 +1307,10 @@
       "description" : "",
       "message" : "Reiniciar"
    },
+   "RESET_ORIENTATION_AND_ZOOM" : {
+      "description" : "",
+      "message" : "Reset Orientation and Zoom"
+   },
    "ROBOTS" : {
       "description" : "",
       "message" : "Robôs"
@@ -1289,7 +1365,7 @@
    },
    "RUBBISH" : {
       "description" : "",
-      "message" : "Rubbish"
+      "message" : "Lixo"
    },
    "SAGITTARIUS_ARM" : {
       "description" : "",
@@ -1297,7 +1373,7 @@
    },
    "SCANNER" : {
       "description" : "",
-      "message" : "Scanner"
+      "message" : "Escaneador"
    },
    "SCANNER_CONTROL" : {
       "description" : "",
@@ -1319,13 +1395,21 @@
       "description" : "",
       "message" : "Procura"
    },
+   "SEARCH_MAP" : {
+      "description" : "",
+      "message" : "Search Map"
+   },
    "SECTOR_COORDINATES" : {
       "description" : "",
       "message" : "Coordenadas do sector:"
    },
+   "SECTOR_MAP_VIEW" : {
+      "description" : "",
+      "message" : "Sector Map View"
+   },
    "SECTOR_X_Y_Z" : {
       "description" : "",
-      "message" : "Sector: %x,%y,%z"
+      "message" : "Setor: %x, %y, %z"
    },
    "SELECTED_SYSTEM" : {
       "description" : "",
@@ -1701,7 +1785,7 @@
    },
    "TIME_POINT" : {
       "description" : "",
-      "message" : "Time point:"
+      "message" : "Ponto do tempo:"
    },
    "TINY" : {
       "description" : "",
@@ -1821,7 +1905,7 @@
    },
    "WITH_A" : {
       "description" : "",
-      "message" : "\" with a \""
+      "message" : "\" com um \""
    },
    "WITH_NO_SIGNIFICANT_ATMOSPHERE" : {
       "description" : "",

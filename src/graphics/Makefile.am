@@ -4,7 +4,7 @@ AM_CFLAGS += $(WARN_CFLAGS)
 AM_CPPFLAGS += $(WARN_CPPFLAGS)
 AM_CXXFLAGS += $(STD_CXXFLAGS) $(WARN_CXXFLAGS)
 
-INCLUDES = -I$(srcdir)/.. -isystem $(top_srcdir)/contrib
+AM_CPPFLAGS += -I$(srcdir)/.. -isystem $(top_srcdir)/contrib
 
 noinst_LIBRARIES = libgraphics.a
 noinst_HEADERS = \
@@ -17,6 +17,7 @@ noinst_HEADERS = \
 	Frustum.h \
 	Light.h \
 	Material.h \
+	RenderState.h \
 	PostProcess.h \
 	PostProcessing.h \
 	StaticMesh.h \
@@ -27,6 +28,7 @@ noinst_HEADERS = \
 	TextureBuilder.h \
 	Drawables.h \
 	gl2/GL2Material.h \
+	gl2/GL2RenderState.h \
 	gl2/GL2RenderTarget.h \
 	gl2/FresnelColourMaterial.h \
 	gl2/GeoSphereMaterial.h \
@@ -34,6 +36,7 @@ noinst_HEADERS = \
 	gl2/Program.h \
 	gl2/RingMaterial.h \
 	gl2/SkyboxMaterial.h \
+	gl2/ShieldMaterial.h \
 	gl2/StarfieldMaterial.h \
 	gl2/Uniform.h
 
@@ -53,10 +56,12 @@ libgraphics_a_SOURCES = \
 	TextureBuilder.cpp \
 	Drawables.cpp \
 	gl2/GL2Material.cpp \
+	gl2/GL2RenderState.cpp \
 	gl2/GL2RenderTarget.cpp \
 	gl2/FresnelColourMaterial.cpp \
 	gl2/GeoSphereMaterial.cpp \
 	gl2/MultiMaterial.cpp \
 	gl2/Program.cpp \
+	gl2/ShieldMaterial.cpp \
 	gl2/RingMaterial.cpp \
 	gl2/Uniform.cpp

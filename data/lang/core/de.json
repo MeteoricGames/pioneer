@@ -269,7 +269,7 @@
    },
    "CTRL" : {
       "description" : "Ctrl key on keyboard",
-      "message" : "Ctrl"
+      "message" : "Strg"
    },
    "CURRENT_SYSTEM" : {
       "description" : "",
@@ -334,6 +334,10 @@
    "DRAW_OUT_RANGE_LABELS" : {
       "description" : "",
       "message" : "Out-of-range System"
+   },
+   "DRAW_UNINHABITED_LABELS" : {
+      "description" : "",
+      "message" : "Unbewohntes System"
    },
    "DRAW_VERTICAL_LINES" : {
       "description" : "",
@@ -534,6 +538,10 @@
    "GAME_SAVE_CANNOT_WRITE" : {
       "description" : "",
       "message" : "Die Spieldatei konnte aufgrund eines Systemfehlers nicht geöffnet werden."
+   },
+   "GENERAL_VIEW_CONTROLS" : {
+      "description" : "",
+      "message" : "Allgemeine Viewsteuerung"
    },
    "GOVERNMENT_TYPE" : {
       "description" : "",
@@ -786,6 +794,70 @@
    "MANUAL_CONTROL_MODE" : {
       "description" : "",
       "message" : "Manuelle Steuerung"
+   },
+   "MAP_LOCK_HYPERSPACE_TARGET" : {
+      "description" : "",
+      "message" : "Auf Hyperraumsprungziel einstellen"
+   },
+   "MAP_TOGGLE_INFO_PANEL" : {
+      "description" : "",
+      "message" : "Umschalten Infoansicht"
+   },
+   "MAP_TOGGLE_SELECTION_FOLLOW_VIEW" : {
+      "description" : "",
+      "message" : "Umschalten Verfolgungsansicht"
+   },
+   "MAP_VIEW_ROTATE_DOWN" : {
+      "description" : "",
+      "message" : "Rotierende Ansicht nach unten"
+   },
+   "MAP_VIEW_ROTATE_LEFT" : {
+      "description" : "",
+      "message" : "Rotierende Ansicht nach Links"
+   },
+   "MAP_VIEW_ROTATE_RIGHT" : {
+      "description" : "",
+      "message" : "Rotierende Ansicht nach Rechts"
+   },
+   "MAP_VIEW_ROTATE_UP" : {
+      "description" : "",
+      "message" : "Rotierende Ansicht nach Oben"
+   },
+   "MAP_VIEW_SHIFT_BACKWARD" : {
+      "description" : "",
+      "message" : "Nach hinten schauen"
+   },
+   "MAP_VIEW_SHIFT_DOWN" : {
+      "description" : "",
+      "message" : "Nach unten schauen"
+   },
+   "MAP_VIEW_SHIFT_FORWARD" : {
+      "description" : "",
+      "message" : "Nach vorne schauen"
+   },
+   "MAP_VIEW_SHIFT_LEFT" : {
+      "description" : "",
+      "message" : "Nach links schauen"
+   },
+   "MAP_VIEW_SHIFT_RIGHT" : {
+      "description" : "",
+      "message" : "Nach rechts schauen"
+   },
+   "MAP_VIEW_SHIFT_UP" : {
+      "description" : "",
+      "message" : "Nach oben schauen"
+   },
+   "MAP_WARP_TO_CURRENT_SYSTEM" : {
+      "description" : "",
+      "message" : "Springe ins aktuelle System"
+   },
+   "MAP_WARP_TO_HYPERSPACE_TARGET" : {
+      "description" : "",
+      "message" : "Springe zum Hyperraumziel"
+   },
+   "MAP_WARP_TO_SELECTED_SYSTEM" : {
+      "description" : "",
+      "message" : "Springe zum ausgewählten System"
    },
    "MASS" : {
       "description" : "",
@@ -1235,6 +1307,10 @@
       "description" : "",
       "message" : "Zurücksetzen"
    },
+   "RESET_ORIENTATION_AND_ZOOM" : {
+      "description" : "",
+      "message" : "Ansicht und Zoom zurücksetzen"
+   },
    "ROBOTS" : {
       "description" : "",
       "message" : "Roboter"
@@ -1319,9 +1395,17 @@
       "description" : "",
       "message" : "Suche"
    },
+   "SEARCH_MAP" : {
+      "description" : "",
+      "message" : "Suche in Karte"
+   },
    "SECTOR_COORDINATES" : {
       "description" : "",
       "message" : "Sektor-Koordinaten:"
+   },
+   "SECTOR_MAP_VIEW" : {
+      "description" : "",
+      "message" : "Kartenansicht"
    },
    "SECTOR_X_Y_Z" : {
       "description" : "",

@@ -26,7 +26,7 @@ static const int detail_edgeLen[5] = {
 	7, 15, 25, 35, 55
 };
 
-#define PRINT_VECTOR(_v) printf("%f,%f,%f\n", (_v).x, (_v).y, (_v).z);
+#define PRINT_VECTOR(_v) Output("%f,%f,%f\n", (_v).x, (_v).y, (_v).z);
 
 static const int geo_sphere_edge_friends[NUM_PATCHES][4] = {
 	{ 3, 4, 1, 2 },
@@ -53,7 +53,7 @@ void GeoSphere::Uninit()
 
 static void print_info(const SystemBody *sbody, const Terrain *terrain)
 {
-	printf(
+	Output(
 		"%s:\n"
 		"    height fractal: %s\n"
 		"    colour fractal: %s\n"
@@ -74,20 +74,6 @@ void GeoSphere::UpdateAllGeoSpheres()
 // static
 void GeoSphere::OnChangeDetailLevel()
 {
-//#warning "cancel jobs"
-#if 0
-	// Cancel all of the pending patch jobs
-	BasePatchJob::CancelAllPatchJobs();
-
-	// wait for all jobs to be finished
-	while(BasePatchJob::GetNumActivePatchJobs()>0) {
-		// re-issue the cancel call
-		BasePatchJob::CancelAllPatchJobs();
-		THREAD_CONFIG::tc_sleep(0);
-	}
-	BasePatchJob::ResetPatchJobCancel();
-#endif
-
 	s_patchContext.Reset(new GeoPatchContext(detail_edgeLen[Pi::detail.planets > 4 ? 4 : Pi::detail.planets]));
 	assert(s_patchContext->edgeLen <= GEOPATCH_MAX_EDGELEN);
 
@@ -147,6 +133,7 @@ void GeoSphere::Reset()
 		{
 			// finally pass SplitResults
 			SSingleSplitResult *psr = (*iter);
+			assert(psr);
 
 			psr->OnCancel();
 
@@ -165,6 +152,7 @@ void GeoSphere::Reset()
 		{
 			// finally pass SplitResults
 			SQuadSplitResult *psr = (*iter);
+			assert(psr);
 
 			psr->OnCancel();
 
@@ -201,20 +189,6 @@ GeoSphere::GeoSphere(const SystemBody *body) : m_sbody(body), m_terrain(Terrain:
 
 GeoSphere::~GeoSphere()
 {
-//#warning "cancel jobs"
-#if 0
-	// Cancel all of the pending patch jobs
-	BasePatchJob::CancelAllPatchJobs();
-	//Pi::jobs().CancelAllPendingJobs();
-
-	// wait for all jobs to be finished
-	while(BasePatchJob::GetNumActivePatchJobs()>0) {
-		Pi::jobs().Update();
-		THREAD_CONFIG::tc_sleep(0);
-	}
-	BasePatchJob::ResetPatchJobCancel();
-#endif
-
 	// update thread should not be able to access us now, so we can safely continue to delete
 	assert(std::count(s_allGeospheres.begin(), s_allGeospheres.end(), this) == 1);
 	s_allGeospheres.erase(std::find(s_allGeospheres.begin(), s_allGeospheres.end(), this));
@@ -223,6 +197,7 @@ GeoSphere::~GeoSphere()
 bool GeoSphere::AddQuadSplitResult(SQuadSplitResult *res)
 {
 	bool result = false;
+	assert(res);
 	assert(mQuadSplitResults.size()<MAX_SPLIT_OPERATIONS);
 	if(mQuadSplitResults.size()<MAX_SPLIT_OPERATIONS) {
 		mQuadSplitResults.push_back(res);
@@ -234,6 +209,7 @@ bool GeoSphere::AddQuadSplitResult(SQuadSplitResult *res)
 bool GeoSphere::AddSingleSplitResult(SSingleSplitResult *res)
 {
 	bool result = false;
+	assert(res);
 	assert(mSingleSplitResults.size()<MAX_SPLIT_OPERATIONS);
 	if(mSingleSplitResults.size()<MAX_SPLIT_OPERATIONS) {
 		mSingleSplitResults.push_back(res);
@@ -251,6 +227,7 @@ void GeoSphere::ProcessSplitResults()
 		{
 			// finally pass SplitResults
 			SSingleSplitResult *psr = (*iter);
+			assert(psr);
 
 			const int32_t faceIdx = psr->face();
 			if( m_patches[faceIdx] ) {
@@ -275,6 +252,7 @@ void GeoSphere::ProcessSplitResults()
 		{
 			// finally pass SplitResults
 			SQuadSplitResult *psr = (*iter);
+			assert(psr);
 
 			const int32_t faceIdx = psr->face();
 			if( m_patches[faceIdx] ) {
@@ -333,7 +311,8 @@ void GeoSphere::BuildFirstPatches()
 static const float g_ambient[4] = { 0, 0, 0, 1.0 };
 
 static void DrawAtmosphereSurface(Graphics::Renderer *renderer,
-	const matrix4x4d &modelView, const vector3d &campos, float rad, Graphics::Material *mat)
+	const matrix4x4d &modelView, const vector3d &campos, float rad,
+	Graphics::RenderState *rs, Graphics::Material *mat)
 {
 	const int LAT_SEGS = 20;
 	const int LONG_SEGS = 20;
@@ -367,7 +346,7 @@ static void DrawAtmosphereSurface(Graphics::Renderer *renderer,
 			cos(latDiff),
 			-sin(latDiff)*sinCosTable[i][1]));
 	}
-	renderer->DrawTriangles(&va, mat, Graphics::TRIANGLE_FAN);
+	renderer->DrawTriangles(&va, rs, mat, Graphics::TRIANGLE_FAN);
 
 	/* and wound latitudinal strips */
 	double lat = latDiff;
@@ -381,7 +360,7 @@ static void DrawAtmosphereSurface(Graphics::Renderer *renderer,
 			v.Add(vector3f(sinLat*sinCosTable[i][0], cosLat, -sinLat*sinCosTable[i][1]));
 			v.Add(vector3f(sinLat2*sinCosTable[i][0], cosLat2, -sinLat2*sinCosTable[i][1]));
 		}
-		renderer->DrawTriangles(&v, mat, Graphics::TRIANGLE_STRIP);
+		renderer->DrawTriangles(&v, rs, mat, Graphics::TRIANGLE_STRIP);
 	}
 }
 
@@ -461,14 +440,12 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 		if (m_materialParameters.atmosphere.atmosDensity > 0.0) {
 			m_atmosphereMaterial->specialParameter0 = &m_materialParameters;
 
-			renderer->SetBlendMode(Graphics::BLEND_ALPHA_ONE);
-			renderer->SetDepthWrite(false);
 			// make atmosphere sphere slightly bigger than required so
 			// that the edges of the pixel shader atmosphere jizz doesn't
 			// show ugly polygonal angles
-			DrawAtmosphereSurface(renderer, trans, campos, m_materialParameters.atmosphere.atmosRadius*1.01, m_atmosphereMaterial.get());
-			renderer->SetDepthWrite(true);
-			renderer->SetBlendMode(Graphics::BLEND_SOLID);
+			DrawAtmosphereSurface(renderer, trans, campos,
+				m_materialParameters.atmosphere.atmosRadius*1.01,
+				m_atmosRenderState, m_atmosphereMaterial.get());
 		}
 	}
 
@@ -500,13 +477,11 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 	}
 
 	renderer->SetAmbientColor(ambient);
-//#define USE_WIREFRAME
-#ifdef USE_WIREFRAME
-	renderer->SetWireFrameMode(true);
-#endif
+
 	// this is pretty much the only place where a non-renderer is allowed to call Apply()
 	// to be removed when someone rewrites terrain
 	m_surfaceMaterial->Apply();
+	renderer->SetRenderState(m_surfRenderState);
 
 	renderer->SetTransform(modelView);
 
@@ -514,9 +489,8 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	for (int i=0; i<NUM_PATCHES; i++) {
+	for (int i=0; i<NUM_PATCHES; i++)
 		m_patches[i]->Render(renderer, campos, modelView, frustum);
-	}
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -528,13 +502,19 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 	m_surfaceMaterial->Unapply();
 
 	renderer->SetAmbientColor(oldAmbient);
-#ifdef USE_WIREFRAME
-	renderer->SetWireFrameMode(false);
-#endif
 }
 
 void GeoSphere::SetUpMaterials()
 {
+	//solid
+	Graphics::RenderStateDesc rsd;
+	m_surfRenderState = Pi::renderer->CreateRenderState(rsd);
+
+	//blended
+	rsd.blendMode = Graphics::BLEND_ALPHA_ONE;
+	rsd.depthWrite = false;
+	m_atmosRenderState = Pi::renderer->CreateRenderState(rsd);
+
 	// Request material for this star or planet, with or without
 	// atmosphere. Separate material for surface and sky.
 	Graphics::MaterialDescriptor surfDesc;

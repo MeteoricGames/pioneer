@@ -6,7 +6,7 @@
 #include "KeyBindings.h"
 #include "FileSystem.h"
 
-GameConfig::GameConfig()
+GameConfig::GameConfig(const std::map<std::string,std::string> &override_)
 {
 	// set defaults
 	std::map<std::string, std::string> &map = m_map[""];
@@ -40,7 +40,8 @@ GameConfig::GameConfig()
 	map["WorkerThreads"] = "0";
 	map["SpeedLines"] = "0";
 	map["TargetIndicators"] = "0";
-	map["EnableCockpit"] = "1";
+	map["EnableCockpit"] = "0";
+	map["HudTrails"] = "0";
 
 #ifdef _WIN32
 	map["RedirectStdio"] = "1";
@@ -50,6 +51,12 @@ GameConfig::GameConfig()
 	map["EnableGLDebug"] = "0";
 
 	Load();
+
+	for (auto i = override_.begin(); i != override_.end(); ++i) {
+		const std::string &key = (*i).first;
+		const std::string &val = (*i).second;
+		map[key] = val;
+	}
 }
 
 void GameConfig::Load()

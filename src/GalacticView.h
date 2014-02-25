@@ -11,8 +11,10 @@
 #include <vector>
 #include <string>
 #include "View.h"
+#include "graphics/RenderState.h"
+#include "UIView.h"
 
-class GalacticView: public View {
+class GalacticView: public UIView {
 public:
 	GalacticView();
 	virtual ~GalacticView();
@@ -20,8 +22,10 @@ public:
 	virtual void Draw3D();
 	virtual void Save(Serializer::Writer &wr);
 	virtual void Load(Serializer::Reader &rd);
+
 protected:
 	virtual void OnSwitchTo() {}
+
 private:
 	void OnClickGalacticView();
 	void PutLabels(vector3d offset);
@@ -33,6 +37,7 @@ private:
 	float m_zoom, m_zoomTo;
 	Gui::TexturedQuad m_quad;
 	sigc::connection m_onMouseWheelCon;
+	Graphics::RenderState *m_renderState;
 };
 
 #endif /* _GALACTICVIEW_H */

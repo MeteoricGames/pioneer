@@ -55,6 +55,14 @@
       "description" : "",
       "message" : "Utaskabin"
    },
+   "CABIN_FREE" : {
+      "description" : "",
+      "message" : "{amount} szabad"
+   },
+   "CABIN_USED" : {
+      "description" : "",
+      "message" : "{amount} foglalt"
+   },
    "CANCEL" : {
       "description" : "",
       "message" : "Mégse"
@@ -74,6 +82,14 @@
    "CARGO_SPACE" : {
       "description" : "",
       "message" : "Raktér kapacitás"
+   },
+   "CARGO_T_FREE" : {
+      "description" : "",
+      "message" : "{amount}t szabad"
+   },
+   "CARGO_T_USED" : {
+      "description" : "",
+      "message" : "{amount}t foglalt"
    },
    "CASH" : {
       "description" : "",
@@ -151,6 +167,10 @@
       "description" : "",
       "message" : "Mentés nem tölthető be:"
    },
+   "CREDIBLE" : {
+      "description" : "For player reputation",
+      "message" : "Szavahihető"
+   },
    "CREW_CABINS" : {
       "description" : "",
       "message" : "Legénységi kabin"
@@ -198,6 +218,10 @@
    "DISMISS" : {
       "description" : "",
       "message" : "Elbocsájt"
+   },
+   "DISPLAY_HUD_TRAILS" : {
+      "description" : "",
+      "message" : "HUD nyomvonalak"
    },
    "DISPLAY_NAV_TUNNELS" : {
       "description" : "",
@@ -271,6 +295,14 @@
       "description" : "",
       "message" : "Kilépés"
    },
+   "EXPERIENCED" : {
+      "description" : "For player reputation",
+      "message" : "Tapasztalt"
+   },
+   "EXPERT" : {
+      "description" : "For player reputation",
+      "message" : "Szakértő"
+   },
    "FAILED" : {
       "description" : "",
       "message" : "Sikertelen"
@@ -296,7 +328,7 @@
       "message" : "Fraktál részletesség"
    },
    "FREE" : {
-      "description" : "",
+      "description" : "Used in Ship Information view as in Capacity: 10t (5t free)",
       "message" : "szabad"
    },
    "FRONT_WEAPON" : {
@@ -403,6 +435,14 @@
       "description" : "",
       "message" : "Inaktív"
    },
+   "INCOMPETENT" : {
+      "description" : "For player reputation",
+      "message" : "Alkalmatlan"
+   },
+   "INEXPERIENCED" : {
+      "description" : "For player reputation",
+      "message" : "Tapasztalatlan"
+   },
    "INVERT_MOUSE_Y" : {
       "description" : "",
       "message" : "Egér Y tengely megfordítása"
@@ -508,12 +548,20 @@
       "message" : "Tömeg"
    },
    "MASTER" : {
-      "description" : "",
+      "description" : "For player reputation",
+      "message" : "Mester"
+   },
+   "MASTER_VOL" : {
+      "description" : "Master sound in settings option",
       "message" : "Fő hangerő:"
    },
    "MAX" : {
       "description" : "",
       "message" : "max"
+   },
+   "MAXIMUM_CREW" : {
+      "description" : "",
+      "message" : "Maximum legénység"
    },
    "MEDIUM" : {
       "description" : "",
@@ -606,6 +654,10 @@
    "NEXT_PAID" : {
       "description" : "",
       "message" : "Következő kifizetés"
+   },
+   "NOBODY" : {
+      "description" : "For player reputation",
+      "message" : "Senki"
    },
    "NONE" : {
       "description" : "",
@@ -715,9 +767,17 @@
       "description" : "",
       "message" : "Ár"
    },
+   "PROFESSIONAL" : {
+      "description" : "For player reputation",
+      "message" : "Szakértő"
+   },
    "QUALIFICATION_SCORES" : {
       "description" : "",
       "message" : "Képzettség pont:"
+   },
+   "QUICKLOAD" : {
+      "description" : "",
+      "message" : "Gyorsmentés betöltése"
    },
    "QUIT" : {
       "description" : "",
@@ -739,9 +799,17 @@
       "description" : "",
       "message" : "Újratölt"
    },
+   "RELIABLE" : {
+      "description" : "For player reputation",
+      "message" : "Megbízható"
+   },
    "REPAIR_X_HULL_DAMAGE_FOR_X" : {
       "description" : "",
       "message" : "{damage}% hajótest sérülés javíttatása {price} -ért"
+   },
+   "REPUTATION" : {
+      "description" : "",
+      "message" : "Hírnév"
    },
    "REQUEST_LAUNCH" : {
       "description" : "",
@@ -867,6 +935,10 @@
       "description" : "",
       "message" : "Illegális termékek kereskedelme"
    },
+   "TRUSTWORTHY" : {
+      "description" : "For player reputation",
+      "message" : "Felelős"
+   },
    "TYPE" : {
       "description" : "",
       "message" : "Típus"
@@ -874,6 +946,10 @@
    "UNLAWFUL_WEAPONS_DISCHARGE" : {
       "description" : "",
       "message" : "Törvénytelen fegyverhasználat"
+   },
+   "UNRELIABLE" : {
+      "description" : "",
+      "message" : "Megbízhatatlan"
    },
    "UP_ACCEL" : {
       "description" : "",
@@ -909,7 +985,7 @@
    },
    "WEIGHT_EMPTY" : {
       "description" : "",
-      "message" : "Üres tömeg:"
+      "message" : "Üres súly"
    },
    "WEIGHT_FULLY_LOADED" : {
       "description" : "",
