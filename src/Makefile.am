@@ -24,7 +24,6 @@ noinst_HEADERS = \
 	Camera.h \
 	CameraController.h \
 	CargoBody.h \
-	ChatForm.h \
 	CityOnPlanet.h \
 	Color.h \
 	Colors.h \
@@ -51,6 +50,7 @@ noinst_HEADERS = \
 	HyperspaceCloud.h \
 	IniConfig.h \
 	Intro.h \
+	IterationProxy.h \
 	JobQueue.h \
 	GameConfig.h \
 	KeyBindings.h \
@@ -161,7 +161,6 @@ paragon_SOURCES	= \
 	CargoBody.cpp \
 	Color.cpp \
 	Colors.cpp \
-	ChatForm.cpp \
 	CityOnPlanet.cpp \
 	CRC32.cpp \
 	DeathView.cpp \

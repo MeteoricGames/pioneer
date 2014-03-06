@@ -138,8 +138,8 @@ void SpaceStation::InitStation()
 {
 	m_adjacentCity = 0;
 	for(int i=0; i<NUM_STATIC_SLOTS; i++) m_staticSlot[i] = false;
-	Random rand(m_sbody->seed);
-	bool ground = m_sbody->type == SystemBody::TYPE_STARPORT_ORBITAL ? false : true;
+	Random rand(m_sbody->GetSeed());
+	bool ground = m_sbody->GetType() == SystemBody::TYPE_STARPORT_ORBITAL ? false : true;
 	if (ground) {
 		if (m_sbody->parent->GetRadius()>3000000.0 && m_sbody->parent->HasAtmosphere())
 			m_type = &SpaceStationType::surfaceStationTypes[ 0 ];
@@ -574,7 +574,7 @@ void SpaceStation::Render(Graphics::Renderer *r, const Camera *camera, const vec
 		Planet *planet = static_cast<Planet*>(b);
 
 		if (!m_adjacentCity) {
-			m_adjacentCity = new CityOnPlanet(planet, this, m_sbody->seed);
+			m_adjacentCity = new CityOnPlanet(planet, this, m_sbody->GetSeed());
 		}
 		m_adjacentCity->Render(r, camera->GetContext()->GetFrustum(), this, viewCoords, viewTransform);
 

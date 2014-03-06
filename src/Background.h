@@ -13,7 +13,6 @@
 
 namespace Graphics {
 	class Renderer;
-	class StaticMesh;
 	class Material;
 }
 
@@ -49,9 +48,9 @@ namespace Background
 		Random createRandom(Uint32 seed);
 		Random createRandom(const SystemPath& system_path);
 
-		Graphics::StaticMesh *m_model;
-		Graphics::Texture* m_cubemap;
-		float fIntensity;
+		std::unique_ptr<Graphics::VertexBuffer> m_vertexBuffer;
+		std::unique_ptr<Graphics::Texture> m_cubemap;
+		float fIntensity;		
 		Graphics::RenderState* m_cubeRS;
 	};
 
@@ -67,11 +66,11 @@ namespace Background
 	private:
 		void Init();
 		static const int BG_STAR_MAX = 10000;
-		std::unique_ptr<Graphics::StaticMesh> m_model;
+		std::unique_ptr<Graphics::VertexBuffer> m_vertexBuffer;
 
 		//hyperspace animation vertex data
-		vector3f m_hyperVtx[BG_STAR_MAX*2];
-		Color m_hyperCol[BG_STAR_MAX*2];
+		vector3f m_hyperVtx[BG_STAR_MAX*3];
+		Color m_hyperCol[BG_STAR_MAX*3];
 		Graphics::RenderState* m_starfieldRS;
 	};
 
@@ -82,7 +81,7 @@ namespace Background
 		void Draw(Graphics::RenderState*);
 
 	private:
-		std::unique_ptr<Graphics::StaticMesh> m_model;
+		std::unique_ptr<Graphics::VertexBuffer> m_vertexBuffer;
 	};
 
 
