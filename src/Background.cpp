@@ -185,7 +185,7 @@ void UniverseBox::LoadCubeMap(Random* randomizer)
 			std::ostringstream os;
 			os << "textures/cube/ub" << (new_ubox_index - 1) << ".dds";
 			TextureBuilder texture_builder = TextureBuilder::Cube(os.str().c_str());
-			m_cubemap = texture_builder.CreateTexture(m_renderer);
+			m_cubemap.reset(texture_builder.CreateTexture(m_renderer));
 			m_material->texture0 = m_cubemap.get();
 		}
 	}

@@ -59,7 +59,7 @@ namespace Background
 	public:
 		//does not Fill the starfield
 		Starfield(Graphics::Renderer *r, Random &rand);
-		void Draw();
+		void Draw(Graphics::RenderState *rs);
 		//create or recreate the starfield
 		void Fill(Random &rand);
 

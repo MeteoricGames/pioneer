@@ -1318,7 +1318,7 @@ void WorldView::BuildCommsNavOptions()
 	}
 
 	for ( std::map< Uint32,std::vector<SystemBody*> >::const_iterator i = groups.begin(); i != groups.end(); ++i ) {
-		m_commsNavOptions->PackEnd(new Gui::Label(Pi::game->GetSpace()->GetStarSystem()->GetBodies()[(*i).first]->GetName())->Color(Color::PARAGON_BLUE));
+		m_commsNavOptions->PackEnd((new Gui::Label(Pi::game->GetSpace()->GetStarSystem()->GetBodies()[(*i).first]->GetName()))->Color(Color::PARAGON_BLUE));
 
 		for ( std::vector<SystemBody*>::const_iterator j = (*i).second.begin(); j != (*i).second.end(); ++j) {
 			SystemPath path = Pi::game->GetSpace()->GetStarSystem()->GetPathOf(*j);

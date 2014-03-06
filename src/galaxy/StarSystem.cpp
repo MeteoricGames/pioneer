@@ -1930,7 +1930,7 @@ void SystemBody::PickPlanetType(Random &rand)
 				starTypeInfo[m_type].radius[1]), 100);
 	} else if (m_mass > 6) {
 		m_type = SystemBody::TYPE_PLANET_GAS_GIANT;
-		averageTemp += 334;
+		m_averageTemp += 334;
 		fixed amount_volatiles = fixed(2,1)*rand.Fixed();
 	} else if (m_mass > fixed(1, 15000)) {
 		m_type = SystemBody::TYPE_PLANET_TERRESTRIAL;

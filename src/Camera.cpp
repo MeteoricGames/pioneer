@@ -297,9 +297,9 @@ void Camera::CalcShadows(const int lightNum, const Body *b, std::vector<Shadow> 
 
 		double perpDist = lightDir.Dot(b2pos);
 
-		if (b2->IsType(Object::SPACESTATION) && !static_cast<SpaceStation*>(b2)->IsGroundStation()) {
+		if (b2->IsType(Object::SPACESTATION) && !static_cast<const SpaceStation*>(b2)->IsGroundStation()) {
 			// use spacestion aabb.radius
-			b2Radius = static_cast<SpaceStation*>(b2)->GetAabb().GetRadius();
+			b2Radius = static_cast<const SpaceStation*>(b2)->GetAabb().GetRadius();
 			// since we're inside a spacestation, skew 50meters towards the lightsource so we cover most.
 			bLightPosRelLenght += 50.0;
 			perpDist += 50.0;
