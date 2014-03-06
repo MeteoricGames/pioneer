@@ -550,6 +550,7 @@ SystemInfoView::BodyIcon::BodyIcon(const char *img, Graphics::Renderer *r)
 {
 	//no blending
 	Graphics::RenderStateDesc rsd;
+	rsd.depthWrite = false;
 	m_renderState = r->CreateRenderState(rsd);
 }
 

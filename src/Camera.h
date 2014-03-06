@@ -34,9 +34,11 @@ public:
 
 	// camera position relative to the frame origin
 	void SetPosition(const vector3d &pos) { m_pos = pos; }
+	vector3d GetPosition() const { return m_pos; }
 
 	// camera orientation relative to the frame origin
 	void SetOrient(const matrix3x3d &orient) { m_orient = orient; }
+	const matrix3x3d &GetOrient() const { return m_orient; }
 
 	// get the frustum. use for projection
 	const Graphics::Frustum &GetFrustum() const { return m_frustum; }
@@ -74,8 +76,15 @@ public:
 
 	const CameraContext *GetContext() const { return m_context.Get(); }
 
-	void Update();
-	void Draw(const Body *excludeBody = nullptr, ShipCockpit* cockpit = nullptr);
+	void Update();	// Draws everything in the scene normally
+	void BeginDraw(const Body *excludeBody = nullptr);
+	
+	// NB: Do any screen space rendering after here:
+	// Things like the AR features like hudtrails, space dust etc.
+
+	// Finalizes drawing process. Clears depth and draws cockpit if provided.
+	void EndDraw(Frame* camFrame = nullptr, ShipCockpit* cockpit = nullptr);
+
 
 	// camera-specific light with attached source body
 	class LightSource {

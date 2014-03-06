@@ -7,6 +7,7 @@
 #include "RenderTarget.h"
 #include "WindowSDL.h"
 #include "Renderer.h"
+#include "RenderState.h"
 
 namespace Graphics {
 
@@ -50,6 +51,13 @@ void PostProcessing::Init()
 		TextureFormat::TEXTURE_RGBA_8888, TextureFormat::TEXTURE_DEPTH,
 		true);
 	rtMain = mRenderer->CreateRenderTarget(rt_desc);
+
+	// Init render state
+	RenderStateDesc rsd;
+	rsd.blendMode = BlendMode::BLEND_SOLID;
+	rsd.depthTest = false;
+	rsd.depthWrite = false;
+	mRenderState = mRenderer->CreateRenderState(rsd);
 }
 
 // rt_device is added so device render target can be changed
@@ -57,7 +65,7 @@ void PostProcessing::BeginFrame()
 {
 	if(bPerformPostProcessing) {
 		mRenderer->SetRenderTarget(rtMain);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		mRenderer->ClearScreen();
 	} else {
 		mRenderer->SetRenderTarget(rtDevice);
 	}
@@ -79,6 +87,7 @@ void PostProcessing::Run(PostProcess* pp)
 	if(pp == nullptr || pp->GetPassCount() == 0) {
 		// No post-processing
 		mRenderer->SetRenderTarget(rtDevice);
+		mRenderer->SetRenderState(mRenderState);
 		mtrlFullscreenQuad->texture0 = rtMain->GetColorTexture();
 		mtrlFullscreenQuad->Apply();
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -94,6 +103,7 @@ void PostProcessing::Run(PostProcess* pp)
 			}
 			Material *mtrl = pp->vPasses[i]->material.get();
 			mRenderer->SetRenderTarget(rt_dest);
+			mRenderer->SetRenderState(mRenderState);
 			glClear(GL_COLOR_BUFFER_BIT);
 			if(pp->vPasses[i]->type == PP_PASS_COMPOSE) {
 				mtrl->texture0 = rtMain->GetColorTexture();

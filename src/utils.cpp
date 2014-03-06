@@ -212,8 +212,9 @@ const char *pi_strcasestr (const char *haystack, const char *needle)
 	for (;; haystack++) {
 		if (!*haystack)
 			return 0;
-
-		if (TOLOWER(*haystack) == b) {
+		// XXX Temporary fix for comparing with non-ASCII characters
+		char d = *haystack > 0? TOLOWER(*haystack) : *haystack;
+		if (d == b) {
 			const char *rhaystack = haystack + 1;
 			const char *rneedle = needle;
 

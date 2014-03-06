@@ -20,6 +20,9 @@ public:
 	OBJDEF(Player, Ship, PLAYER);
 	Player(ShipType::Id shipId);
 	Player() {}; //default constructor used before Load
+
+	virtual void SetFrame(Frame *f) override;
+
 	virtual void SetDockedWith(SpaceStation *, int port);
 	virtual bool OnDamage(Object *attacker, float kgDamage, const CollisionContact& contactData);
 	virtual bool SetWheelState(bool down); // returns success of state change, NOT state itself
@@ -43,6 +46,8 @@ public:
 	ShipCockpit* GetCockpit() const {return m_cockpit.get();}
 	void OnCockpitActivated();
 
+	HudTrail* GetHudTrail() const { return m_hudTrail.get(); }
+
 	virtual void StaticUpdate(const float timeStep);
 
 protected:
@@ -55,6 +60,7 @@ protected:
 
 private:
 	std::unique_ptr<ShipCockpit> m_cockpit;
+	std::unique_ptr<HudTrail> m_hudTrail;
 };
 
 #endif /* _PLAYER_H */

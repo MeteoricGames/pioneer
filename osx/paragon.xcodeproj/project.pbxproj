@@ -2412,7 +2412,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "git=/usr/bin/git\nversion=`$git log -n1 --pretty=%h`\necho \"#define GIT_VERSION $version\" > InfoPlist.h\ncat ../src/buildopts.h | grep \"#define PIONEER_VERSION\" >> InfoPlist.h\n";
+			shellScript = "git=/usr/bin/git\nversion=`$git log -n1 --pretty=%h`\necho \"#define GIT_VERSION $version\" > InfoPlist.h\ncat ../src/buildopts.h | grep \"#define PARAGON_VERSION\" >> InfoPlist.h\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

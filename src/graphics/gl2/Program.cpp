@@ -212,6 +212,11 @@ void Program::InitUniforms()
 	sceneAmbient.Init("scene.ambient", m_program);
 }
 
+void Program::AddUniform(Uniform& uniform, const char* name)
+{
+	uniform.Init(name, m_program);
+}
+
 } // GL2
 
 } // Graphics

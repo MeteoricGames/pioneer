@@ -113,6 +113,7 @@ public:
 
 	//set 0 to render to screen
 	virtual bool SetRenderTarget(RenderTarget*) { return false; }
+	virtual RenderTarget* GetActiveRenderTarget() const { return nullptr; }
 
 	//clear color and depth buffer
 	virtual bool ClearScreen() { return false; }
@@ -150,6 +151,7 @@ public:
 	virtual bool DrawPoints(int count, const vector3f *points, const Color *colors, RenderState*, float pointSize=1.f) { return false; }
 	//unindexed triangle draw
 	virtual bool DrawTriangles(const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES)  { return false; }
+	virtual bool DrawTriangles(int vertCount, const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES)  { return false; }
 	//indexed triangle draw
 	virtual bool DrawSurface(const Surface *surface, RenderState *rs) { return false; }
 	//high amount of textured quads for particles etc

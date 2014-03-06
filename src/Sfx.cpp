@@ -206,19 +206,6 @@ void Sfx::AddExplotion(Body *b, TYPE t)
 	}
 }
 
-void Sfx::AddThrustSmoke(const Body *b, TYPE t, const float speed, vector3d adjustpos)
-{
-	Sfx *sfx = AllocSfxInFrame(b->GetFrame());
-	if (!sfx) return;
-
-	sfx->m_type = t;
-	sfx->m_age = 0;
-	sfx->m_speed = speed;
-	vector3d npos = b->GetPosition();
-	sfx->SetPosition(npos+adjustpos);
-	sfx->m_vel = vector3d(0,0,0);
-}
-
 void Sfx::TimeStepAll(const float timeStep, Frame *f)
 {
 	PROFILE_SCOPED()

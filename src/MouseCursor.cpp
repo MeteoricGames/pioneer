@@ -4,6 +4,7 @@
 #include "MouseCursor.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
+#include "graphics/RenderState.h"
 #include "graphics/TextureBuilder.h"
 
 MouseCursor::MouseCursor(Graphics::Renderer* renderer) : m_renderer(renderer), 
@@ -30,6 +31,8 @@ MouseCursor::MouseCursor(Graphics::Renderer* renderer) : m_renderer(renderer),
 
 	Graphics::RenderStateDesc rsd;
 	rsd.blendMode = Graphics::BlendMode::BLEND_ALPHA;
+	rsd.depthTest = false;
+	rsd.depthWrite = false;
 	m_cursorRS = m_renderer->CreateRenderState(rsd);
 }
 

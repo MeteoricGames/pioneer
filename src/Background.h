@@ -104,9 +104,9 @@ namespace Background
 
 	private:
 		Graphics::Renderer *m_renderer;
-		MilkyWay m_milkyWay;
-		Starfield m_starField;
-		UniverseBox m_universeBox;
+		std::shared_ptr<MilkyWay> m_milkyWay;
+		std::shared_ptr<Starfield> m_starField;
+		std::shared_ptr<UniverseBox> m_universeBox;
 		bool m_bLoadNewCubemap;
 		Uint32 m_uSeed;
 		Graphics::RenderState *m_renderState;

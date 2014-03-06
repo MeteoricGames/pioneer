@@ -1298,7 +1298,7 @@ void Pi::MainLoop()
 
 		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
-		if(currentView == settingsView || currentView == infoView || currentView == sectorView || currentView == spaceStationView) {
+		if(currentView != worldView) {
 			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
 		} else {
 			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
@@ -1328,11 +1328,6 @@ void Pi::MainLoop()
 			}
 		}
 
-		if(Pi::mouseCursor) {
-			Pi::mouseCursor->Update();
-			Pi::mouseCursor->Draw();
-		}
-
 		// XXX don't draw the UI during death obviously a hack, and still
 		// wrong, because we shouldn't this when the HUD is disabled, but
 		// probably sure draw it if they switch to eg infoview while the HUD is
@@ -1340,6 +1335,11 @@ void Pi::MainLoop()
 		if (Pi::GetView() != Pi::deathView) {
 			Pi::ui->Update();
 			Pi::ui->Draw();
+		}
+
+		if(Pi::mouseCursor) {
+			Pi::mouseCursor->Update();
+			Pi::mouseCursor->Draw();
 		}
 
 #if WITH_DEVKEYS

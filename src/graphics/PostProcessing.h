@@ -12,6 +12,7 @@ namespace Graphics {
 	class Renderer;
 	class PostProcess;
 	class RenderTarget;
+	class RenderState;
 
 	class PostProcessing
 	{
@@ -38,6 +39,7 @@ namespace Graphics {
 		Renderer* mRenderer;
 		RenderTarget* rtDevice;
 		RenderTarget* rtMain;
+		RenderState* mRenderState;
 		bool bPerformPostProcessing;
 	};
 }

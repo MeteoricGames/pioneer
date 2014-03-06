@@ -167,8 +167,6 @@ void UniverseBox::SetIntensity(float intensity)
 	m_material->specialParameter0 = &fIntensity;
 }
 
-
-
 Starfield::Starfield(Graphics::Renderer *renderer, Random &rand)
 {
 	m_renderer = renderer;
@@ -314,13 +312,13 @@ void MilkyWay::Draw(Graphics::RenderState *rs)
 
 Container::Container(Graphics::Renderer *renderer, Random &rand)
 : m_renderer(renderer)
-, m_milkyWay(renderer)
-, m_starField(renderer, rand)
-, m_universeBox(renderer)
 , m_bLoadNewCubemap(true)
 , m_uSeed(0)
 {
 	Graphics::RenderStateDesc rsd;
+	m_milkyWay.reset(new MilkyWay(renderer));
+	m_starField.reset(new Starfield(renderer, rand));
+	m_universeBox.reset(new UniverseBox(renderer));
 	rsd.depthTest  = false;
 	rsd.depthWrite = false;
 	m_renderState = renderer->CreateRenderState(rsd);
@@ -329,19 +327,22 @@ Container::Container(Graphics::Renderer *renderer, Random &rand)
 
 Container::Container(Graphics::Renderer *renderer, Uint32 seed)
 : m_renderer(renderer)
-, m_milkyWay(renderer)
-, m_starField(renderer, Random(seed))
-, m_universeBox(renderer)
 , m_bLoadNewCubemap(true)
 , m_uSeed(seed)
 {
+	m_milkyWay.reset(new MilkyWay(renderer));
+	Random rand(seed);
+	m_starField.reset(new Starfield(renderer, rand));
+	m_universeBox.reset(new UniverseBox(renderer));
+
 	Refresh(seed);
 };
 
 void Container::Refresh(Uint32 seed)
 {
 	// always redo starfield, milkyway stays normal for now
-	m_starField.Fill(Random(seed));
+	Random rand(seed);
+	m_starField->Fill(rand);
 	if(m_uSeed != seed) {
 		m_bLoadNewCubemap = true;
 	}
@@ -365,31 +366,31 @@ void Container::Draw(const matrix4x4d &transform)
 				seeds[3] = system_path.sectorZ;
 				seeds[4] = UNIVERSE_SEED;
 				Random rand(seeds, 5);
-				m_universeBox.LoadCubeMap(&rand);
+				m_universeBox->LoadCubeMap(&rand);
 			} else {
 				Random rand(m_uSeed);
-				m_universeBox.LoadCubeMap(&rand);
+				m_universeBox->LoadCubeMap(&rand);
 			}
 		} else {
-			m_universeBox.LoadCubeMap();
+			m_universeBox->LoadCubeMap();
 		}
 	}
 
 	m_renderer->SetTransform(transform);
-	m_universeBox.Draw();
-	//m_milkyWay.Draw(renderer);
+	m_universeBox->Draw();
+	//m_milkyWay->Draw(renderer);
 	// squeeze the starfield a bit to get more density near horizon
 	matrix4x4d starTrans = transform * matrix4x4d::ScaleMatrix(1.0, 0.4, 1.0);
 	m_renderer->SetTransform(starTrans);
-	m_starField.Draw();
+	m_starField->Draw();
 }
 
 void Container::SetIntensity(float intensity)
 {
 	PROFILE_SCOPED()
-	m_universeBox.SetIntensity(intensity);
-	m_starField.SetIntensity(intensity);
-	m_milkyWay.SetIntensity(intensity);
+	m_universeBox->SetIntensity(intensity);
+	m_starField->SetIntensity(intensity);
+	m_milkyWay->SetIntensity(intensity);
 }
 
 void Container::SetDrawFlags(const Uint32 flags)

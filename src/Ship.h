@@ -11,6 +11,7 @@
 #include "EquipSet.h"
 #include "galaxy/SystemPath.h"
 #include "HudTrail.h"
+#include "ThrusterTrail.h"
 #include "NavLights.h"
 #include "Planet.h"
 #include "Sensors.h"
@@ -27,6 +28,7 @@ class AICommand;
 class ShipController;
 class CargoBody;
 class Missile;
+class ThrusterTrail;
 namespace Graphics { class Renderer; }
 
 struct HeatGradientParameters_t {
@@ -83,7 +85,7 @@ public:
 	Ship() {} //default constructor used before Load
 	virtual ~Ship();
 
-	virtual void SetFrame(Frame *f);
+	virtual void SetFrame(Frame *f) override;
 
 	void SetController(ShipController *c); //deletes existing
 	ShipController *GetController() const { return m_controller; }
@@ -296,15 +298,21 @@ public:
 	bool IsInvulnerable() const { return m_invulnerable; }
 	void SetInvulnerable(bool b) { m_invulnerable = b; }
 
-	bool TargetInSight() const { return m_targetInSight; }
 	Sensors *GetSensors() const { return m_sensors.get(); }
-
-	virtual Body *GetCombatTarget() const { return 0; }
-	virtual Body *GetNavTarget() const { return 0; }
 	Uint8 GetRelations(Body *other) const; //0=hostile, 50=neutral, 100=ally
 	void SetRelations(Body *other, Uint8 percent);
 
+	bool TargetInSight() const { return m_targetInSight; }
+
+	virtual Body *GetCombatTarget() const { return 0; }
+	virtual Body *GetNavTarget() const { return 0; }
+
 	double GetLandingPosOffset() const { return m_landingMinOffset; }
+
+	unsigned int GetThrusterTrailsNum() const { return m_thrusterTrails.size(); }
+	ThrusterTrail* GetThrusterTrail(unsigned int index) const { return m_thrusterTrails[index]; }
+	void UpdateThrusterTrails(float time);
+	void ClearThrusterTrails();
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
@@ -337,6 +345,7 @@ protected:
 	float m_ecmRecharge;
 
 	ShipController *m_controller;
+	std::vector<ThrusterTrail*> m_thrusterTrails;
 
 private:
 	float GetECMRechargeTime();
@@ -401,10 +410,10 @@ private:
 	SceneGraph::Animation *m_landingGearAnimation;
 	std::unique_ptr<NavLights> m_navLights;
 
-	static HeatGradientParameters_t s_heatGradientParams;
+	 std::unique_ptr<Sensors> m_sensors;
+	 std::unordered_map<Body*, Uint8> m_relationsMap;
 
-	std::unique_ptr<Sensors> m_sensors;
-	std::unordered_map<Body*, Uint8> m_relationsMap;
+	static HeatGradientParameters_t s_heatGradientParams;
 };
 
 

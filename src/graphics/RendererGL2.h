@@ -39,6 +39,11 @@ namespace GL2 {
 	class BloomCompositorMaterial;
 }
 
+namespace Effects {	
+	class ThrusterTrailsDepthMaterial;
+	class ThrusterTrailsMaterial;
+}
+
 class RendererGL2 : public Renderer
 {
 public:
@@ -57,6 +62,7 @@ public:
 
 	virtual bool SetRenderState(RenderState*) override;
 	virtual bool SetRenderTarget(RenderTarget*) override;
+	virtual RenderTarget* GetActiveRenderTarget() const { return reinterpret_cast<Graphics::RenderTarget*>(m_activeRenderTarget); }
 
 	virtual bool ClearScreen();
 	virtual bool ClearDepthBuffer();
@@ -82,6 +88,7 @@ public:
 	virtual bool DrawLines2D(int vertCount, const vector2f *vertices, const Color &color, RenderState*, LineType type=LINE_SINGLE) override;
 	virtual bool DrawPoints(int count, const vector3f *points, const Color *colors, RenderState*, float pointSize=1.f) override;
 	virtual bool DrawTriangles(const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES) override;
+	virtual bool DrawTriangles(int vertCount, const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES);
 	virtual bool DrawSurface(const Surface *surface, RenderState *rs) override;
 	virtual bool DrawPointSprites(int count, const vector3f *positions, RenderState *rs, Material *material, float size) override;
 	virtual bool DrawStaticMesh(StaticMesh*, RenderState*) override;
@@ -143,6 +150,8 @@ protected:
 	friend class GL2::HorizontalBlurMaterial;
 	friend class GL2::VerticalBlurMaterial;
 	friend class GL2::BloomCompositorMaterial;
+	friend class Effects::ThrusterTrailsDepthMaterial;
+	friend class Effects::ThrusterTrailsMaterial;
 	std::vector<std::pair<MaterialDescriptor, GL2::Program*> > m_programs;
 	std::unordered_map<Uint32, GL2::RenderState*> m_renderStates;
 	float m_invLogZfarPlus1;

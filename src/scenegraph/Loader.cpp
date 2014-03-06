@@ -693,6 +693,7 @@ void Loader::ConvertNodes(aiNode *node, Group *_parent, std::vector<RefCountedPt
 			CreateNavlight(nodename, accum*m);
 		} else if (starts_with(nodename, "thruster_")) {
 			CreateThruster(nodename, accum*m);
+			m_model->AddTag(nodename, new MatrixTransform(m_renderer, accum*m));
 		} else if (starts_with(nodename, "label_")) {
 			CreateLabel(parent, m);
 		} else if (starts_with(nodename, "tag_")) {

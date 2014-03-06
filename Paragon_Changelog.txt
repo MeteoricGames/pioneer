@@ -102,5 +102,17 @@ Alpha 4
 *New jump drives
 *Much much more!
 
+Alpha 5
+
+*new ship exhaust trails
+*new ship; civilian corvette
+*new npc ship; passenger liner
+*new npc ship; ultraheavy tanker
+*new ship; civilian fighter
+*new shields for all ships
+*fixed mission spawning bug
+*updates to missions and reputation
+
+
 
 

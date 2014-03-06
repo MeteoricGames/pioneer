@@ -12,6 +12,8 @@
 #include "SectorView.h"
 #include "Serializer.h"
 #include "ShipCpanel.h"
+#include "HudTrail.h"
+#include "ThrusterTrail.h"
 #include "Sound.h"
 #include "Space.h"
 #include "SpaceStation.h"
@@ -519,22 +521,73 @@ void WorldView::Draw3D()
 		if (m_internalCameraController->GetMode() == InternalCameraController::MODE_FRONT)
 			cockpit = Pi::player->GetCockpit();
 	}
-	m_camera->Draw(excludeBody, cockpit);
+	m_camera->BeginDraw(excludeBody);
 
-	// Draw 3D HUD
 	// Speed lines
 	if (Pi::AreSpeedLinesDisplayed())
 		m_speedLines->Render(m_renderer);
+		
+	DrawThrusterTrails();
 
-	// Contact trails
-	if( Pi::AreHudTrailsDisplayed() ) {
-		for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it)
-			it->trail->Render(m_renderer);
-	}
+	// Hud trails for ships
+    //for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it)
+	//	it->trail->Render(m_renderer);
 
+	// Hud trail for player
+	//Pi::player->GetHudTrail()->Render(m_renderer);	
+
+	m_camera->EndDraw(m_cameraContext->GetCamFrame(), cockpit);
+	
 	m_cameraContext->EndFrame();
-
 	UIView::Draw3D();
+}
+
+#include "graphics/effects/thruster_trails/ThrusterTrailsMaterial.h"
+
+void WorldView::DrawThrusterTrails()
+{
+	// Thruster trails depth RT + material
+	static Graphics::MaterialDescriptor ttd;
+	ttd.effect = Graphics::EffectType::EFFECT_THRUSTERTRAILS_DEPTH;
+	static Graphics::Material *depth_mtrl = m_renderer->CreateMaterial(ttd);
+	ttd.effect = Graphics::EffectType::EFFECT_THRUSTERTRAILS;
+	static Graphics::Effects::ThrusterTrailsMaterial *trail_mtrl = reinterpret_cast<Graphics::Effects::ThrusterTrailsMaterial*>(m_renderer->CreateMaterial(ttd));
+	static Graphics::RenderTargetDesc rtd(
+		m_renderer->GetWindow()->GetWidth(), 
+		m_renderer->GetWindow()->GetHeight(), 
+		Graphics::TextureFormat::TEXTURE_RGBA_8888, Graphics::TextureFormat::TEXTURE_NONE,
+		false);
+	static Graphics::Texture* trail_gradient = Graphics::TextureBuilder::UI("textures/exhaust_gradient.png").GetOrCreateTexture(m_renderer, "effect");
+	static Graphics::RenderTarget *depth_rt = m_renderer->CreateRenderTarget(rtd);
+	Graphics::RenderTarget *main_rt = m_renderer->GetActiveRenderTarget();
+	m_renderer->SetRenderTarget(depth_rt);
+	m_renderer->ClearScreen();
+	
+	// Thruster trails for ships and player
+	for(auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
+		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
+			it->ship->GetThrusterTrail(i)->Render(depth_mtrl);
+		}
+	}
+	for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
+		Pi::player->GetThrusterTrail(i)->Render(depth_mtrl);
+	}
+	
+	m_renderer->SetRenderTarget(main_rt);
+
+	trail_mtrl->texture0 = trail_gradient;
+	trail_mtrl->texture1 = depth_rt->GetColorTexture();
+	trail_mtrl->setWindowSize(m_renderer->GetWindow()->GetWidth(), m_renderer->GetWindow()->GetHeight());
+
+	// Thruster trails for ships and player
+	for(auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
+		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
+			it->ship->GetThrusterTrail(i)->Render(trail_mtrl);
+		}
+	}
+	for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
+		Pi::player->GetThrusterTrail(i)->Render(trail_mtrl);
+	}
 }
 
 void WorldView::OnToggleLabels()
@@ -1129,19 +1182,18 @@ void WorldView::Update()
 	if (Pi::AreSpeedLinesDisplayed()) {
 		m_speedLines->Update(Pi::game->GetTimeStep());
 
-		matrix4x4d trans;
+        matrix4x4d trans;
 		Frame::GetFrameTransform(playerFrame, camFrame, trans);
 
 		if ( m_speedLines.get() && Pi::AreSpeedLinesDisplayed() ) {
 			m_speedLines->Update(Pi::game->GetTimeStep());
-
 			trans[12] = trans[13] = trans[14] = 0.0;
 			trans[15] = 1.0;
 			m_speedLines->SetTransform(trans);
 		}
 	}
 
-	if( Pi::AreHudTrailsDisplayed() )
+	/*if( Pi::AreHudTrailsDisplayed() )
 	{
 		matrix4x4d trans;
 		Frame::GetFrameTransform(playerFrame, camFrame, trans);
@@ -1151,7 +1203,7 @@ void WorldView::Update()
 	} else {
 		for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it)
 			it->trail->Reset(playerFrame);
-	}
+	}*/
 
 	// target object under the crosshairs. must be done after
 	// UpdateProjectedObjects() to be sure that m_projectedPos does not have
@@ -1159,6 +1211,23 @@ void WorldView::Update()
 	if (targetObject) {
 		Body* const target = PickBody(double(Gui::Screen::GetWidth())/2.0, double(Gui::Screen::GetHeight())/2.0);
 		SelectBody(target, false);
+	}
+
+	// Exhaust Trails
+	const Frame *cam_frame = m_cameraContext->GetCamFrame();
+	matrix4x4d trans;
+    Frame::GetFrameTransform(Pi::player->GetFrame(), cam_frame, trans);
+	// Thruster trails: other ships		
+	for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
+		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
+			it->ship->GetThrusterTrail(i)->SetTransform(trans);
+			it->ship->GetThrusterTrail(i)->Update(frameTime);
+		}
+	}
+	// Thruster trails: player ship
+	for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
+			Pi::player->GetThrusterTrail(i)->SetTransform(trans);
+			Pi::player->GetThrusterTrail(i)->Update(frameTime);
 	}
 
 	UIView::Update();

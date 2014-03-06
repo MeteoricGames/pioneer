@@ -26,6 +26,7 @@
 #include "collider/collider.h"
 #include "StringF.h"
 #include "Player.h"
+#include "ThrusterTrail.h"
 
 static const float TONS_HULL_PER_SHIELD = 10.f;
 static const double KINETIC_ENERGY_MULT	= 0.01;
@@ -242,6 +243,20 @@ void Ship::Init()
 		m_landingMinOffset = GetAabb().min.y;
 	}
 
+	// Thruster trails
+	std::string tag_name;
+	vector3f tag_scale;
+	for(auto i = 0; i < m_thrusterTrails.size(); ++i) delete m_thrusterTrails[i];
+	m_thrusterTrails.clear();
+	for(unsigned int i = 0; i < GetModel()->GetNumTags(); ++i) {
+		tag_name = GetModel()->GetTagNameByIndex(i);
+		tag_scale = GetModel()->GetTagByIndex(i)->GetTransform().DecomposeScaling();
+		 if(tag_scale.x >= THRUSTER_TRAILS_UPPER_BOUND && tag_name.substr(0, 9) == "thruster_") {
+			 vector3f trans = GetModel()->GetTagByIndex(i)->GetTransform().DecomposeTranslation();
+			 m_thrusterTrails.push_back(new ThrusterTrail(Pi::renderer, this, THRUSTER_TRAILS_COLOR, trans, tag_scale.x));
+		 }
+	}
+
 	InitMaterials();
 }
 
@@ -308,6 +323,7 @@ Ship::~Ship()
 {
 	if (m_curAICmd) delete m_curAICmd;
 	delete m_controller;
+	for(auto i = 0; i < m_thrusterTrails.size(); ++i) delete m_thrusterTrails[i];
 }
 
 void Ship::SetController(ShipController *c)
@@ -930,6 +946,9 @@ void Ship::SetFrame(Frame *f)
 {
 	DynamicBody::SetFrame(f);
 	m_sensors->ResetTrails();
+	for(unsigned int i = 0; i < m_thrusterTrails.size(); ++i) {
+		m_thrusterTrails[i]->Reset(f);
+	}
 }
 
 void Ship::TimeStepUpdate(const float timeStep)
@@ -1363,20 +1382,6 @@ void Ship::StaticUpdate(const float timeStep)
 		}
 	}
 
-	if (this->GetFrame() == Pi::player->GetFrame()) {
-		//Add smoke trails based on thruster state and in atmosphere.
-		if ( GetVelocity().Length() < 5000.0 && GetVelocity().Length() > 5.0 && std::max(0.0001*GetVelocity().Length(),0.1)*Pi::rng.Double() < timeStep ) {
-			vector3d pos = GetOrient() * vector3d(0, 0, GetAabb().radius*0.75);
-			Sfx::AddThrustSmoke(this, Sfx::TYPE_SMOKE, std::min(10.0*GetVelocity().Length()*abs(m_thrusters.z)+abs(m_thrusters.y),std::max(GetVelocity().Length()*0.2,GetAabb().min.y*GetAabb().min.y*0.3)),pos);
-		}
-
-		//Add smoke trails for missiles on thruster state
-		if (m_type->tag == ShipType::TAG_MISSILE && m_thrusters.z < 0.0 && 0.1*Pi::rng.Double() < timeStep) {
-			vector3d pos = GetOrient() * vector3d(0, 0 , 5);
-			Sfx::AddThrustSmoke(this, Sfx::TYPE_SMOKE, std::min(10.0*GetVelocity().Length()*abs(m_thrusters.z),100.0),pos);
-		}
-	}
-
 	//play start transit drive
 	if (m_transitstate == TRANSIT_DRIVE_READY && IsType(Object::PLAYER)) {
 		Sound::PlaySfx("Transit_Start", 0.25f, 0.25f, false);
@@ -1634,3 +1639,17 @@ void Ship::SetRelations(Body *other, Uint8 percent)
 	m_relationsMap[other] = percent;
 	if (m_sensors.get()) m_sensors->UpdateIFF(other);
 }
+
+void Ship::UpdateThrusterTrails(float time) 
+{ 
+	for(unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
+		m_thrusterTrails[i]->Update(time); 
+	}
+}
+
+void Ship::ClearThrusterTrails() { 
+	for(unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
+		m_thrusterTrails[i]->ClearTrail(); 
+	}
+}
+

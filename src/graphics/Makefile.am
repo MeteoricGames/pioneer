@@ -38,7 +38,10 @@ noinst_HEADERS = \
 	gl2/SkyboxMaterial.h \
 	gl2/ShieldMaterial.h \
 	gl2/StarfieldMaterial.h \
-	gl2/Uniform.h
+	gl2/SphereImpostorMaterial.h \
+	gl2/Uniform.h \
+	effects/thruster_trails/ThrusterTrailsDepthMaterial.h \
+	effects/thruster_trails/ThrusterTrailsMaterial.h
 
 libgraphics_a_SOURCES = \
 	Graphics.cpp \

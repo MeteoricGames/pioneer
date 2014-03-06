@@ -1,4 +1,5 @@
 // Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _SENSORS_H
@@ -13,9 +14,9 @@
  */
 #include "libs.h"
 #include "Body.h"
+#include "HudTrail.h"
 
 class Body;
-class HudTrail;
 class Ship;
 
 class Sensors {
@@ -36,6 +37,7 @@ public:
 		RadarContact(Body *);
 		~RadarContact();
 		Body *body;
+		Ship *ship;
 		HudTrail* trail;
 		double distance;
 		IFF iff;

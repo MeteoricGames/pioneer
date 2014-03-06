@@ -1,0 +1,27 @@
+Paragon Release Cycle:
+=====================================================
+
+1st Day of Month:
+-----------------
+
+Alpha releases to various digital distributors
+
+2nd Day of Month
+--------------------------------
+
+- Alpha source release.
+- Sync opensource repo with Pioneer
+- Port back changes to paragon
+- Next milestone features
+
+Rest of the Month
+--------------------------------
+
+Regular development, general bug fixing, etc.
+
+Last Day of the Month
+--------------------------------
+
+Bug fixing and next release preparations
+
+

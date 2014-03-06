@@ -32,6 +32,8 @@
 #include "gl2/ShieldMaterial.h"
 #include "gl2/SphereImpostorMaterial.h"
 #include "gl2/BloomCompositorMaterial.h"
+#include "effects/thruster_trails/ThrusterTrailsDepthMaterial.h"
+#include "effects/thruster_trails/ThrusterTrailsMaterial.h"
 #include <stddef.h> //for offsetof
 #include <ostream>
 #include <sstream>
@@ -487,6 +489,23 @@ bool RendererGL2::DrawTriangles(const VertexArray *v, RenderState *rs, Material 
 	return true;
 }
 
+bool RendererGL2::DrawTriangles(int vertCount, const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type)
+{
+	if(!vertices || vertices->position.size() < 3 || static_cast<unsigned>(vertCount) > vertices->GetNumVerts()) return false;
+
+	SetRenderState(state);
+
+	material->Apply();
+	EnableClientStates(vertices);
+
+	glDrawArrays(type, 0, vertCount);
+
+	material->Unapply();
+	DisableClientStates();
+
+	return true;
+}
+
 bool RendererGL2::DrawSurface(const Surface *s, RenderState *rs)
 {
 	if (!s || !s->GetVertices() || s->GetNumIndices() < 3) return false;
@@ -773,6 +792,15 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 	case EFFECT_SPHEREIMPOSTOR:
 		mat = new GL2::SphereImpostorMaterial();
 		break;
+
+	case EFFECT_THRUSTERTRAILS_DEPTH:
+		mat = new Effects::ThrusterTrailsDepthMaterial();
+		break;
+
+	case EFFECT_THRUSTERTRAILS:
+		mat = new Effects::ThrusterTrailsMaterial();
+		break;
+
 	default:
 		if (desc.lighting)
 			mat = new GL2::LitMultiMaterial();

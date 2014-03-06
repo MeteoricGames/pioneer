@@ -27,6 +27,7 @@ noinst_HEADERS = \
 	ChatForm.h \
 	CityOnPlanet.h \
 	Color.h \
+	Colors.h \
 	Cutscene.h \
 	CRC32.h \
 	DeathView.h \
@@ -132,6 +133,7 @@ noinst_HEADERS = \
 	Star.h \
 	SystemInfoView.h \
 	SystemView.h \
+	ThrusterTrail.h \
 	TerrainBody.h \
 	Tombstone.h \
 	UIView.h \
@@ -158,6 +160,7 @@ paragon_SOURCES	= \
 	CameraController.cpp \
 	CargoBody.cpp \
 	Color.cpp \
+	Colors.cpp \
 	ChatForm.cpp \
 	CityOnPlanet.cpp \
 	CRC32.cpp \
@@ -268,6 +271,7 @@ paragon_SOURCES	= \
 	Star.cpp \
 	SystemInfoView.cpp \
 	SystemView.cpp \
+	ThrusterTrail.cpp \
 	TerrainBody.cpp \
 	Tombstone.cpp \
 	UIView.cpp \

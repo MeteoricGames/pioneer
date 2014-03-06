@@ -15,6 +15,8 @@
 #include "SpaceStation.h"
 #include "WorldView.h"
 #include "StringF.h"
+#include "HudTrail.h"
+#include "ThrusterTrail.h"
 
 //Some player specific sounds
 static Sound::Event s_soundUndercarriage;
@@ -40,6 +42,7 @@ void Player::Init()
 {
 	InitCockpit();
 	Ship::Init();
+	m_hudTrail.reset(new HudTrail(this, Color::PARAGON_BLUE));
 }
 
 void Player::InitCockpit()
@@ -232,4 +235,10 @@ void Player::StaticUpdate(const float timeStep)
 	// anyway so this will do for now
 	if (m_cockpit)
 		m_cockpit->Update(timeStep);
+}
+
+void Player::SetFrame(Frame *f)
+{
+	GetSensors()->ResetTrails();
+	Ship::SetFrame(f);
 }
