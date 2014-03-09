@@ -1,14 +1,15 @@
 // Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Sensors.h"
 #include "Body.h"
+#include "Colors.h"
 #include "Game.h"
 #include "Pi.h"
 #include "Ship.h"
 #include "Space.h"
 #include "Player.h"
-#include "HudTrail.h"
 
 Sensors::RadarContact::RadarContact()
 : body(0)
@@ -35,12 +36,12 @@ Color Sensors::IFFColor(IFF iff)
 {
 	switch (iff)
 	{
-		case IFF_NEUTRAL: return Color::BLUE;
-		case IFF_ALLY:    return Color::GREEN;
-		case IFF_HOSTILE: return Color::RED;
+		case IFF_NEUTRAL: return Colors::IFF_NEUTRAL;
+		case IFF_ALLY:    return Colors::IFF_ALLY;
+		case IFF_HOSTILE: return Colors::IFF_HOSTILE;
 		case IFF_UNKNOWN:
 		default:
-			return Color::GRAY;
+			return Colors::IFF_UNKNOWN;
 	}
 }
 
@@ -103,6 +104,8 @@ void Sensors::Update(float time)
 		if ((*i) == m_owner || !(*i)->IsType(Object::SHIP)) continue;
 		if ((*i)->IsDead()) continue;
 
+		Ship* ship = static_cast<Ship*>((*i));
+
 		auto cit = m_radarContacts.begin();
 		while (cit != m_radarContacts.end()) {
 			if (cit->body == (*i)) break;
@@ -114,8 +117,10 @@ void Sensors::Update(float time)
 			m_radarContacts.push_back(RadarContact());
 			RadarContact &rc = m_radarContacts.back();
 			rc.body = (*i);
+			rc.ship = ship;
 			rc.iff = CheckIFF(rc.body);
 			rc.trail = new HudTrail(rc.body, IFFColor(rc.iff));
+			rc.ship->ClearThrusterTrails();
 		} else {
 			cit->fresh = true;
 		}
@@ -148,18 +153,18 @@ void Sensors::UpdateIFF(Body *b)
 
 void Sensors::ResetTrails()
 {
-	for (auto it = m_radarContacts.begin(); it != m_radarContacts.end(); ++it)
+	for (auto it = m_radarContacts.begin(); it != m_radarContacts.end(); ++it) {
 		it->trail->Reset(Pi::player->GetFrame());
+		it->ship->ClearThrusterTrails();
+	}
 }
 
 void Sensors::PopulateStaticContacts()
 {
 	m_staticContacts.clear();
 
-	auto start = Pi::game->GetSpace()->BodiesBegin();
-	auto end   = Pi::game->GetSpace()->BodiesEnd();
-	for (auto it = start; it != end; ++it) {
-		switch ((*it)->GetType())
+	for (Body* b : Pi::game->GetSpace()->GetBodies()) {
+		switch (b->GetType())
 		{
 			case Object::STAR:
 			case Object::PLANET:
@@ -169,7 +174,6 @@ void Sensors::PopulateStaticContacts()
 			default:
 				continue;
 		}
-		Body *b = *it;
 		m_staticContacts.push_back(RadarContact(b));
 		RadarContact &rc = m_staticContacts.back();
 		rc.fresh = true;

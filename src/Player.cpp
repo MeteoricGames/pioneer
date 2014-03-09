@@ -15,6 +15,8 @@
 #include "SpaceStation.h"
 #include "WorldView.h"
 #include "StringF.h"
+#include "HudTrail.h"
+#include "ThrusterTrail.h"
 
 //Some player specific sounds
 static Sound::Event s_soundUndercarriage;
@@ -40,6 +42,7 @@ void Player::Init()
 {
 	InitCockpit();
 	Ship::Init();
+	m_hudTrail.reset(new HudTrail(this, Color::PARAGON_BLUE));
 }
 
 void Player::InitCockpit()
@@ -202,6 +205,15 @@ void Player::SetNavTarget(Body* const target, bool setSpeedTo)
 }
 //temporary targeting stuff ends
 
+Ship::HyperjumpStatus Player::InitiateHyperjumpTo(const SystemPath &dest, int warmup_time, double duration, LuaRef checks) {
+	HyperjumpStatus status = Ship::InitiateHyperjumpTo(dest, warmup_time, duration, checks);
+
+	if (status == HYPERJUMP_OK)
+		s_soundHyperdrive.Play("Hyperdrive_Charge");
+
+	return status;
+}
+
 Ship::HyperjumpStatus Player::StartHyperspaceCountdown(const SystemPath &dest)
 {
 	HyperjumpStatus status = Ship::StartHyperspaceCountdown(dest);
@@ -210,6 +222,12 @@ Ship::HyperjumpStatus Player::StartHyperspaceCountdown(const SystemPath &dest)
 		s_soundHyperdrive.Play("Hyperdrive_Charge");
 
 	return status;
+}
+
+void Player::AbortHyperjump()
+{
+	s_soundHyperdrive.Play("Hyperdrive_Abort");
+	Ship::AbortHyperjump();
 }
 
 void Player::ResetHyperspaceCountdown()
@@ -232,4 +250,10 @@ void Player::StaticUpdate(const float timeStep)
 	// anyway so this will do for now
 	if (m_cockpit)
 		m_cockpit->Update(timeStep);
+}
+
+void Player::SetFrame(Frame *f)
+{
+	GetSensors()->ResetTrails();
+	Ship::SetFrame(f);
 }

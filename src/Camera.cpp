@@ -105,15 +105,15 @@ static void position_system_lights(Frame *camFrame, Frame *frame, std::vector<Ca
 		const double dist = lpos.Length() / AU;
 		lpos *= 1.0/dist; // normalize
 
-		const Uint8 *col = StarSystem::starRealColors[body->type];
+		const Uint8 *col = StarSystem::starRealColors[body->GetType()];
 
 		const Color lightCol(col[0], col[1], col[2], 0);
 		vector3f lightpos(lpos.x, lpos.y, lpos.z);
 		lights.push_back(Camera::LightSource(frame->GetBody(), Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, lightpos, lightCol, lightCol)));
 	}
 
-	for (Frame::ChildIterator it = frame->BeginChildren(); it != frame->EndChildren(); ++it) {
-		position_system_lights(camFrame, *it, lights);
+	for (Frame* kid : frame->GetChildren()) {
+		position_system_lights(camFrame, kid, lights);
 	}
 }
 
@@ -123,9 +123,7 @@ void Camera::Update()
 
 	// evaluate each body and determine if/where/how to draw it
 	m_sortedBodies.clear();
-	for (Space::BodyIterator i = Pi::game->GetSpace()->BodiesBegin(); i != Pi::game->GetSpace()->BodiesEnd(); ++i) {
-		Body *b = *i;
-
+	for (Body* b : Pi::game->GetSpace()->GetBodies()) {
 		BodyAttrs attrs;
 		attrs.body = b;
 
@@ -156,7 +154,7 @@ void Camera::Update()
 				attrs.billboardPos = vector3f(&pos.x);
 				attrs.billboardSize = float(size);
 				if (b->IsType(Object::STAR)) {
-					Uint8 *col = StarSystem::starRealColors[b->GetSystemBody()->type];
+					const Uint8 *col = StarSystem::starRealColors[b->GetSystemBody()->GetType()];
 					attrs.billboardColor = Color(col[0], col[1], col[2], 255);
 				}
 				else if (b->IsType(Object::PLANET)) {
@@ -179,7 +177,7 @@ void Camera::Update()
 	m_sortedBodies.sort();
 }
 
-void Camera::Draw(const Body *excludeBody, ShipCockpit* cockpit)
+void Camera::BeginDraw(const Body *excludeBody)
 {
 	PROFILE_SCOPED()
 
@@ -259,14 +257,18 @@ void Camera::Draw(const Body *excludeBody, ShipCockpit* cockpit)
 
 	Sfx::RenderAll(m_renderer, Pi::game->GetSpace()->GetRootFrame(), camFrame);
 
-	// NB: Do any screen space rendering after here:
-	// Things like the cockpit and AR features like hudtrails, space dust etc.
+	//glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_TRANSFORM_BIT);
+}
 
+void Camera::EndDraw(Frame* camFrame, ShipCockpit* cockpit)
+{
+	//glPopAttrib();
 	// Render cockpit
 	// XXX only here because it needs a frame for lighting calc
 	// should really be in WorldView, immediately after camera draw
-	if(cockpit)
+	if(camFrame && cockpit) {
 		cockpit->RenderCockpit(m_renderer, this, camFrame);
+	}
 }
 
 void Camera::CalcShadows(const int lightNum, const Body *b, std::vector<Shadow> &shadowsOut) const {
@@ -284,8 +286,7 @@ void Camera::CalcShadows(const int lightNum, const Body *b, std::vector<Shadow> 
 	else bRadius = b->GetPhysRadius();
 
 	// Look for eclipsing third bodies:
-	for (Space::BodyIterator ib2 = Pi::game->GetSpace()->BodiesBegin(); ib2 != Pi::game->GetSpace()->BodiesEnd(); ++ib2) {
-		Body *b2 = *ib2;
+	for (const Body *b2 : Pi::game->GetSpace()->GetBodies()) {
 		if ( b2 == b || b2 == lightBody || !(b2->IsType(Object::PLANET) || b2->IsType(Object::STAR) || b2->IsType(Object::SPACESTATION) ))
 			continue;
 
@@ -296,9 +297,9 @@ void Camera::CalcShadows(const int lightNum, const Body *b, std::vector<Shadow> 
 
 		double perpDist = lightDir.Dot(b2pos);
 
-		if (b2->IsType(Object::SPACESTATION) && !static_cast<SpaceStation*>(b2)->IsGroundStation()) {
+		if (b2->IsType(Object::SPACESTATION) && !static_cast<const SpaceStation*>(b2)->IsGroundStation()) {
 			// use spacestion aabb.radius
-			b2Radius = static_cast<SpaceStation*>(b2)->GetAabb().GetRadius();
+			b2Radius = static_cast<const SpaceStation*>(b2)->GetAabb().GetRadius();
 			// since we're inside a spacestation, skew 50meters towards the lightsource so we cover most.
 			bLightPosRelLenght += 50.0;
 			perpDist += 50.0;

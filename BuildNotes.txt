@@ -13,6 +13,8 @@ Building static binary:
 		to build libassimp as static, in source/assimp/CMakeLists.txt change "SET ( BUILD_STATIC_LIB OFF CACHE BOOL" to "ON"
 	configure paragon:
 		./configure --with-thirdparty=/path/to/pioneer-thirdparty
+	alternatively, build assimp separately from /build with:
+		cmake -DBUILD_STATIC_LIB=ON ..
 	build paragon normally
 	remove binary symbols to reduce size using strip:
 		strip --strip-all src/paragon

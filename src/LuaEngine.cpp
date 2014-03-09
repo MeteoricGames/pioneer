@@ -105,8 +105,8 @@ static int l_engine_attr_ui(lua_State *l)
  */
 static int l_engine_attr_version(lua_State *l)
 {
-	std::string version(PIONEER_VERSION);
-	if (strlen(PIONEER_EXTRAVERSION)) version += " (" PIONEER_EXTRAVERSION ")";
+	std::string version(PARAGON_VERSION);
+	if (strlen(PARAGON_EXTRAVERSION)) version += " (" PARAGON_EXTRAVERSION ")";
     lua_pushlstring(l, version.c_str(), version.size());
     return 1;
 }
@@ -280,7 +280,7 @@ static int l_engine_set_fractal_detail_level(lua_State *l)
 {
 	const int level = LuaConstants::GetConstantFromArg(l, "DetailLevel", 1);
 	if (level != Pi::detail.fracmult) {
-		Pi::detail.cities = level;
+		Pi::detail.fracmult = level;
 		Pi::config->SetInt("FractalMultiple", level);
 		Pi::config->Save();
 		Pi::OnChangeDetailLevel();

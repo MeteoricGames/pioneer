@@ -4,6 +4,7 @@ bin/
 lib/
 Debug/
 PreRelease/
+Profile/
 Release/
 ipch/
 src/data
@@ -55,5 +56,5 @@ Thumbs.db
 gmon.out
 .project
 .cproject
-
+.dirstamp
 *.aps

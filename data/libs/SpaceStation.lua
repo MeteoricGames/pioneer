@@ -432,7 +432,7 @@ Event.Register("onGameStart", function ()
 	end
 
 	updateSystem()
-	Timer:CallEvery(3600, updateSystem)
+	Timer:CallEvery(30, updateSystem)
 end)
 Event.Register("onEnterSystem", function (ship)
 	if ship ~= Game.player then return end

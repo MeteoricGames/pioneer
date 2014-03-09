@@ -5,11 +5,11 @@
 #define _BUILDOPTS_H
 
 // game version. usually defined by configure
-#ifndef PIONEER_VERSION
-#define PIONEER_VERSION "Alpha 4 dev"
+#ifndef PARAGON_VERSION
+#define PARAGON_VERSION "Alpha 5 dev"
 #endif
-#ifndef PIONEER_EXTRAVERSION
-#define PIONEER_EXTRAVERSION ""
+#ifndef PARAGON_EXTRAVERSION
+#define PARAGON_EXTRAVERSION ""
 #endif
 
 // define to include the object viewer in the build

@@ -20,6 +20,7 @@ local utils = import("utils")
 local InfoFace = import("ui/InfoFace")
 
 local l = Lang.GetResource("module-deliverpackage")
+local paragon_time_factor = 0.001;
 
 -- Get the UI class
 local ui = Engine.ui
@@ -28,7 +29,7 @@ local ui = Engine.ui
 local max_delivery_dist = 30
 -- typical time for travel to a system max_delivery_dist away
 --	Irigi: ~ 4 days for in-system travel, the rest is FTL travel time
-local typical_travel_time = (1.6 * max_delivery_dist + 4) * 24 * 2 * 2
+local typical_travel_time = (1.6 * max_delivery_dist + 4) * 24 * 60 * 60 * paragon_time_factor
 -- typical reward for delivery to a system max_delivery_dist away
 local typical_reward = 25 * max_delivery_dist
 
@@ -245,7 +246,7 @@ local makeAdvert = function (station, manualFlavour, nearbystations)
 		if #nearbystations == 0 then return nil end
 		location, dist = table.unpack(nearbystations[Engine.rand:Integer(1,#nearbystations)])
 		reward = 25 + (math.sqrt(dist) / 15000) * (1+urgency)
-		due = Game.time + ((4*24*2*2) * (Engine.rand:Number(1.5,3.5) - urgency))
+		due = Game.time + ((4 * 24 * 60 * 60 * paragon_time_factor) * (Engine.rand:Number(1.5,3.5) - urgency))
 	else
 		if nearbysystems == nil then
 			nearbysystems = Game.system:GetNearbySystems(max_delivery_dist, function (s) return #s:GetStationPaths() > 0 end)
@@ -329,16 +330,16 @@ end
 local onUpdateBB = function (station)
 	for ref,ad in pairs(ads) do
 		if flavours[ad.flavour].localdelivery then
-			if ad.due < Game.time + 2*2*2*24 then -- two day timeout for locals
+			if ad.due < Game.time + 2*60*60*24*paragon_time_factor then -- two day timeout for locals
 				ad.station:RemoveAdvert(ref)
 			end
 		else
-			if ad.due < Game.time + 5*2*2*24 then -- five day timeout for inter-system
+			if ad.due < Game.time + 5*60*60*24*paragon_time_factor then -- five day timeout for inter-system
 				ad.station:RemoveAdvert(ref)
 			end
 		end
 	end
-	if Engine.rand:Integer(12*2*2) < 2*2 then -- roughly once every twelve hours
+	if Engine.rand:Integer(12*60*60*paragon_time_factor) < 60*60*paragon_time_factor then -- roughly once every twelve hours
 		makeAdvert(station)
 	end
 end

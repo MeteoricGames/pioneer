@@ -24,6 +24,7 @@ namespace Graphics {
 			void Reload();
 			virtual void Use();
 			virtual void Unuse();
+			virtual void AddUniform(Uniform& uniform, const char* name);
 
 			// Some generic uniforms.
 			// to be added: matrices etc.
