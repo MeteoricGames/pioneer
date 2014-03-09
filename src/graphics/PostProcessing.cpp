@@ -105,6 +105,7 @@ void PostProcessing::Run(PostProcess* pp)
 			mRenderer->SetRenderTarget(rt_dest);
 			mRenderer->SetRenderState(mRenderState);
 			glClear(GL_COLOR_BUFFER_BIT);
+			glDepthMask(GL_FALSE);
 			if(pp->vPasses[i]->type == PP_PASS_COMPOSE) {
 				mtrl->texture0 = rtMain->GetColorTexture();
 				mtrl->texture1 = rt_src->GetColorTexture();

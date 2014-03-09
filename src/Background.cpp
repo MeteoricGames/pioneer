@@ -385,7 +385,10 @@ Container::Container(Graphics::Renderer *renderer, Uint32 seed)
 	Random rand(seed);
 	m_starField.reset(new Starfield(renderer, rand));
 	m_universeBox.reset(new UniverseBox(renderer));
-
+	Graphics::RenderStateDesc rsd;
+	rsd.depthTest = false;
+	rsd.depthWrite = false;
+	m_renderState = renderer->CreateRenderState(rsd);
 	Refresh(seed);
 };
 

@@ -158,6 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsDepthMaterial.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\Frustum.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\FresnelColourMaterial.h" />
@@ -166,13 +168,16 @@
     <ClInclude Include="..\..\..\src\graphics\gl2\GL2RenderState.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\GL2RenderTarget.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\GL2VertexBuffer.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\HorizontalBlurMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\MultiMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\Program.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\RingMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\ShieldMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\SkyboxMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\StarfieldMaterial.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\TexturedFullscreenQuad.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\Uniform.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\VerticalBlurMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\Graphics.h" />
     <ClInclude Include="..\..\..\src\graphics\Light.h" />
     <ClInclude Include="..\..\..\src\graphics\Material.h" />

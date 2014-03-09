@@ -21,17 +21,22 @@ local SmartTable = {}
 
 function SmartTable.New (rowspec)
 	local self = {}
-
-	self.widget = ui:Table()
-		:SetHeadingFont("LARGE")
-		:SetColumnAlignment("JUSTIFY")
-		:SetRowSpacing(10)
-
+	
+	self.rowspec = rowspec
+	self.headers = ui:Grid(rowspec,1)
+	self.body = ui:VBox(10) 
+	
 	self.table = {} -- data and widgets
 	self.sortCol = nil
 	self.defaultSortFunction = _DefaultSort
 	self.sortFunction = _DefaultSort
 	self.defaultCellWidget = _DefaultCellWidget
+
+	self.widget =
+		ui:VBox(10):PackEnd({
+			self.headers,
+			ui:Expand():SetInnerWidget(ui:Scroller(self.body))
+		})
 
 	setmetatable(self, {
 		__index = SmartTable,
@@ -42,13 +47,11 @@ function SmartTable.New (rowspec)
 end
 
 function SmartTable.SetHeaders (self, headers)
-	local row = {}
 	for i,header in ipairs(headers) do
 		local label = ui:Label(header)
 		label.onClick:Connect(function () self:Sort(i) end)
-		table.insert(row, label)
+		self.headers:SetCell(i-1, 0, label)
 	end
-	self.widget:SetHeadingRow(row)
 end
 
 function SmartTable.AddRow (self, cells)
@@ -73,15 +76,17 @@ function SmartTable.Sort (self, col)
 end
 
 function SmartTable.UpdateBody (self)
-	self.widget:ClearRows()
+	self.body:Clear()
 	for _,row in ipairs(self.table) do
-		self.widget:AddRow(row.widgets)
+		local rowGrid = ui:Grid(self.rowspec, 1)
+		rowGrid:SetRow(0, row.widgets)
+		self.body:PackEnd(rowGrid)
 	end
 end
 
 function SmartTable.Clear (self)
 	self.table = {}
-	self.widget:ClearRows()
+	self.body:Clear()
 end
 
 function SmartTable.SetSortFunction (self, f)

@@ -160,19 +160,13 @@ ui.templates.Settings = function (args)
 			return optionCheckBox(getter, setter, l.MUTE)
 		end
 
-		return ui:Table():SetColumnSpacing(10)
-			:AddRow({
-				muteBox(Engine.GetMasterMuted, Engine.SetMasterMuted),
-				volumeSlider(l.MASTER_VOL, Engine.GetMasterVolume, Engine.SetMasterVolume),
-			})
-			:AddRow({
-				muteBox(Engine.GetMusicMuted, Engine.SetMusicMuted),
-				volumeSlider(l.MUSIC, Engine.GetMusicVolume, Engine.SetMusicVolume),
-			})
-			:AddRow({
-				muteBox(Engine.GetEffectsMuted, Engine.SetEffectsMuted),
-				volumeSlider(l.EFFECTS, Engine.GetEffectsVolume, Engine.SetEffectsVolume),
-			})
+		return ui:VBox():PackEnd(ui:Grid({1,2,1}, 3)
+			:SetCell(0,0,muteBox(Engine.GetMasterMuted, Engine.SetMasterMuted))
+			:SetCell(1,0,volumeSlider(l.MASTER, Engine.GetMasterVolume, Engine.SetMasterVolume))
+			:SetCell(0,1,muteBox(Engine.GetMusicMuted, Engine.SetMusicMuted))
+			:SetCell(1,1,volumeSlider(l.MUSIC, Engine.GetMusicVolume, Engine.SetMusicVolume))
+			:SetCell(0,2,muteBox(Engine.GetEffectsMuted, Engine.SetEffectsMuted))
+			:SetCell(1,2,volumeSlider(l.EFFECTS, Engine.GetEffectsVolume, Engine.SetEffectsVolume)))
 	end
 
 	local languageTemplate = function()
@@ -287,15 +281,15 @@ ui.templates.Settings = function (args)
 		return captureDialog(AxisBindingCapture, label, onOk)
 	end
 
-	local initKeyBindingControls = function (bindingsTable, info)
+	local initKeyBindingControls = function (grid, row, info)
 		local bindings = { info.binding1, info.binding2 }
 		local descriptions = { info.bindingDescription1, info.bindingDescription2 }
 		local buttons = { SmallLabeledButton.New(''), SmallLabeledButton.New('') }
 		
-		local extra = ui:Margin(0)
-		bindingsTable:AddRow({ ui:Margin(30, 'LEFT', info.label), buttons[1], extra })
 		keyBindings[info.id] = {buttons[1], buttons[2]}
 
+		grid:SetCell(0, row, ui:Label(info.label):SetColor(c))
+		grid:SetCell(1, row, buttons[1])
 
 		local updateUI = function ()
 			buttons[1].label:SetText(descriptions[1] or '')
@@ -303,9 +297,9 @@ ui.templates.Settings = function (args)
 			-- the first button is always shown
 			-- the second button is shown if there's already one binding
 			if bindings[1] then
-				extra:SetInnerWidget(buttons[2])
+				grid:SetCell(2, row, buttons[2])
 			else
-				extra:RemoveInnerWidget()
+				grid:ClearCell(2, row)
 			end
 		end
 
@@ -339,10 +333,14 @@ ui.templates.Settings = function (args)
 		updateUI()
 	end
 
-	local initAxisBindingControls = function (bindingsTable, info)
+	local initAxisBindingControls = function (grid, row, info)
 		local button = SmallLabeledButton.New(info.bindingDescription1 or '')
 		
-		bindingsTable:AddRow({ ui:Margin(30, 'LEFT', info.label), button })
+		axisBindings[info.id] = button
+
+		grid:SetCell(0, row, ui:Label(info.label):SetColor(c))
+		grid:SetCell(1, row, button)
+		grid:ClearCell(2, row)
 
 		button.button.onClick:Connect(function ()
 			local dialog = captureAxisDialog(info.label, function (new_binding, new_binding_description)
@@ -384,28 +382,26 @@ ui.templates.Settings = function (args)
 		box:PackEnd(ui:Label(l.CONTROL_OPTIONS):SetFont('HEADING_LARGE'):SetColor(c))
 		box:PackEnd(options)
 
-		local bindingsTable = ui:Table():SetColumnSpacing(20)
-
-		box:PackEnd(bindingsTable)
-
 		local pages = Engine.GetKeyBindings()
 		for page_idx = 1, #pages do
 			local page = pages[page_idx]
-			bindingsTable:AddRow({ui:Label(page.label):SetFont("HEADING_LARGE")})
+			box:PackEnd(ui:Label(page.label):SetFont('HEADING_LARGE'):SetColor(c))
 			for group_idx = 1, #page do
 				local group = page[group_idx]
-				bindingsTable:AddRow({ui:Margin(10, 'LEFT', ui:Label(group.label):SetFont('HEADING_NORMAL'))})
+				box:PackEnd(ui:Margin(10, 'LEFT', ui:Label(group.label):SetFont('HEADING_NORMAL'):SetColor(c)))
+				local grid = ui:Grid(3, #group)
+				-- grid columns: Action, Binding 1, Binding 2
 				for i = 1, #group do
 					local info = group[i]
 					if info.type == 'KEY' then
-						initKeyBindingControls(bindingsTable, info)
+						initKeyBindingControls(grid, i - 1, info)
 					elseif info.type == 'AXIS' then
-						initAxisBindingControls(bindingsTable, info)
+						initAxisBindingControls(grid, i - 1, info)
 					end
 				end
+				box:PackEnd(ui:Margin(30, 'LEFT', grid))
 			end
 		end
-
 		return box
 	end
 

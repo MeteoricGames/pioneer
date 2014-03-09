@@ -27,7 +27,7 @@ namespace Graphics {
 			Program *CreateProgram(const MaterialDescriptor &) {
 				return new Program("skybox", "");
 			}
-
+			
 			virtual void Apply() {
 				m_program->Use();
 				if(texture0) {
@@ -37,13 +37,9 @@ namespace Graphics {
 					fIntensity = *(static_cast<float*>(specialParameter0));
 				}
 				m_program->shininess.Set(fSkyboxFactor * fIntensity);
-				glPushAttrib(GL_DEPTH_BUFFER_BIT);
-				glEnable(GL_DEPTH_TEST);
-				glDepthMask(GL_FALSE);
 			}
 
 			virtual void Unapply() {
-				glPopAttrib();
 				m_program->Unuse();
 			}
 			
