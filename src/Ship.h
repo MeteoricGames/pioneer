@@ -11,6 +11,7 @@
 #include "EquipSet.h"
 #include "galaxy/SystemPath.h"
 #include "HudTrail.h"
+#include "ThrusterTrail.h"
 #include "NavLights.h"
 #include "Planet.h"
 #include "Sensors.h"
@@ -27,6 +28,7 @@ class AICommand;
 class ShipController;
 class CargoBody;
 class Missile;
+class ThrusterTrail;
 namespace Graphics { class Renderer; }
 
 struct HeatGradientParameters_t {
@@ -67,12 +69,15 @@ enum TransitState {
 // Transit Constants
 static const double TRANSIT_GRAVITY_RANGE_1 = 15000.0;
 static const double TRANSIT_GRAVITY_RANGE_2 = 1000000.0;
-static const double TRANSIT_START_SPEED = 50000.0;
 static const double TRANSIT_DRIVE_1_SPEED = 299000.0;
 static const double TRANSIT_DRIVE_2_SPEED = 99999999999.0;
 static const float TRANSIT_START_TIME = 2.0; // Allows sound to play first then the drive kicks in
 static const double TRANSIT_STATIONCATCH_DISTANCE = 20000.0;
 static const double TAKEOFF_THRUSTER_POWER = 0.1;
+static const char* DEFAULT_SHIP_LABEL = "UNLABELED_SHIP";
+// (Deprecated)
+static const double TRANSIT_START_SPEED = 50000.0;
+
 
 class Ship: public DynamicBody {
 	friend class ShipController; //only controllers need access to AITimeStep
@@ -83,7 +88,7 @@ public:
 	Ship() {} //default constructor used before Load
 	virtual ~Ship();
 
-	virtual void SetFrame(Frame *f);
+	virtual void SetFrame(Frame *f) override;
 
 	void SetController(ShipController *c); //deletes existing
 	ShipController *GetController() const { return m_controller; }
@@ -128,6 +133,23 @@ public:
 	virtual void TimeStepUpdate(const float timeStep);
 	virtual void StaticUpdate(const float timeStep);
 
+	// Ship automatically calculates velocity based on current flight mode
+	void CalculateVelocity(bool force_drive_1, double transit_factor = 1.0);
+	// Ship calculates velocity for maneuver flight mode
+	void ManeuverVelocity();
+	// Ship calculates velocity for transit flight mode
+	void TransitVelocity(float timeStep, double altitude, bool only_drive_1 = false, double transit_factor = 1.0);
+	bool IsTransitPossible();
+	void TransitTunnelingTest(float timeStep);
+	void TransitStationCatch(float timeStep);
+
+	enum EFlightMode {
+		EFM_MANEUVER,
+		EFM_TRANSIT
+	};
+	EFlightMode GetFlightMode() const { return m_flightMode; }
+	void SetFlightMode(EFlightMode m);
+
 	void TimeAccelAdjust(const float timeStep);
 	void SetDecelerating(bool decel) { m_decelerating = decel; }
 	bool IsDecelerating() const { return m_decelerating; }
@@ -156,9 +178,7 @@ public:
 	virtual bool IsInSpace() const { return (m_flightState != HYPERSPACE); }
 
 	void SetJuice(const double &juice) { m_juice = juice; }
-	void SetTransitState(const TransitState &transitstate) { 
-		m_transitstate = transitstate; 
-	}
+	void SetTransitState(TransitState transitstate);
 	void SetHyperspaceDest(const SystemPath &dest) { m_hyperspace.dest = dest; }
 	const SystemPath &GetHyperspaceDest() const { return m_hyperspace.dest; }
 	double GetHyperspaceDuration() const { return m_hyperspace.duration; }
@@ -192,6 +212,9 @@ public:
 	}
 	bool CanHyperspaceTo(const SystemPath &dest) { return (CheckHyperspaceTo(dest) == HYPERJUMP_OK); }
 
+	Ship::HyperjumpStatus CheckHyperjumpCapability() const;
+	virtual Ship::HyperjumpStatus InitiateHyperjumpTo(const SystemPath &dest, int warmup_time, double duration, LuaRef checks);
+	virtual void AbortHyperjump();
 	virtual Ship::HyperjumpStatus StartHyperspaceCountdown(const SystemPath &dest);
 	float GetHyperspaceCountdown() const { return m_hyperspace.countdown; }
 	bool IsHyperspaceActive() const { return (m_hyperspace.countdown > 0.0); }
@@ -296,15 +319,25 @@ public:
 	bool IsInvulnerable() const { return m_invulnerable; }
 	void SetInvulnerable(bool b) { m_invulnerable = b; }
 
-	bool TargetInSight() const { return m_targetInSight; }
 	Sensors *GetSensors() const { return m_sensors.get(); }
-
-	virtual Body *GetCombatTarget() const { return 0; }
-	virtual Body *GetNavTarget() const { return 0; }
 	Uint8 GetRelations(Body *other) const; //0=hostile, 50=neutral, 100=ally
 	void SetRelations(Body *other, Uint8 percent);
 
+	bool TargetInSight() const { return m_targetInSight; }
+
+	virtual Body *GetCombatTarget() const { return 0; }
+	virtual Body *GetNavTarget() const { return 0; }
+
 	double GetLandingPosOffset() const { return m_landingMinOffset; }
+
+	unsigned int GetThrusterTrailsNum() const { return m_thrusterTrails.size(); }
+	ThrusterTrail* GetThrusterTrail(unsigned int index) const { return m_thrusterTrails[index]; }
+	void UpdateThrusterTrails(float time);
+	void ClearThrusterTrails();
+
+	sigc::signal<void>& OnPlayerChangeFlightModeSignal() {
+		return m_onPlayerChangeFlightModeSignal;
+	}
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
@@ -337,6 +370,7 @@ protected:
 	float m_ecmRecharge;
 
 	ShipController *m_controller;
+	std::vector<ThrusterTrail*> m_thrusterTrails;
 
 private:
 	float GetECMRechargeTime();
@@ -368,6 +402,8 @@ private:
 	int m_wheelTransition;
 	double m_juice;
 	TransitState m_transitstate;
+	EFlightMode m_flightMode;
+	sigc::signal<void> m_onPlayerChangeFlightModeSignal;
 
 	vector3d m_thrusters;
 	vector3d m_angThrusters;
@@ -380,7 +416,9 @@ private:
 		// > 0 means active
 		float countdown;
 		bool now;
+		bool ignoreFuel; // XXX: To remove once the fuel handling is out of the core
 		double duration;
+		LuaRef checks; // A Lua function to check all the conditions before the jump
 	} m_hyperspace;
 	HyperspaceCloud *m_hyperspaceCloud;
 
@@ -401,10 +439,12 @@ private:
 	SceneGraph::Animation *m_landingGearAnimation;
 	std::unique_ptr<NavLights> m_navLights;
 
+	 std::unique_ptr<Sensors> m_sensors;
+	 std::unordered_map<Body*, Uint8> m_relationsMap;
+
 	static HeatGradientParameters_t s_heatGradientParams;
 
-	std::unique_ptr<Sensors> m_sensors;
-	std::unordered_map<Body*, Uint8> m_relationsMap;
+	bool m_unlabeled;
 };
 
 

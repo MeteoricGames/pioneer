@@ -16,7 +16,21 @@ const double NO_TRANSIT_RANGE = 100000.0;
 class AICommand {
 public:
 	// This enum is solely to make the serialization work
-	enum CmdName { CMD_NONE, CMD_DOCK, CMD_FLYTO, CMD_FLYAROUND, CMD_KILL, CMD_KAMIKAZE, CMD_HOLDPOSITION, CMD_FORMATION, CMD_TRANSITAROUND };
+	enum CmdName { 
+		CMD_NONE, 
+		CMD_DOCK, 
+		CMD_FLYTO, 
+		CMD_FLYAROUND, 
+		CMD_KILL, 
+		CMD_KAMIKAZE, 
+		CMD_HOLDPOSITION, 
+		CMD_FORMATION, 
+		CMD_TRANSITAROUND,
+		CMD_PARAGON_FLYTO,
+		CMD_PARAGON_TRANSIT,
+		CMD_PARAGON_GOTO,
+		CMD_PARAGON_STEERAROUND,
+	};
 
 	AICommand(Ship *ship, CmdName name) {
 	   	m_ship = ship; m_cmdName = name;
@@ -156,6 +170,19 @@ public:
 	}
 
 private:
+	enum EFlyToState {
+		EFS_THREE = 3,
+		//EFS_TWO = 2,
+		EFS_ONE = 1,
+		EFS_ZERO = 0,
+		//EFS_MONE = -1,
+		//EFS_MTWO = -2,
+		//EFS_MTHREE = -3,
+		//EFS_MFOUR = -4,
+		EFS_MFIVE = -5,
+		EFS_MSIX = -6,
+	};
+
 	Body *m_target;		// target for vicinity. Either this or targframe is 0
 	double m_dist;		// vicinity distance
 	Frame *m_targframe;	// target frame for waypoint

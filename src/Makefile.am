@@ -24,9 +24,9 @@ noinst_HEADERS = \
 	Camera.h \
 	CameraController.h \
 	CargoBody.h \
-	ChatForm.h \
 	CityOnPlanet.h \
 	Color.h \
+	Colors.h \
 	Cutscene.h \
 	CRC32.h \
 	DeathView.h \
@@ -50,6 +50,7 @@ noinst_HEADERS = \
 	HyperspaceCloud.h \
 	IniConfig.h \
 	Intro.h \
+	IterationProxy.h \
 	JobQueue.h \
 	GameConfig.h \
 	KeyBindings.h \
@@ -110,6 +111,7 @@ noinst_HEADERS = \
 	RefCounted.h \
 	SDLWrappers.h \
 	SectorView.h \
+	SectorViewLabelSet.h \
 	Sensors.h \
 	Serializer.h \
 	StringF.h \
@@ -118,6 +120,7 @@ noinst_HEADERS = \
 	Shields.h \
 	Ship.h \
 	ShipAICmd.h \
+	ShipAICmdParagon.h \ 
 	ShipCockpit.h \
 	ShipController.h \
 	ShipCpanel.h \
@@ -132,6 +135,7 @@ noinst_HEADERS = \
 	Star.h \
 	SystemInfoView.h \
 	SystemView.h \
+	ThrusterTrail.h \
 	TerrainBody.h \
 	Tombstone.h \
 	UIView.h \
@@ -148,6 +152,7 @@ noinst_HEADERS = \
 	utils.h \
 	vector2.h \
 	vector3.h \
+	VSLog.h \ 
 	enum_table.h
 
 paragon_SOURCES	= \
@@ -158,7 +163,7 @@ paragon_SOURCES	= \
 	CameraController.cpp \
 	CargoBody.cpp \
 	Color.cpp \
-	ChatForm.cpp \
+	Colors.cpp \
 	CityOnPlanet.cpp \
 	CRC32.cpp \
 	DeathView.cpp \
@@ -246,6 +251,7 @@ paragon_SOURCES	= \
 	PropertyMap.cpp \
 	SDLWrappers.cpp \
 	SectorView.cpp \
+	SectorViewLabelSet.cpp \
 	Sensors.cpp \
 	Serializer.cpp \
 	StringF.cpp \
@@ -254,6 +260,7 @@ paragon_SOURCES	= \
 	Ship-AI.cpp \
 	Ship.cpp \
 	ShipAICmd.cpp \
+	ShipAICmdParagon.cpp \ 
 	ShipCockpit.cpp \
 	ShipController.cpp \
 	ShipCpanel.cpp \
@@ -268,6 +275,7 @@ paragon_SOURCES	= \
 	Star.cpp \
 	SystemInfoView.cpp \
 	SystemView.cpp \
+	ThrusterTrail.cpp \
 	TerrainBody.cpp \
 	Tombstone.cpp \
 	UIView.cpp \

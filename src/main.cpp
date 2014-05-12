@@ -89,8 +89,8 @@ start:
 		}
 
 		case MODE_VERSION: {
-			std::string version(PIONEER_VERSION);
-			if (strlen(PIONEER_EXTRAVERSION)) version += " (" PIONEER_EXTRAVERSION ")";
+			std::string version(PARAGON_VERSION);
+			if (strlen(PARAGON_EXTRAVERSION)) version += " (" PARAGON_EXTRAVERSION ")";
 			Output("pioneer %s\n", version.c_str());
 			break;
 		}

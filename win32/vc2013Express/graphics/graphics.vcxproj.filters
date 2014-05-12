@@ -7,7 +7,6 @@
     <ClCompile Include="..\..\..\src\graphics\Material.cpp" />
     <ClCompile Include="..\..\..\src\graphics\Renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphics\RendererGL2.cpp" />
-    <ClCompile Include="..\..\..\src\graphics\StaticMesh.cpp" />
     <ClCompile Include="..\..\..\src\graphics\TextureBuilder.cpp" />
     <ClCompile Include="..\..\..\src\graphics\TextureGL.cpp" />
     <ClCompile Include="..\..\..\src\graphics\VertexArray.cpp" />
@@ -51,6 +50,10 @@
     <ClCompile Include="..\..\..\src\graphics\gl2\GL2RenderState.cpp">
       <Filter>gl2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\VertexBuffer.cpp" />
+    <ClCompile Include="..\..\..\src\graphics\gl2\GL2VertexBuffer.cpp">
+      <Filter>gl2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
@@ -60,7 +63,6 @@
     <ClInclude Include="..\..\..\src\graphics\Renderer.h" />
     <ClInclude Include="..\..\..\src\graphics\RendererGL2.h" />
     <ClInclude Include="..\..\..\src\graphics\RendererGLBuffers.h" />
-    <ClInclude Include="..\..\..\src\graphics\StaticMesh.h" />
     <ClInclude Include="..\..\..\src\graphics\Surface.h" />
     <ClInclude Include="..\..\..\src\graphics\Texture.h" />
     <ClInclude Include="..\..\..\src\graphics\TextureBuilder.h" />
@@ -101,7 +103,6 @@
     <ClInclude Include="..\..\..\src\graphics\WindowSDL.h" />
     <ClInclude Include="..\..\..\src\graphics\PostProcess.h" />
     <ClInclude Include="..\..\..\src\graphics\PostProcessing.h" />
-    <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\ShieldMaterial.h">
       <Filter>gl2</Filter>
     </ClInclude>
@@ -112,6 +113,31 @@
     <ClInclude Include="..\..\..\src\graphics\gl2\GL2RenderState.h">
       <Filter>gl2</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\VertexBuffer.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl2\GL2VertexBuffer.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\HorizontalBlurMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\TexturedFullscreenQuad.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\VerticalBlurMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsDepthMaterial.h">
+      <Filter>effects\thruster_trails</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsMaterial.h">
+      <Filter>effects\thruster_trails</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h">
+      <Filter>gl2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\sector_view\SectorViewIconMaterial.h">
+      <Filter>effects\sector_view</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="win32">
@@ -120,5 +146,34 @@
     <Filter Include="gl2">
       <UniqueIdentifier>{d326765b-28c9-46c3-bde7-60dcfd3a059f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="effects">
+      <UniqueIdentifier>{60fe71b2-baca-4990-9220-840a89f1a89b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects\thruster_trails">
+      <UniqueIdentifier>{d0ea3273-87a2-4e07-b4dc-fed09c18540d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects\sector_view">
+      <UniqueIdentifier>{4ff0b5bb-2f96-49d8-8a30-4eee330964ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\data\shaders\gl2\sector_view\sv_icon.frag">
+      <Filter>effects\sector_view</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\sector_view\sv_icon.vert">
+      <Filter>effects\sector_view</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_depth.frag">
+      <Filter>effects\thruster_trails</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_depth.vert">
+      <Filter>effects\thruster_trails</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_draw.frag">
+      <Filter>effects\thruster_trails</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_draw.vert">
+      <Filter>effects\thruster_trails</Filter>
+    </None>
   </ItemGroup>
 </Project>

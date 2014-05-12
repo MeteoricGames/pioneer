@@ -40,6 +40,7 @@ namespace Gui {
 			scale[1] = fontScale[1];
 		}
 		static const float* GetCoords2Pixels() { return fontScale; }
+		static void SDLEventCoordToScreenCoord(int sdlev_x, int sdlev_y, float *x, float *y);
 		static void SetFocused(Widget *w, bool enableKeyRepeat = false);
 		static void ClearFocus();
 		static bool IsFocused(Widget *w) {
@@ -66,10 +67,16 @@ namespace Gui {
 		static Graphics::RenderState *alphaBlendState;
 		static Graphics::Material* flatColorMaterial;
 
+		// Converts HD size (width & height in 1920x1080 design space) to UI size retaining ratio
+		// and favoring width
+		static void ConvertSizeToUI(float hd_width, float hd_height, float& out_width, float& out_height);
+		// Converts UI size (width & height in UI space 800x600) to HD design space retaining ratio
+		// and favoring width
+		static void ConvertSizeToHD(float ui_width, float ui_height, float& out_width, float& out_height);
+
 	private:
 		static void AddShortcutWidget(Widget *w);
 		static void RemoveShortcutWidget(Widget *w);
-		static void SDLEventCoordToScreenCoord(int sdlev_x, int sdlev_y, float *x, float *y);
 
 		static bool initted;
 		static int width, height;

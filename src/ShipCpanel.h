@@ -36,7 +36,11 @@ public:
 		OVERLAY_TOP_LEFT,
 		OVERLAY_TOP_RIGHT,
 		OVERLAY_BOTTOM_LEFT,
-		OVERLAY_BOTTOM_RIGHT
+		OVERLAY_BOTTOM_RIGHT,
+		OVERLAY_HUD2_LEFT,
+		OVERLAY_HUD2_LEFT_2,
+		OVERLAY_HUD2_LEFT_3,
+		OVERLAY_HUD2_LEFT_4,
 	};
 	void SetOverlayText(OverlayTextPos pos, const std::string &text);
 	void SetOverlayToolTip(OverlayTextPos pos, const std::string &text);
@@ -52,7 +56,6 @@ private:
 	void OnChangeToMapView(Gui::MultiStateImageButton *b);
 	void OnChangeMapView(enum MapView);
 	void OnChangeInfoView(Gui::MultiStateImageButton *b);
-	void OnClickTimeaccel(Game::TimeAccel val);
 	void OnClickComms(Gui::MultiStateImageButton *b);
 	void OnDockingClearanceExpired(const SpaceStation *);
 
@@ -68,18 +71,16 @@ private:
 
 	sigc::connection m_connOnDockingClearanceExpired;
 
-	MultiFuncSelectorWidget *m_mfsel;
 	ScannerWidget *m_scanner;
 	MsgLogWidget *m_msglog;
 	MsgLogWidget *m_inflog;
 	UseEquipWidget *m_useEquipWidget;
 	Gui::MultiStateImageButton *m_camButton;
 	Gui::RadioGroup *m_leftButtonGroup, *m_rightButtonGroup;
-	Gui::ImageRadioButton *m_timeAccelButtons[6];
 	Gui::Widget *m_mapViewButtons[4];
 	Gui::Image *m_alertLights[3];
 
-	Gui::Label *m_overlay[4];
+	Gui::Label *m_overlay[8];
 };
 
 #endif /* _SHIP_CPANEL_H */

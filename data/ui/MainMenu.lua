@@ -14,14 +14,14 @@ local l = Lang.GetResource("ui-core");
 local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local setupPlayerShip = function ()
-	Game.player:SetShipType("personal_skiff")
+	Game.player:SetShipType("passenger_shuttle")
 	Game.player:SetLabel(Ship.MakeRandomLabel())
-	Game.player:AddEquip("PULSECANNON_1MW")
+	Game.player:AddEquip("UNOCCUPIED_CABIN")
 	Game.player:AddEquip("ATMOSPHERIC_SHIELDING")
 	Game.player:AddEquip("AUTOPILOT")
 	Game.player:AddEquip("SCANNER")
 	Game.player:AddEquip("HYDROGEN", 2)
-	Game.player:SetMoney(100)
+	Game.player:SetMoney(1000)
 end
 
 local loadGame = function (path)
@@ -55,7 +55,7 @@ local doSettingsScreen = function()
 end
 
 local buttonDefs = {
-	{ l.START_AT_NEW_HOPE,      function () Game.StartGame(SystemPath.New(1,-1,-1,0,4)) setupPlayerShip() end },
+	{ l.START_AT_NEW_HOPE,      function () Game.StartGame(SystemPath.New(1,-1,0,0,4)) setupPlayerShip() end },
 	{ l.LOAD_GAME,              doLoadDialog },
 	{ l.OPTIONS,                doSettingsScreen },
 	{ l.QUIT,                   function () Engine.Quit() end },

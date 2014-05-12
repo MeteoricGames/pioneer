@@ -210,6 +210,13 @@ void Program::InitUniforms()
 	heatingNormal.Init("heatingNormal", m_program);
 	heatingAmount.Init("heatingAmount", m_program);
 	sceneAmbient.Init("scene.ambient", m_program);
+	pointSize.Init("pointSize", m_program);
+	colorTint.Init("colorTint", m_program);
+}
+
+void Program::AddUniform(Uniform& uniform, const char* name)
+{
+	uniform.Init(name, m_program);
 }
 
 } // GL2

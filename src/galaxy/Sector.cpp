@@ -58,19 +58,23 @@ static const int CUSTOM_ONLY_RADIUS	= 4;
 Sector::Sector(const SystemPath& path) : m_factionsAssigned(false)
 {
 	PROFILE_SCOPED()
-	Uint32 _init[4] = { Uint32(path.sectorX), Uint32(path.sectorY), Uint32(path.sectorZ), UNIVERSE_SEED };
+	
+	SystemPath p = path;
+	p.sectorZ = 0;
+
+	Uint32 _init[4] = { Uint32(p.sectorX), Uint32(p.sectorY), Uint32(p.sectorZ), UNIVERSE_SEED };
 	Random rng(_init, 4);
 
-	sx = path.sectorX; sy = path.sectorY; sz = path.sectorZ;
+	sx = p.sectorX; sy = p.sectorY; sz = p.sectorZ;
 
 	GetCustomSystems(rng);
 	int customCount = m_systems.size();
 
 	/* Always place random systems outside the core custom-only region */
-	if ((path.sectorX < -CUSTOM_ONLY_RADIUS) || (path.sectorX > CUSTOM_ONLY_RADIUS-1) ||
-	    (path.sectorY < -CUSTOM_ONLY_RADIUS) || (path.sectorY > CUSTOM_ONLY_RADIUS-1) ||
-	    (path.sectorZ < -CUSTOM_ONLY_RADIUS) || (path.sectorZ > CUSTOM_ONLY_RADIUS-1)) {
-		int numSystems = (rng.Int32(4,20) * Galaxy::GetSectorDensity(path.sectorX, path.sectorY, path.sectorZ)) >> 8;
+	if ((p.sectorX < -CUSTOM_ONLY_RADIUS) || (p.sectorX > CUSTOM_ONLY_RADIUS-1) ||
+	    (p.sectorY < -CUSTOM_ONLY_RADIUS) || (p.sectorY > CUSTOM_ONLY_RADIUS-1) ||
+	    (p.sectorZ < -CUSTOM_ONLY_RADIUS) || (p.sectorZ > CUSTOM_ONLY_RADIUS-1)) {
+		int numSystems = (rng.Int32(4,20) * Galaxy::GetSectorDensity(p.sectorX, p.sectorY, p.sectorZ)) >> 8;
 
 		for (int i=0; i<numSystems; i++) {
 			System s(sx, sy, sz, customCount + i);

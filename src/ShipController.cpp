@@ -32,7 +32,6 @@ PlayerShipController::PlayerShipController() :
 	m_rotationDamping(true),
 	m_mouseX(0.0),
 	m_mouseY(0.0),
-	m_setSpeed(0.0),
 	m_flightControlState(CONTROL_MANEUVER),
 	m_lowThrustPower(0.25), // note: overridden by the default value in GameConfig.cpp (DefaultLowThrustPower setting)
 	m_mouseDir(0.0),
@@ -51,6 +50,9 @@ PlayerShipController::PlayerShipController() :
 	m_fireMissileKey = KeyBindings::fireMissile.onPress.connect(
 			sigc::mem_fun(this, &PlayerShipController::FireMissile));
 
+	//m_onPlayerChangeFlightMode = player->OnPlayerChangeFlightModeSignal().connect(
+	//	sigc::mem_fun(this, &PlayerShipController::OnPlayerChangeFlightMode));
+
 }
 
 PlayerShipController::~PlayerShipController()
@@ -62,7 +64,6 @@ PlayerShipController::~PlayerShipController()
 void PlayerShipController::Save(Serializer::Writer &wr, Space *space)
 {
 	wr.Int32(static_cast<int>(m_flightControlState));
-	wr.Double(m_setSpeed);
 	wr.Float(m_lowThrustPower);
 	wr.Bool(m_rotationDamping);
 	wr.Int32(space->GetIndexForBody(m_combatTarget));
@@ -73,7 +74,6 @@ void PlayerShipController::Save(Serializer::Writer &wr, Space *space)
 void PlayerShipController::Load(Serializer::Reader &rd)
 {
 	m_flightControlState = static_cast<FlightControlState>(rd.Int32());
-	m_setSpeed = rd.Double();
 	m_lowThrustPower = rd.Float();
 	m_rotationDamping = rd.Bool();
 	//figure out actual bodies in PostLoadFixup - after Space body index has been built
@@ -93,7 +93,6 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 {
 	vector3d v;
 	matrix4x4d m;
-	double current_velocity;
 	bool any_linthrust_keydown = IsAnyLinearThrusterKeyDown();
 	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || !GetMouseFlightZeroOffset();
 
@@ -107,183 +106,51 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	if (m_ship->GetFlightState() == Ship::FLYING) {
 
 		switch (m_flightControlState) {
-		case CONTROL_MANEUVER:
-			PollControls(timeStep, true);
-			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
-				if (any_linthrust_keydown) break;
-				v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
-				if (m_setSpeedTarget) {
-					v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
+			case CONTROL_MANEUVER:
+				PollControls(timeStep, true);
+				if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
+					if (any_linthrust_keydown) break;
+					m_ship->ManeuverVelocity();
 				}
-				m_ship->AIMatchVel(v);
+				break;
 
-				// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
-				current_velocity = m_ship->GetVelocity().Length();
-				if(current_velocity >= m_ship->GetMaxManeuverSpeed() ||
-					current_velocity <= -m_ship->GetMaxManeuverSpeed()) {
-					v = vector3d(0.0, 0.0, 0.0);
+			case CONTROL_TRANSIT:
+				PollControls(timeStep, true);
+				if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
+					m_ship->TransitVelocity(timeStep, altitude, any_angthrust_keydown);
 				}
-			}
-			break;
-
-		case CONTROL_TRANSIT:
-			PollControls(timeStep, true);
-			if(m_ship->GetLaunchLockTimeout() <= 0.0f) {
-				if(m_ship->GetTransitState() == TRANSIT_DRIVE_READY) {
-					// READY
-					// Ship.cpp will start the transit drive
-				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_START) {
-					// START
-					// Ship.cpp will engage the transit drive to ON state
-				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_ON) {
-					if((altitude < 0.0 || altitude > TRANSIT_GRAVITY_RANGE_2) && !any_angthrust_keydown) {
-						m_setSpeed = TRANSIT_DRIVE_2_SPEED;
-					} else if(altitude < 0.0 || altitude > TRANSIT_GRAVITY_RANGE_1) {
-						m_setSpeed = TRANSIT_DRIVE_1_SPEED;
-						if(m_ship->GetVelocity().Length() > m_setSpeed) {
-							m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
-						}
-					} else {
-						m_ship->StopTransitDrive();
-						SetFlightControlState(CONTROL_MANEUVER);
-					}
-					m_ship->SetJuice(80.0);
-					//if (any_linthrust_keydown) break;
-					v = -m_ship->GetOrient().VectorZ() * m_setSpeed;
-					if (m_setSpeedTarget) {
-						v += m_setSpeedTarget->GetVelocityRelTo(m_ship->GetFrame());
-					}
-					m_ship->AIMatchVel(v);
-					// No thrust if ship is at max transit speed, otherwise due to thrust limiter jitter will occur
-					current_velocity = m_ship->GetVelocity().Length();
-					if(current_velocity >= m_setSpeed ||
-						current_velocity <= -m_setSpeed) {
-						v = vector3d(0.0, 0.0, 0.0);
-						m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * m_setSpeed);
-					}
-					TransitTunnelingTest(timeStep);
-					TransitStationCatch(timeStep);
-				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_STOP) {
-					// STOP
-				} else if(m_ship->GetTransitState() == TRANSIT_DRIVE_OFF) {
-					// OFF
+				if (m_ship->GetTransitState() == TRANSIT_DRIVE_OFF
+					&& m_ship->GetFlightMode() == Ship::EFM_MANEUVER) {
+					SetFlightControlState(CONTROL_MANEUVER);
 				}
-			}
-			break;
+				break;
 
-		case CONTROL_MANUAL:
-			PollControls(timeStep, false);
-			break;
+			/*case CONTROL_MANUAL:
+				PollControls(timeStep, false);
+				break;*/
 
-		case CONTROL_AUTOPILOT:
-			if (m_ship->AIIsActive()) break;
-			Pi::game->RequestTimeAccel(Game::TIMEACCEL_1X);
-//			AIMatchVel(vector3d(0.0));			// just in case autopilot doesn't...
-						// actually this breaks last timestep slightly in non-relative target cases
-			m_ship->AIMatchAngVelObjSpace(vector3d(0.0));
-			SetFlightControlState(CONTROL_MANEUVER);
-			m_setSpeed = 0.0;
-			break;
+			case CONTROL_AUTOPILOT:
+				if (m_ship->AIIsActive()) break;
+				Pi::game->RequestTimeAccel(Game::TIMEACCEL_1X);
+	//			AIMatchVel(vector3d(0.0));			// just in case autopilot doesn't...
+							// actually this breaks last timestep slightly in non-relative target cases
+				m_ship->AIMatchAngVelObjSpace(vector3d(0.0));
+				SetFlightControlState(CONTROL_MANEUVER);
+				m_setSpeed = 0.0;
+				break;
 
-		default: 
-			assert(0); 
-			break;
+			default: 
+				assert(0); 
+				break;
 		}
 	} else {
 		SetFlightControlState(CONTROL_MANEUVER);
 	}
 
 	//call autopilot AI, if active (also applies to set speed and heading lock modes)
-	OS::EnableFPE();
+	//OS::EnableFPE();
 	m_ship->AITimeStep(timeStep);
-	OS::DisableFPE();
-}
-
-void PlayerShipController::TransitTunnelingTest(const float timeStep) {
-	// Perform future collision detection with current system if it's a planet to detect possible tunneling collisions
-	// Perform future collision detection with planet to detect required changes to transit drive
-	if(m_ship->GetFrame()->GetBody()->IsType(Object::PLANET)) {
-		Frame* frame = m_ship->GetFrame();
-		Body* planet = frame->GetBody();
-		vector3d ship_position = m_ship->GetPositionRelTo(frame);
-		vector3d ship_velocity = m_ship->GetVelocityRelTo(frame);
-		vector3d ship_direction = ship_velocity.Normalized();
-		vector3d planet_position = planet->GetPosition();
-		vector3d ship_to_planet = planet_position - ship_position;
-		float heading_check = ship_to_planet.Dot(ship_direction);
-		if(heading_check > 0.0f) {
-			assert(planet->IsType(Object::TERRAINBODY));
-			double terrain_height = static_cast<TerrainBody*>(planet)->GetTerrainHeight(ship_position.Normalized());
-			ship_velocity *= timeStep;
-			double ship_step = ship_velocity.Length();
-			double distance_to_planet = ship_to_planet.Length();
-			vector3d ship_position_future = ship_position + (ship_direction * ship_step);
-			double future_distance_to_planet = (ship_position_future - planet_position).Length();
-			double planet_radius = terrain_height;
-			double gravity_bubble_2_radius = planet_radius + TRANSIT_GRAVITY_RANGE_2;
-			double gravity_bubble_1_radius = planet_radius + TRANSIT_GRAVITY_RANGE_1;
-
-			bool motion_clamp = false;
-			double desired_distance;
-
-			if(future_distance_to_planet <= gravity_bubble_1_radius) {
-				m_setSpeed = m_ship->GetMaxManeuverSpeed();
-				motion_clamp = true;
-				desired_distance = distance_to_planet - planet_radius - TRANSIT_GRAVITY_RANGE_1 + 100.0;
-				m_ship->StopTransitDrive();
-				SetFlightControlState(CONTROL_MANEUVER);
-			} else if(m_setSpeed > TRANSIT_DRIVE_1_SPEED && future_distance_to_planet <= gravity_bubble_2_radius) {
-				m_setSpeed = TRANSIT_DRIVE_1_SPEED;
-				motion_clamp = true;				
-				desired_distance = distance_to_planet - planet_radius - TRANSIT_GRAVITY_RANGE_2 + 100.0;
-			}
-			if(motion_clamp && desired_distance > 0.0) {
-				m_ship->SetPosition(ship_position + (ship_direction * desired_distance));
-				m_ship->SetVelocity(ship_direction * m_setSpeed);
-			}
-		}
-	}
-}
-
-void PlayerShipController::TransitStationCatch(const float timeStep)
-{
-	if(m_ship->GetFrame()->GetBody()->IsType(Object::SPACESTATION)) {
-		// Check current position and future position
-		Frame* frame = m_ship->GetFrame();
-		Body* station = frame->GetBody();
-		vector3d ship_position = m_ship->GetPositionRelTo(frame);
-		vector3d ship_velocity = m_ship->GetVelocityRelTo(frame);
-		vector3d ship_direction = ship_velocity.Normalized();
-		vector3d station_position = station->GetPosition();
-		vector3d ship_to_station = station_position - ship_position;
-		float heading_check = ship_to_station.Dot(ship_direction);
-		if(heading_check > 0.0f) {
-			double distance = ship_to_station.Length();
-			if(distance <= TRANSIT_STATIONCATCH_DISTANCE) {
-				// Catch!
-				m_ship->StopTransitDrive();
-				SetFlightControlState(CONTROL_MANEUVER);
-			} else {
-				// Determine the closest point to station between current position and future position
-				double ship_step = ship_velocity.Length();
-				vector3d ship_position_future = ship_position + (ship_direction * ship_step);
-				double future_distance = (ship_position_future - station_position).Length();
-				if(heading_check * distance < future_distance) { // cos(heading angle) * distance = closest distance to station along movement vector
-					float heading_angle = acos(heading_check);
-					if(sin(heading_angle) * distance <= TRANSIT_STATIONCATCH_DISTANCE) { // sin(heading angle) * distance = distance between closes point along path and station
-						// Catch!
-						m_setSpeed = m_ship->GetMaxManeuverSpeed();
-						m_ship->StopTransitDrive();
-						SetFlightControlState(CONTROL_MANEUVER);
-						if(future_distance > 0.0) {
-							m_ship->SetPosition(ship_position + (ship_direction * future_distance));
-							m_ship->SetVelocity(ship_direction * m_setSpeed);
-						}
-					}
-				}
-			}
-		}
-	}
+	//OS::DisableFPE();
 }
 
 void PlayerShipController::CheckControlsLock()
@@ -336,46 +203,33 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		if (m_mouseFlightToggle)
 		{
 			int x,y;
-			SDL_GetMouseState(&x,&y);
+			Pi::mouseCursor->GetFlightCursorState(&x, &y);
+			
+			float window_width = Pi::renderer->GetWindow()->GetWidth();
+			float window_height = Pi::renderer->GetWindow()->GetHeight();
+			float zone_radius = MouseFlightZoneDiameter * window_width / 2.0f;
+			float deadzone_radius = MouseFlightDeadZoneDiameter * window_width / 2.0f;
+			float effect_radius = zone_radius - deadzone_radius;
 
-			// Box-in mouse location for mouse flight to make horizontal and vertical extent and value equivalent
-			float smallest_dimension = std::min<int>(Pi::renderer->GetWindow()->GetWidth(), 
-				Pi::renderer->GetWindow()->GetHeight()) / 2;
-			x -= Pi::renderer->GetWindow()->GetWidth() / 2;
-			y -= Pi::renderer->GetWindow()->GetHeight() / 2;
-			x = Clamp<int>(x, -smallest_dimension, smallest_dimension);
-			y = Clamp<int>(y, -smallest_dimension, smallest_dimension);
+			x += static_cast<int>(window_width / 2.0f);
+			y += static_cast<int>(window_height / 2.0f);
 
-			if(x < 0) {
-				if(x > -MOUSE_FLIGHT_DEADZONE_X) {
-					x = 0;
-				} else {
-					x += MOUSE_FLIGHT_DEADZONE_X;
-				}
-			} else if(x > 0) {
-				if(x < MOUSE_FLIGHT_DEADZONE_X) {
-					x = 0;
-				} else {
-					x -= MOUSE_FLIGHT_DEADZONE_X;
+			// Limit mouse rotation effect to flight zone (circle)
+			vector2f mouse_pos(x - window_width / 2.0f, y - window_height / 2.0f);
+			if (mouse_pos.LengthSqr() >= 1.0) {
+				vector2f mouse_dir = mouse_pos.Normalized();
+				if (mouse_pos.LengthSqr() > zone_radius * zone_radius) {
+					mouse_pos = mouse_dir * zone_radius;
 				}
 			}
-
-			if(y < 0) {
-				if(y > -MOUSE_FLIGHT_DEADZONE_Y) {
-					y = 0;
-				} else {
-					y += MOUSE_FLIGHT_DEADZONE_Y;
-				}
-			} else if(y > 0) {
-				if(y < MOUSE_FLIGHT_DEADZONE_Y) {
-					y = 0;
-				} else {
-					y -= MOUSE_FLIGHT_DEADZONE_Y;
-				}
+			float radius = mouse_pos.Length(); // Distance from center of view to mouse cursor inside zone
+			if (radius >= deadzone_radius) {
+				x = static_cast<int>(mouse_pos.x) * 2.0f;
+				y = static_cast<int>(mouse_pos.y) * 2.0f;
+			} else {
+				x = 0;
+				y = 0;
 			}
-
-			x *= (1000.0f / smallest_dimension);
-			y *= (1000.0f / smallest_dimension);
 
 			if(x == 0 && y == 0) {
 				m_mouseFlightZeroOffset = true;
@@ -524,8 +378,8 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 {
 	if (m_flightControlState != s) {
 		// finalizer
-		switch(m_flightControlState) {
-			case CONTROL_TRANSIT:
+		switch(m_ship->GetFlightMode()) {
+			case Ship::EFM_TRANSIT:
 				m_ship->StopTransitDrive();
 				break;
 		}
@@ -558,6 +412,23 @@ void PlayerShipController::SetFlightControlState(FlightControlState s)
 		Pi::onPlayerChangeFlightControlState.emit();
 	}
 }
+
+/*void PlayerShipController::OnPlayerChangeFlightMode()
+{
+	switch (m_ship->GetFlightMode()) {
+		case Ship::EFM_MANEUVER:
+			if (m_flightControlState == CONTROL_TRANSIT) {
+
+			}
+			break;
+
+		case Ship::EFM_TRANSIT:
+			if (m_flightControlState == CONTROL_MANEUVER) {
+
+			}
+			break;
+	}
+}*/
 
 void PlayerShipController::SetLowThrustPower(float power)
 {

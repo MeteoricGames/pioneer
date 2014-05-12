@@ -138,4 +138,4 @@ local vale = CustomSystemBody:new('Vale', 'PLANET_GAS_GIANT')
 		higan,
 	})
 
-s:add_to_sector(1,-1,-1,v(0.037,0.325,0.784))
+s:add_to_sector(1,-1,0,v(0.037,0.325,0.784))

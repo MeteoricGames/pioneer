@@ -128,22 +128,4 @@ private:
 	void FireMissile(int idx);
 };
 
-
-class MultiFuncSelectorWidget: public Gui::Fixed {
-public:
-	MultiFuncSelectorWidget();
-	virtual ~MultiFuncSelectorWidget();
-	sigc::signal<void, multifuncfunc_t> onSelect;
-	void SetSelected(multifuncfunc_t f) {
-		m_rg->SetSelected(int(f));
-	}
-private:
-	void UpdateButtons();
-	void OnClickButton(multifuncfunc_t f);
-
-	int m_active;
-	Gui::ImageRadioButton *m_buttons[MFUNC_MAX];
-	Gui::RadioGroup *m_rg;
-};
-
 #endif /* _SHIPCPANELMULTIFUNCDISPLAYS_H */

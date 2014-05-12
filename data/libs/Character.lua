@@ -166,7 +166,7 @@ Character = {
 --
 -- Attribute: lastSavedTime
 --
---   The game time, in seconds since 12:00 01-01-3200, that this character was
+--   The game time, in seconds since 12:00 01-01-2184, that this character was
 --   last saved.
 --
 -- Availability:

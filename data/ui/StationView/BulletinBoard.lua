@@ -13,6 +13,7 @@ local ui = Engine.ui
 local tabGroup
 
 local rowRef = {}
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local bbTable = ui:Table()
 	:SetRowSpacing(5)
@@ -24,6 +25,9 @@ bbTable.onRowClicked:Connect(function (row)
 	local station = Game.player:GetDockedWith()
 	local ref = rowRef[station][row+1]
 	local ad = SpaceStation.adverts[station][ref]
+	if ad == nil then 
+			return
+	end
 
 	local chatFunc = function (form, option)
 		return ad.onChat(form, ref, option)
@@ -47,7 +51,7 @@ local updateTable = function (station)
 	local rows = {}
 	for ref,ad in pairs(adverts) do
 		local icon = ad.icon or "default"
-		local label = ui:Label(ad.description)
+		local label = ui:Label(ad.description):SetColor(c)
 		if type(ad.isEnabled) == "function" and not ad.isEnabled(ref) then
 			label:SetColor({ r = 0.4, g = 0.4, b = 0.4 })
 		end

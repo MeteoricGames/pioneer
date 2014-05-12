@@ -123,6 +123,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\PostProcess.h" />
     <ClInclude Include="..\..\..\src\graphics\PostProcessing.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsDepthMaterial.h">
+      <Filter>effects\thruster_trails</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsMaterial.h">
+      <Filter>effects\thruster_trails</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="win32">
@@ -130,6 +136,12 @@
     </Filter>
     <Filter Include="gl2">
       <UniqueIdentifier>{d326765b-28c9-46c3-bde7-60dcfd3a059f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects">
+      <UniqueIdentifier>{3d0191b9-0860-4fbf-8270-5e6357eab71a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects\thruster_trails">
+      <UniqueIdentifier>{cb73af8d-8d4f-488b-a907-dfacb9cb5569}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 #include "libs.h"
 #include "Ship.h"
 #include "ShipAICmd.h"
+#include "ShipAICmdParagon.h"
 #include "Pi.h"
 #include "Player.h"
 #include "perlin.h"
@@ -135,7 +136,15 @@ void Ship::AIFlyTo(Body *target)
 		vector3d posoff(-1000.0, 0.0, 1000.0);
 		m_curAICmd = new AICmdFormation(this, static_cast<Ship*>(target), posoff);
 	}
-	else m_curAICmd = new AICmdFlyTo(this, target);
+	else {
+		m_curAICmd = new AIParagonCmdFlyTo(this, target);
+		/*if (IsType(Object::Type::PLAYER)) {
+			m_curAICmd = new AIParagonCmdFlyTo(this, target);
+		}
+		else {
+			m_curAICmd = new AICmdFlyTo(this, target);
+		}*/
+	}
 }
 
 void Ship::AIFlyTo(Body *target, vector3d posoff)
@@ -146,14 +155,27 @@ void Ship::AIFlyTo(Body *target, vector3d posoff)
 	if (target->IsType(Object::SHIP)) {		// test code
 		m_curAICmd = new AICmdFormation(this, static_cast<Ship*>(target), posoff);
 	}
-	else m_curAICmd = new AICmdFlyTo(this, target);
+	else {
+		m_curAICmd = new AIParagonCmdFlyTo(this, target);
+		/*if (IsType(Object::Type::PLAYER)) {
+			m_curAICmd = new AIParagonCmdFlyTo(this, target);
+		} else {
+			m_curAICmd = new AICmdFlyTo(this, target);
+		}*/
+	}
 }
 
 void Ship::AIFlyToClose(Body *target, double dist)
 {
 	AIClearInstructions();
 	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
-	m_curAICmd = new AICmdFlyTo(this, target, dist); //close
+	m_curAICmd = new AIParagonCmdFlyTo(this, target, dist);
+	/*
+	if (IsType(Object::Type::PLAYER)) {
+		m_curAICmd = new AIParagonCmdFlyTo(this, target, dist);
+	} else {
+		m_curAICmd = new AICmdFlyTo(this, target, dist); //close
+	}*/
 }
 
 void Ship::AIDock(SpaceStation *target)

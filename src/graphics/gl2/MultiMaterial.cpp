@@ -25,6 +25,11 @@ MultiProgram::MultiProgram(const MaterialDescriptor &desc, int lights)
 		ss << "#define VERTEXCOLOR\n";
 	if (desc.alphaTest)
 		ss << "#define ALPHA_TEST\n";
+	if (desc.pointsMode)
+		ss << "#define POINTS\n";
+	if (desc.colorTint)
+		ss << "#define COLOR_TINT\n";
+
 	//using only one light
 	if (desc.lighting && lights > 0)
 		ss << stringf("#define NUM_LIGHTS %0{d}\n", lights);
@@ -94,6 +99,13 @@ void MultiMaterial::Apply()
 		p->heatingMatrix.Set(matrix3x3f::Identity());
 		p->heatingNormal.Set(vector3f(0.0f, -1.0f, 0.0f));
 		p->heatingAmount.Set(0.0f);
+	}
+
+	if (m_descriptor.pointsMode) {
+		p->pointSize.Set(this->pointSize);
+	}
+	if (m_descriptor.colorTint) {
+		p->colorTint.Set(this->tint);
 	}
 }
 

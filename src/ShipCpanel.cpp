@@ -59,56 +59,13 @@ void ShipCpanel::InitObject()
 	m_useEquipWidget->onUngrabFocus.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnMultiFuncUngrabFocus), MFUNC_EQUIPMENT));
 	m_msglog->onUngrabFocus.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnMultiFuncUngrabFocus), MFUNC_MSGLOG));
 
-	// where the scanner is
-	m_mfsel = new MultiFuncSelectorWidget();
-	m_mfsel->onSelect.connect(sigc::mem_fun(this, &ShipCpanel::OnUserChangeMultiFunctionDisplay));
-	Add(m_mfsel, 656, 18);
 	ChangeMultiFunctionDisplay(MFUNC_SCANNER);
 
 //	Gui::RadioGroup *g = new Gui::RadioGroup();
+	float ui_width = static_cast<float>(Gui::Screen::GetWidth());
+	const float pp_margin = 40.0f, clock_margin = 125.0f;
 
-	Gui::ImageRadioButton *b = new Gui::ImageRadioButton(0, "icons/timeaccel0.png", "icons/timeaccel0_on.png");
-	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnClickTimeaccel), Game::TIMEACCEL_PAUSED));
-	b->SetShortcut(SDLK_ESCAPE, KMOD_LSHIFT);
-	b->SetRenderDimensions(22, 18);
-	Add(b, 0, 44);
-	m_timeAccelButtons[0] = b;
-
-	b = new Gui::ImageRadioButton(0, "icons/timeaccel1.png", "icons/timeaccel1_on.png");
-	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnClickTimeaccel), Game::TIMEACCEL_1X));
-	b->SetShortcut(SDLK_F1, KMOD_LSHIFT);
-	b->SetSelected(true);
-	b->SetRenderDimensions(22, 18);
-	Add(b, 22, 44);
-	m_timeAccelButtons[1] = b;
-
-	b = new Gui::ImageRadioButton(0, "icons/timeaccel2.png", "icons/timeaccel2_on.png");
-	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnClickTimeaccel), Game::TIMEACCEL_10X));
-	//b->SetShortcut(SDLK_F2, KMOD_LSHIFT);
-	b->SetRenderDimensions(22, 18);
-	//Add(b, 44, 36);
-	m_timeAccelButtons[2] = b;
-
-	b = new Gui::ImageRadioButton(0, "icons/timeaccel3.png", "icons/timeaccel3_on.png");
-	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnClickTimeaccel), Game::TIMEACCEL_100X));
-	//b->SetShortcut(SDLK_F3, KMOD_LSHIFT);
-	b->SetRenderDimensions(22, 18);
-	//Add(b, 66, 36);
-	m_timeAccelButtons[3] = b;
-
-	b = new Gui::ImageRadioButton(0, "icons/timeaccel4.png", "icons/timeaccel4_on.png");
-	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnClickTimeaccel), Game::TIMEACCEL_1000X));
-	//b->SetShortcut(SDLK_F4, KMOD_LSHIFT);
-	b->SetRenderDimensions(22, 18);
-	//Add(b, 88, 36);
-	m_timeAccelButtons[4] = b;
-
-	b = new Gui::ImageRadioButton(0, "icons/timeaccel5.png", "icons/timeaccel5_on.png");
-	b->onSelect.connect(sigc::bind(sigc::mem_fun(this, &ShipCpanel::OnClickTimeaccel), Game::TIMEACCEL_10000X));
-	//b->SetShortcut(SDLK_F5, KMOD_LSHIFT);
-	b->SetRenderDimensions(22, 18);
-	//Add(b, 110, 36);
-	m_timeAccelButtons[5] = b; 
+	Gui::ImageRadioButton *b;
 
 	m_leftButtonGroup = new Gui::RadioGroup();
 	m_camButton = new Gui::MultiStateImageButton();
@@ -151,7 +108,7 @@ void ShipCpanel::InitObject()
 
 	Gui::Screen::PushFont("OverlayFont");
 	m_clock = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
-	Add(m_clock, 4, 64);
+	Add(m_clock, ui_width - clock_margin, 64);
 	Gui::Screen::PopFont();
 
 	m_rightButtonGroup = new Gui::RadioGroup();
@@ -201,15 +158,23 @@ void ShipCpanel::InitObject()
 	Add(img, 388, 5);
 	m_alertLights[2] = img;
 
-	Gui::Screen::PushFont("OverlayFont");
+	Gui::Screen::PushFont("HudFont");
 	m_overlay[OVERLAY_TOP_LEFT]     = (new Gui::Label(""))->Color(s_hudTextColor);
 	m_overlay[OVERLAY_TOP_RIGHT]    = (new Gui::Label(""))->Color(s_hudTextColor);
 	m_overlay[OVERLAY_BOTTOM_LEFT]  = (new Gui::Label(""))->Color(s_hudTextColor);
 	m_overlay[OVERLAY_BOTTOM_RIGHT] = (new Gui::Label(""))->Color(s_hudTextColor);
+	m_overlay[OVERLAY_HUD2_LEFT] = (new Gui::Label(""))->Color(s_hudTextColor);
+	m_overlay[OVERLAY_HUD2_LEFT_2] = (new Gui::Label(""))->Color(s_hudTextColor);
+	m_overlay[OVERLAY_HUD2_LEFT_3] = (new Gui::Label(""))->Color(s_hudTextColor);
+	m_overlay[OVERLAY_HUD2_LEFT_4] = (new Gui::Label(""))->Color(s_hudTextColor);
 	Add(m_overlay[OVERLAY_TOP_LEFT],     214.0f, 22.0f);
 	Add(m_overlay[OVERLAY_TOP_RIGHT],    460.0f, 22.0f);
 	Add(m_overlay[OVERLAY_BOTTOM_LEFT],  214.0f, 34.0f);
 	Add(m_overlay[OVERLAY_BOTTOM_RIGHT], 460.0f, 34.0f);
+	Add(m_overlay[OVERLAY_HUD2_LEFT], 2.0f, 30.0f);
+	Add(m_overlay[OVERLAY_HUD2_LEFT_2], 2.0f, 38.0f);
+	Add(m_overlay[OVERLAY_HUD2_LEFT_3], 2.0f, 46.0f);
+	Add(m_overlay[OVERLAY_HUD2_LEFT_4], 2.0f, 54.0f);
 	Gui::Screen::PopFont();
 
 	m_connOnDockingClearanceExpired =
@@ -224,19 +189,11 @@ ShipCpanel::~ShipCpanel()
 	Remove(m_useEquipWidget);
 	Remove(m_msglog);
 	Remove(m_inflog);
-	Remove(m_mfsel);
 	delete m_scanner;
 	delete m_useEquipWidget;
 	delete m_msglog;
 	delete m_inflog;
-	delete m_mfsel;
 	m_connOnDockingClearanceExpired.disconnect();
-}
-
-void ShipCpanel::OnUserChangeMultiFunctionDisplay(multifuncfunc_t f)
-{
-	m_userSelectedMfuncWidget = f;
-	ChangeMultiFunctionDisplay(f);
 }
 
 void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
@@ -250,7 +207,6 @@ void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
 	Remove(m_msglog);
 	Remove(m_inflog);
 	if (selected) {
-		m_mfsel->SetSelected(f);
 		if (selected == m_msglog)
 			Add(selected, 214, -34);
 		else
@@ -289,16 +245,6 @@ void ShipCpanel::OnDockingClearanceExpired(const SpaceStation *s)
 void ShipCpanel::Update()
 {
 	PROFILE_SCOPED()
-	int timeAccel = Pi::game->GetTimeAccel();
-	int requested = Pi::game->GetRequestedTimeAccel();
-
-	for (int i=0; i<6; i++) {
-		m_timeAccelButtons[i]->SetSelected(timeAccel == i);
-	}
-	// make requested but not selected icon blink
-	if (timeAccel != requested) {
-		m_timeAccelButtons[Clamp(requested,0,5)]->SetSelected((SDL_GetTicks() & 0x200) != 0);
-	}
 
 	m_scanner->Update();
 	m_useEquipWidget->Update();
@@ -365,22 +311,6 @@ void ShipCpanel::HideMapviewButtons()
 	for (int i=0; i<4; i++) m_mapViewButtons[i]->Hide();
 }
 
-void ShipCpanel::OnClickTimeaccel(Game::TimeAccel val)
-{
-	Pi::BoinkNoise();
-	if ((Pi::game->GetTimeAccel() == val) && (val == Game::TIMEACCEL_PAUSED)) {
-		if (Pi::GetView() != Pi::settingsView)
-			Pi::SetView(Pi::settingsView);
-		else
-			Pi::SetView(Pi::worldView);
-	}
-	else {
-		if (Pi::GetView() == Pi::settingsView)
-			Pi::SetView(Pi::worldView);
-		Pi::game->RequestTimeAccel(val, Pi::KeyState(SDLK_LCTRL) || Pi::KeyState(SDLK_RCTRL));
-	}
-}
-
 void ShipCpanel::OnClickComms(Gui::MultiStateImageButton *b)
 {
 	Pi::BoinkNoise();
@@ -440,7 +370,7 @@ void ShipCpanel::SetOverlayToolTip(OverlayTextPos pos, const std::string &text)
 
 void ShipCpanel::ClearOverlay()
 {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 8; i++) {
 		m_overlay[i]->SetText("");
 		m_overlay[i]->SetToolTip("");
 	}

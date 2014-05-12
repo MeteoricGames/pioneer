@@ -15,8 +15,10 @@ Material::Material() :
 	diffuse(Color::WHITE),
 	specular(Color::BLACK),
 	emissive(Color::BLACK),
+	tint(Color::WHITE),
 	shininess(100), //somewhat sharp
-	specialParameter0(0)
+	specialParameter0(0),
+	pointSize(1.0f)
 {
 }
 
@@ -28,6 +30,8 @@ MaterialDescriptor::MaterialDescriptor()
 , specularMap(false)
 , usePatterns(false)
 , vertexColors(false)
+, pointsMode(false)
+, colorTint(false)
 , textures(0)
 , dirLights(0)
 , quality(0)
@@ -44,6 +48,8 @@ bool operator==(const MaterialDescriptor &a, const MaterialDescriptor &b)
 		a.specularMap == b.specularMap &&
 		a.usePatterns == b.usePatterns &&
 		a.vertexColors == b.vertexColors &&
+		a.pointsMode == b.pointsMode && 
+		a.colorTint == b.colorTint && 
 		a.textures == b.textures &&
 		a.dirLights == b.dirLights &&
 		a.quality == b.quality

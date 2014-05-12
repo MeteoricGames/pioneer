@@ -26,6 +26,7 @@ public:
 	void Update(float timeStep);
 	void RenderCockpit(Graphics::Renderer* renderer, const Camera* camera, Frame* frame);
 	void OnActivated();
+	void Shake(double sx, double sy);
 
 protected:
 	float CalculateSignedForwardVelocity(vector3d forward, vector3d velocity);

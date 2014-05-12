@@ -22,6 +22,7 @@
 #include <deque>
 #include <vector>
 #include <map>
+#include <deque>
 #include <algorithm>
 #include <memory>
 
@@ -65,6 +66,10 @@
 #include "RefCounted.h"
 
 #include "profiler/Profiler.h"
+
+#ifdef STEAM
+#include "steam/steam_api.h"
+#endif
 
 #ifdef NDEBUG
 #define	PiVerify(x) ((void)(x))

@@ -20,7 +20,7 @@ std::string format_money(Sint64 money)
 
 class timedate {
 public:
-	timedate() : hour(0), minute(0), second(0), day(0), month(0), year(3200) {}
+	timedate() : hour(0), minute(0), second(0), day(0), month(0), year(2184) {}
 	timedate(int stamp) { *this = stamp; }
 	timedate &operator=(int stamp);
 	std::string fmt_time_date();
@@ -60,14 +60,16 @@ timedate &timedate::operator=(int stamp)
 	minute = (i /   60 + 60)%60; i %=   60;
 	second = (i+60)%60;
 
-	i = int(stamp) / 86400 + 1168410 - ((stamp < 0)?1:0); // days since "year 0"
+	int leap_years = EPOCH_START_YEAR / 4;
+	int days_in_year = ((EPOCH_START_YEAR - leap_years) * 365) + (leap_years * 366);
+	i = int(stamp) / 86400 + days_in_year - ((stamp < 0) ? 1 : 0); 
 
 	int n400 = i / 146097; i %= 146097;
 	int n100 = i /  36524; i %=  36524;
 	int n4   = i /   1461; i %=   1461;
 	int n1   = i /    365;
 
-	year = n1 + n4 * 4 + n100 * 100 + n400 * 400 + !(n100 == 4 || n1 == 4);
+	year = n1 + n4 * 4 + n100 * 100 + n400 * 400 + !(n100 == 4 || n1 == 4) - 1;
 	day = i % 365 + (n100 == 4 || n1 == 4) * 365;
 	int leap = (year % 4 == 0 && year % 100) || (year % 400 == 0);
 
@@ -212,8 +214,9 @@ const char *pi_strcasestr (const char *haystack, const char *needle)
 	for (;; haystack++) {
 		if (!*haystack)
 			return 0;
-
-		if (TOLOWER(*haystack) == b) {
+		// XXX Temporary fix for comparing with non-ASCII characters
+		char d = *haystack > 0? TOLOWER(*haystack) : *haystack;
+		if (d == b) {
 			const char *rhaystack = haystack + 1;
 			const char *rneedle = needle;
 

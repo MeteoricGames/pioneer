@@ -127,6 +127,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsDepthMaterial.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\Frustum.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\FresnelColourMaterial.h" />

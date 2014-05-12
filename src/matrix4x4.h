@@ -121,7 +121,7 @@ class matrix4x4 {
 	// (left, right, bottom, top, near, far)
 	///////////////////////////////////////////////////////////////////////////////
 	static matrix4x4 OrthoFrustum (T left, T right, T bottom, T top, T znear, T zfar) {
-		assert((znear >= T(-1)) && (zfar > T(0)));
+		//assert((znear >= T(-1)) && (zfar > T(0)));
 		T a = T(2) / (right - left);
         T b = T(2) / (top - bottom);
         T c = -T(2) / (zfar - znear);
@@ -387,6 +387,21 @@ class matrix4x4 {
 
 	vector3<T> Back() const {
 		return vector3<T>(cell[2], cell[6], cell[10]);
+	}
+
+	vector3<T> DecomposeTranslation() const {
+		return vector3<T>(cell[12], cell[13], cell[14]);
+	}
+
+	vector3<T> DecomposeScaling() const {
+		vector3<T> c0 = vector3<T>(cell[0], cell[4], cell[8]);
+		vector3<T> c1 = vector3<T>(cell[1], cell[5], cell[9]);
+		vector3<T> c2 = vector3<T>(cell[2], cell[6], cell[10]);
+		return vector3<T>(
+				c0.Length(),
+				c1.Length(),
+				c2.Length()
+			);
 	}
 };
 

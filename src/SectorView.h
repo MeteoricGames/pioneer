@@ -16,6 +16,7 @@
 #include "galaxy/SystemPath.h"
 #include "graphics/Drawables.h"
 #include "graphics/RenderState.h"
+#include "SectorViewLabelSet.h"
 #include <set>
 
 class SectorView: public UIView {
@@ -73,12 +74,14 @@ private:
 	void DrawFarSectors(const matrix4x4f& modelview);
 	void BuildFarSector(RefCountedPtr<Sector> sec, const vector3f &origin, std::vector<vector3f> &points, std::vector<Color> &colors);
 	void PutFactionLabels(const vector3f &secPos);
-	void AddStarBillboard(const matrix4x4f &modelview, const vector3f &pos, const Color &col, float size);
+	void AddStarBillboard(const matrix4x4f &modelview, const vector3f &pos, const Color &col, float size,
+		bool current_sector = false, bool selected_sector = false);
 
 	void OnClickSystem(const SystemPath &path);
 
 	void UpdateDistanceLabelAndLine(DistanceIndicator &distance, const SystemPath &src, const SystemPath &dest);
 	void UpdateSystemLabels(SystemLabels &labels, const SystemPath &path);
+	void GetSystemLabels(const SystemPath &path, std::string& name_out, std::string& path_out, std::string& type_out, std::string& desc_out);
 	void UpdateFactionToggles();
 	void RefreshDetailBoxVisibility();
 
@@ -107,6 +110,7 @@ private:
 	float m_zoom;
 	float m_zoomClamped;
 	float m_zoomMovingTo;
+	vector2f m_pan;
 
 	SystemPath m_hyperspaceTarget;
 	bool m_matchTargetToSelection;
@@ -122,16 +126,16 @@ private:
 	Gui::TextEntry *m_searchBox;
 	Gui::ToggleButton *m_drawOutRangeLabelButton;
 	Gui::ToggleButton *m_drawUninhabitedLabelButton;
-	Gui::ToggleButton *m_drawSystemLegButton;
+	//Gui::ToggleButton *m_drawSystemLegButton;
 
 	std::unique_ptr<Graphics::Drawables::Disk> m_disk;
 
-	Gui::LabelSet *m_clickableLabels;
+	Gui::SectorViewLabelSet *m_clickableLabels;
 
 	Gui::VBox *m_infoBox;
 
 	SystemLabels m_currentSystemLabels;
-	SystemLabels m_selectedSystemLabels;
+	//SystemLabels m_selectedSystemLabels;
 	SystemLabels m_targetSystemLabels;
 	DistanceIndicator m_secondDistance;
 	Gui::Label *m_hyperspaceLockLabel;
@@ -160,9 +164,12 @@ private:
 
 	Graphics::RenderState *m_solidState;
 	Graphics::RenderState *m_alphaBlendState;
-	Graphics::RenderState *m_jumpSphereState;
+	Graphics::RenderState *m_jumpCircleState;
 	RefCountedPtr<Graphics::Material> m_material; //flat colour
 	RefCountedPtr<Graphics::Material> m_starMaterial;
+	Graphics::Texture* m_starIcon;
+	Graphics::Texture* m_currentSectorIcon;
+	Graphics::Texture* m_selectedSectorIcon;
 
 	std::vector<vector3f> m_farstars;
 	std::vector<Color>    m_farstarsColor;
@@ -180,9 +187,10 @@ private:
 
 	std::unique_ptr<Graphics::VertexArray> m_lineVerts;
 	std::unique_ptr<Graphics::VertexArray> m_secLineVerts;
-	std::unique_ptr<Graphics::Drawables::Sphere3D> m_jumpSphere;
-	std::unique_ptr<Graphics::Drawables::Disk> m_jumpDisk;
+	std::unique_ptr<Graphics::VertexArray> m_jumpCircle;
 	std::unique_ptr<Graphics::VertexArray> m_starVerts;
+	std::unique_ptr<Graphics::VertexArray> m_currentSectorVerts;
+	std::unique_ptr<Graphics::VertexArray> m_selectedSectorVerts;
 };
 
 #endif /* _SECTORVIEW_H */

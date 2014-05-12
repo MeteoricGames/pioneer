@@ -16,6 +16,7 @@ Box::Box(BoxOrientation orient): Container()
 void Box::_Init()
 {
 	m_spacing = 0;
+	m_padding = 0;
 	m_wantedSize[0] = m_wantedSize[1] = 0;
 	m_eventMask = EVENT_ALL;
 }
@@ -77,13 +78,13 @@ void Box::OnChildResizeRequest(Widget *child)
 
 void Box::PackStart(Widget *child)
 {
-	PrependChild(child, 0, 0);
+	PrependChild(child, m_padding, m_padding);
 	ResizeRequest();
 }
 
 void Box::PackEnd(Widget *child)
 {
-	AppendChild(child, 0, 0);
+	AppendChild(child, m_padding, m_padding);
 	ResizeRequest();
 }
 
@@ -91,7 +92,7 @@ void Box::UpdateAllChildSizes()
 {
 	float size[2];
 	GetSize(size);
-	float pos = 0;
+	float pos = m_padding;
 	float space = (m_orient == BOX_VERTICAL ? size[1] : size[0]);
 	int num_expand_children = 0;
 	// look at all children...
@@ -108,8 +109,8 @@ void Box::UpdateAllChildSizes()
 
 			if (msize[0] > size[0]) msize[0] = size[0];
 			if (msize[1] > space) msize[1] = space;
-			(*i).w->SetSize(size[0], msize[1]);
-			(*i).pos[0] = 0;
+			(*i).w->SetSize(size[0] - (m_padding * 2.0f), msize[1] - (m_padding * 2.0f));
+			(*i).pos[0] = m_padding;
 			(*i).pos[1] = pos;
 			pos += msize[1] + m_spacing;
 			space -= msize[1] + m_spacing;

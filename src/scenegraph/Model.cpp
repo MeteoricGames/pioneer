@@ -251,6 +251,13 @@ MatrixTransform * const Model::GetTagByIndex(const unsigned int i) const
 	return m_tags.at(i);
 }
 
+std::string const Model::GetTagNameByIndex(const unsigned int i) const
+{
+	if(m_tags.empty() || i > m_tags.size() - 1) return 0;
+	assert(!m_tags[i]->GetName().empty());
+	return m_tags[i]->GetName();
+}
+
 MatrixTransform * const Model::FindTagByName(const std::string &name) const
 {
 	for (TagContainer::const_iterator it = m_tags.begin();

@@ -340,4 +340,22 @@ void Screen::RemoveShortcutWidget(Widget *w)
 	kbshortcut_widgets.remove(w);
 }
 
+// Converts HD size (width & height in 1920x1080 design space) to UI size retaining ratio
+// and favoring width
+void Screen::ConvertSizeToUI(float hd_width, float hd_height, float& out_width, float& out_height)
+{
+	float ratio = hd_width / hd_height;
+	out_width = Screen::GetWidth() * hd_width / 1920.0f;
+	out_height = out_width / ratio;
+}
+
+// Converts UI size (width & height in UI space 800x600) to HD design space retaining ratio
+// and favoring width
+void Screen::ConvertSizeToHD(float ui_width, float ui_height, float& out_width, float& out_height)
+{
+	float ratio = ui_width / ui_height;
+	out_width = 1920.0f * ui_width / static_cast<float>(GetWidth());
+	out_height = out_width / ratio;
+}
+
 }

@@ -103,10 +103,6 @@ ui.templates.Settings = function (args)
 			Engine.GetDisplaySpeedLines, Engine.SetDisplaySpeedLines,
 			l.DISPLAY_SPEED_LINES)
 			
-		local targetIndicatorsCheckBox = optionCheckBox(
-			Engine.GetDisplayTargetIndicators, Engine.SetDisplayTargetIndicators,
-			"Display target indicators")
-			
 		local postProcessingCheckBox = optionCheckBox(
 			Engine.GetPostProcessingEnabled, Engine.SetPostProcessingEnabled,
 			"Post-processing")
@@ -137,7 +133,6 @@ ui.templates.Settings = function (args)
 				cityDetailDropDown,
 				navTunnelsCheckBox,
 				speedLinesCheckBox,
-				targetIndicatorsCheckBox,
 				postProcessingCheckBox,
 				cockpitCheckBox,
 			})))

@@ -22,6 +22,7 @@ local utils = import("utils")
 local InfoFace = import("ui/InfoFace")
 
 local l = Lang.GetResource("module-assassination")
+local paragon_time_factor = 0.001;
 
 -- Get the UI class
 local ui = Engine.ui
@@ -172,7 +173,7 @@ local makeAdvert = function (station)
 	local location = nearbystations[Engine.rand:Integer(1,#nearbystations)]
 	local dist = location:DistanceTo(Game.system)
 	local time = Engine.rand:Number(0.3, 3)
-	local due = Game.time + Engine.rand:Number(7*2*2*24, time * 31*2*2*24)
+	local due = Game.time + Engine.rand:Number(7*60*60*24*paragon_time_factor, time * 31*60*60*24*paragon_time_factor)
 	local danger = Engine.rand:Integer(1,4)
 	local reward = Engine.rand:Number(2100, 7000) * danger
 
@@ -427,11 +428,11 @@ end
 
 local onUpdateBB = function (station)
 	for ref,ad in pairs(ads) do
-		if (ad.due < Game.time + 5*2*2*24) then
+		if (ad.due < Game.time + 5*60*60*24*paragon_time_factor) then
 			ad.station:RemoveAdvert(ref)
 		end
 	end
-	if Engine.rand:Integer(4*24*2*2) < 2*2 then -- roughly once every four days
+	if Engine.rand:Integer(4*24*60*60*paragon_time_factor) < 60*60*paragon_time_factor then -- roughly once every four days
 		makeAdvert(station)
 	end
 end

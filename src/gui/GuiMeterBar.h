@@ -13,7 +13,13 @@
 namespace Gui {
 	class MeterBar: public Gui::Fixed {
 	public:
-		MeterBar(float width, const char *label, const ::Color &graphCol);
+		enum MeterBarAlign {
+			METERBAR_LEFT = 0,
+			METERBAR_RIGHT,
+		};
+
+		MeterBar(float width, const char *label, const ::Color &graphCol, 
+			MeterBarAlign alignment = METERBAR_LEFT, const Color &labelCol = Color::PARAGON_GREEN);
 		virtual ~MeterBar() {}
 		virtual void Draw();
 		virtual void GetSizeRequested(float size[2]);
@@ -24,6 +30,7 @@ namespace Gui {
 		Gui::Label *m_label;
 		::Color m_barColor;
 		float m_barValue;
+		MeterBarAlign m_alignment;
 	};
 }
 

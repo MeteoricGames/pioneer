@@ -7,6 +7,9 @@
 #include "libs.h"
 #include "gui/Gui.h"
 
+static const float MouseFlightZoneDiameter = 0.1593f;
+static const float MouseFlightDeadZoneDiameter = 0.0238f;
+
 enum MouseCursorType
 {
 	MCT_NORMAL,
@@ -24,6 +27,10 @@ public:
 	void SetVisible(bool visible);
 	void SetType(MouseCursorType type);
 	void Reset();
+	void GetFlightCursorState(int* x, int* y) { 
+		*x = static_cast<int>(m_flightCursor.x); 
+		*y = static_cast<int>(m_flightCursor.y); 
+	}
 
 private:
 	MouseCursor(const MouseCursor&);
@@ -37,6 +44,11 @@ private:
 	vector2f m_pos;
 	MouseCursorType m_type;
 	bool m_visible;
+
+	std::unique_ptr<Gui::TexturedQuad> m_mouseFlightZone;
+	vector2f m_mouseFlightZoneSize;
+	vector2f m_mouseFlightZonePos;
+	vector2f m_flightCursor;
 
 protected:
 

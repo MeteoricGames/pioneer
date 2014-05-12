@@ -61,6 +61,7 @@ public:
 	T Length() const { return sqrt (x*x + y*y + z*z); }
 	T LengthSqr() const { return x*x + y*y + z*z; }
 	vector3 Normalized() const { const T l = 1.0f / sqrt(x*x + y*y + z*z); return vector3(x*l, y*l, z*l); }
+	vector3 Normalized(T& length) const { const T l = sqrt(x*x + y*y + z*z); length = l; return vector3(x/l, y/l, z/l); }
 	vector3 NormalizedSafe() const {
 		const T lenSqr = x*x + y*y + z*z;
 		if (lenSqr < 1e-18) // sqrt(lenSqr) < 1e-9

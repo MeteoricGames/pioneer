@@ -3,20 +3,27 @@
 
 #include "Gui.h"
 
-static const float METERBAR_PADDING    = 5.0f;
-static const float METERBAR_BAR_HEIGHT = 8.0f;
+static const float METERBAR_PADDING		= 4.0f;
+static const float METERBAR_BAR_HEIGHT	= 8.0f;
+static const float LABEL_WIDTH			= 32.0f;
 
 namespace Gui {
 
-MeterBar::MeterBar(float width, const char *label, const ::Color &graphCol)
+MeterBar::MeterBar(float width, const char *label, const ::Color &graphCol, MeterBarAlign alignment,
+	const Color &labelCol)
 {
 	m_requestedWidth = width;
 	m_barValue = 0;
 	m_barColor = graphCol;
-	Gui::Screen::PushFont("OverlayFont");
+	m_alignment = alignment;
+	Gui::Screen::PushFont("HudFont");
 	m_label = new Gui::Label(label);
-	m_label->Color(Color::PARAGON_GREEN);
-	Add(m_label, METERBAR_PADDING, METERBAR_PADDING + METERBAR_BAR_HEIGHT);
+	m_label->Color(labelCol);
+	if (m_alignment == METERBAR_LEFT) {
+		Add(m_label, m_requestedWidth - LABEL_WIDTH, 0.0f);
+	} else {
+		Add(m_label, 0.0f, 0.0f);
+	}
 	m_label->Show();
 	Gui::Screen::PopFont();
 }
@@ -24,19 +31,29 @@ MeterBar::MeterBar(float width, const char *label, const ::Color &graphCol)
 void MeterBar::Draw()
 {
 	PROFILE_SCOPED()
-	float size[2];
+	float size[2], sizeback[2];
 	GetSize(size);
 
 	Graphics::Renderer *r = Gui::Screen::GetRenderer();
 
-	Gui::Theme::DrawRoundEdgedRect(size, 5.0, Color(255,255,255,32), Screen::alphaBlendState);
-
 	Graphics::Renderer::MatrixTicket ticket(r, Graphics::MatrixMode::MODELVIEW);
 
-	r->Translate(METERBAR_PADDING, METERBAR_PADDING, 0.0f);
-	size[0] = m_barValue * (size[0] - 2.0f*METERBAR_PADDING);
+	if (m_alignment == METERBAR_LEFT) {
+		r->Translate(METERBAR_PADDING, METERBAR_PADDING, 0.0f);
+	} else {
+		r->Translate(METERBAR_PADDING + LABEL_WIDTH, METERBAR_PADDING, 0.0f);
+	}
+
+	sizeback[0] = (size[0] - LABEL_WIDTH) - 2.0f * METERBAR_PADDING;
+	sizeback[1] = METERBAR_BAR_HEIGHT;
+	size[0] = m_barValue * sizeback[0];
 	size[1] = METERBAR_BAR_HEIGHT;
+	Gui::Theme::DrawRoundEdgedRect(sizeback, 3.0f, Color(255, 255, 255, 32), Screen::alphaBlendState);
 	Gui::Theme::DrawRoundEdgedRect(size, 3.0f, m_barColor, Screen::alphaBlendState);
+
+	if (m_alignment == METERBAR_RIGHT) {
+		r->Translate(-LABEL_WIDTH, 0.0f, 0.0f);
+	}
 
 	Gui::Fixed::Draw();
 }
@@ -44,7 +61,7 @@ void MeterBar::Draw()
 void MeterBar::GetSizeRequested(float size[2])
 {
 	size[0] = m_requestedWidth;
-	size[1] = METERBAR_PADDING*2.0f + METERBAR_BAR_HEIGHT + Gui::Screen::GetFontHeight();
+	size[1] = METERBAR_PADDING * 2.0f + METERBAR_BAR_HEIGHT + Gui::Screen::GetFontHeight();
 }
 
 }

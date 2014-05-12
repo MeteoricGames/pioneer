@@ -38,7 +38,10 @@ enum EffectType {
 	EFFECT_SHIELD,
 	EFFECT_SPHEREIMPOSTOR,
 	EFFECT_VERTICAL_BLUR,
-	EFFECT_BLOOM_COMPOSITOR
+	EFFECT_BLOOM_COMPOSITOR,
+	EFFECT_THRUSTERTRAILS_DEPTH,
+	EFFECT_THRUSTERTRAILS,
+	EFFECT_SECTORVIEW_ICON,
 };
 
 
@@ -61,6 +64,8 @@ public:
 	bool specularMap;
 	bool usePatterns; //pattern/color system
 	bool vertexColors;
+	bool pointsMode;
+	bool colorTint;
 	Sint32 textures; //texture count
 	Uint32 dirLights; //set by rendererGL2 if lighting == true
 	Uint32 quality; // see: Graphics::MaterialQuality
@@ -86,7 +91,10 @@ public:
 	Color diffuse;
 	Color specular;
 	Color emissive;
+	Color tint;
+
 	int shininess; //specular power 0-128
+	float pointSize;
 
 	virtual void Apply() { }
 	virtual void Unapply() { }

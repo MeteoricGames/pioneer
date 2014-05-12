@@ -367,6 +367,7 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 
 	FileSystem::Init();
 	FileSystem::userFiles.MakeDirectory(""); // ensure the config directory exists
+
 #ifdef PIONEER_PROFILER
 	FileSystem::userFiles.MakeDirectory("profiler");
 	profilerPath = FileSystem::JoinPathBelow(FileSystem::userFiles.GetRoot(), "profiler");
@@ -387,6 +388,11 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	Pi::detail.textures = config->Int("Textures");
 	Pi::detail.fracmult = config->Int("FractalMultiple");
 	Pi::detail.cities = config->Int("DetailCities");
+
+#ifdef STEAM
+	bool steam_init_result = SteamAPI_Init();
+	assert(steam_init_result);
+#endif
 
 	// Initialize SDL
 	Uint32 sdlInitFlags = SDL_INIT_VIDEO | SDL_INIT_JOYSTICK;
@@ -723,6 +729,13 @@ void Pi::Quit()
 	delete Pi::renderer;
 	delete Pi::config;
 	StarSystemCache::ShrinkCache(SystemPath(), true);
+
+#ifdef STEAM
+	if (SteamUser()) {
+		SteamAPI_Shutdown();
+	}
+#endif
+
 	SDL_Quit();
 	FileSystem::Uninit();
 	jobQueue.reset();
@@ -1283,8 +1296,8 @@ void Pi::MainLoop()
 
 		/* Calculate position for this rendered frame (interpolated between two physics ticks */
         // XXX should this be here? what is this anyway?
-		for (Space::BodyIterator i = game->GetSpace()->BodiesBegin(); i != game->GetSpace()->BodiesEnd(); ++i) {
-			(*i)->UpdateInterpTransform(Pi::GetGameTickAlpha());
+		for (Body* b : game->GetSpace()->GetBodies()) {
+			b->UpdateInterpTransform(Pi::GetGameTickAlpha());
 		}
 		game->GetSpace()->GetRootFrame()->UpdateInterpTransform(Pi::GetGameTickAlpha());
 
@@ -1296,9 +1309,9 @@ void Pi::MainLoop()
 		Pi::HandleEvents();
 		// hide cursor for ship control.
 
-		SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
+		//SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
-		if(currentView == settingsView || currentView == infoView || currentView == sectorView || currentView == spaceStationView) {
+		if(currentView != worldView) {
 			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
 		} else {
 			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
@@ -1328,11 +1341,6 @@ void Pi::MainLoop()
 			}
 		}
 
-		if(Pi::mouseCursor) {
-			Pi::mouseCursor->Update();
-			Pi::mouseCursor->Draw();
-		}
-
 		// XXX don't draw the UI during death obviously a hack, and still
 		// wrong, because we shouldn't this when the HUD is disabled, but
 		// probably sure draw it if they switch to eg infoview while the HUD is
@@ -1340,6 +1348,11 @@ void Pi::MainLoop()
 		if (Pi::GetView() != Pi::deathView) {
 			Pi::ui->Update();
 			Pi::ui->Draw();
+		}
+
+		if(Pi::mouseCursor) {
+			Pi::mouseCursor->Update();
+			Pi::mouseCursor->Draw();
 		}
 
 #if WITH_DEVKEYS

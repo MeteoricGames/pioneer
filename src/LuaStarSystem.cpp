@@ -61,10 +61,10 @@ static int l_starsystem_get_station_paths(lua_State *l)
 
 	lua_newtable(l);
 
-	for (std::vector<SystemBody*>::const_iterator i = s->m_spaceStations.begin(); i != s->m_spaceStations.end(); ++i)
+	for (const SystemBody *station : s->GetSpaceStations())
 	{
 		lua_pushinteger(l, lua_rawlen(l, -1)+1);
-		LuaObject<SystemPath>::PushToLua(&(*i)->path);
+		LuaObject<SystemPath>::PushToLua(&station->GetPath());
 		lua_rawset(l, -3);
 	}
 
@@ -101,10 +101,10 @@ static int l_starsystem_get_body_paths(lua_State *l)
 
 	lua_newtable(l);
 
-	for (std::vector< RefCountedPtr<SystemBody> >::const_iterator i = s->m_bodies.begin(); i != s->m_bodies.end(); ++i)
+	for (RefCountedPtr<const SystemBody> sb : s->GetBodies())
 	{
 		lua_pushinteger(l, lua_rawlen(l, -1)+1);
-		LuaObject<SystemPath>::PushToLua(&(*i)->path);
+		LuaObject<SystemPath>::PushToLua(&sb->GetPath());
 		lua_rawset(l, -3);
 	}
 
@@ -247,7 +247,8 @@ static int l_starsystem_get_nearby_systems(lua_State *l)
 
 	for (int x = here_x-diff_sec; x <= here_x+diff_sec; x++) {
 		for (int y = here_y-diff_sec; y <= here_y+diff_sec; y++) {
-			for (int z = here_z-diff_sec; z <= here_z+diff_sec; z++) {
+			for(int z = 0; z == 0; z++) {
+			//for (int z = here_z-diff_sec; z <= here_z+diff_sec; z++) {
 				RefCountedPtr<const Sector> sec = Sector::cache.GetCached(SystemPath(x, y, z));
 
 				for (unsigned int idx = 0; idx < sec->m_systems.size(); idx++) {

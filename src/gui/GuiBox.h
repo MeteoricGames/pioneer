@@ -30,11 +30,13 @@ namespace Gui {
 		void SetSizeRequest(float size[2]);
 		void SetSizeRequest(float x, float y);
 		void SetSpacing(float spacing) { m_spacing = spacing; }
+		void SetPadding(float padding) { m_padding = padding; }
 	private:
 		void _Init();
 		void GetSizeRequestedOrMinimum(float size[2], bool minimum);
 		float m_wantedSize[2];
 		float m_spacing;
+		float m_padding;
 		enum BoxOrientation m_orient;
 	};
 

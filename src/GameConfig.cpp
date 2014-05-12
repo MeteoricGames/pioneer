@@ -40,7 +40,7 @@ GameConfig::GameConfig(const std::map<std::string,std::string> &override_)
 	map["WorkerThreads"] = "0";
 	map["SpeedLines"] = "0";
 	map["TargetIndicators"] = "0";
-	map["EnableCockpit"] = "0";
+	map["EnableCockpit"] = "1";
 	map["HudTrails"] = "0";
 
 #ifdef _WIN32

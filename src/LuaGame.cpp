@@ -34,7 +34,7 @@
  *                 orbit around the specified body.
  *
  *   start_time - optional, default 0. Time to start at in seconds from the
- *                Pioneer epoch (i.e. from 3200-01-01 00:00 UTC).
+ *                Pioneer epoch (i.e. from 2184-01-01 00:00 UTC).
  *
  * Availability:
  *
@@ -231,7 +231,7 @@ static int l_game_attr_system(lua_State *l)
 /*
  * Attribute: time
  *
- * The current game time, in seconds since 12:00 01-01-3200
+ * The current game time, in seconds since 12:00 01-01-2184
  *
  * Availability:
  *

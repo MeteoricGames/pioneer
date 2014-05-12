@@ -27,7 +27,7 @@
  *
  * Parameters:
  *
- *   date - a date/time value, as seconds since 12:00 01-01-3200
+ *   date - a date/time value, as seconds since 12:00 01-01-2184
  *
  * Return:
  *

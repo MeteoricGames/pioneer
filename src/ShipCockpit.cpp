@@ -1,4 +1,4 @@
-// Copyright Â© 2013-14 Meteoric Games Ltd
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
@@ -40,6 +40,10 @@ void ShipCockpit::Render(Graphics::Renderer *renderer, const Camera *camera, con
 void ShipCockpit::Update(float timeStep)
 {
 	m_transform = matrix4x4d::Identity();
+	m_translate = vector3d(0.0, 0.0, 0.0);
+	m_rotInterp = 0.0f;
+	m_transInterp = 0.0f;
+
 	vector3d cur_dir = Pi::player->GetOrient().VectorZ().Normalized();
 	if(cur_dir.Dot(m_shipDir) < 1.0f) {
 		m_rotInterp = 0.0f;
@@ -50,7 +54,7 @@ void ShipCockpit::Update(float timeStep)
 	float cur_vel = CalculateSignedForwardVelocity(-cur_dir, Pi::player->GetVelocity()); // Forward is -Z
 	float gforce = Clamp(floorf(((abs(cur_vel) - m_shipVel) / timeStep) / 9.8f), -COCKPIT_MAX_GFORCE, COCKPIT_MAX_GFORCE);
 	if(abs(cur_vel) > 500000.0f ||      // Limit gforce measurement so we don't get astronomical fluctuations
-	   abs(gforce - m_gForce) > 100.0) { // Smooth out gforce one frame spikes, sometimes happens when hitting max speed due to the thrust limiters
+	   abs(gforce - m_gForce) > 100.0) { // Smooth out gforce on frame spikes, sometimes happens when hitting max speed due to the thrust limiters
 		gforce = 0.0f;
 	}
 	if((gforce > 0 && m_gForce < 0) || (m_gForce > 0 && gforce < 0)) {
@@ -176,6 +180,12 @@ void ShipCockpit::OnActivated()
 	m_shipDir = m_dir;
 	m_shipYaw = m_yaw;
 	m_shipVel = CalculateSignedForwardVelocity(-m_shipDir, Pi::player->GetVelocity());
+}
+
+void ShipCockpit::Shake(double sx, double sy)
+{
+	m_translate.x = sx;
+	m_translate.y = sy;
 }
 
 float ShipCockpit::CalculateSignedForwardVelocity(vector3d normalized_forward, vector3d velocity) {

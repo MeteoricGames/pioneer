@@ -27,6 +27,10 @@
       "description" : "",
       "message" : "Alt: %altitude{f.0}m (%vspeed{f.1}m/s)"
    },
+   "ALT_NO_DATA" : {
+	  "description" : "",
+	  "message" : "no data"
+   },
    "AND_HIGHLY_COMPLEX_ECOSYSTEM" : {
       "description" : "",
       "message" : "\" and a highly complex ecosystem.\""
@@ -1219,6 +1223,30 @@
       "description" : "",
       "message" : "%distance to target"
    },
+   "P_NO_TARGET" : {
+	  "description" : "",
+	  "message" : "no target"
+   },
+   "P_UI_FUEL" : {
+	  "description" : "",
+	  "message" : "fuel"
+   },
+   "P_UI_TEMP" : {
+	  "description" : "",
+	  "message" : "temp"
+   },
+   "P_UI_WEAP" : {
+	  "description" : "",
+	  "message" : "weap"
+   },
+   "P_UI_HULL" : {
+	  "description" : "",
+	  "message" : "hull"
+   },
+   "P_UI_SHLD" : {
+	  "description" : "",
+	  "message" : "shld"
+   },
    "N_EARTH_DAYS" : {
       "description" : "",
       "message" : "%days{f.1} earth days"
@@ -2058,5 +2086,21 @@
    "ZOOM_OUT" : {
       "description" : "",
       "message" : "Zoom out"
+   },   
+   "TUTORIAL_1" : {
+	  "description" : "",
+	  "message" : "#0f3Intro\n\n#fffWelcome to Paragon, this is an alpha release, and there will be BUGS! We need player feedback to help us squash them, and opinions on the game on how to improve and enhance it. Below is a quick tutorial to get you started as a newly trained independent ship captain.\n\nAs a ship captain you are able to travel around the universe, completing missions in order to upgrade and eventually replace your ships.  You are also free to pursue other different pursuits such as trading, exploring and piracy as you wish.\n\n"
+	},
+	"TUTORIAL_2" : {
+	  "description" : "",
+	  "message" : "#0f3Spaceflight\n\n#fffSpaceflight in Paragon is straightforward, to the right of the radar display (oval at bottom centre of screen) there is an autopilot indicator, along with 3 buttons, from left to right they are MANEUVER, TRANSIT and JUMP, they are colour coded grey when unavailable, blue when available and  green when in operation.\n\nMANEUVER mode is the default, it is speed limited at 600m/s and is used when flying in the gravity bubbles of planet surfaces, settlements, space stations and other ships. It is used when docking and undocking and during combat with other ships.\n\nTRANSIT mode is a very high speed mode used to travel the massive distances required to orbit planets, get from planet surfaces to space stations, and to travel across solar systems. It can only be used when the player is outside of any other object’s gravity bubble (15km above a planet surface, away from a planet, away from another ship). When in this mode ships will quickly accelerate when moving in a straight line, but can near instantly slow back down by turning, and when close to planets will also move much more slowly. When they strike the 15km gravity bubble of any planet or station, ships will be knocked back down to maneuver mode. \n\nJUMP mode is used to travel between solar systems and like transit mode it can only be used when the player is outside of gravity bubbles. Additionally it requires that the player have a jump drive installed (purchasable at station equipment market), some hydrogen in their cargo hold (purchasable at station commodity market) and have a jump destination set (using nav map accessible via the star icon to the left of the radar).\n\n"
+	},
+	"TUTORIAL_3" : {
+	  "description" : "",
+	  "message" : "\n#0f3Missions\n\n#fffMissions can be acquired from exonet terminals accessible using the comms button while docked at stations and settlements.\n\n"
+	},
+	"TUTORIAL_4" : {
+	  "description" : "",
+	  "message" : "#0f3Controls\n\n#fffThe default controls map pitch and yaw to the mouse, roll to A and D, accelerate/decelerate to W and S, activate/deactivate mouse flight to right click and fire main weapon to left click.\n"
    }
 }

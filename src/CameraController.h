@@ -43,6 +43,7 @@ public:
 	virtual void Update();
 
 	const Ship *GetShip() const { return m_ship; }
+	const CameraContext *GetCameraContext() const { assert(m_camera.Valid()); return m_camera.Get(); }
 
 private:
 	RefCountedPtr<CameraContext> m_camera;

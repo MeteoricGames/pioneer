@@ -13,6 +13,7 @@ noinst_HEADERS = \
 	Renderer.h \
 	RendererGL2.h \
 	RenderTarget.h \
+	RendererGLBuffers.h \
 	GLDebug.h \
 	Frustum.h \
 	Light.h \
@@ -20,16 +21,18 @@ noinst_HEADERS = \
 	RenderState.h \
 	PostProcess.h \
 	PostProcessing.h \
-	StaticMesh.h \
-	Surface.h \
 	VertexArray.h \
+	Surface.h \ 
 	Texture.h \
 	TextureGL.h \
 	TextureBuilder.h \
 	Drawables.h \
+	Types.h \
+	VertexBuffer.h \
 	gl2/GL2Material.h \
 	gl2/GL2RenderState.h \
 	gl2/GL2RenderTarget.h \
+	gl2/GL2VertexBuffer.h \
 	gl2/FresnelColourMaterial.h \
 	gl2/GeoSphereMaterial.h \
 	gl2/MultiMaterial.h \
@@ -38,7 +41,9 @@ noinst_HEADERS = \
 	gl2/SkyboxMaterial.h \
 	gl2/ShieldMaterial.h \
 	gl2/StarfieldMaterial.h \
-	gl2/Uniform.h
+	gl2/Uniform.h \
+	effects/thruster_trails/ThrusterTrailsDepthMaterial.h \
+	effects/thruster_trails/ThrusterTrailsMaterial.h
 
 libgraphics_a_SOURCES = \
 	Graphics.cpp \
@@ -50,14 +55,15 @@ libgraphics_a_SOURCES = \
 	Material.cpp \
 	PostProcess.cpp \
 	PostProcessing.cpp \
-	StaticMesh.cpp \
 	VertexArray.cpp \
 	TextureGL.cpp \
 	TextureBuilder.cpp \
 	Drawables.cpp \
+	VertexBuffer.cpp \
 	gl2/GL2Material.cpp \
 	gl2/GL2RenderState.cpp \
 	gl2/GL2RenderTarget.cpp \
+	gl2/GL2VertexBuffer.cpp \
 	gl2/FresnelColourMaterial.cpp \
 	gl2/GeoSphereMaterial.cpp \
 	gl2/MultiMaterial.cpp \

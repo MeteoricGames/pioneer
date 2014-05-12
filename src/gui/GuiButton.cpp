@@ -101,7 +101,8 @@ void TransparentButton::Draw()
 LabelButton::LabelButton(Label *label): Button()
 {
 	m_label = label;
-	m_padding = 2.0;
+	m_padding = 2.0f;
+	m_padding_y = 0.0f;
 	onSetSize.connect(sigc::mem_fun(this, &LabelButton::OnSetSize));
 }
 
@@ -110,8 +111,8 @@ LabelButton::~LabelButton() { delete m_label; }
 void LabelButton::GetSizeRequested(float size[2])
 {
 	m_label->GetSizeRequested(size);
-	size[0] += 2*m_padding;
-	//size[1] += 2*m_padding;
+	size[0] += 2.0f * m_padding;
+	size[1] += 2.0f * m_padding_y;
 }
 
 void LabelButton::Draw()
@@ -129,7 +130,7 @@ void LabelButton::Draw()
 	Graphics::Renderer *r = Gui::Screen::GetRenderer();
 	Graphics::Renderer::MatrixTicket ticket(r, Graphics::MatrixMode::MODELVIEW);
 
-	r->Translate(m_padding, m_padding*0.5, 0);
+	r->Translate(m_padding, m_padding_y, 0);
 	m_label->Draw();
 }
 

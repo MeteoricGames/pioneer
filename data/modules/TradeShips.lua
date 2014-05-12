@@ -561,16 +561,19 @@ local spawnReplacementFast = function ()
 		local ship_name = ship_names[Engine.rand:Integer(1, #ship_names)]
 
 		local ship = Space.SpawnShipNear(ship_name, Game.player, 15, 25) -- 10mkm - 1AU
-		trade_ships[ship] = {
-			status		= 'inbound',
-			starport	= starport,
-			ship_name	= ship_name,
-		}
-		addShipEquip(ship)
-		ship:AIDockWith(starport)
-		trade_ships[ship]['starport'] = starport
-		trade_ships[ship]['status'] = 'inbound'
-		addShipCargo(ship, 'import')
+		if ship ~= nil then
+			ship:SetLabel(Ship.MakeRandomLabel())
+			trade_ships[ship] = {
+				status		= 'inbound',
+				starport	= starport,
+				ship_name	= ship_name,
+			}
+			addShipEquip(ship)
+			ship:AIDockWith(starport)
+			trade_ships[ship]['starport'] = starport
+			trade_ships[ship]['status'] = 'inbound'
+			addShipCargo(ship, 'import')
+		end
 	end
 
 
@@ -583,6 +586,7 @@ local spawnReplacementFast = function ()
 		local ship_name = ship_names[Engine.rand:Integer(1, #ship_names)]
 		local ship = Space.SpawnShipDocked(ship_name, starport)
 		if ship ~= nil then
+			ship:SetLabel(Ship.MakeRandomLabel())
 			trade_ships[ship] = {
 				status		= 'docked',
 				starport	= starport,
@@ -943,7 +947,7 @@ local onShipDestroyed = function (ship, attacker)
 	if trade_ships[ship] ~= nil then
 		local trader = trade_ships[ship]
 
-		if trader.starport.label==nil then return end
+		if trader.starport==nill or trader.starport.label==nil then return end
 		print(ship.label..' destroyed by '..attacker.label..', status:'..trader.status..' ship:'..trader.ship_name..', starport:'..trader.starport.label)
 		trade_ships[ship] = nil
 

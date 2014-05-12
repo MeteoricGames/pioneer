@@ -21,6 +21,7 @@ local InfoFace = import("ui/InfoFace")
 
 -- Get the language resource
 local l = Lang.GetResource("module-taxi")
+local paragon_time_factor = 0.001;
 
 -- Get the UI class
 local ui = Engine.ui
@@ -29,7 +30,7 @@ local ui = Engine.ui
 local max_taxi_dist = 40
 -- typical time for travel to a system max_taxi_dist away
 --	Irigi: ~ 4 days for in-system travel, the rest is FTL travel time
-local typical_travel_time = (2.0 * max_taxi_dist + 4) * 24 * 2 * 2
+local typical_travel_time = (2.0 * max_taxi_dist + 4) * 24 * 60 * 60 * paragon_time_factor
 -- typical reward for taxi service to a system max_taxi_dist away
 local typical_reward = 75 * max_taxi_dist
 -- max number of passengers per trip
@@ -298,11 +299,11 @@ end
 
 local onUpdateBB = function (station)
 	for ref,ad in pairs(ads) do
-		if ad.due < Game.time + 5*2*2*24 then
+		if ad.due < Game.time + 5*60*60*24*paragon_time_factor then
 			ad.station:RemoveAdvert(ref)
 		end
 	end
-	if Engine.rand:Integer(24*2*2) < 2*2 then -- roughly once every day
+	if Engine.rand:Integer(24*60*60*paragon_time_factor) < 60*60*paragon_time_factor then -- roughly once every day
 		makeAdvert(station)
 	end
 end
@@ -347,17 +348,19 @@ local onEnterSystem = function (player)
 					local laserdef = laserdefs[Engine.rand:Integer(1,#laserdefs)]
 
 					ship = Space.SpawnShipNear(shipdef.id, Game.player, 50, 100)
-					ship:SetLabel(Ship.MakeRandomLabel())
-					ship:AddEquip(default_drive)
-					ship:AddEquip(laserdef.id)
-					ship:AddEquip('SHIELD_GENERATOR', math.ceil(risk * 3))
-					if Engine.rand:Number(2) <= risk then
-						ship:AddEquip('LASER_COOLING_BOOSTER')
+					if ship ~= nil then
+						ship:SetLabel(Ship.MakeRandomLabel())
+						ship:AddEquip(default_drive)
+						ship:AddEquip(laserdef.id)
+						ship:AddEquip('SHIELD_GENERATOR', math.ceil(risk * 3))
+						if Engine.rand:Number(2) <= risk then
+							ship:AddEquip('LASER_COOLING_BOOSTER')
+						end
+						if Engine.rand:Number(3) <= risk then
+							ship:AddEquip('SHIELD_ENERGY_BOOSTER')
+						end
+						ship:AIKill(Game.player)
 					end
-					if Engine.rand:Number(3) <= risk then
-						ship:AddEquip('SHIELD_ENERGY_BOOSTER')
-					end
-					ship:AIKill(Game.player)
 				end
 			end
 

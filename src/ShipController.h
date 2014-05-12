@@ -16,7 +16,7 @@ class Space;
 
 enum FlightControlState {
 	CONTROL_MANEUVER,
-	CONTROL_MANUAL,
+	//CONTROL_MANUAL,
 	CONTROL_AUTOPILOT,
 	CONTROL_TRANSIT,
 
@@ -36,21 +36,31 @@ static const int MOUSE_FLIGHT_DEADZONE_Y = 15;
 // only AI
 class ShipController
 {
+	friend class Ship;
 public:
 	//needed for serialization
 	enum Type {
 		AI = 0,
 		PLAYER = 1
 	};
-	ShipController() { }
+	ShipController() : m_setSpeed(0.0) { }
 	virtual ~ShipController() { }
 	virtual Type GetType() { return AI; }
-	virtual void Save(Serializer::Writer &wr, Space *s) { }
-	virtual void Load(Serializer::Reader &rd) { }
+	virtual void Save(Serializer::Writer &wr, Space *s) {
+		wr.Double(m_setSpeed);
+	}
+	virtual void Load(Serializer::Reader &rd) { 
+		m_setSpeed = rd.Double();
+	}
 	virtual void PostLoadFixup(Space *) { }
 	virtual void StaticUpdate(float timeStep);
 	virtual void SetFlightControlState(FlightControlState s) { }
+	double GetSpeedLimit() const { return m_setSpeed; }
+	void SetSpeedLimit(double set_speed) { m_setSpeed = set_speed; }
+
+protected:
 	Ship *m_ship;
+	double m_setSpeed;
 };
 
 // autopilot AI + input
@@ -67,7 +77,6 @@ public:
 	// Poll controls, set thruster states, gun states and target velocity
 	void PollControls(float timeStep, const bool force_rotation_damping);
 	bool IsMouseActive() const { return m_mouseActive; }
-	double GetSetSpeed() const { return m_setSpeed; }
 	FlightControlState GetFlightControlState() const { return m_flightControlState; }
 	vector3d GetMouseDir() const { return m_mouseDir; }
 	void SetMouseForRearView(bool enable) { m_invertMouse = enable; }
@@ -98,10 +107,7 @@ private:
 	bool IsAnyLinearThrusterKeyDown();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();
-	// Perform future collision detection to determine any possible tunneling collisions involving ship
-	void TransitTunnelingTest(const float timeStep);
-	// Perform proximity detection this frame and next frame so space stations can catch transit-ships within range
-	void TransitStationCatch(const float timeStep);
+	void OnPlayerChangeFlightMode();
 
 	Body* m_combatTarget;
 	Body* m_navTarget;
@@ -112,7 +118,6 @@ private:
 	bool m_rotationDamping;
 	double m_mouseX;
 	double m_mouseY;
-	double m_setSpeed;
 	FlightControlState m_flightControlState;
 	float m_fovY; //for mouse acceleration adjustment
 	float m_joystickDeadzone;
@@ -127,6 +132,7 @@ private:
 
 	sigc::connection m_connRotationDampingToggleKey;
 	sigc::connection m_fireMissileKey;
+	//sigc::connection m_onPlayerChangeFlightMode;
 };
 
 #endif

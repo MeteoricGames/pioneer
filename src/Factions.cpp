@@ -17,8 +17,8 @@
 #include <algorithm>
 
 const Uint32 Faction::BAD_FACTION_IDX      = UINT_MAX;
-const Color  Faction::BAD_FACTION_COLOUR   = Color(204,204,204,128);
-const float  Faction::FACTION_BASE_ALPHA   = 0.40f;
+const Color  Faction::BAD_FACTION_COLOUR   = Color(204,204,204,160);
+const float  Faction::FACTION_BASE_ALPHA   = 0.60f;
 const double Faction::FACTION_CURRENT_YEAR = 3200;
 
 
@@ -529,7 +529,7 @@ void Faction::SetBestFitHomeworld(Sint32 x, Sint32 y, Sint32 z, Sint32 si, Uint3
 		while (Uint32(candidateSi) < sec->m_systems.size()) {
 			path.systemIndex = candidateSi;
 			sys = StarSystemCache::GetCached(path);
-			if (sys->m_spaceStations.size() > 0) {
+			if (sys->HasSpaceStations()) {
 				si = candidateSi;
 				break;
 			}

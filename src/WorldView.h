@@ -48,6 +48,7 @@ public:
 	void HideTargetActions();
 	int GetActiveWeapon() const;
 	void OnClickBlastoff();
+	void OnClickTutorial();
 	bool IsAltitudeAvailable() const { return m_bAltitudeAvailable; }
 	double GetAltitude() const { return m_altitude; }
 
@@ -64,7 +65,6 @@ private:
 	void UpdateCommsOptions();
 
 	void ChangeInternalCameraMode(InternalCameraController::Mode m);
-	void UpdateCameraName();
 
 	enum IndicatorSide {
 		INDICATOR_HIDDEN,
@@ -92,10 +92,17 @@ private:
 
 	void DrawCrosshair(float px, float py, float sz, const Color &c);
 	void DrawCombatTargetIndicator(const Indicator &target, const Indicator &lead, const Color &c);
+	void DrawTargetIndicator(const Indicator &target, const Color &c);
 	void DrawTargetSquare(const Indicator &marker, const Color &c);
 	void DrawVelocityIndicator(const Indicator &marker, const Color &c);
-	void DrawImageIndicator(const Indicator &marker, Gui::TexturedQuad *quad, const Color &c);
+	void DrawImageIndicator(const Indicator &marker, Gui::TexturedQuad *quad, const Color &c); 
+	// Size is in 1920x1080 display
+	void DrawIconIndicator(const Indicator &marker, Gui::TexturedQuad* quad, const Color& c, 
+		vector2f size_in_px);
+	void DrawBodyIcons();
+	void DrawBodyIcon(Object::Type type, vector2f position);
 	void DrawEdgeMarker(const Indicator &marker, const Color &c);
+	void DrawThrusterTrails();
 
 	Gui::Button *AddCommsOption(const std::string msg, int ypos, int optnum);
 	void AddCommsNavOption(const std::string msg, Body *target);
@@ -129,7 +136,6 @@ private:
 	Gui::ImageButton *m_hyperspaceButton;
 
 	Gui::Label *m_pauseText;
-	Gui::Label *m_showCameraName;
 	Gui::Fixed *m_commsOptions;
 	Gui::VBox *m_commsNavOptions;
 	Gui::HBox *m_commsNavOptionsContainer;
@@ -142,6 +148,8 @@ private:
 	Gui::MultiStateImageButton *m_flightTransitButton;
 	Gui::MultiStateImageButton *m_flightJumpButton;
 
+	Gui::Fixed *m_tutorialDialog;
+
 	// Used to cache altitude calculation in WorldView::RefreshButtonStateAndVisibility()
 	bool m_bAltitudeAvailable;
 	double m_altitude;
@@ -150,7 +158,7 @@ private:
 	enum CamType m_camType;
 	Uint32 m_showTargetActionsTimeout;
 	Uint32 m_showLowThrustPowerTimeout;
-	Uint32 m_showCameraNameTimeout;
+	bool m_tutorialSeen;
 
 #if WITH_DEVKEYS
 	Gui::Label *m_debugInfo;
@@ -180,15 +188,36 @@ private:
 	Indicator m_navVelIndicator;
 	Indicator m_navTargetIndicator;
 	Indicator m_combatTargetIndicator;
-	Indicator m_targetLeadIndicator;
 	Indicator m_mouseDirIndicator;
 
 	std::unique_ptr<Gui::TexturedQuad> m_indicatorMousedir;
 	vector2f m_indicatorMousedirSize;
 	std::unique_ptr<Gui::TexturedQuad> m_reticle;
-	vector2f m_reticleSize;
-	vector2f m_reticlePos;
+	std::unique_ptr<Gui::TexturedQuad> m_reticleTarget;
 	Graphics::RenderState *m_blendState;
+
+	std::unique_ptr<Gui::TexturedQuad> m_hud2Planet;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2Settlement;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2Ship;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2ShipIndicator;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2ShipOffscreen;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2Star;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2Station;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2TargetOffscreen;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2TargetSelector;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2Unknown;
+
+	struct SBodyIcon
+	{
+		SBodyIcon(float _x, float _y, Object::Type _type) {
+			position.x = _x;
+			position.y = _y;
+			type = _type;
+		}
+		vector2f position;
+		Object::Type type;
+	};
+	std::vector<SBodyIcon> m_hud2BodyIcons;
 };
 
 class NavTunnelWidget: public Gui::Widget {

@@ -21,5 +21,7 @@ static const double G = 6.67428e-11;
 static const double EARTH_ATMOSPHERE_SURFACE_DENSITY = 1.225;
 static const double GAS_CONSTANT_R                   = 8.3144621;
 
+static const int	EPOCH_START_YEAR = 2184;
+
 
 #endif /* _GAMECONSTS_H */

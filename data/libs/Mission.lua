@@ -60,7 +60,7 @@ Mission = {
 --
 -- Attribute: due
 --
--- Due date/time, in seconds since 12:00 01-01-3200
+-- Due date/time, in seconds since 12:00 01-01-2184
 --
 -- Availability:
 --

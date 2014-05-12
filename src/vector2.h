@@ -37,6 +37,7 @@ public:
 	float Length() const { return sqrt(x*x + y*y); }
 	float LengthSqr() const { return x*x + y*y; }
 	vector2f Normalized() const { const float invlen = 1.0f / sqrt(x*x + y*y); return vector2f(x*invlen, y*invlen); }
+	vector2f Normalized(float& length) const { length = sqrt(x * x + y * y); return vector2f(x / length, y / length); }
 	vector2f NormalizedSafe() const {
 		const float lenSqr = x*x + y*y;
 		if (lenSqr < 1e-18) // sqrt(lenSqr) < 1e-9
