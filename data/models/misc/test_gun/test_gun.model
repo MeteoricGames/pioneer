@@ -1,9 +1,0 @@
-material laser
-tex_diff laser_diff.dds
-tex_glow laser_emit.dds
-tex_spec laser_spec.dds
-emissive 1.0 1.0 1.0
-specular 1.0 1.0 1.0
-shininess 200
-
-mesh test_gun.obj

@@ -198,7 +198,7 @@ void Ship::InitGun(const char *tag, int num)
 	else {
 		// XXX deprecated
 		m_gun[num].pos = m_type->gunMount[num].pos;
-		m_gun[num].dir = m_type->gunMount[num].dir;
+		m_gun[num].dir = -m_type->gunMount[num].dir;
 	}
 }
 
@@ -219,8 +219,6 @@ void Ship::InitMaterials()
 void Ship::Init()
 {
 	m_invulnerable = false;
-
-	m_sensors.reset(new Sensors(this));
 
 	m_navLights.reset(new NavLights(GetModel()));
 	m_navLights->SetEnabled(true);
@@ -335,11 +333,14 @@ Ship::Ship(ShipType::Id shipId): DynamicBody(),
 
 Ship::~Ship()
 {
-	if (m_curAICmd) delete m_curAICmd;
+	if (m_curAICmd) {
+		delete m_curAICmd;
+	}
 	delete m_controller;
 	for (unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
 		delete m_thrusterTrails[i];
 	}
+	m_thrusterTrails.clear();
 }
 
 void Ship::SetController(ShipController *c)
@@ -430,8 +431,9 @@ bool Ship::OnDamage(Object *attacker, float kgDamage, const CollisionContact& co
 
 			Explode();
 		} else {
-			if (attacker && attacker->IsType(Object::SHIP))
-				Polit::NotifyOfCrime(static_cast<Ship*>(attacker), Polit::CRIME_PIRACY);
+			// Disable piracy on ship-ship collision (#135 Bumping into other ship and piracy)
+			//if (attacker && attacker->IsType(Object::SHIP))
+			//	Polit::NotifyOfCrime(static_cast<Ship*>(attacker), Polit::CRIME_PIRACY);
 
 			if (Pi::rng.Double() < kgDamage)
 				Sfx::Add(this, Sfx::TYPE_DAMAGE);
@@ -1002,10 +1004,11 @@ void Ship::SetLandedOn(Planet *p, float latitude, float longitude)
 
 void Ship::SetFrame(Frame *f)
 {
-	DynamicBody::SetFrame(f);
-	m_sensors->ResetTrails();
-	for(unsigned int i = 0; i < m_thrusterTrails.size(); ++i) {
-		m_thrusterTrails[i]->Reset(f);
+	if(f != GetFrame()) {
+		DynamicBody::SetFrame(f);
+		for(unsigned int i = 0; i < m_thrusterTrails.size(); ++i) {
+			m_thrusterTrails[i]->Reset(f);
+		}
 	}
 }
 
@@ -1035,7 +1038,6 @@ void Ship::TimeStepUpdate(const float timeStep)
 
 	m_navLights->SetEnabled(m_wheelState > 0.01f);
 	m_navLights->Update(timeStep);
-	if (m_sensors.get()) m_sensors->Update(timeStep);
 }
 
 void Ship::DoThrusterSounds() const
@@ -1591,14 +1593,18 @@ bool Ship::IsTransitPossible()
 	// Determine if transit is possible for this ship at this moment
 	// - Ship must be either in space or outside 15km radius from space station or planet
 	if (GetFrame()) {
-		Object::Type body_type = GetFrame()->GetBody()->GetType();
-		if (body_type == Object::PLANET && Pi::worldView->IsAltitudeAvailable()) {
-			if (Pi::worldView->GetAltitude() >= TRANSIT_GRAVITY_RANGE_1) {
-				return true;
-			}
-		} else if (body_type == Object::SPACESTATION) {
-			vector3d ship_to_station = GetFrame()->GetBody()->GetPositionRelTo(this);
-			if (ship_to_station.Length() >= TRANSIT_GRAVITY_RANGE_1) {
+		if (GetFrame()->GetBody()) { // In distant space, body is null
+			Object::Type body_type = GetFrame()->GetBody()->GetType();
+			if (body_type == Object::PLANET && Pi::worldView->IsAltitudeAvailable()) {
+				if (Pi::worldView->GetAltitude() >= TRANSIT_GRAVITY_RANGE_1) {
+					return true;
+				}
+			} else if (body_type == Object::SPACESTATION) {
+				vector3d ship_to_station = GetFrame()->GetBody()->GetPositionRelTo(this);
+				if (ship_to_station.Length() >= TRANSIT_GRAVITY_RANGE_1) {
+					return true;
+				}
+			} else {
 				return true;
 			}
 		} else {
@@ -1659,6 +1665,9 @@ void Ship::TransitTunnelingTest(float timeStep)
 {
 	// Perform future collision detection with current system if it's a planet to detect possible tunneling collisions
 	// Perform future collision detection with planet to detect required changes to transit drive
+	if (GetFrame()->GetBody() == nullptr) {
+		return;
+	}
 	if (GetFrame()->GetBody()->IsType(Object::PLANET)) {
 		Frame* frame = GetFrame();
 		Body* planet = frame->GetBody();
@@ -1704,6 +1713,9 @@ void Ship::TransitTunnelingTest(float timeStep)
 
 void Ship::TransitStationCatch(float timeStep)
 {
+	if (GetFrame()->GetBody() == nullptr) {
+		return;
+	}
 	if (GetFrame()->GetBody()->IsType(Object::SPACESTATION)) {
 		// Check current position and future position
 		Frame* frame = GetFrame();
@@ -1790,7 +1802,13 @@ void Ship::Render(Graphics::Renderer *renderer, const Camera *camera, const vect
 	if (IsDead()) return;
 
 	//angthrust negated, for some reason
-	GetModel()->SetThrust(vector3f(m_thrusters), -vector3f(m_angThrusters));
+	//GetModel()->SetThrust(vector3f(m_thrusters), -vector3f(m_angThrusters));
+	float speed_factor = std::min(GetVelocity().Length() / GetMaxManeuverSpeed(), 1.0);
+	if(speed_factor > 0.01f) {
+		GetModel()->SetThrust(
+			vector3f(GetVelocity().Normalized()) * speed_factor,
+			-vector3f(m_angThrusters));
+	}
 
 	matrix3x3f mt;
 	matrix3x3dtof(viewTransform.InverseOf().GetOrient(), mt);
@@ -1971,7 +1989,6 @@ Uint8 Ship::GetRelations(Body *other) const
 void Ship::SetRelations(Body *other, Uint8 percent)
 {
 	m_relationsMap[other] = percent;
-	if (m_sensors.get()) m_sensors->UpdateIFF(other);
 }
 
 void Ship::UpdateThrusterTrails(float time) 
@@ -1982,8 +1999,12 @@ void Ship::UpdateThrusterTrails(float time)
 }
 
 void Ship::ClearThrusterTrails() { 
-	for(unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
-		m_thrusterTrails[i]->ClearTrail(); 
+	if (GetFlightState() != FlightState::HYPERSPACE) {
+		for (unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
+			if (m_thrusterTrails[i]) {
+				m_thrusterTrails[i]->ClearTrail();
+			}
+		}
 	}
 }
 

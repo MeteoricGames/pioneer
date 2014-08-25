@@ -92,10 +92,8 @@ public:
 	static void SetSpeedLinesDisplayed(bool state) { speedLinesDisplayed = state; }
 	static bool AreTargetIndicatorsDisplayed() { return targetIndicatorsDisplayed; }
 	static void SetTargetIndicatorsDisplayed(bool state) { targetIndicatorsDisplayed = state; }
-	static bool AreHudTrailsDisplayed() { return hudTrailsDisplayed; }
-	static void SetHudTrailsDisplayed(bool state) { hudTrailsDisplayed = state; }
 	static bool IsPostProcessingEnabled() { return postProcessingEnabled; }
-	static void SetPostProcessingEnabled(bool state) { postProcessingEnabled = state; }
+	static void SetPostProcessingEnabled(bool state);
 	static int MouseButtonState(int button) { return mouseButton[button]; }
 	/// Get the default speed modifier to apply to movement (scrolling, zooming...), depending on the "shift" keys.
 	/// This is a default value only, centralized here to promote uniform user expericience.
@@ -227,7 +225,6 @@ private:
 	static bool navTunnelDisplayed;
 	static bool speedLinesDisplayed;
 	static bool targetIndicatorsDisplayed;
-	static bool hudTrailsDisplayed;
 	static bool postProcessingEnabled;
 
 	static Gui::Fixed *menu;

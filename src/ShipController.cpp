@@ -63,6 +63,7 @@ PlayerShipController::~PlayerShipController()
 
 void PlayerShipController::Save(Serializer::Writer &wr, Space *space)
 {
+	ShipController::Save(wr, space);
 	wr.Int32(static_cast<int>(m_flightControlState));
 	wr.Float(m_lowThrustPower);
 	wr.Bool(m_rotationDamping);
@@ -73,6 +74,9 @@ void PlayerShipController::Save(Serializer::Writer &wr, Space *space)
 
 void PlayerShipController::Load(Serializer::Reader &rd)
 {
+	if (Game::s_loadedGameVersion >= 75) { // Save game upgrade 74 -> 75
+		ShipController::Load(rd);
+	}
 	m_flightControlState = static_cast<FlightControlState>(rd.Int32());
 	m_lowThrustPower = rd.Float();
 	m_rotationDamping = rd.Bool();

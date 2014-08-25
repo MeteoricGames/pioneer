@@ -12,7 +12,10 @@
 namespace Graphics {
 
 PostProcessing::PostProcessing(Renderer *renderer) :
-	mtrlFullscreenQuad(nullptr), mRenderer(renderer), rtDevice(nullptr)
+	mtrlFullscreenQuad(nullptr), 
+	mRenderer(renderer), 
+	rtDevice(nullptr),
+	bPerformPostProcessing(false)
 {
 	assert(mRenderer != nullptr);
 	Init();
@@ -78,20 +81,20 @@ void PostProcessing::EndFrame()
 	}
 }
 
+// For post processing material:
+// Normal pass: 
+//		texture0: set to previous pass output (main if it's the first pass)
+// Compose pass: (at least 1 pass before it to work)
+//		texture0: set to main output always
+//		texture1: set to previous output
 void PostProcessing::Run(PostProcess* pp)
 {
 	if(!bPerformPostProcessing) return;
-	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<void*>(0));
 	if(pp == nullptr || pp->GetPassCount() == 0) {
 		// No post-processing
 		mRenderer->SetRenderTarget(rtDevice);
-		mRenderer->SetRenderState(mRenderState);
 		mtrlFullscreenQuad->texture0 = rtMain->GetColorTexture();
-		mtrlFullscreenQuad->Apply();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		mtrlFullscreenQuad->Unapply();
+		mRenderer->DrawFullscreenQuad(mtrlFullscreenQuad.get(), mRenderState, true);
 	} else {
 		RenderTarget* rt_src = rtMain;
 		RenderTarget* rt_dest = 0;
@@ -103,8 +106,6 @@ void PostProcessing::Run(PostProcess* pp)
 			}
 			Material *mtrl = pp->vPasses[i]->material.get();
 			mRenderer->SetRenderTarget(rt_dest);
-			mRenderer->SetRenderState(mRenderState);
-			glClear(GL_COLOR_BUFFER_BIT);
 			glDepthMask(GL_FALSE);
 			if(pp->vPasses[i]->type == PP_PASS_COMPOSE) {
 				mtrl->texture0 = rtMain->GetColorTexture();
@@ -112,17 +113,13 @@ void PostProcessing::Run(PostProcess* pp)
 			} else {
 				mtrl->texture0 = rt_src->GetColorTexture();
 			}
-			mtrl->Apply();
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			mtrl->Unapply();
+			mRenderer->DrawFullscreenQuad(mtrl, mRenderState, true);
 			rt_src = rt_dest;
 		}
 	}
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void PostProcessing::SetEnabled(bool enabled) 
+void PostProcessing::SetPerformPostProcessing(bool enabled) 
 {
 	if(bPerformPostProcessing != enabled) {
 		bPerformPostProcessing = enabled;

@@ -48,9 +48,13 @@ public:
 	ShipCockpit* GetCockpit() const {return m_cockpit.get();}
 	void OnCockpitActivated();
 
-	HudTrail* GetHudTrail() const { return m_hudTrail.get(); }
+	virtual void SetRelations(Body *other, Uint8 percent);
 
+	virtual void TimeStepUpdate(const float timeStep);
 	virtual void StaticUpdate(const float timeStep);
+	virtual bool IsPlayerShip() const override { return true; }
+
+	Sensors *GetSensors() const { return m_sensors.get(); }
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
@@ -62,7 +66,7 @@ protected:
 
 private:
 	std::unique_ptr<ShipCockpit> m_cockpit;
-	std::unique_ptr<HudTrail> m_hudTrail;
+	std::unique_ptr<Sensors> m_sensors;
 };
 
 #endif /* _PLAYER_H */

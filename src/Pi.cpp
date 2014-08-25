@@ -138,7 +138,6 @@ std::map<SDL_JoystickID,Pi::JoystickState> Pi::joysticks;
 bool Pi::navTunnelDisplayed;
 bool Pi::speedLinesDisplayed = false;
 bool Pi::targetIndicatorsDisplayed = true;
-bool Pi::hudTrailsDisplayed = false;
 bool Pi::postProcessingEnabled = true;
 Gui::Fixed *Pi::menu;
 bool Pi::DrawGUI = true;
@@ -363,6 +362,7 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	Profiler::reset();
 #endif
 
+	OS::EnableBreakpad();
 	OS::NotifyLoadBegin();
 
 	FileSystem::Init();
@@ -439,7 +439,6 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	navTunnelDisplayed = (config->Int("DisplayNavTunnel")) ? true : false;
 	speedLinesDisplayed = (config->Int("SpeedLines")) ? true : false;
 	targetIndicatorsDisplayed = (config->Int("TargetIndicators")) ? true : false;
-	hudTrailsDisplayed = (config->Int("HudTrails")) ? true : false;
 	postProcessingEnabled = (config->Int("PostProcessing")) ? true : false;
 
 	EnumStrings::Init();
@@ -694,6 +693,16 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	m_gamePP->AddPass(renderer, "HBlur", Graphics::EFFECT_HORIZONTAL_BLUR);
 	m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
 	m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR, Graphics::PP_PASS_COMPOSE);
+
+	// Set post processing option
+	Pi::renderer->GetPostProcessing()->SetPerformPostProcessing(postProcessingEnabled);
+
+
+	// Preload noise texture for tunnel effect
+ 	Graphics::TextureBuilder noise_tb("textures/noise.png", Graphics::LINEAR_CLAMP, 
+		false, false, false, true);
+	noise_tb.GetOrCreateTexture(renderer, "effect");
+
 	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
 
 	// Mouse cursor
@@ -1135,6 +1144,7 @@ void Pi::Start()
 
 		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
+		renderer->ClearDepthBuffer();
 		Pi::renderer->BeginPostProcessing();
 		intro->Draw(_time);		
 		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
@@ -1563,4 +1573,13 @@ float Pi::GetMoveSpeedShiftModifier() {
 	if (Pi::KeyState(SDLK_LSHIFT)) return 100.f;
 	if (Pi::KeyState(SDLK_RSHIFT)) return 10.f;
 	return 1;
+}
+
+void Pi::SetPostProcessingEnabled(bool state) {
+	if (postProcessingEnabled != state && Pi::renderer &&
+		Pi::renderer->GetPostProcessing())
+	{
+		Pi::renderer->GetPostProcessing()->SetPerformPostProcessing(state);
+	}
+	postProcessingEnabled = state;
 }

@@ -11,6 +11,7 @@ local Serializer = import("Serializer")
 local ShipDef = import("ShipDef")
 local Ship = import("Ship")
 local utils = import("utils")
+local inspect = import("inspect")
 
 --[[
 	trade_ships
@@ -220,7 +221,7 @@ local getMyStarport = function (ship, current)
 		local next_starport = starports[i]
 		if next_starport ~= current then
 			local next_distance = Game.player:DistanceTo(next_starport)
-			
+
 			local next_canland
 			if ship==Game.player then
 				next_canland = true
@@ -230,7 +231,7 @@ local getMyStarport = function (ship, current)
 				starport, distance = next_starport, next_distance
 			end
 		end
-	end 
+	end
 	return starport -- or current
 end
 
@@ -450,13 +451,17 @@ local spawnInitialShips = function (game_start)
 			else
 				-- the starport must have been full
 				ship = Space.SpawnShipNear(ship_name, starport, 10000000, 149598000) -- 10mkm - 1AU
-				ship:SetLabel(Ship.MakeRandomLabel())
-				trade_ships[ship] = {
-					status		= 'inbound',
-					starport	= starport,
-					ship_name	= ship_name,
-				}
-				addShipEquip(ship)
+				if ship ~= nil then
+					ship:SetLabel(Ship.MakeRandomLabel())
+					trade_ships[ship] = {
+						status		= 'inbound',
+						starport	= starport,
+						ship_name	= ship_name,
+					}
+					addShipEquip(ship)
+				else
+					print("WARNING: TradeShips.lua:453 spawned an invalid ship!")
+				end
 			end
 		elseif i < num_trade_ships * 0.75 then
 			-- spawn the first three quarters in space, or middle half if game start
@@ -466,15 +471,19 @@ local spawnInitialShips = function (game_start)
 			end
 
 			ship = Space.SpawnShip(ship_name, min_dist, min_dist + range)
-			ship:SetLabel(Ship.MakeRandomLabel())
-			trade_ships[ship] = {
-				status		= 'inbound',
-				ship_name	= ship_name,
-			}
-			-- Add ship equipment right now, because...
-			addShipEquip(ship)
-			-- ...this next call needs to see if there's an atmospheric shield.
-			trade_ships[ship].starport	= getRandomStarport(ship)
+			if ship ~= nil then
+				ship:SetLabel(Ship.MakeRandomLabel())
+				trade_ships[ship] = {
+					status		= 'inbound',
+					ship_name	= ship_name,
+				}
+				-- Add ship equipment right now, because...
+				addShipEquip(ship)
+				-- ...this next call needs to see if there's an atmospheric shield.
+				trade_ships[ship].starport	= getRandomStarport(ship)
+			else
+				print("WARNING: TradeShips.lua:473 spawned an invalid ship!")
+			end
 		else
 			-- spawn the last quarter in hyperspace
 			local min_time = trade_ships.interval * (i - num_trade_ships * 0.75)
@@ -483,15 +492,19 @@ local spawnInitialShips = function (game_start)
 			local from = from_paths[Engine.rand:Integer(1, #from_paths)]
 
 			ship = Space.SpawnShip(ship_name, 1, 2, {from, dest_time})
-			ship:SetLabel(Ship.MakeRandomLabel())
-			trade_ships[ship] = {
-				status		= 'hyperspace',
-				dest_time	= dest_time,
-				dest_path	= Game.system.path,
-				from_path	= from,
-				ship_name	= ship_name,
-			}
-			addShipEquip(ship)
+			if ship ~= nil then
+				ship:SetLabel(Ship.MakeRandomLabel())
+				trade_ships[ship] = {
+					status		= 'hyperspace',
+					dest_time	= dest_time,
+					dest_path	= Game.system.path,
+					from_path	= from,
+					ship_name	= ship_name,
+				}
+				addShipEquip(ship)
+			else
+				print("WARNING: TradeShips.lua:494 spawned an invalid ship!")
+			end
 		end
 		local trader = trade_ships[ship]
 
@@ -512,8 +525,8 @@ local spawnInitialShips = function (game_start)
 			if fuel_added and fuel_added > 0 then
 				ship:RemoveEquip('HYDROGEN', Engine.rand:Integer(1, fuel_added))
 			end
-			if trader.status == 'inbound' then 
-				ship:AIDockWith(trader.starport) 
+			if trader.status == 'inbound' then
+				ship:AIDockWith(trader.starport)
 			end
 		end
 	end
@@ -531,20 +544,24 @@ local spawnReplacement = function ()
 		local from = from_paths[Engine.rand:Integer(1, #from_paths)]
 
 		local ship = Space.SpawnShip(ship_name, 1, 2, {from, dest_time})
-		ship:SetLabel(Ship.MakeRandomLabel())
-		trade_ships[ship] = {
-			status		= 'hyperspace',
-			dest_time	= dest_time,
-			dest_path	= Game.system.path,
-			from_path	= from,
-			ship_name	= ship_name,
-		}
+		if ship ~= nil then
+			ship:SetLabel(Ship.MakeRandomLabel())
+			trade_ships[ship] = {
+				status		= 'hyperspace',
+				dest_time	= dest_time,
+				dest_path	= Game.system.path,
+				from_path	= from,
+				ship_name	= ship_name,
+			}
 
-		addShipEquip(ship)
-		local fuel_added = addFuel(ship)
-		addShipCargo(ship, 'import')
-		if fuel_added and fuel_added > 0 then
-			ship:RemoveEquip('HYDROGEN', Engine.rand:Integer(1, fuel_added))
+			addShipEquip(ship)
+			local fuel_added = addFuel(ship)
+			addShipCargo(ship, 'import')
+			if fuel_added and fuel_added > 0 then
+				ship:RemoveEquip('HYDROGEN', Engine.rand:Integer(1, fuel_added))
+			end
+		else
+			print("WARNING: TradeShips.lua:546 spawned an invalid ship!")
 		end
 	end
 end
@@ -573,6 +590,8 @@ local spawnReplacementFast = function ()
 			trade_ships[ship]['starport'] = starport
 			trade_ships[ship]['status'] = 'inbound'
 			addShipCargo(ship, 'import')
+		else
+			print("WARNING: TradeShips.lua:576 spawned an invalid ship!")
 		end
 	end
 
@@ -595,6 +614,8 @@ local spawnReplacementFast = function ()
 			addShipEquip(ship)
 			addShipCargo(ship, 'import')
 			Timer:CallAt(Game.time+Engine.rand:Integer(25, 200), function () doUndock(ship) end)
+		else
+			print("WARNING: TradeShips.lua:606 spawned an invalid ship!")
 		end
 	end
 	end
@@ -702,15 +723,15 @@ local onFrameChanged = function (ship)
 
 	--add local traffic fast to make it busy. Check if we're on approach or not
 	if #starports > 0 and ship:isa("Ship") and ship == Game.player then
-		local dist,delta = 0 
+		local dist,delta = 0
 
 		Timer:CallAt(Game.time+1, function ()
-			if ship==nil then return end
+			if ship==nil or getMyStarport(ship)==nil then return end
 			dist= ship:DistanceTo(getMyStarport(ship)) end)
-		Timer:CallAt(Game.time+2, function () 
+		Timer:CallAt(Game.time+2, function ()
 			if ship==nil then return end
 			if getMyStarport(ship)==nil then return end
-			delta=dist-ship:DistanceTo(getMyStarport(ship)) 
+			delta=dist-ship:DistanceTo(getMyStarport(ship))
 			print('delta: '..delta..',dist: '..dist)
 			if delta~=nil and delta > 0 and delta < 50000000 then
 				for variable = 0, Engine.rand:Number(0, 3), 1 do
@@ -947,7 +968,7 @@ local onShipDestroyed = function (ship, attacker)
 	if trade_ships[ship] ~= nil then
 		local trader = trade_ships[ship]
 
-		if trader.starport==nill or trader.starport.label==nil then return end
+		if trader.starport==nil or trader.starport.label==nil then return end
 		print(ship.label..' destroyed by '..attacker.label..', status:'..trader.status..' ship:'..trader.ship_name..', starport:'..trader.starport.label)
 		trade_ships[ship] = nil
 
@@ -1057,6 +1078,21 @@ Event.Register("onGameEnd", onGameEnd)
 
 local serialize = function ()
 	-- all we need to save is trade_ships, the rest can be rebuilt on load
+	
+	-- The serializer will crash if we try to serialize dead objects (issue #3123)
+	-- also, trade_ships may be nil, because it is cleared in 'onGameEnd', and this may
+	-- happen before the autosave module creates its '_exit' save
+	if trade_ships ~= nil then
+		local count = 0
+		for k,v in pairs(trade_ships) do
+			if type(k) == 'userdata' and not k:exists() then
+				count = count + 1
+				-- according to the Lua manual, removing items during iteration with pairs() or next() is ok
+				trade_ships[k] = nil
+			end
+		end
+		print('TradeShips: Removed ' .. count .. ' ships before serialization')
+	end
 	return trade_ships
 end
 

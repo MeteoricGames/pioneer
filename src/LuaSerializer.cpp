@@ -63,6 +63,8 @@
 void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *key = 0)
 {
 	static char buf[256];
+	std::string str_out = "";
+	bool b_write = true;
 
 	LUA_DEBUG_START(l);
 
@@ -100,7 +102,7 @@ void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *
 				return;
 			}
 
-			out += buf;
+			str_out += buf;
 		}
 	}
 
@@ -110,13 +112,13 @@ void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *
 
 		case LUA_TNUMBER: {
 			snprintf(buf, sizeof(buf), "f%f\n", lua_tonumber(l, idx));
-			out += buf;
+			str_out += buf;
 			break;
 		}
 
 		case LUA_TBOOLEAN: {
 			snprintf(buf, sizeof(buf), "b%d", lua_toboolean(l, idx) ? 1 : 0);
-			out += buf;
+			str_out += buf;
 			break;
 		}
 
@@ -125,8 +127,8 @@ void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *
 			size_t len;
 			const char *str = lua_tolstring(l, -1, &len);
 			snprintf(buf, sizeof(buf), "s" SIZET_FMT "\n", len);
-			out += buf;
-			out.append(str, len);
+			str_out += buf;
+			str_out.append(str, len);
 			lua_pop(l, 1);
 			break;
 		}
@@ -139,65 +141,70 @@ void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *
 			lua_rawget(l, -2);                                              // ptr reftable ???
 
 			if (!lua_isnil(l, -1)) {
-				out += "r";
-				pickle(l, -3, out, key);
+				str_out += "r";
+				pickle(l, -3, str_out, key);
 				lua_pop(l, 3);                                              // [empty]
 			}
 
 			else {
-				out += "t";
+				str_out += "t";
 
 				lua_pushvalue(l, -3);                                       // ptr reftable nil ptr
 				lua_pushvalue(l, idx);                                      // ptr reftable nil ptr table
 				lua_rawset(l, -4);                                          // ptr reftable nil
-				pickle(l, -3, out, key);
+				pickle(l, -3, str_out, key);
 				lua_pop(l, 3);                                              // [empty]
 
 				lua_pushvalue(l, idx);
 				lua_pushnil(l);
 				while (lua_next(l, -2)) {
 					if (key) {
-						pickle(l, -2, out, key);
-						pickle(l, -1, out, key);
+						pickle(l, -2, str_out, key);
+						pickle(l, -1, str_out, key);
 					}
 					else {
 						lua_pushvalue(l, -2);
 						const char *k = lua_tostring(l, -1);
-						pickle(l, -3, out, k);
-						pickle(l, -2, out, k);
+						pickle(l, -3, str_out, k);
+						pickle(l, -2, str_out, k);
 						lua_pop(l, 1);
 					}
 					lua_pop(l, 1);
 				}
 				lua_pop(l, 1);
-				out += "n";
+				str_out += "n";
 			}
 
 			break;
 		}
 
 		case LUA_TUSERDATA: {
-			out += "u";
+			str_out += "u";
 
 			LuaObjectBase *lo = static_cast<LuaObjectBase*>(lua_touserdata(l, idx));
 			void *o = lo->GetObject();
-			if (!o)
-				Error("Lua serializer '%s' tried to serialize an invalid '%s' object", key, lo->GetType());
-
+			if (!o) {
+//				Error("Lua serializer '%s' tried to serialize an invalid '%s' object", key, lo->GetType());
+#ifdef _DEBUG
+				Warning("Lua serializer '%s' tried to serialize an invalid '%s' object", key, lo->GetType());
+#endif
+				b_write = false;
+				break;
+			}
 			// XXX object wrappers should really have Serialize/Unserialize
 			// methods to deal with this
 			if (lo->Isa("SystemPath")) {
 				SystemPath *sbp = static_cast<SystemPath*>(o);
 				snprintf(buf, sizeof(buf), "SystemPath\n%d\n%d\n%d\n%u\n%u\n",
 					sbp->sectorX, sbp->sectorY, sbp->sectorZ, sbp->systemIndex, sbp->bodyIndex);
-				out += buf;
+				str_out += buf;
 				break;
 			}
 
 			if (lo->Isa("Body")) {
 				Body *b = static_cast<Body*>(o);
 				snprintf(buf, sizeof(buf), "Body\n%u\n", Pi::game->GetSpace()->GetIndexForBody(b));
-				out += buf;
+				str_out += buf;
 				break;
 			}
 
@@ -207,8 +214,8 @@ void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *
 				skin->Save(wr);
 				const std::string &ser = wr.GetData();
 				snprintf(buf, sizeof(buf), "ModelSkin\n%lu\n", ser.size());
-				out += buf;
-				out += ser;
+				str_out += buf;
+				str_out += ser;
 				break;
 			}
 
@@ -219,6 +226,10 @@ void LuaSerializer::pickle(lua_State *l, int idx, std::string &out, const char *
 		default:
 			Error("Lua serializer '%s' tried to serialize %s value", key, lua_typename(l, lua_type(l, idx)));
 			break;
+	}
+
+	if(b_write) {
+		out.append(str_out);
 	}
 
 	LUA_DEBUG_END(l, 0);

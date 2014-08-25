@@ -110,6 +110,8 @@ public:
 	//complex unchanging geometry that is worthwhile to store in VBOs etc.
 	virtual bool DrawBuffer(VertexBuffer*, RenderState*, Material*, PrimitiveType type=TRIANGLES) { return false; }
 	virtual bool DrawBufferIndexed(VertexBuffer*, IndexBuffer*, RenderState*, Material*, PrimitiveType=TRIANGLES) { return false; }
+	virtual bool DrawFullscreenQuad(Material*, RenderState* state = nullptr, bool clear_rt = true) { return false; }
+	virtual bool DrawFullscreenQuad(Texture*, RenderState* state = nullptr, bool clear_rt = true) { return false; }
 
 	//creates a unique material based on the descriptor. It will not be deleted automatically.
 	virtual Material *CreateMaterial(const MaterialDescriptor &descriptor) = 0;

@@ -158,9 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\RadialBlurMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\effects\sector_view\SectorViewIconMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsDepthMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\effects\thruster_trails\ThrusterTrailsMaterial.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\transit\TransitCompositionMaterial.h" />
+    <ClInclude Include="..\..\..\src\graphics\effects\transit\TransitEffectMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\Frustum.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\BloomCompositorMaterial.h" />
     <ClInclude Include="..\..\..\src\graphics\gl2\FresnelColourMaterial.h" />
@@ -199,12 +202,16 @@
     <ClInclude Include="..\..\..\src\win32\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\data\shaders\gl2\pp_radialblur.frag" />
+    <None Include="..\..\..\data\shaders\gl2\pp_rardialblur.vert" />
     <None Include="..\..\..\data\shaders\gl2\sector_view\sv_icon.frag" />
     <None Include="..\..\..\data\shaders\gl2\sector_view\sv_icon.vert" />
     <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_depth.frag" />
     <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_depth.vert" />
     <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_draw.frag" />
     <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_draw.vert" />
+    <None Include="..\..\..\data\shaders\gl2\transit\t_tunnel.frag" />
+    <None Include="..\..\..\data\shaders\gl2\transit\t_tunnel.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

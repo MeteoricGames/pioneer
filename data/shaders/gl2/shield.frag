@@ -16,8 +16,8 @@ uniform vec3 hitPos[MAX_SHIELD_HITS];
 uniform float radii[MAX_SHIELD_HITS];
 uniform int numHits;
 
-const vec4 red = vec4(1.0, 0.5, 0.5, 0.5);
-const vec4 blue = vec4(0.5, 0.5, 1.0, 1.0);
+const vec4 red = vec4(0.0, 0.0, 0.0, 0.0);
+const vec4 blue = vec4(0.0, 0.8, 1.0, 0.3);
 const vec4 hitColour = vec4(1.0, 0.5, 0.5, 1.0);
 
 float calcIntensity(int shieldIndex)

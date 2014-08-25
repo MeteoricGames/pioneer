@@ -157,11 +157,6 @@ void Ship::AIFlyTo(Body *target, vector3d posoff)
 	}
 	else {
 		m_curAICmd = new AIParagonCmdFlyTo(this, target);
-		/*if (IsType(Object::Type::PLAYER)) {
-			m_curAICmd = new AIParagonCmdFlyTo(this, target);
-		} else {
-			m_curAICmd = new AICmdFlyTo(this, target);
-		}*/
 	}
 }
 
@@ -170,28 +165,26 @@ void Ship::AIFlyToClose(Body *target, double dist)
 	AIClearInstructions();
 	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
 	m_curAICmd = new AIParagonCmdFlyTo(this, target, dist);
-	/*
-	if (IsType(Object::Type::PLAYER)) {
-		m_curAICmd = new AIParagonCmdFlyTo(this, target, dist);
-	} else {
-		m_curAICmd = new AICmdFlyTo(this, target, dist); //close
-	}*/
 }
 
 void Ship::AIDock(SpaceStation *target)
 {
 	AIClearInstructions();
 	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
-
-	m_curAICmd = new AICmdDock(this, target);
+	
+	m_curAICmd = new AIParagonCmdDock(this, target);
+	/*if (!IsPlayerShip()) {
+		m_curAICmd = new AICmdDock(this, target);
+	} else {
+		m_curAICmd = new AIParagonCmdDock(this, target);
+	}*/
 }
 
 void Ship::AIOrbit(Body *target, double alt)
 {
 	AIClearInstructions();
 	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
-
-	m_curAICmd = new AICmdFlyAround(this, target, alt);
+	m_curAICmd = new AIParagonCmdOrbit(this, target->GetFrame(), alt);
 }
 
 void Ship::AIHoldPosition()

@@ -33,7 +33,8 @@ PostProcess::~PostProcess()
 	}
 }
 
-void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, std::shared_ptr<Material>& material, PostProcessPassType pass_type)
+void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, 
+	std::shared_ptr<Material>& material, PostProcessPassType pass_type)
 {
 	assert(renderer != nullptr);
 	PostProcessPass* ppp = new PostProcessPass;

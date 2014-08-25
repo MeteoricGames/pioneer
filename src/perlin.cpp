@@ -2,6 +2,8 @@
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include <math.h>
+#include <limits.h>
+#include <algorithm>
 
 /* Simplex.cpp
  *
@@ -108,13 +110,15 @@ static const unsigned char mod12[] = {
 // 3D raw Simplex noise
 double noise( const double x, const double y, const double z ) {
 	double n0, n1, n2, n3; // Noise contributions from the four corners
+	static const double int_max = double(INT_MAX - 1);
+	static const double int_min = double(INT_MIN + 1);
 
 	// Skew the input space to determine which simplex cell we're in
 	const double F3 = 1.0/3.0;
-	double s = (x+y+z)*F3; // Very nice and simple skew factor for 3D
-	int i = fastfloor(x+s);
-	int j = fastfloor(y+s);
-	int k = fastfloor(z+s);
+	double s = (x+y+z) * F3; // Very nice and simple skew factor for 3D
+	int i = fastfloor(std::max(std::min(x + s, int_max), int_min));
+	int j = fastfloor(std::max(std::min(y + s, int_max), int_min));
+	int k = fastfloor(std::max(std::min(z + s, int_max), int_min));
 
 	const double G3 = 1.0/6.0; // Very nice and simple unskew factor, too
 	double t = (i+j+k)*G3;

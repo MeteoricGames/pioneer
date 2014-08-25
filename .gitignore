@@ -4,6 +4,7 @@ bin/
 lib/
 Debug/
 PreRelease/
+Profile/
 Release/
 ipch/
 src/data
@@ -13,6 +14,9 @@ debian/*.debhelper.log
 debian/*.substvars
 debian/pioneer*/
 autom4te.cache/
+steam/tools/ContentBuilder/builder/
+steam/tools/ContentBuilder/output/
+steam/tools/ContentBuilder/content/
 *.vcxproj.user
 *.user
 *.ncb
@@ -55,5 +59,7 @@ Thumbs.db
 gmon.out
 .project
 .cproject
-
+.dirstamp
 *.aps
+
+OGLdpf.log

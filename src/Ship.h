@@ -10,7 +10,6 @@
 #include "DynamicBody.h"
 #include "EquipSet.h"
 #include "galaxy/SystemPath.h"
-#include "HudTrail.h"
 #include "ThrusterTrail.h"
 #include "NavLights.h"
 #include "Planet.h"
@@ -319,7 +318,6 @@ public:
 	bool IsInvulnerable() const { return m_invulnerable; }
 	void SetInvulnerable(bool b) { m_invulnerable = b; }
 
-	Sensors *GetSensors() const { return m_sensors.get(); }
 	Uint8 GetRelations(Body *other) const; //0=hostile, 50=neutral, 100=ally
 	void SetRelations(Body *other, Uint8 percent);
 
@@ -439,7 +437,6 @@ private:
 	SceneGraph::Animation *m_landingGearAnimation;
 	std::unique_ptr<NavLights> m_navLights;
 
-	 std::unique_ptr<Sensors> m_sensors;
 	 std::unordered_map<Body*, Uint8> m_relationsMap;
 
 	static HeatGradientParameters_t s_heatGradientParams;

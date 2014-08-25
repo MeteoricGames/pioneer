@@ -46,7 +46,6 @@ noinst_HEADERS = \
 	GalacticView.h \
 	Game.h \
 	GeoSphere.h \
-	HudTrail.h \
 	HyperspaceCloud.h \
 	IniConfig.h \
 	Intro.h \
@@ -184,7 +183,6 @@ paragon_SOURCES	= \
 	GeoPatchID.cpp \
 	GeoPatchJobs.cpp \
 	GeoSphere.cpp \
-	HudTrail.cpp \
 	HyperspaceCloud.cpp \
 	IniConfig.cpp \
 	Intro.cpp \

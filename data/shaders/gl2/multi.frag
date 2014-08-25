@@ -26,6 +26,10 @@ varying vec3 normal;
 uniform Scene scene;
 uniform Material material;
 
+#ifdef COLOR_TINT
+uniform vec4 colorTint;
+#endif
+
 #if (NUM_LIGHTS > 0)
 //ambient, diffuse, specular
 //would be a good idea to make specular optional
@@ -103,5 +107,10 @@ void main(void)
 #else
 	gl_FragColor = color;
 #endif
+
+#ifdef COLOR_TINT
+	gl_FragColor.rgb = gl_FragColor.rgb * colorTint.rgb;
+#endif
+
 	SetFragDepth();
 }

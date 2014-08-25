@@ -32,10 +32,17 @@ static bool valid_token(const std::string &token)
 	return true;
 }
 
+Resource* Resource::s_defaultLangResource = nullptr;
+
 bool Resource::Load()
 {
 	if (m_loaded)
 		return true;
+
+	if(s_defaultLangResource == nullptr) {
+		s_defaultLangResource = new Resource("core", "en");
+		s_defaultLangResource->Load();
+	}
 
 	Json::Reader reader;
 	Json::Value data;
@@ -118,6 +125,9 @@ const std::string &Resource::Get(const std::string &token) const
 {
 	std::map<std::string,std::string>::const_iterator i = m_strings.find(token);
 	if (i == m_strings.end()) {
+		if(s_defaultLangResource->GetLangCode() != GetLangCode()) {
+			return s_defaultLangResource->Get(token);
+		}
 		static const std::string empty;
 		return empty;
 	}

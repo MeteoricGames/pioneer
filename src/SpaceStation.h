@@ -56,6 +56,7 @@ public:
 	int GetDockingPortCount() const { return m_type->numDockingPorts; }
 	int GetFreeDockingPort(const Ship *s) const; // returns -1 if none free
 	int GetMyDockingPort(const Ship *s) const;
+	bool HasFreeDockingPort() const; // returns true if there is at least one free port of any size
 	int NumShipsDocked() const;
 
 	const SpaceStationType *GetStationType() const { return m_type; }
@@ -68,6 +69,16 @@ public:
 
 	// need this now because stations rotate in their frame
 	virtual void UpdateInterpTransform(double alpha);
+
+	/// Ship requests docking approach permission (ship will be added to docking queue)
+	void RequestDockingApproach(Ship* ship);
+
+	/// Ship cancels docking approach request if it's in the queue
+	void CancelDockingApproach(Ship* ship);
+
+	/// Ship checks to find out if approach is clear (its turn)
+	/// Once this method is called and approach is clear, spacestation will remove the ship from docking approach queue
+	bool CheckDockingApproachSignal(Ship* ship);
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
@@ -124,6 +135,10 @@ private:
 	double m_doorAnimationState;
 
 	std::unique_ptr<NavLights> m_navLights;
+
+	typedef std::list<Ship*> DockingQueue;
+	DockingQueue m_dockingQueue;
+	std::vector<int> m_dockingQueueLoadedData;	// used for post load fixup of docking queue (holds body indices)
 };
 
 #endif /* _SPACESTATION_H */

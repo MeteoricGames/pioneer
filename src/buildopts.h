@@ -6,7 +6,7 @@
 
 // game version. usually defined by configure
 #ifndef PARAGON_VERSION
-#define PARAGON_VERSION "Alpha 7 dev"
+#define PARAGON_VERSION "Alpha 8.02"
 #endif
 #ifndef PARAGON_EXTRAVERSION
 #define PARAGON_EXTRAVERSION ""

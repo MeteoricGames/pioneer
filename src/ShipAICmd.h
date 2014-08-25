@@ -30,6 +30,8 @@ public:
 		CMD_PARAGON_TRANSIT,
 		CMD_PARAGON_GOTO,
 		CMD_PARAGON_STEERAROUND,
+		CMD_PARAGON_ORBIT,
+		CMD_PARAGON_DOCK,
 	};
 
 	AICommand(Ship *ship, CmdName name) {
@@ -55,6 +57,8 @@ public:
 
 	// Signal functions
 	virtual void OnDeleted(const Body *body) { if (m_child) m_child->OnDeleted(body); }
+
+	AICommand* GetChildCommand() const { return m_child; }
 
 protected:
 	CmdName m_cmdName;

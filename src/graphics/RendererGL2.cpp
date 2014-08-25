@@ -33,6 +33,9 @@
 #include "effects/thruster_trails/ThrusterTrailsDepthMaterial.h"
 #include "effects/thruster_trails/ThrusterTrailsMaterial.h"
 #include "effects/sector_view/SectorViewIconMaterial.h"
+#include "effects/transit/TransitEffectMaterial.h"
+#include "effects/transit/TransitCompositionMaterial.h"
+#include "effects/RadialBlurMaterial.h"
 #include <stddef.h> //for offsetof
 #include <ostream>
 #include <sstream>
@@ -57,7 +60,7 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 , m_maxZFar(10000000.0f)
 , m_useCompressedTextures(false)
 , m_invLogZfarPlus1(0.f)
-, m_activeRenderTarget(0)
+, m_activeRenderTarget(nullptr)
 , m_activeRenderState(nullptr)
 , m_matrixMode(MatrixMode::MODELVIEW)
 {
@@ -95,6 +98,28 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	desc.pointsMode = true;
 	pointsColorProg = new GL2::MultiProgram(desc);
 	m_programs.push_back(std::make_pair(desc, pointsColorProg));
+
+	// Init fullscreen quad
+	const float screenquad_vertices[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f
+	};
+	glGenBuffers(1, &m_screenQuadBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, m_screenQuadBufferId);
+	glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(float), screenquad_vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	RenderStateDesc sqrs;
+	sqrs.blendMode = BlendMode::BLEND_SOLID;
+	sqrs.depthTest = false;
+	sqrs.depthWrite = false;
+	m_screenQuadRS = CreateRenderState(sqrs);
+	MaterialDescriptor sqmd;
+	sqmd.effect = EFFECT_TEXTURED_FULLSCREEN_QUAD;
+	m_screenQuadMtrl.reset(CreateMaterial(sqmd));
 
 	// Init post processing
 	m_postprocessing.reset(new PostProcessing(this));
@@ -566,6 +591,40 @@ bool RendererGL2::DrawBufferIndexed(VertexBuffer *vb, IndexBuffer *ib, RenderSta
 	return true;
 }
 
+bool RendererGL2::DrawFullscreenQuad(Material *mat, RenderState *state, bool clear_rt)
+{
+	assert(mat);
+	state = state == nullptr? m_screenQuadRS : state;
+
+	SetRenderState(state);
+	mat->Apply();
+
+	if(clear_rt) {
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_screenQuadBufferId);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<void*>(0));
+	
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	mat->Unapply();
+
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return true;
+}
+
+bool RendererGL2::DrawFullscreenQuad(Texture *texture, RenderState *state, bool clear_rt)
+{
+	assert(texture);
+	m_screenQuadMtrl->texture0 = texture;
+	bool result = DrawFullscreenQuad(m_screenQuadMtrl.get(), state, clear_rt);
+	m_screenQuadMtrl->texture0 = nullptr;
+	return result;
+}
+
 
 void RendererGL2::EnableClientStates(const VertexArray *v)
 {
@@ -677,6 +736,9 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 	case EFFECT_VERTICAL_BLUR:
 		mat = new GL2::VerticalBlurMaterial();
 		break;
+	case EFFECT_RADIAL_BLUR:
+		mat = new Effects::RadialBlurMaterial();
+		break;
 	case EFFECT_BLOOM_COMPOSITOR:
 		mat = new GL2::BloomCompositorMaterial();
 		break;
@@ -700,6 +762,14 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 
 	case EFFECT_SECTORVIEW_ICON:
 		mat = new Effects::SectorViewIconMaterial();
+		break;
+
+	case EFFECT_TRANSIT_TUNNEL:
+		mat = new Effects::TransitEffectMaterial();
+		break;
+
+	case EFFECT_TRANSIT_COMPOSITION:
+		mat = new Effects::TransitCompositionMaterial();
 		break;
 
 	default:

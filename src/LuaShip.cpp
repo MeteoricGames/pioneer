@@ -59,6 +59,20 @@ static int l_ship_is_player(lua_State *l)
     return 1;
 }
 
+/*
+ *
+ */
+static int l_ship_is_in_hyperspace(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	if (s->GetFlightState() == Ship::FlightState::HYPERSPACE) {
+		lua_pushboolean(l, true);
+	} else {
+		lua_pushboolean(l, false);
+	}
+	return 1;
+}
+
 /* Method: SetShipType
  *
  * Replaces the ship with a new ship of the specified type.
@@ -1495,6 +1509,7 @@ template <> void LuaObject<Ship>::RegisterClass()
 
 	static const luaL_Reg l_methods[] = {
 		{ "IsPlayer", l_ship_is_player },
+		{ "IsInHyperspace", l_ship_is_in_hyperspace },
 
 		{ "SetShipType", l_ship_set_type },
 		{ "SetHullPercent", l_ship_set_hull_percent },

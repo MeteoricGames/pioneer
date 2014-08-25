@@ -12,7 +12,6 @@
 #include "SectorView.h"
 #include "Serializer.h"
 #include "ShipCpanel.h"
-#include "HudTrail.h"
 #include "ThrusterTrail.h"
 #include "Sound.h"
 #include "Space.h"
@@ -366,7 +365,11 @@ void WorldView::InitObject()
 		auto t2 = (new Gui::Label(Lang::TUTORIAL_2))->Color(Color::WHITE);
 		auto t3 = (new Gui::Label(Lang::TUTORIAL_3))->Color(Color::WHITE);
 		auto t4 = (new Gui::Label(Lang::TUTORIAL_4))->Color(Color::WHITE);
+		auto t5 = (new Gui::Label(Lang::TUTORIAL_5))->Color(Color::WHITE);
+		auto t6 = (new Gui::Label(Lang::TUTORIAL_6))->Color(Color::WHITE);
 
+		paragraph->PackStart(t6);
+		paragraph->PackStart(t5);
 		paragraph->PackStart(t4);
 		paragraph->PackStart(t3);
 		paragraph->PackStart(t2);
@@ -446,21 +449,26 @@ void WorldView::OnClickAutopilotButton(Gui::MultiStateImageButton *b)
 {
 	int newState = b->GetState();
 	Pi::BoinkNoise();
-	if(newState == FLIGHT_BUTTON_UNAVAILABLE) {		// Autopilot is being turned off
+
+	if(newState == FLIGHT_BUTTON_UNAVAILABLE) {		// Autopilot is turned off/disabled
+		// Turned off when there are no targets
 		newState = FLIGHT_BUTTON_OFF;
-		b->SetActiveState(newState);
 		m_flightAutopilotButton->SetEnabled(false);
 		Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_MANEUVER);
-	} else if(newState == FLIGHT_BUTTON_ON) {		// Autopilot is being turned on
-		Body* const navtarget = Pi::player->GetNavTarget();
+	} else if(newState == FLIGHT_BUTTON_ON) {		// Autopilot is turned on
+		// Do I need to find out if a command is issued?
+		ToggleTargetActions();
+		/*Body* const navtarget = Pi::player->GetNavTarget();
 		Body* const comtarget = Pi::player->GetCombatTarget();
 		if(navtarget || comtarget) {
 			b->SetActiveState(newState);
 			m_flightAutopilotButton->SetEnabled(true);
-			autopilot_flyto(navtarget? navtarget : comtarget);
+			//autopilot_flyto(navtarget? navtarget : comtarget);
+			Pi::SetView(Pi::worldView);
+			ToggleTargetActions();
 		} else {
 			assert(0); // The autopilot button should've been disabled, no targets are found
-		}
+		}*/
 	} else {
 		// previous state was FLIGHT_BUTTON_UNAVAILABLE before click, which means autopilot button should have been disabled
 		assert(0);
@@ -597,13 +605,6 @@ void WorldView::Draw3D()
 		
 	DrawThrusterTrails();
 
-	// Hud trails for ships
-    //for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it)
-	//	it->trail->Render(m_renderer);
-
-	// Hud trail for player
-	//Pi::player->GetHudTrail()->Render(m_renderer);	
-
 	m_camera->EndDraw(m_cameraContext->GetCamFrame(), cockpit);
 	
 	m_cameraContext->EndFrame();
@@ -614,6 +615,10 @@ void WorldView::Draw3D()
 
 void WorldView::DrawThrusterTrails()
 {
+	// Thruster trails for ships and player
+	if (Pi::game->IsHyperspace()) {
+		return;
+	}
 	// Thruster trails depth RT + material
 	static Graphics::MaterialDescriptor ttd;
 	ttd.effect = Graphics::EffectType::EFFECT_THRUSTERTRAILS_DEPTH;
@@ -630,11 +635,15 @@ void WorldView::DrawThrusterTrails()
 	Graphics::RenderTarget *main_rt = m_renderer->GetActiveRenderTarget();
 	m_renderer->SetRenderTarget(depth_rt);
 	m_renderer->ClearScreen();
-	
-	// Thruster trails for ships and player
-	for(auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
+	// Depth pass
+	for(auto it = Pi::player->GetSensors()->GetContacts().begin(); 
+		it != Pi::player->GetSensors()->GetContacts().end(); ++it) 
+	{
 		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
-			it->ship->GetThrusterTrail(i)->Render(depth_mtrl);
+			ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
+			if (tt) {
+				tt->Render(depth_mtrl);
+			}
 		}
 	}
 	for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
@@ -648,9 +657,13 @@ void WorldView::DrawThrusterTrails()
 	trail_mtrl->setWindowSize(m_renderer->GetWindow()->GetWidth(), m_renderer->GetWindow()->GetHeight());
 
 	// Thruster trails for ships and player
+	// Diffuse pass
 	for(auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
 		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
-			it->ship->GetThrusterTrail(i)->Render(trail_mtrl);
+			ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
+			if (tt) {
+				it->ship->GetThrusterTrail(i)->Render(trail_mtrl);
+			}
 		}
 	}
 	for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
@@ -690,7 +703,7 @@ static Color get_color_for_warning_meter_bar(float v) {
 }
 
 void WorldView::RefreshHyperspaceButton() {
-	if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget())) {
+	if (Pi::player->IsTransitPossible() && Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget())) {
 		m_hyperspaceButton->Show();
 		if(Pi::player->IsHyperspaceActive()) {
 			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
@@ -787,27 +800,6 @@ void WorldView::RefreshButtonStateAndVisibility()
 			Body * const navtarget = Pi::player->GetNavTarget();
 			Body * const comtarget = Pi::player->GetCombatTarget();
 			switch (fstate) {
-				/*case CONTROL_MANUAL:
-					m_flightStatus->SetText(Lang::MANUAL_CONTROL); 
-					m_flightManeuverButton->SetEnabled(true);
-					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
-					if(!navtarget && !comtarget) { 
-						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
-						m_flightAutopilotButton->SetEnabled(false);
-					} else {
-						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
-						m_flightAutopilotButton->SetEnabled(true);
-					}
-					// If it's outside the gravity bubble, enable transit button
-					if(is_outside_gravity_bubble) {
-						m_flightTransitButton->SetEnabled(true);
-						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_OFF);
-					} else {
-						m_flightTransitButton->SetEnabled(false);
-						m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
-					}
-					break;*/
-
 				case CONTROL_MANEUVER: {
 					std::string msg;
 					const double setspeed = Pi::player->GetController()->GetSpeedLimit();
@@ -818,14 +810,11 @@ void WorldView::RefreshButtonStateAndVisibility()
 					}
 					m_flightStatus->SetText(msg);
 					m_flightManeuverButton->SetEnabled(true);
-					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_ON);	
-					if(!navtarget && !comtarget) { 
-						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
-						m_flightAutopilotButton->SetEnabled(false);
-					} else {
-						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
-						m_flightAutopilotButton->SetEnabled(true);
-					}
+					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_ON);
+
+					m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					m_flightAutopilotButton->SetEnabled(true);
+
 					// If it's outside the gravity bubble, enable transit button
 					if(is_outside_gravity_bubble) {
 						m_flightTransitButton->SetEnabled(true);
@@ -847,13 +836,10 @@ void WorldView::RefreshButtonStateAndVisibility()
 					m_flightStatus->SetText(msg);
 					m_flightTransitButton->SetEnabled(true);
 					m_flightTransitButton->SetActiveState(FLIGHT_BUTTON_ON);
-					if(!navtarget && !comtarget) { 
-						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
-						m_flightAutopilotButton->SetEnabled(false);
-					} else {
-						m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
-						m_flightAutopilotButton->SetEnabled(true);
-					}
+
+					m_flightAutopilotButton->SetActiveState(FLIGHT_BUTTON_OFF);
+					m_flightAutopilotButton->SetEnabled(true);
+
 					m_flightManeuverButton->SetEnabled(true);
 					m_flightManeuverButton->SetActiveState(FLIGHT_BUTTON_OFF);
 					break;
@@ -1231,18 +1217,6 @@ void WorldView::Update()
 		}
 	}
 
-	/*if( Pi::AreHudTrailsDisplayed() )
-	{
-		matrix4x4d trans;
-		Frame::GetFrameTransform(playerFrame, camFrame, trans);
-
-		for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it)
-			it->trail->SetTransform(trans);
-	} else {
-		for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it)
-			it->trail->Reset(playerFrame);
-	}*/
-
 	// target object under the crosshairs. must be done after
 	// UpdateProjectedObjects() to be sure that m_projectedPos does not have
 	// contain references to deleted objects
@@ -1251,21 +1225,28 @@ void WorldView::Update()
 		SelectBody(target, false);
 	}
 
-	// Exhaust Trails
-	const Frame *cam_frame = m_cameraContext->GetCamFrame();
-	matrix4x4d trans;
-    Frame::GetFrameTransform(Pi::player->GetFrame(), cam_frame, trans);
-	// Thruster trails: other ships		
-	for (auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
-		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
-			it->ship->GetThrusterTrail(i)->SetTransform(trans);
-			it->ship->GetThrusterTrail(i)->Update(frameTime);
+	if(!Pi::game->IsHyperspace()) {
+		// Exhaust Trails/Update
+		const Frame *cam_frame = m_cameraContext->GetCamFrame();
+		matrix4x4d trans;
+		Frame::GetFrameTransform(Pi::player->GetFrame(), cam_frame, trans);
+		// Thruster trails: other ships		
+		for (auto it = Pi::player->GetSensors()->GetContacts().begin(); 
+			it != Pi::player->GetSensors()->GetContacts().end(); ++it) 
+		{
+			for (unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
+				ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
+				if (tt) {
+					tt->SetTransform(trans);
+					tt->Update(frameTime);
+				}
+			}
 		}
-	}
-	// Thruster trails: player ship
-	for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
-			Pi::player->GetThrusterTrail(i)->SetTransform(trans);
-			Pi::player->GetThrusterTrail(i)->Update(frameTime);
+		// Thruster trails: player ship
+		for(unsigned int i = 0; i < Pi::player->GetThrusterTrailsNum(); ++i) {
+				Pi::player->GetThrusterTrail(i)->SetTransform(trans);
+				Pi::player->GetThrusterTrail(i)->Update(frameTime);
+		}
 	}
 
 	UIView::Update();
@@ -2260,6 +2241,7 @@ void WorldView::DrawBodyIcon(Object::Type type, vector2f position)
 
 		case Object::Type::PROJECTILE:
 		case Object::Type::MISSILE:
+		case Object::Type::PLAYER:
 			tquad = nullptr;
 	}
 	if (tquad) {

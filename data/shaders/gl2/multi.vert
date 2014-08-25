@@ -16,6 +16,9 @@ varying vec3 normal;
 		varying vec3 heatingDir;
 	#endif // HEAT_COLOURING
 #endif
+#ifdef POINTS
+uniform float pointSize;
+#endif
 
 void main(void)
 {
@@ -32,5 +35,8 @@ void main(void)
 	#ifdef HEAT_COLOURING
 		heatingDir = normalize(heatingMatrix * heatingNormal);
 	#endif
+#endif
+#ifdef POINTS
+	gl_PointSize = pointSize;
 #endif
 }

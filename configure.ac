@@ -131,6 +131,9 @@ OPTIMISE=-O3 -s
 AC_ARG_WITH([no-optimise], AS_HELP_STRING([--with-no-optimise], [Compile without optimisation]), [test "$withval" != no && OPTIMISE=-O0], [])
 AC_SUBST([OPTIMISE])
 
+dnl Release stuff
+AC_ARG_ENABLE([release], AS_HELP_STRING([--enable-release], [Set release mode (defines NDEBUG necessary for asserts)]), [EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -DNDEBUG"])
+
 dnl Debug stuff
 AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Enable debugging code (stack checks, debug tools features, etc)]), [EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -DDEBUG"])
 AC_ARG_ENABLE([ldb], AS_HELP_STRING([--enable-ldb], [Enable ldb support.]), [EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -DENABLE_LDB" ; EXTRA_LIBS="$EXTRA_LIBS -lldbcore"])

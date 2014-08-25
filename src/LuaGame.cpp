@@ -34,7 +34,7 @@
  *                 orbit around the specified body.
  *
  *   start_time - optional, default 0. Time to start at in seconds from the
- *                Pioneer epoch (i.e. from 2184-01-01 00:00 UTC).
+ *                Paragon epoch (i.e. from 2184-01-01 00:00 UTC).
  *
  * Availability:
  *

@@ -31,15 +31,17 @@ local getMyStarport = function (ship, current)
 	for i = 1, #starports do
 		local next_starport = starports[i]
 		if next_starport ~= current then
-			local next_distance = Game.player:DistanceTo(next_starport)
+			if Game.player:IsInHyperspace() == false then
+				local next_distance = Game.player:DistanceTo(next_starport)
 			
-			local next_canland
-			if ship==Game.player then
-				next_canland = true
-			end
+				local next_canland
+				if ship == Game.player then
+					next_canland = true
+				end
 
-			if next_canland and ((starport == nil) or (next_distance < distance)) then
-				starport, distance = next_starport, next_distance
+				if next_canland and ((starport == nil) or (next_distance < distance)) then
+					starport, distance = next_starport, next_distance
+				end
 			end
 		end
 	end 
@@ -61,7 +63,7 @@ local spawnPolice = function()
 		while max_police > 0 and lawlessness < 0.5 do
 			max_police = max_police-1
 
-			local ship = Space.SpawnShipDocked("security_interceptor", starport)
+			local ship = Space.SpawnShipDocked("security_ultralight1", starport)
 			if ship~=nil then
 				ship:AddEquip('PULSECANNON_DUAL_1MW')
 				ship:AddEquip('LASER_COOLING_BOOSTER')

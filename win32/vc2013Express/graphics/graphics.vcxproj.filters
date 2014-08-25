@@ -138,6 +138,15 @@
     <ClInclude Include="..\..\..\src\graphics\effects\sector_view\SectorViewIconMaterial.h">
       <Filter>effects\sector_view</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\transit\TransitEffectMaterial.h">
+      <Filter>effects\transit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\RadialBlurMaterial.h">
+      <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\effects\transit\TransitCompositionMaterial.h">
+      <Filter>effects\transit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="win32">
@@ -154,6 +163,9 @@
     </Filter>
     <Filter Include="effects\sector_view">
       <UniqueIdentifier>{4ff0b5bb-2f96-49d8-8a30-4eee330964ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects\transit">
+      <UniqueIdentifier>{8b37c513-6e93-4f83-919c-9b48a45a2870}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +186,18 @@
     </None>
     <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_draw.vert">
       <Filter>effects\thruster_trails</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\transit\t_tunnel.frag">
+      <Filter>effects\transit</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\transit\t_tunnel.vert">
+      <Filter>effects\transit</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\pp_radialblur.frag">
+      <Filter>effects</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\pp_rardialblur.vert">
+      <Filter>effects</Filter>
     </None>
   </ItemGroup>
 </Project>

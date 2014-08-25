@@ -17,8 +17,8 @@ local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local commodityMarket = function (args)
 	local stationTable, shipTable = EquipmentTableWidgets.Pair({
-		stationColumns = { "icon", "name", "price", "stock" },
-		shipColumns = { "icon", "name", "amount" },
+		stationColumns = { "icon", "name", "price", "stock", "buy_bulk" },
+		shipColumns = { "icon", "name", "amount", "sell_bulk" },
 	})
 
 	return

@@ -280,9 +280,9 @@ void ModelBody::MoveGeoms(const matrix4x4d &m, const vector3d &p)
 //    * As suns set the split is biased towards ambient
 void ModelBody::CalcLighting(double &ambient, double &direct, const Camera *camera)
 {
-	const double minAmbient = 0.20;
+	const double minAmbient = 0.12;
 	ambient = minAmbient;
-	direct = 1.0;
+	direct = 0.8;
 	Body *astro = GetFrame()->GetBody();
 	if ( ! (astro && astro->IsType(Object::PLANET)) )
 		return;

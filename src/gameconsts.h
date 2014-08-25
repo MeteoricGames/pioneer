@@ -23,5 +23,13 @@ static const double GAS_CONSTANT_R                   = 8.3144621;
 
 static const int	EPOCH_START_YEAR = 2184;
 
+// Save versions
+// 74: First Steam release version (alpha 7)
+// 75: +PlayerController read and write ShipController
+// 76: +small starport upgraded to have more landing pads (LUA) -> BASE SAVE
+// 77: +Docking AI changes to flyto, goto, and new dock command (WIP)
+static const int  s_baseSaveVersion = 76;		
+static const int  s_latestSaveVersion = 77;		
+
 
 #endif /* _GAMECONSTS_H */

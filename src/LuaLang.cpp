@@ -39,6 +39,8 @@ static int l_lang_get_resource(lua_State *l)
 	lua_pop(l, 1);
 
 	Lang::Resource res(resourceName, langCode);
+	bool default_lang_valid = Lang::Resource::s_defaultLangResource && langCode != "en";
+
 	if (!res.Load()) {
 		lua_pushnil(l);
 		return 1;
@@ -46,12 +48,33 @@ static int l_lang_get_resource(lua_State *l)
 
 	lua_newtable(l);
 
-	for (auto i : res.GetStrings()) {
-		const std::string token(i.first);
-		const std::string text(i.second.empty() ? token : i.second);
-		lua_pushlstring(l, token.c_str(), token.size());
-		lua_pushlstring(l, text.c_str(), text.size());
-		lua_rawset(l, -3);
+	if(default_lang_valid) {
+		std::map<std::string, std::string> strings_locale;
+
+		for(auto i : Lang::Resource::s_defaultLangResource->GetStrings()) {
+			strings_locale.insert(std::make_pair(i.first, 
+				Lang::Resource::s_defaultLangResource->Get(i.first)));
+		}
+
+		for(auto i : res.GetStrings()) {
+			strings_locale[i.first] = res.Get(i.first);
+		}
+
+		for (auto i : strings_locale) {
+			const std::string token(i.first);
+			const std::string text(i.second.empty() ? token : i.second);
+			lua_pushlstring(l, token.c_str(), token.size());
+			lua_pushlstring(l, text.c_str(), text.size());
+			lua_rawset(l, -3);
+		}
+	} else {
+		for (auto i : res.GetStrings()) {
+			const std::string token(i.first);
+			const std::string text(i.second.empty() ? token : i.second);
+			lua_pushlstring(l, token.c_str(), token.size());
+			lua_pushlstring(l, text.c_str(), text.size());
+			lua_rawset(l, -3);
+		}
 	}
 
 	lua_newtable(l);

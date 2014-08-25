@@ -23,8 +23,9 @@ namespace Graphics {
 		void BeginFrame();
 		void EndFrame();
 		void Run(PostProcess* pp = nullptr);
-		void SetEnabled(bool enabled);
+		void SetPerformPostProcessing(bool enabled);
 		void SetDeviceRT(RenderTarget* rt_device);
+		bool IsPostProcessingEnabled() const { return bPerformPostProcessing; }
 
 	protected:
 

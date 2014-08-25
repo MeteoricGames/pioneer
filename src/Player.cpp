@@ -15,7 +15,6 @@
 #include "SpaceStation.h"
 #include "WorldView.h"
 #include "StringF.h"
-#include "HudTrail.h"
 #include "ThrusterTrail.h"
 
 //Some player specific sounds
@@ -41,8 +40,8 @@ void Player::Load(Serializer::Reader &rd, Space *space)
 void Player::Init()
 {
 	InitCockpit();
+	m_sensors.reset(new Sensors(this));
 	Ship::Init();
-	m_hudTrail.reset(new HudTrail(this, Color::PARAGON_BLUE));
 }
 
 void Player::InitCockpit()
@@ -242,6 +241,14 @@ void Player::OnCockpitActivated()
 		m_cockpit->OnActivated();
 }
 
+void Player::TimeStepUpdate(const float timeStep)
+{
+	Ship::TimeStepUpdate(timeStep);
+	if (m_sensors) {
+		m_sensors->Update(timeStep);
+	}
+}
+
 void Player::StaticUpdate(const float timeStep)
 {
 	Ship::StaticUpdate(timeStep);
@@ -261,6 +268,13 @@ void Player::StaticUpdate(const float timeStep)
 
 void Player::SetFrame(Frame *f)
 {
-	GetSensors()->ResetTrails();
 	Ship::SetFrame(f);
+}
+
+void Player::SetRelations(Body *other, Uint8 percent)
+{
+	Ship::SetRelations(other, percent);
+	if (m_sensors) {
+		m_sensors->UpdateIFF(other);
+	}
 }

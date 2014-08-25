@@ -91,17 +91,17 @@ start:
 		case MODE_VERSION: {
 			std::string version(PARAGON_VERSION);
 			if (strlen(PARAGON_EXTRAVERSION)) version += " (" PARAGON_EXTRAVERSION ")";
-			Output("pioneer %s\n", version.c_str());
+			Output("paragon %s\n", version.c_str());
 			break;
 		}
 
 		case MODE_USAGE_ERROR:
-			Output("pioneer: unknown mode %s\n", argv[1]);
+			Output("paragon: unknown mode %s\n", argv[1]);
 			// fall through
 
 		case MODE_USAGE:
 			Output(
-				"usage: pioneer [mode] [options...]\n"
+				"usage: paragon [mode] [options...]\n"
 				"available modes:\n"
 				"    -game        [-g]     game (default)\n"
 				"    -modelviewer [-mv]    model viewer\n"

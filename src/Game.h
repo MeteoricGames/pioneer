@@ -21,6 +21,8 @@ public:
 	// XXX game arg should be const, and this should probably be a member function
 	// (or LoadGame/SaveGame should be somewhere else entirely)
 	static void SaveGame(const std::string &filename, Game *game);
+	// The last loaded game version, used for doing save file upgrades automagically
+	static int s_loadedGameVersion;
 
 	// start docked in station referenced by path
 	Game(const SystemPath &path, double time = 0.0);

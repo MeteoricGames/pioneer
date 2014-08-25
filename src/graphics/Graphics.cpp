@@ -62,12 +62,12 @@ Renderer* Init(Settings vs)
 	glewInit();
 
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object"))
-		Error("OpenGL extension ARB_vertex_buffer_object not supported. Pioneer can not run on your graphics card.");
+		Error("OpenGL extension ARB_vertex_buffer_object not supported. Paragon can not run on your graphics card.");
 
 	Renderer *renderer = 0;
 
-	if (!glewIsSupported("GL_VERSION_2_0") )
-		Error("OpenGL Version 2.0 is not supported. Pioneer cannot run on your graphics card.");
+	if (!glewIsSupported("GL_VERSION_2_1") )
+		Error("OpenGL Version 2.1 is not supported. Paragon cannot run on your graphics card.");
 	
 	renderer = new RendererGL2(window, vs);
 

@@ -75,18 +75,40 @@ void ThrusterTrail::Update(float time)
 		m_trailUVs.clear();
 		const vector3d curpos = m_body->GetInterpPosition();
 		m_trailVertices.push_back(vector3f(0.f));
-		m_trailColors.push_back(Color(0.f));
+		m_trailColors.push_back(Color(0));
 		m_trailUVs.push_back(vector2f(0.f));
-		float alpha = 1.f;
-		const float decrement = 1.f / m_trailPoints.size();
-		const Color tcolor = m_color;
+		// R: Alpha for the first gradient, whole trail is lit with the hottest color
+		// G: Alpha for the core gradient, core disappears gradually
+		// B:
+		// A: Used for transparency of the whole trail
+		float trail_r = 1.0f;
+		float trail_g = 1.0f;
+		float trail_a = 1.0f;
+		const float decr_r = 1.0f / (m_trailPoints.size() * 0.09345f);
+		const float decr_g = 1.0f / (m_trailPoints.size() * 0.76791f);
+		const float decr_a = 1.0f / m_trailPoints.size();
+		//Color trail_color = m_color;
+		Color trail_color(255, 255, 255, 255);
 
 		// Is this necessary? its an extra reset
 		for (Uint16 i = m_trailPoints.size()-1; i > 0; i--) {
 			m_trailVertices.push_back(-vector3f(curpos - m_trailPoints[i]));
-			alpha -= decrement;
-			m_trailColors.push_back(tcolor);
-			m_trailColors.back().a = Uint8(alpha * 255);
+			trail_r -= decr_r; 
+			if(trail_r < 0.0f) {
+				trail_r = 0.0f;
+			}
+			trail_g -= decr_g; 
+			if(trail_g < 0.0f) {
+				trail_g = 0.0f;
+			}
+			trail_a -= decr_a;
+			if(trail_a < 0.0f) {
+				trail_a = 0.0f;
+			}
+			m_trailColors.push_back(trail_color);
+			m_trailColors.back().r = Uint8(trail_r * 255.0f);
+			m_trailColors.back().g = Uint8(trail_g * 255.0f);
+			m_trailColors.back().a = Uint8(trail_a * 255.0f);
 			m_trailUVs.push_back(vector2f(0.0f, 0.0f));
 		}
 
@@ -112,8 +134,8 @@ void ThrusterTrail::Update(float time)
 		const vector2f uv1(0.0f, 0.0f);
 		const vector2f uv2(0.0f, 1.0f);
 		float size = ((m_scale * 0.9f) + 0.1f) * THRUSTER_TRAILS_MAX_WIDTH;
-		m_trailGeometry->Set(0, (-v_first_extend * size), m_color, uv1);
-		m_trailGeometry->Set(1, (v_first_extend * size), m_color, uv2);
+		m_trailGeometry->Set(0, (-v_first_extend * size), trail_color, uv1);
+		m_trailGeometry->Set(1, (v_first_extend * size), trail_color, uv2);
 
 		vector3f v_prev = v_zero;
 	  	for(unsigned int i = 0; i < m_trailVertices.size(); ++i) {

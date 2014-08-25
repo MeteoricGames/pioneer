@@ -99,45 +99,47 @@ private:
 /// Example: going from within the atmosphere of a planet outwards to transit gravity bubble distance.
 class AIParagonCmdGoTo : public AICommand {
 public:
-	AIParagonCmdGoTo(Ship *ship, Frame *target_frame, vector3d target_position, bool to_transit_distance = false);
+	AIParagonCmdGoTo(Ship *ship, Frame *target_frame, vector3d target_position, 
+		bool to_transit_distance = false);
+	AIParagonCmdGoTo(Ship *ship, Frame *target_frame,
+		SpaceStationType::positionOrient_t posorient,  double arrival_speed, double speed_limit);
+	AIParagonCmdGoTo(Ship *ship, Frame *target_frame,
+		vector3d target_position, matrix3x3d target_orient, double arrival_speed, double speed_limit);
+	AIParagonCmdGoTo(Ship *ship, Frame *target_frame, SpaceStationType::positionOrient_t start_posorient, 
+		SpaceStationType::positionOrient_t end_posorient);
 	virtual ~AIParagonCmdGoTo();
 
+	virtual void GetStatusText(char *str);
+	virtual void Save(Serializer::Writer &wr);
+	AIParagonCmdGoTo(Serializer::Reader &rd);
+	virtual void PostLoadFixup(Space *space);
+	virtual void OnDeleted(const Body *body);
+
 	virtual bool TimeStepUpdate();
-	virtual void GetStatusText(char *str) {
-		if (m_child) {
-			m_child->GetStatusText(str);
-		} else {
-			snprintf(str, 255, "Paragon GoTo: distance: %.1fkm, juice: %.1f",
-				m_remainingDistance, m_ship->GetJuice());
-		}
-	}
-	virtual void Save(Serializer::Writer &wr) {
-		if (m_child) { delete m_child; m_child = 0; }
-		AICommand::Save(wr);
-		wr.Int32(Pi::game->GetSpace()->GetIndexForFrame(m_targetFrame));
-		wr.Vector3d(m_targetPosition);
-		wr.Bool(m_toTransit);
-	}
-	AIParagonCmdGoTo(Serializer::Reader &rd) : AICommand(rd, CMD_PARAGON_GOTO) {
-		m_targetFrameIndex = rd.Int32();
-		m_targetPosition = rd.Vector3d();
-		m_toTransit = rd.Bool();
-	}
-	virtual void PostLoadFixup(Space *space) {
-		AICommand::PostLoadFixup(space);
-		m_targetFrame = space->GetFrameByIndex(m_targetFrameIndex);
-	}
-	virtual void OnDeleted(const Body *body) {
-		AICommand::OnDeleted(body);
-	}
 
 private:
-	Ship* m_ship;
+
+	enum EGoToMode
+	{
+		EGTM_SIMPLE = 0,
+		EGTM_TRANSIT,
+		EGTM_PRECISION,
+		EGTM_DOCK,
+	};
+	
 	Frame* m_targetFrame;
+
+	// Saved
 	int m_targetFrameIndex;
 	vector3d m_targetPosition;
 	double m_remainingDistance; // For debugging/status text
 	bool m_toTransit;
+	matrix3x3d m_targetOrient;
+	SpaceStationType::positionOrient_t m_startPO;
+	SpaceStationType::positionOrient_t m_endPO;
+	double m_speedLimit;
+	double m_arrivalSpeed;
+	EGoToMode m_mode;
 };
 
 /// SteerAround is specialized in the situation of steering around obstacles at high speed.
@@ -190,6 +192,8 @@ public:
 		m_targetFrame = space->GetFrameByIndex(m_targetFrameIndex);
 		CacheData();
 	}
+
+	double GetRemainingDistance() const { return m_remainingDistance; }
 
 private:
 	struct SSteerAroundData { // Cache for repetitively calculated data
@@ -273,6 +277,87 @@ private:
 	vector3d m_targetLocation; // target location in target frame
 	int m_targframeIndex;	// used during deserialisation
 	double m_distance;
+};
+
+/// Orbit command is a high level command that uses FlyTo and SteerAround to orbit an astrobody
+/// continuously until player disables/restarts the autopilot.
+class AIParagonCmdOrbit : public AICommand {
+public:
+	AIParagonCmdOrbit(Ship *ship, Frame *target_frame, double altitude_multiplier);
+	virtual ~AIParagonCmdOrbit();
+
+	virtual bool TimeStepUpdate();
+	virtual void GetStatusText(char *str) {
+		if (m_child) {
+			m_child->GetStatusText(str);
+		} else {
+			snprintf(str, 255, "Paragon Orbit");
+		}
+	}
+	virtual void Save(Serializer::Writer &wr) {
+		if (m_child) { delete m_child; m_child = 0; }
+		AICommand::Save(wr);
+		wr.Int32(Pi::game->GetSpace()->GetIndexForFrame(m_targetFrame));
+		wr.Double(m_altitudeMultiplier);
+	}
+	AIParagonCmdOrbit(Serializer::Reader &rd) : AICommand(rd, CMD_PARAGON_ORBIT) {
+		m_targetFrameIndex = rd.Int32();
+		m_altitudeMultiplier = rd.Double();
+	}
+	virtual void PostLoadFixup(Space *space) {
+		AICommand::PostLoadFixup(space);
+		m_targetFrame = space->GetFrameByIndex(m_targetFrameIndex);
+	}
+	virtual void OnDeleted(const Body *body) {
+		AICommand::OnDeleted(body);
+	}
+
+private:
+	Frame* m_targetFrame;
+
+	// Saved data
+	int m_targetFrameIndex;
+	double m_altitudeMultiplier;
+};
+
+/// Dock command is a high level command that uses precise motion commands to dock with a station
+/// Future work: local collision detection and proper queueing
+class AIParagonCmdDock : public AICommand 
+{
+public:
+	AIParagonCmdDock(Ship *ship, SpaceStation *target);
+	virtual ~AIParagonCmdDock();
+
+	virtual void Save(Serializer::Writer &wr);
+	AIParagonCmdDock(Serializer::Reader &rd);
+	virtual void PostLoadFixup(Space *space);
+	virtual void OnDeleted(const Body *body);
+
+	virtual void GetStatusText(char *str);
+	virtual bool TimeStepUpdate();
+
+private:
+	enum EDockingState
+	{
+		EDS_ZERO = 0,		// Ship gets to station and stops
+		EDS_START,			// Docking process starts
+		EDS_WAIT_FOR_GO,	// Ship waits for station to give it the go signal (queue)
+		EDS_WAYPOINTS,		// Ship reads all waypoints necessary to get to dock
+		EDS_DOCKING,		// Ship follows waypoints consecutively to dock
+		EDS_DOCK,			// Ship actually docks
+
+		EDS_TOTAL,
+	};
+
+	// Saved data
+	SpaceStation *m_station;
+	int m_stationIndex;
+	EDockingState m_state;
+	std::vector<SpaceStationType::positionOrient_t> m_approachPoints;
+	unsigned int m_nextApproachPoint;
+
+	// Not saved data
+	bool m_waitingForSignalMessage;	// used to show player message for waiting signal once
 };
 
 #endif

@@ -24,9 +24,10 @@
 #include "FileSystem.h"
 #include "graphics/Renderer.h"
 
-static const int  s_saveVersion   = 74;
 static const char s_saveStart[]   = "PARAGON";
 static const char s_saveEnd[]     = "END";
+
+int Game::s_loadedGameVersion = s_latestSaveVersion;
 
 Game::Game(const SystemPath &path, double time) :
 	m_time(time),
@@ -119,10 +120,37 @@ Game::Game(Serializer::Reader &rd) :
 	// version check
 	rd.SetStreamVersion(rd.Int32());
 	Output("savefile version: %d\n", rd.StreamVersion());
-	if (rd.StreamVersion() != s_saveVersion) {
-		Output("can't load savefile, expected version: %d\n", s_saveVersion);
+	if (rd.StreamVersion() < s_baseSaveVersion) {
+		//Output("Can't load savefile, expected version: >= %d\n", s_baseSaveVersion);
+		Output("Unfortunately, this save file version (%d) is no longer supported after latest update\nCan't load savefile, expected version: >= %d\n",
+			rd.StreamVersion(), s_latestSaveVersion);
 		throw SavedGameWrongVersionException();
 	}
+	s_loadedGameVersion = rd.StreamVersion();
+
+	//--------------------- PATCH 76 #1 (DISABLED)
+	// Version 76 changes: +small starport upgraded to have more landing pads (LUA)
+	/*bool v76_patch = false;
+	SpaceStationType* v76_sst;			// space station type
+	SpaceStationType::TBayGroups v76_bg;// bay groups
+	unsigned int v76_ndp;				// num docking ports
+	if (s_loadedGameVersion < s_latestSaveVersion) {
+		// Patch station type: starport_small
+		std::vector<SpaceStationType>& surface_stations = SpaceStationType::surfaceStationTypes;
+		for (unsigned int i = 0; i < surface_stations.size(); i++) {
+			if (surface_stations[i].modelName == "starport_small") {
+				v76_sst = &surface_stations[i];
+				v76_bg = surface_stations[i].bayGroups;
+				v76_ndp = surface_stations[i].numDockingPorts;
+				while (surface_stations[i].bayGroups.size() > 4) {
+					surface_stations[i].bayGroups.pop_back();
+				}
+				surface_stations[i].numDockingPorts = 4;
+				v76_patch = true;
+			}
+		}
+	}*/
+	//---------------------- PATCH 76 #1 END
 
 	// XXX This must be done after loading sectors once we can change them in game
 	Pi::FlushCaches();
@@ -169,6 +197,14 @@ Game::Game(Serializer::Reader &rd) :
 	// signature check
 	for (Uint32 i = 0; i < strlen(s_saveEnd)+1; i++)
 		if (rd.Byte() != s_saveEnd[i]) throw SavedGameCorruptException();
+
+	//--------------------- PATCH 76 #2 (DISABLED)
+	// Version 76 changes: +small starport upgraded to have more landing pads (LUA)
+	/*if (v76_patch) {
+		v76_sst->bayGroups = v76_bg;
+		v76_sst->numDockingPorts = v76_ndp;
+	}*/
+	//---------------------- PATCH 76 #2 END
 }
 
 void Game::Serialize(Serializer::Writer &wr)
@@ -178,7 +214,7 @@ void Game::Serialize(Serializer::Writer &wr)
 		wr.Byte(s_saveStart[i]);
 
 	// version
-	wr.Int32(s_saveVersion);
+	wr.Int32(s_latestSaveVersion);
 
 	Serializer::Writer section;
 

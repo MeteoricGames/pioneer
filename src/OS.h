@@ -30,6 +30,9 @@ namespace OS {
 
 	// http://stackoverflow.com/questions/150355/programmatically-find-the-number-of-cores-on-a-machine
 	int GetNumCores();
+
+	// Enable Google breakpad for crash minidumps
+	void EnableBreakpad();
 }
 
 #endif

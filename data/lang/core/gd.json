@@ -23,6 +23,10 @@
       "description" : "",
       "message" : "Àirde: %altitude{f.0}m (%vspeed{f.1}m/s)"
    },
+   "ALT_NO_DATA" : {
+	  "description" : "",
+	  "message" : "no data"
+   },
    "AND_HIGHLY_COMPLEX_ECOSYSTEM" : {
       "description" : "",
       "message" : "\" and a highly complex ecosystem.\""
@@ -529,7 +533,7 @@
    },
    "GAME_LOAD_WRONG_VERSION" : {
       "description" : "",
-      "message" : "Cha ghabh an geama air a shàbhaladh seo a luchdadh on a chaidh a chruthachadh le tionndadh eile de Pioneer."
+      "message" : "Cha ghabh an geama air a shàbhaladh seo a luchdadh on a chaidh a chruthachadh le tionndadh eile de Paragon."
    },
    "GAME_SAVED_TO" : {
       "description" : "",
@@ -1115,6 +1119,30 @@
       "description" : "",
       "message" : "%distance to target"
    },
+   "P_NO_TARGET" : {
+	  "description" : "",
+	  "message" : "no target"
+   },
+   "P_UI_FUEL" : {
+	  "description" : "",
+	  "message" : "fuel"
+   },
+   "P_UI_TEMP" : {
+	  "description" : "",
+	  "message" : "temp"
+   },
+   "P_UI_WEAP" : {
+	  "description" : "",
+	  "message" : "weap"
+   },
+   "P_UI_HULL" : {
+	  "description" : "",
+	  "message" : "hull"
+   },
+   "P_UI_SHLD" : {
+	  "description" : "",
+	  "message" : "shld"
+   },
    "N_EARTH_DAYS" : {
       "description" : "",
       "message" : "%days{f.1} làithean talmhainn"
@@ -1185,7 +1213,7 @@
    },
    "PIONEER" : {
       "description" : "",
-      "message" : "PIONEER"
+      "message" : "PARAGON"
    },
    "PIRACY" : {
       "description" : "",
@@ -1954,5 +1982,29 @@
    "ZOOM_OUT" : {
       "description" : "",
       "message" : "Sùm a-mach"
+   },   
+   "TUTORIAL_1" : {
+	  "description" : "",
+	  "message" : "#0f3Intro\n\n#fffWelcome to Paragon, this is an alpha release and there will be BUGS! We need player feedback to help us squash them and opinions on the game about how to improve and enhance it. Below is a quick tutorial to get you started as a newly trained independent ship captain.\n\nAs a ship captain you are able to travel the galaxy completing missions in order to upgrade and eventually replace your ship.  You are also free to pursue other activities such as trading, exploring and piracy as you wish.\n\n"
+	},
+	"TUTORIAL_2" : {
+	  "description" : "",
+	  "message" : "#0f3Spaceflight\n\n#fffTo the right of the radar display (oval at bottom centre of screen) there is an autopilot indicator along with 3 drive mode indicators: from left to right they are MANEUVER, TRANSIT and JUMP. They are colour coded gray when unavailable, blue when available and  green when in operation.\n\n"
+	},
+	"TUTORIAL_3" : {
+	  "description" : "",
+	  "message" : "MANEUVER mode is the default; it is speed limited at 600m/s and is used when flying in the gravity bubbles of planet surfaces, settlements, space stations and other ships.\n\nTRANSIT mode is a high speed mode used to quickly travel the massive distances required to orbit planets, fly from planet surfaces to space stations, and travel across solar systems. It can only be used when the player is outside of any other object’s gravity bubble (15km above a planet surface, 15km away from a space station). When in this mode ships will quickly accelerate when moving in a straight line but near instantly slow back down by turning and when close to planets will also move much more slowly. When entering the 15km gravity bubble of any planet or station ships will be knocked back down to maneuver mode.\n\n"
+	},
+	"TUTORIAL_4" : {
+	  "description" : "", 
+	  "message" : "JUMP mode is used to travel between solar systems, it requires that the player have a jump drive installed (purchasable at station equipment markets), some hydrogen in their cargo hold (purchasable at station commodity markets) and have a jump destination set (using nav map accessible via the star icon to the left of the radar).\n\n"
+	},
+	"TUTORIAL_5" : {
+	  "description" : "",
+	  "message" : "#0f3Missions\n\n#fffMissions can be acquired from exonet terminals accessible by using the comms button while docked at stations and settlements.\n\n"
+	},
+	"TUTORIAL_6" : {
+	  "description" : "",
+	  "message" : "#0f3Controls\n\n#fffThe default controls map pitch and yaw to the mouse, roll to A and D, accelerate/decelerate to W and S, activate/deactivate mouse flight to right click and fire main weapon to left click.\n\n"
    }
 }

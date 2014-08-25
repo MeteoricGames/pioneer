@@ -43,6 +43,9 @@ namespace Effects {
 	class ThrusterTrailsDepthMaterial;
 	class ThrusterTrailsMaterial;
 	class SectorViewIconMaterial;
+	class TransitEffectMaterial;
+	class RadialBlurMaterial;
+	class TransitCompositionMaterial;
 }
 
 class RendererGL2 : public Renderer
@@ -63,6 +66,8 @@ public:
 
 	virtual bool SetRenderState(RenderState*) override;
 	virtual bool SetRenderTarget(RenderTarget*) override;
+
+	// Warning: active render target Could be null! (indicating main framebuffer)
 	virtual RenderTarget* GetActiveRenderTarget() const { return reinterpret_cast<Graphics::RenderTarget*>(m_activeRenderTarget); }
 
 	virtual bool ClearScreen();
@@ -93,6 +98,8 @@ public:
 	virtual bool DrawPointSprites(int count, const vector3f *positions, RenderState *rs, Material *material, float size) override;
 	virtual bool DrawBuffer(VertexBuffer*, RenderState*, Material*, PrimitiveType) override;
 	virtual bool DrawBufferIndexed(VertexBuffer*, IndexBuffer*, RenderState*, Material*, PrimitiveType) override;
+	virtual bool DrawFullscreenQuad(Material* mat, RenderState* state = nullptr, bool clear_rt = true) override;
+	virtual bool DrawFullscreenQuad(Texture* texture, RenderState* state = nullptr, bool clear_rt = true) override;
 
 	virtual Material *CreateMaterial(const MaterialDescriptor &descriptor) override;
 	virtual Texture *CreateTexture(const TextureDescriptor &descriptor) override;
@@ -152,10 +159,13 @@ protected:
 	friend class GL2::TexturedFullscreenQuad;
 	friend class GL2::HorizontalBlurMaterial;
 	friend class GL2::VerticalBlurMaterial;
+	friend class Effects::RadialBlurMaterial;
 	friend class GL2::BloomCompositorMaterial;
 	friend class Effects::ThrusterTrailsDepthMaterial;
 	friend class Effects::ThrusterTrailsMaterial;
 	friend class Effects::SectorViewIconMaterial;
+	friend class Effects::TransitEffectMaterial;
+	friend class Effects::TransitCompositionMaterial;
 	std::vector<std::pair<MaterialDescriptor, GL2::Program*> > m_programs;
 	std::unordered_map<Uint32, GL2::RenderState*> m_renderStates;
 	float m_invLogZfarPlus1;
@@ -171,6 +181,10 @@ protected:
 		Sint32 x, y, w, h;
 	};
 	std::stack<Viewport> m_viewportStack;
+
+	unsigned int m_screenQuadBufferId;
+	RenderState* m_screenQuadRS;
+	std::unique_ptr<Material> m_screenQuadMtrl;
 };
 
 }

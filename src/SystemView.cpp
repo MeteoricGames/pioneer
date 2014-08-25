@@ -26,6 +26,7 @@ static const float ZOOM_OUT_SPEED = 1.f/ZOOM_IN_SPEED;
 static const float WHEEL_SENSITIVITY = .1f;		// Should be a variable in user settings.
 // i don't know how to name it
 static const double ROUGH_SIZE_OF_TURD = 10.0;
+static const Color BACKGROUND_COLOR = Color(0, 89, 178, 255);
 
 SystemView::SystemView() : UIView()
 {
@@ -324,7 +325,10 @@ void SystemView::Draw3D()
 {
 	PROFILE_SCOPED()
 	m_renderer->SetPerspectiveProjection(50.f, m_renderer->GetDisplayAspect(), 1.f, 1000.f);
+
+	m_renderer->SetClearColor(BACKGROUND_COLOR);
 	m_renderer->ClearScreen();
+	m_renderer->SetClearColor(Color(0, 0, 0));
 
 	SystemPath path = Pi::sectorView->GetSelected().SystemOnly();
 	if (m_system) {

@@ -14,7 +14,7 @@ local l = Lang.GetResource("ui-core");
 local c = {r = 0.0, g = 0.86, b = 1.0}
 
 local setupPlayerShip = function ()
-	Game.player:SetShipType("passenger_shuttle")
+	Game.player:SetShipType("passenger_ultralight1")
 	Game.player:SetLabel(Ship.MakeRandomLabel())
 	Game.player:AddEquip("UNOCCUPIED_CABIN")
 	Game.player:AddEquip("ATMOSPHERIC_SHIELDING")

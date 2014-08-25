@@ -275,6 +275,10 @@ static int l_space_spawn_ship_docked(lua_State *l)
 
 	SpaceStation *station = LuaObject<SpaceStation>::CheckFromLua(2);
 
+	if(!station->HasFreeDockingPort()) {
+		return 0;
+	}
+
 	Ship *ship = new Ship(type);
 	assert(ship);
 

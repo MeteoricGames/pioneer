@@ -8,7 +8,7 @@
 #include "gui/Gui.h"
 
 static const float MouseFlightZoneDiameter = 0.1593f;
-static const float MouseFlightDeadZoneDiameter = 0.0238f;
+static const float MouseFlightDeadZoneDiameter = 0.0157f;
 
 enum MouseCursorType
 {

@@ -14,7 +14,6 @@
  */
 #include "libs.h"
 #include "Body.h"
-#include "HudTrail.h"
 
 class Body;
 class Ship;
@@ -38,7 +37,6 @@ public:
 		~RadarContact();
 		Body *body;
 		Ship *ship;
-		HudTrail* trail;
 		double distance;
 		IFF iff;
 		bool fresh;

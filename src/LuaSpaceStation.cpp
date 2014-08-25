@@ -94,6 +94,18 @@ static int l_spacestation_attr_is_ground_station(lua_State *l)
 	return 1;
 }
 
+/*
+* Attribute: hasFreeDockingPort
+*
+* true if station has at least one free docking port of any size
+*/
+static int l_spacestation_attr_has_free_docking_port(lua_State *l)
+{
+	SpaceStation *s = LuaObject<SpaceStation>::CheckFromLua(1);
+	lua_pushboolean(l, s->HasFreeDockingPort());
+	return 1;
+}
+
 template <> const char *LuaObject<SpaceStation>::s_type = "SpaceStation";
 
 template <> void LuaObject<SpaceStation>::RegisterClass()
@@ -109,6 +121,7 @@ template <> void LuaObject<SpaceStation>::RegisterClass()
 	static luaL_Reg l_attrs[] = {
 		{ "numDocks",        l_spacestation_attr_num_docks         },
 		{ "isGroundStation", l_spacestation_attr_is_ground_station },
+		{ "hasFreeDockingPort", l_spacestation_attr_has_free_docking_port },
 
 		{ 0, 0 }
 	};

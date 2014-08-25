@@ -1,13 +1,13 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
-local s = CustomSystem:new('Firedrake', { 'STAR_K' })
+local s = CustomSystem:new('Firedrake', { 'STAR_M' })
 	:govtype('CISSOCDEM')
 	:short_desc('Remote colony with large amounts of heavy industry')
 	:long_desc([[A remote heavy industry and mining colony on the far edges of the western territories, Firedrake is a local centre of commerce in this remote part of American space.]])
 
 
-local epserid = CustomSystemBody:new('Firedrake', 'STAR_K')
+local epserid = CustomSystemBody:new('Firedrake', 'STAR_M')
 	:radius(f(7,10))
 	:mass(f(61,110))
 	:temp(4584)
@@ -58,7 +58,7 @@ local harken = CustomSystemBody:new('Harken', 'PLANET_TERRESTRIAL')
 	:eccentricity(f(367,10000))
 	:rotation_period(f(4,6))
 	:axial_tilt(fixed.deg2rad(f(1741,100)))
-	:metallicity(f(5,6))
+	:metallicity(f(5,12))
 	:volcanicity(f(68,100))
 	:atmos_density(f(15,10))
 	:atmos_oxidizing(f(7,10))
@@ -83,7 +83,7 @@ local harken = CustomSystemBody:new('Harken', 'PLANET_TERRESTRIAL')
 
 	local rust = {
 	CustomSystemBody:new('Rust', 'PLANET_TERRESTRIAL')
-		:seed(191082)
+		:seed(391782)
 		:radius(f(484,1000))
 		:mass(f(121,1000))
 		:temp(280)
@@ -92,8 +92,8 @@ local harken = CustomSystemBody:new('Harken', 'PLANET_TERRESTRIAL')
 		:inclination(math.deg2rad(5.145))
 		:rotation_period(f(4,10))
 		:axial_tilt(fixed.deg2rad(f(668,100)))
-		:volcanicity(f(9,10))
-		:atmos_density(f(1,10)),
+		:volcanicity(f(1,10))
+		:atmos_density(f(9,10)),
 	{
 		CustomSystemBody:new('Rust Transfer Station', 'STARPORT_ORBITAL')
 		:semi_major_axis(f(5068,100000000))

@@ -76,6 +76,7 @@ private:
 	MsgLogWidget *m_inflog;
 	UseEquipWidget *m_useEquipWidget;
 	Gui::MultiStateImageButton *m_camButton;
+	Gui::MultiStateImageButton *m_commsButton;
 	Gui::RadioGroup *m_leftButtonGroup, *m_rightButtonGroup;
 	Gui::Widget *m_mapViewButtons[4];
 	Gui::Image *m_alertLights[3];

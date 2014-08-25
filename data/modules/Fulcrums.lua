@@ -10,6 +10,7 @@ local Event = import("Event")
 local Serializer = import("Serializer")
 local ShipDef = import("ShipDef")
 local utils = import("utils")
+local inspect = import("inspect")
 
 local loaded
 local fulcrum
@@ -19,10 +20,10 @@ local spawnShips = function ()
 	local population = Game.system.population
 
 	if population == 0 then
-		return	
+		return
 	end
 
-	local stations = Space.GetBodies(function (body) 
+	local stations = Space.GetBodies(function (body)
 		return body:isa("SpaceStation") and body.type == 'STARPORT_SURFACE'
 	end)
 	if #stations < 2 then
@@ -37,28 +38,33 @@ local spawnShips = function ()
 		fulcrum:SetLabel('[--Fulcrum--]')
 		fulcrum:AddEquip("ECM_ADVANCED")
 		playerarrived=true
+		return 0
+	else
+		print("WARNING: Fulcrums.lua:36 spawned an invalid ship!")
 	end
-	return 0
+
+	return
 end
 
 local onEnterSystem = function (player)
+	return
 	
-	if player:IsPlayer() and spawnShips()~=nil then
-		if fulcrum~=nil then
-			local x,y,z = fulcrum:GetPos()
-			y=y-200
-			Game.player:SetPos(fulcrum,x,y,z)
-			fulcrum:UseECM()
-			Game.player:AIFlyToClose(fulcrum,500)
-		end
-	else
-		if fulcrum~=nil and player:exists() and fulcrum:exists() then
-			local x,y,z = fulcrum:GetPos()
-			y=y+200
-			player:SetPos(fulcrum,x,y,z)
-			fulcrum:UseECM()
-		end
-	end
+	--if player:IsPlayer() and spawnShips()~=nil then
+	--	if fulcrum~=nil then
+	--		local x,y,z = fulcrum:GetPos()
+	--		y=y-200
+	--		Game.player:SetPos(fulcrum,x,y,z)
+	--		fulcrum:UseECM()
+	--		Game.player:AIFlyToClose(fulcrum,500)
+	--	end
+	--else
+	--	if fulcrum~=nil and player:exists() and fulcrum:exists() then
+	--		local x,y,z = fulcrum:GetPos()
+	--		y=y+200
+	--		player:SetPos(fulcrum,x,y,z)
+	--		fulcrum:UseECM()
+	--	end
+	--end
 end
 
 local onAICompleted = function (ship, ai_error)
@@ -75,7 +81,7 @@ local onGameStart = function ()
 end
 
 local serialize = function ()
-	return {playerarrived,fulcrum}
+	return nil
 end
 
 local unserialize = function (data)

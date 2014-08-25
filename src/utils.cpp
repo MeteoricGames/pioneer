@@ -130,7 +130,7 @@ void Error(const char *format, ...)
 	va_end(ap);
 
 	Output("error: %s\n", buf);
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Pioneer error", buf, 0);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Paragon error", buf, 0);
 
 	exit(1);
 }
@@ -144,7 +144,7 @@ void Warning(const char *format, ...)
 	va_end(ap);
 
 	Output("warning: %s\n", buf);
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Pioneer warning", buf, 0);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Paragon warning", buf, 0);
 }
 
 void Output(const char *format, ...)

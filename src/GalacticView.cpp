@@ -23,9 +23,10 @@ using namespace Graphics;
 static const float ZOOM_IN_SPEED = 2;
 static const float ZOOM_OUT_SPEED = 1.f/ZOOM_IN_SPEED;
 static const float WHEEL_SENSITIVITY = .2f;		// Should be a variable in user settings.
+static const Color BACKGROUND_COLOR = Color(0, 89, 178, 255);
 
 GalacticView::GalacticView() : UIView(),
-	m_quad(Graphics::TextureBuilder::UI("galaxy.bmp").CreateTexture(Gui::Screen::GetRenderer()))
+	m_quad(Graphics::TextureBuilder::UI("galaxy.png").CreateTexture(Gui::Screen::GetRenderer()))
 {
 
 	SetTransparency(true);
@@ -114,7 +115,9 @@ void GalacticView::Draw3D()
 
 	const float aspect = m_renderer->GetDisplayAspect();
 	m_renderer->SetOrthographicProjection(-aspect, aspect, 1.f, -1.f, -1.f, 1.f);
+	m_renderer->SetClearColor(BACKGROUND_COLOR);
 	m_renderer->ClearScreen();
+	m_renderer->SetClearColor(Color(0, 0, 0));
 
 	//apply zoom
 	m_renderer->SetTransform(
@@ -123,7 +126,10 @@ void GalacticView::Draw3D()
 		matrix4x4f::Translation(-offset_x, -offset_y, 0.f));
 
 	// galaxy image
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	m_quad.Draw(m_renderer, vector2f(-1.0f), vector2f(2.0f));
+	glDisable(GL_BLEND);
 
 	// "you are here" dot
 	//Color green(0, 255, 0, 255);

@@ -15,6 +15,31 @@ static const float COCKPIT_ACCEL_INTERP_MULTIPLIER = 0.5f;
 static const float COCKPIT_MAX_GFORCE = 10000.0f;
 static const float COCKPIT_ACCEL_OFFSET = 0.075f;
 
+namespace Graphics { namespace GL2 { class TexturedFullscreenQuad; } }
+namespace Graphics { namespace Effects { class TransitEffectMaterial; class TransitCompositionMaterial; } }
+
+class CockpitTransitEffect
+{
+public:
+	explicit CockpitTransitEffect(Graphics::Renderer* renderer);
+	~CockpitTransitEffect();
+
+	void Update(float timeStep);
+	void Render(const matrix4x4d &viewTransform);
+
+private:
+	CockpitTransitEffect(const CockpitTransitEffect&);
+	CockpitTransitEffect& operator=(const CockpitTransitEffect&);
+
+	Graphics::Renderer* m_renderer;
+	std::unique_ptr<Graphics::Effects::TransitEffectMaterial> m_tunnelMtrl;
+	std::unique_ptr<Graphics::Effects::TransitCompositionMaterial> m_compBlurMtrl;
+	std::unique_ptr<Graphics::GL2::TexturedFullscreenQuad> m_outputMtrl;
+	std::unique_ptr<Graphics::RenderTarget> m_tunnelRT;
+	std::unique_ptr<Graphics::RenderTarget> m_compBlurRT;
+	Graphics::Texture* m_noiseTexture;
+};
+
 class ShipCockpit : public ModelBody
 {
 public:
@@ -46,6 +71,8 @@ private:
 	float m_shipVel;           // current ship velocity
 	vector3d m_translate;      // cockpit translation
 	matrix4x4d m_transform;    // cockpit transformation
+
+	std::unique_ptr<CockpitTransitEffect> m_transitEffect;
 };
 
 #endif

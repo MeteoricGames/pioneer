@@ -13,7 +13,6 @@
 
 Sensors::RadarContact::RadarContact()
 : body(0)
-, trail(0)
 , distance(0.0)
 , iff(IFF_UNKNOWN)
 , fresh(true) {
@@ -21,7 +20,6 @@ Sensors::RadarContact::RadarContact()
 
 Sensors::RadarContact::RadarContact(Body *b)
 : body(b)
-, trail(0)
 , distance(0.0)
 , iff(IFF_UNKNOWN)
 , fresh(true) {
@@ -29,7 +27,6 @@ Sensors::RadarContact::RadarContact(Body *b)
 
 Sensors::RadarContact::~RadarContact() {
 	body = 0;
-	delete trail;
 }
 
 Color Sensors::IFFColor(IFF iff)
@@ -119,7 +116,6 @@ void Sensors::Update(float time)
 			rc.body = (*i);
 			rc.ship = ship;
 			rc.iff = CheckIFF(rc.body);
-			rc.trail = new HudTrail(rc.body, IFFColor(rc.iff));
 			rc.ship->ClearThrusterTrails();
 		} else {
 			cit->fresh = true;
@@ -133,7 +129,6 @@ void Sensors::Update(float time)
 			m_radarContacts.erase(it++);
 		} else {
 			it->distance = m_owner->GetPositionRelTo(it->body).Length();
-			it->trail->Update(time);
 			it->fresh = false;
 			++it;
 		}
@@ -146,7 +141,6 @@ void Sensors::UpdateIFF(Body *b)
 	{
 		if (it->body == b) {
 			it->iff = CheckIFF(b);
-			it->trail->SetColor(IFFColor(it->iff));
 		}
 	}
 }
@@ -154,8 +148,10 @@ void Sensors::UpdateIFF(Body *b)
 void Sensors::ResetTrails()
 {
 	for (auto it = m_radarContacts.begin(); it != m_radarContacts.end(); ++it) {
-		it->trail->Reset(Pi::player->GetFrame());
-		it->ship->ClearThrusterTrails();
+		//it->trail->Reset(Pi::player->GetFrame());
+		/*if (it->ship->GetFlightState() != Ship::FlightState::HYPERSPACE) {
+			it->ship->ClearThrusterTrails();
+		}*/
 	}
 }
 

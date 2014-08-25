@@ -33,9 +33,15 @@ public:
 	void GetSizeRequested(float size[2]);
 
 	void ImportantMessage(const std::string &sender, const std::string &msg) {
+		if (m_msgQueue.size() > 0 && m_msgQueue.back().IsEqual(sender, msg)) {
+			return;
+		}
 		m_msgQueue.push_back(message_t(sender, msg, MUST_SEE));
 	}
 	void Message(const std::string &sender, const std::string &msg) {
+		if (m_msgQueue.size() > 0 && m_msgQueue.back().IsEqual(sender, msg)){
+			return;
+		}
 		m_msgQueue.push_back(message_t(sender, msg, NOT_IMPORTANT));
 	}
 	virtual void Update();
@@ -51,7 +57,32 @@ private:
 		std::string sender;
 		std::string message;
 		Type type;
+
+		inline bool operator==(const message_t& other) const {
+			if(message.size() == other.message.size() &&
+				sender == other.sender &&
+				message == other.message) 
+			{
+				return true;
+			} else {
+				return false;
+			}
+		}
+		inline bool operator!=(const message_t& other) const {
+			return !(*this == other);
+		}
+		inline bool IsEqual(const std::string& _sender, const std::string& _message) const {
+			if (message.size() == _message.size() &&
+				sender == _sender &&
+				message == _message)
+			{
+				return true;
+			} else {
+				return false;
+			}
+		}
 	};
+
 	std::list<message_t> m_msgQueue;
 	Uint32 m_msgAge;
 	Gui::Label *m_msgLabel;

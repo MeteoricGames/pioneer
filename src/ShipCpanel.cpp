@@ -63,7 +63,7 @@ void ShipCpanel::InitObject()
 
 //	Gui::RadioGroup *g = new Gui::RadioGroup();
 	float ui_width = static_cast<float>(Gui::Screen::GetWidth());
-	const float pp_margin = 40.0f, clock_margin = 125.0f;
+	const float pp_margin = 40.0f, clock_margin = 135.0f;
 
 	Gui::ImageRadioButton *b;
 
@@ -97,14 +97,17 @@ void ShipCpanel::InitObject()
 	info_button->SetRenderDimensions(30, 22);
 	Add(info_button, 279, 56);
 
-	Gui::MultiStateImageButton *comms_button = new Gui::MultiStateImageButton();
-	m_leftButtonGroup->Add(comms_button);
-	comms_button->SetSelected(false);
-	comms_button->SetShortcut(SDLK_F4, KMOD_NONE);
-	comms_button->AddState(0, "icons/comms_f4.png", "icons/comms_f4_on.png", Lang::COMMS);
-	comms_button->onClick.connect(sigc::mem_fun(this, &ShipCpanel::OnClickComms));
-	comms_button->SetRenderDimensions(30, 22);
-	Add(comms_button, 312, 56);
+	m_commsButton = new Gui::MultiStateImageButton();
+	m_leftButtonGroup->Add(m_commsButton);
+	m_commsButton->SetSelected(false);
+	m_commsButton->SetShortcut(SDLK_F4, KMOD_NONE);
+	m_commsButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/comms_unavailable.png", Lang::COMMS);
+	m_commsButton->AddState(FLIGHT_BUTTON_OFF, "icons/comms_off.png", Lang::COMMS);
+	m_commsButton->AddState(FLIGHT_BUTTON_ON, "icons/comms_on.png", Lang::COMMS);
+	m_commsButton->onClick.connect(sigc::mem_fun(this, &ShipCpanel::OnClickComms));
+	m_commsButton->SetRenderDimensions(30, 22);
+	m_commsButton->SetEnabled(false);
+	Add(m_commsButton, 312, 56);
 
 	Gui::Screen::PushFont("OverlayFont");
 	m_clock = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
@@ -194,6 +197,8 @@ ShipCpanel::~ShipCpanel()
 	delete m_msglog;
 	delete m_inflog;
 	m_connOnDockingClearanceExpired.disconnect();
+
+	m_commsButton = nullptr; // Should've been deleted automatically by left button group
 }
 
 void ShipCpanel::ChangeMultiFunctionDisplay(multifuncfunc_t f)
@@ -250,6 +255,17 @@ void ShipCpanel::Update()
 	m_useEquipWidget->Update();
 	m_msglog->Update();
 	m_inflog->Update();
+
+	// New comms button behavior, only activated when player is docked
+	if (Pi::player->GetFlightState() == Ship::DOCKED) {
+		if (m_commsButton->GetState() == FlightButtonStatus::FLIGHT_BUTTON_UNAVAILABLE) {
+			m_commsButton->SetEnabled(true);
+			m_commsButton->SetActiveState(FlightButtonStatus::FLIGHT_BUTTON_OFF);
+		}
+	} else {
+		m_commsButton->SetActiveState(FlightButtonStatus::FLIGHT_BUTTON_UNAVAILABLE);
+		m_commsButton->SetEnabled(false);
+	}
 }
 
 void ShipCpanel::Draw()
@@ -314,10 +330,12 @@ void ShipCpanel::HideMapviewButtons()
 void ShipCpanel::OnClickComms(Gui::MultiStateImageButton *b)
 {
 	Pi::BoinkNoise();
-	if (Pi::player->GetFlightState() == Ship::DOCKED) Pi::SetView(Pi::spaceStationView);
-	else {
-		Pi::SetView(Pi::worldView);
-		Pi::worldView->ToggleTargetActions();
+	if (Pi::player->GetFlightState() == Ship::DOCKED) {
+		Pi::SetView(Pi::spaceStationView);
+	} else {
+		assert(0);
+		//Pi::SetView(Pi::worldView);
+		//Pi::worldView->ToggleTargetActions();
 	}
 }
 

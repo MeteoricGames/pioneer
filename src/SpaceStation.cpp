@@ -64,6 +64,12 @@ void SpaceStation::Save(Serializer::Writer &wr, Space *space)
 	wr.Double(m_doorAnimationStep);
 	wr.Double(m_doorAnimationState);
 
+	// Store docking queue
+	wr.Int32(m_dockingQueue.size());
+	for(DockingQueue::iterator it = m_dockingQueue.begin(); it != m_dockingQueue.end(); ++it) {
+		wr.Int32(space->GetIndexForBody(*it));
+	}
+
 	m_navLights->Save(wr);
 }
 
@@ -109,6 +115,15 @@ void SpaceStation::Load(Serializer::Reader &rd, Space *space)
 	m_doorAnimationStep = rd.Double();
 	m_doorAnimationState = rd.Double();
 
+	if(Game::s_loadedGameVersion >= 77) { // Save game upgrade: 76 -> 77
+		// Retrieve docking queue indices
+		const int docking_queue_size = rd.Int32();
+		m_dockingQueue.clear();
+		for(int i = 0; i < docking_queue_size; ++i) {
+			m_dockingQueueLoadedData.push_back(rd.Int32());
+		}
+	}
+
 	InitStation();
 
 	m_navLights->Load(rd);
@@ -119,6 +134,12 @@ void SpaceStation::PostLoadFixup(Space *space)
 	ModelBody::PostLoadFixup(space);
 	for (Uint32 i=0; i<m_shipDocking.size(); i++) {
 		m_shipDocking[i].ship = static_cast<Ship*>(space->GetBodyByIndex(m_shipDocking[i].shipIndex));
+	}
+
+	// Fixup docking queue indices to ship pointers
+	for(unsigned int i = 0; i < m_dockingQueueLoadedData.size(); ++i) {
+		m_dockingQueue.push_back(
+			static_cast<Ship*>(space->GetBodyByIndex(m_dockingQueueLoadedData[i])));
 	}
 }
 
@@ -237,6 +258,16 @@ int SpaceStation::GetFreeDockingPort(const Ship *s) const
 		}
 	}
 	return -1;
+}
+
+bool SpaceStation::HasFreeDockingPort() const
+{
+	for(unsigned i = 0; i < m_type->numDockingPorts; ++i) {
+		if(m_shipDocking[i].ship == 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void SpaceStation::SetDocked(Ship *ship, int port)
@@ -416,7 +447,10 @@ void SpaceStation::DockingUpdate(const double timeStep)
 			m_doorAnimationStep = 0.3; // open door
 
 			if (dt.stagePos >= 1.0) {
-				if (dt.ship == static_cast<Ship*>(Pi::player)) Pi::onDockingClearanceExpired.emit(this);
+				CancelDockingApproach(dt.ship);
+				if (dt.ship == static_cast<Ship*>(Pi::player)) { 
+					Pi::onDockingClearanceExpired.emit(this);
+				}
 				dt.ship = 0;
 				dt.stage = 0;
 				m_doorAnimationStep = -0.3; // close door
@@ -596,9 +630,12 @@ void SpaceStation::SetLabel(const std::string &label)
 // great place for this, but its gotta be tracked somewhere
 bool SpaceStation::AllocateStaticSlot(int& slot)
 {
+	// <Salwan> return false was commented out as part of an old commit a year ago by shadmar.
+	// Don't know if leaving IsGroundStation check was intentional or not.
+	//
 	// no slots at ground stations
-	if (IsGroundStation())
-		//return false;
+	//if (IsGroundStation())
+	//	return false;
 
 	for (int i=0; i<NUM_STATIC_SLOTS; i++) {
 		if (!m_staticSlot[i]) {
@@ -691,5 +728,37 @@ void SpaceStation::LockPort(const int bay, const bool lockIt)
 				return;
 			}
 		}
+	}
+}
+
+void SpaceStation::RequestDockingApproach(Ship* ship)
+{
+	DockingQueue::iterator iter = std::find(m_dockingQueue.begin(), m_dockingQueue.end(), ship);
+	assert(iter == m_dockingQueue.end()); // Ship already in docking queue!
+	if(iter == m_dockingQueue.end()) {
+		m_dockingQueue.push_back(ship);
+		assert(m_dockingQueue.size() < 10); // Debugging warning: docking queue exceeded 10 ships! something is wrong
+	}
+}
+
+void SpaceStation::CancelDockingApproach(Ship* ship)
+{
+	if(ship && !m_dockingQueue.empty()) {
+		DockingQueue::iterator iter = std::find(m_dockingQueue.begin(), m_dockingQueue.end(), ship);
+		if(iter != m_dockingQueue.end()) {
+			m_dockingQueue.erase(iter);
+		}
+	}
+}
+
+bool SpaceStation::CheckDockingApproachSignal(Ship* ship)
+{
+	if(m_dockingQueue.front() == ship) {
+		m_dockingQueue.pop_front();
+		return true;
+	} else {
+		DockingQueue::const_iterator iter = std::find(m_dockingQueue.begin(), m_dockingQueue.end(), ship);
+		assert(iter != m_dockingQueue.end()); // Ship not in docking queue!
+		return false;
 	}
 }

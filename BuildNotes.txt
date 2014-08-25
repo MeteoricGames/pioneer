@@ -4,6 +4,10 @@ Paragon Build Notes
 LINUX:
 -------------------------------------------------
 
+First time configuring of paragon:
+	if using autoconf configure.ac fails, make sure pkg-config is installed and then:
+		autoreconf -fi configure.ac > configure
+
 Building debian package: 
 	Unsolved problem: depedency libassimp3 is not available in default repositories
 	Possible solution: statically link to libassimp3 when building debian package
@@ -13,6 +17,10 @@ Building static binary:
 		to build libassimp as static, in source/assimp/CMakeLists.txt change "SET ( BUILD_STATIC_LIB OFF CACHE BOOL" to "ON"
 	configure paragon:
 		./configure --with-thirdparty=/path/to/pioneer-thirdparty
+	add release flag if needed:
+		--enable-release
+	alternatively, build assimp separately from /build with:
+		cmake -DBUILD_STATIC_LIB=ON ..
 	build paragon normally
 	remove binary symbols to reduce size using strip:
 		strip --strip-all src/paragon

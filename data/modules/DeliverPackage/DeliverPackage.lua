@@ -384,10 +384,12 @@ local onEnterSystem = function (player)
                     local laserdef = laserdefs[Engine.rand:Integer(1,#laserdefs)]
 
 					ship = Space.SpawnShipNear(shipdef.id, Game.player, 50, 100)
-					ship:SetLabel(Ship.MakeRandomLabel())
-					ship:AddEquip(default_drive)
-					ship:AddEquip(laserdef.id)
-					ship:AIKill(Game.player)
+					if ship ~= nil then
+						ship:SetLabel(Ship.MakeRandomLabel())
+						ship:AddEquip(default_drive)
+						ship:AddEquip(laserdef.id)
+						ship:AIKill(Game.player)
+					end
 				end
 			end
 

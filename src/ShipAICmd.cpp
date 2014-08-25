@@ -36,6 +36,8 @@ AICommand *AICommand::Load(Serializer::Reader &rd)
 		case CMD_FORMATION: return new AICmdFormation(rd);
 		case CMD_PARAGON_FLYTO: return new AIParagonCmdFlyTo(rd);
 		case CMD_PARAGON_TRANSIT: return new AIParagonCmdTransit(rd);
+		case CMD_PARAGON_ORBIT: return new AIParagonCmdOrbit(rd);
+		case CMD_PARAGON_DOCK: return new AIParagonCmdDock(rd);
 	}
 }
 
@@ -266,7 +268,8 @@ bool AICmdKill::TimeStepUpdate()
 
 	if (targpos.Length() >= VICINITY_MIN/3) {
 		m_ship->SetJuice(20.0 * hullDamage);
-		m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
+		m_child = new AIParagonCmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
+		//m_child = new AICmdFlyTo(m_ship, m_target, Pi::rng.Int32(2000, 3000));
 		ProcessChild(); return false;
 	}
 	else {
@@ -1189,6 +1192,7 @@ bool AICmdFlyTo::TimeStepUpdate()
 //------------------------------- Command: Dock
 AICmdDock::AICmdDock(Ship *ship, SpaceStation *target) : AICommand(ship, CMD_DOCK)
 {
+	bool is_player = ship->IsPlayerShip();
 	m_target = target;
 	m_state = eDockGetDataStart;
 	double grav = GetGravityAtPos(m_target->GetFrame(), m_target->GetPosition());
@@ -1206,6 +1210,7 @@ AICmdDock::AICmdDock(Ship *ship, SpaceStation *target) : AICommand(ship, CMD_DOC
 
 bool AICmdDock::TimeStepUpdate()
 {
+	bool is_player = m_ship->IsPlayerShip();
 	if (m_ship->GetFlightState() == Ship::JUMPING) return false;
 	if (!ProcessChild()) return false;
 	if (!m_target) return true;
@@ -1218,7 +1223,8 @@ bool AICmdDock::TimeStepUpdate()
 	// if we're not close to target, do a flyto first
 	double targdist = m_target->GetPositionRelTo(m_ship).Length();
 	if (targdist > 16000.0) {
-		m_child = new AICmdFlyTo(m_ship, m_target);
+		//m_child = new AICmdFlyTo(m_ship, m_target);
+		m_child = new AIParagonCmdFlyTo(m_ship, m_target);
 		ProcessChild(); return false;
 	}
 	//Forced reduce power. for landing...
@@ -1263,9 +1269,10 @@ bool AICmdDock::TimeStepUpdate()
 	}
 
 	if (m_state == 1) {			// fly to first docking waypoint
-		m_dockpos.x+=Pi::rng.Int32(-50,50);
-		m_dockpos.y+=Pi::rng.Int32(-10,10);
+		//m_dockpos.x+=Pi::rng.Int32(-50,50);
+		//m_dockpos.y+=Pi::rng.Int32(-10,10);
 		m_child = new AICmdFlyTo(m_ship, m_target->GetFrame(), m_dockpos, 0.0, false);
+		//m_child = new AIParagonCmdGoTo(m_ship, m_target->GetFrame(), m_dockpos);
 		ProcessChild(); return false;
 	}
 
@@ -1595,7 +1602,8 @@ bool AICmdFormation::TimeStepUpdate()
 	// if too far away, do an intercept first
 	// TODO: adjust distance cap by timestep so we don't bounce?
 	if (m_target->GetPositionRelTo(m_ship).Length() > 30000.0) {
-		m_child = new AICmdFlyTo(m_ship, m_target);
+		//m_child = new AICmdFlyTo(m_ship, m_target);
+		m_child = new AIParagonCmdFlyTo(m_ship, m_target);
 		ProcessChild(); return false;
 	}
 

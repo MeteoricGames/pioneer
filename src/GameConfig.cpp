@@ -41,12 +41,11 @@ GameConfig::GameConfig(const std::map<std::string,std::string> &override_)
 	map["SpeedLines"] = "0";
 	map["TargetIndicators"] = "0";
 	map["EnableCockpit"] = "1";
-	map["HudTrails"] = "0";
 
 #ifdef _WIN32
 	map["RedirectStdio"] = "1";
 #else
-	map["RedirectStdio"] = "0";
+	map["RedirectStdio"] = "1";
 #endif
 	map["EnableGLDebug"] = "0";
 

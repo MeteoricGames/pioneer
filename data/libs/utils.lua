@@ -147,4 +147,41 @@ function utils.stable_sort(values, cmp)
 	return merge_sort(values)
 end
 
+--
+-- split: split a string using a seperator char
+--
+-- returns: an array of strings
+--
+function utils.split(inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        t={} ; i=1
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                t[i] = str
+                i = i + 1
+        end
+        return t, i
+end
+
+--
+-- inspectObject: inspects and prints a description of an object
+--
+--
+local inspectObject = function (title, object)
+	-- Debug inspection
+	object_dump = inspect(object)
+	print("START of Serialization")
+	print(title.." serlizable data character count: "..object_dump:len())
+	object_dump_array, split_count = utils.split(object_dump, '}')
+	if split_count > 1 then
+		for key, val in pairs(object_dump_array) do
+			print(val.."}")
+		end
+	else
+		print(val)
+	end
+	print("END of Serialization")
+end
+
 return utils

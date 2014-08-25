@@ -30,6 +30,8 @@ public:
 	IterationProxy<std::map<std::string,std::string> > GetStrings() { return MakeIterationProxy(m_strings); }
 	const IterationProxy<const std::map<std::string,std::string> > GetStrings() const { return MakeIterationProxy(m_strings); }
 
+	static Resource* s_defaultLangResource;
+
 private:
 	std::string m_name;
 	std::string m_langCode;

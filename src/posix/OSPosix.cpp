@@ -95,4 +95,9 @@ int GetNumCores()
 #endif
 }
 
+void EnableBreakpad()
+{
+	// Support for Mac and Linux should be added
+}
+
 } // namespace OS

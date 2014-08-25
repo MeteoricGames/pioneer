@@ -1,1 +1,0 @@
-CubeMapGen -importFaceXPos:"ub0/ub0_right1.png" -importFaceXNeg:"ub0/ub0_left2.png" -importFaceYPos:"ub0/ub0_top3.png" -importFaceYNeg:"ub0/ub0_bottom4.png" -importFaceZPos:"ub0/ub0_front5.png" -importFaceZNeg:"ub0/ub0_back6.png" -exportFilename:"ub0.dds" -exportCubeDDS -exportPixelFormat:DXT1 -consoleErrorOutput -exit

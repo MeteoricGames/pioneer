@@ -18,6 +18,8 @@
 #include "graphics/Drawables.h"
 #include "Factions.h"
 
+static const Color BACKGROUND_COLOR = Color(0, 89, 178, 255);
+
 SystemInfoView::SystemInfoView() : UIView()
 {
 	SetTransparency(true);
@@ -441,7 +443,11 @@ void SystemInfoView::Draw3D()
 {
 	PROFILE_SCOPED()
 	m_renderer->SetTransform(matrix4x4f::Identity());
+
+	m_renderer->SetClearColor(BACKGROUND_COLOR);
 	m_renderer->ClearScreen();
+	m_renderer->SetClearColor(Color(0, 0, 0));
+
 	UIView::Draw3D();
 }
 
