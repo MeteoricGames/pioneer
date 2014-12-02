@@ -19,6 +19,8 @@
 #include "SectorViewLabelSet.h"
 #include <set>
 
+// SECTORS/SYSTEMS
+
 class SectorView: public UIView {
 public:
 	SectorView();
@@ -75,7 +77,7 @@ private:
 	void BuildFarSector(RefCountedPtr<Sector> sec, const vector3f &origin, std::vector<vector3f> &points, std::vector<Color> &colors);
 	void PutFactionLabels(const vector3f &secPos);
 	void AddStarBillboard(const matrix4x4f &modelview, const vector3f &pos, const Color &col, float size,
-		bool current_sector = false, bool selected_sector = false);
+		bool current_sector = false, bool selected_sector = false, bool current_mission = false);
 
 	void OnClickSystem(const SystemPath &path);
 
@@ -170,6 +172,7 @@ private:
 	Graphics::Texture* m_starIcon;
 	Graphics::Texture* m_currentSectorIcon;
 	Graphics::Texture* m_selectedSectorIcon;
+	Graphics::Texture* m_currentMissionTopIcon;
 
 	std::vector<vector3f> m_farstars;
 	std::vector<Color>    m_farstarsColor;
@@ -191,6 +194,7 @@ private:
 	std::unique_ptr<Graphics::VertexArray> m_starVerts;
 	std::unique_ptr<Graphics::VertexArray> m_currentSectorVerts;
 	std::unique_ptr<Graphics::VertexArray> m_selectedSectorVerts;
+	std::unique_ptr<Graphics::VertexArray> m_currentMissionVerts;
 };
 
 #endif /* _SECTORVIEW_H */

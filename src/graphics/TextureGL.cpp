@@ -90,16 +90,19 @@ TextureGL::TextureGL(const TextureDescriptor &descriptor, const bool useCompress
 	switch (m_target) {
 		case GL_TEXTURE_2D:
 			if (!IsCompressed(descriptor.format)) {
-				if (descriptor.generateMipmaps)
-					glTexParameteri(m_target, GL_GENERATE_MIPMAP, GL_TRUE);
-				else
+				if (!descriptor.generateMipmaps) {
 					glTexParameteri(m_target, GL_TEXTURE_MAX_LEVEL, 0);
+				}
 
 				glTexImage2D(
 					m_target, 0, compressTexture ? GLCompressedInternalFormat(descriptor.format) : GLInternalFormat(descriptor.format),
 					descriptor.dataSize.x, descriptor.dataSize.y, 0,
 					GLImageFormat(descriptor.format),
 					GLImageType(descriptor.format), 0);
+
+				//if(descriptor.generateMipmaps) {
+				//	glGenerateMipmap(m_target);
+				//}
 			} else {
 				const GLint oglFormatMinSize = GetMinSize(descriptor.format);
 				size_t Width = descriptor.dataSize.x;
@@ -123,10 +126,9 @@ TextureGL::TextureGL(const TextureDescriptor &descriptor, const bool useCompress
 
 		case GL_TEXTURE_CUBE_MAP:
 			if(!IsCompressed(descriptor.format)) {
-				if(descriptor.generateMipmaps)
-					glTexParameteri(m_target, GL_GENERATE_MIPMAP, GL_TRUE);
-				else
+				if(!descriptor.generateMipmaps) {
 					glTexParameteri(m_target, GL_TEXTURE_MAX_LEVEL, 0);
+				}
 
 				glTexImage2D(
 					GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, compressTexture ? GLCompressedInternalFormat(descriptor.format) : GLInternalFormat(descriptor.format),
@@ -158,6 +160,10 @@ TextureGL::TextureGL(const TextureDescriptor &descriptor, const bool useCompress
 					descriptor.dataSize.x, descriptor.dataSize.y, 0,
 					GLImageFormat(descriptor.format),
 					GLImageType(descriptor.format), 0);
+
+				//if(descriptor.generateMipmaps) {
+				//	glGenerateMipmap(m_target);
+				//}
 			} else {
 				const GLint oglFormatMinSize = GetMinSize(descriptor.format);
 				size_t Width = descriptor.dataSize.x;
@@ -258,13 +264,17 @@ void TextureGL::Update(const void *data, const vector2f &pos, const vector2f &da
 					Height /= 2;
 				}
 			}
+
+			if(GetDescriptor().generateMipmaps && numMips == 0) {
+				glGenerateMipmap(m_target);
+			}
 			break;
 
 		default:
 			assert(0);
 	}
 
-	glBindTexture(m_target, 0);
+	//glBindTexture(m_target, 0);
 }
 
 void TextureGL::Update(const TextureCubeData &data, const vector2f &dataSize, TextureFormat format, const unsigned int numMips)
@@ -311,13 +321,17 @@ void TextureGL::Update(const TextureCubeData &data, const vector2f &dataSize, Te
 					Height /= 2;
 				}
 			}
+
+			if(GetDescriptor().generateMipmaps && numMips == 0) {
+				glGenerateMipmap(m_target);
+			}
 			break;
 
 		default:
 			assert(0);
 	}
 
-	glBindTexture(m_target, 0);
+	//glBindTexture(m_target, 0);
 }
 
 void TextureGL::Bind()
@@ -327,7 +341,7 @@ void TextureGL::Bind()
 
 void TextureGL::Unbind()
 {
-	glBindTexture(m_target, 0);
+	//glBindTexture(m_target, 0);
 }
 
 void TextureGL::SetSampleMode(TextureSampleMode mode)
@@ -360,7 +374,7 @@ void TextureGL::SetSampleMode(TextureSampleMode mode)
 	glBindTexture(m_target, m_texture);
 	glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, magFilter);
 	glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, minFilter);
-	glBindTexture(m_target, 0);
+	//glBindTexture(m_target, 0);
 }
 
 }

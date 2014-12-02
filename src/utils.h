@@ -155,4 +155,7 @@ static inline Uint32 ceil_pow2(Uint32 v)
 
 void hexdump(const unsigned char *buf, int bufsz);
 
+void CheckGLError();
+std::string glerr_to_string(GLenum err);
+
 #endif /* _UTILS_H */

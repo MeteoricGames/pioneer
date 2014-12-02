@@ -25,7 +25,7 @@ public:
 	void UnsetAttribPointers();
 
 protected:
-	virtual Uint8 *MapInternal(BufferMapMode) override;
+	virtual Uint8 *MapInternal(BufferMapMode, size_t) override;
 
 private:
 	Uint8 *m_data;
@@ -36,11 +36,11 @@ public:
 	IndexBuffer(Uint32 size, BufferUsage);
 	~IndexBuffer();
 
-	virtual Uint16 *Map(BufferMapMode) override;
+	virtual Uint32 *Map(BufferMapMode) override;
 	virtual void Unmap() override;
 
 private:
-	Uint16 *m_data;
+	Uint32 *m_data;
 };
 
 } }

@@ -3,6 +3,7 @@
 
 #include "CameraController.h"
 #include "Ship.h"
+#include "ShipCockpit.h"
 #include "AnimationCurves.h"
 #include "Pi.h"
 #include "Game.h"
@@ -33,10 +34,30 @@ void CameraController::Update()
 }
 
 
+void CameraController::Save(Serializer::Writer &wr)
+{
+	
+}
+
+void CameraController::Load(Serializer::Reader &rd)
+{
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+//--------------------------------------------------------- InternalCameraController
 InternalCameraController::InternalCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship) :
 	CameraController(camera, ship),
-	m_mode(MODE_FRONT)
+	m_mode(MODE_FRONT),
+	m_dist(200), m_distTo(m_dist),
+	m_rotX(0),
+	m_rotY(0),
+	m_flDir(0.0, 0.0),
+	m_flResetTimer(0.0f)
 {
+	m_tweenRotX.reset(new Easing::NumericTweener<double>(0.0, Easing::Cubic::EaseInOut<double>));
+	m_tweenRotY.reset(new Easing::NumericTweener<double>(0.0, Easing::Cubic::EaseInOut<double>));
+	m_tweenSpeed.reset(new Easing::NumericTweener<double>(0.0, Easing::Cubic::EaseInOut<double>));
 	Reset();
 }
 
@@ -89,8 +110,44 @@ void InternalCameraController::Reset()
 	SetMode(m_mode);
 }
 
+void InternalCameraController::RotateDown(float frameTime)
+{
+	m_flDir.x += 1.0;
+}
+
+void InternalCameraController::RotateUp(float frameTime)
+{
+	m_flDir.x -= 1.0;
+}
+
+void InternalCameraController::RotateLeft(float frameTime)
+{
+	m_flDir.y -= 1.0;
+}
+
+void InternalCameraController::RotateRight(float frameTime)
+{
+	m_flDir.y += 1.0;
+}
+
+void InternalCameraController::ZoomIn(float frameTime)
+{
+	ZoomOut(-frameTime);
+}
+
+void InternalCameraController::ZoomOut(float frameTime)
+{
+	m_dist += 400 * frameTime;
+	m_dist = std::max(GetShip()->GetClipRadius(), m_dist);
+	m_distTo = m_dist;
+	m_flResetTimer = COCKPIT_RESET_TIME;
+}
+
 void InternalCameraController::SetMode(Mode m)
 {
+	if (m_mode != m) {
+		ResetFreelook();
+	}
 	m_mode = m;
 	switch (m_mode) {
 		case MODE_FRONT:
@@ -126,19 +183,111 @@ void InternalCameraController::SetMode(Mode m)
 	}
 }
 
+void InternalCameraController::ApplySmoothFreelook(vector2d& dir, float td)
+{
+	m_rotX += dir.x * m_tweenSpeed->GetValue() * td;
+	m_rotY += dir.y * m_tweenSpeed->GetValue() * td;
+	m_rotX = Clamp(m_rotX, -COCKPIT_MAX_FREELOOK_ANGLE, COCKPIT_MAX_FREELOOK_ANGLE);
+	m_rotY = Clamp(m_rotY, -COCKPIT_MAX_FREELOOK_ANGLE, COCKPIT_MAX_FREELOOK_ANGLE);
+	m_extOrient = matrix3x3d::RotateY(DEG2RAD(m_rotY)) *
+		matrix3x3d::RotateX(DEG2RAD(m_rotX));
+	SetOrient(m_extOrient);
+	m_tweenRotX->SetValue(m_rotX);
+	m_tweenRotY->SetValue(m_rotY);
+	m_tweenRotX->EaseTo(0.0, 0.5);
+	m_tweenRotY->EaseTo(0.0, 0.5);
+}
+
+void InternalCameraController::Update()
+{
+	bool dir_down = m_flDir.LengthSqr() > 0.0001;
+	bool is_freelooking = IsFreelooking();
+	const float td = Pi::GetFrameTime();
+
+	if(dir_down) { // Freelooking keys are down
+		m_flResetTimer = COCKPIT_RESET_TIME;
+		if (m_tweenSpeed->GetEndValue() < COCKPIT_MAX_FREELOOK_SPEED) {
+			m_tweenSpeed->EaseTo(COCKPIT_MAX_FREELOOK_SPEED, 0.5);
+		}
+		m_tweenSpeed->Update(td);
+		ApplySmoothFreelook(m_flDir, td);
+		m_flLastDir = m_flDir;
+	} else if(is_freelooking) { // No keys are down, but view not in center
+		if (m_tweenSpeed->GetEndValue() > 0.0) {
+			m_tweenSpeed->EaseTo(0.0, 0.5);
+		}
+		m_tweenSpeed->Update(td);
+		if(m_tweenSpeed->GetValue() > 0.0) {
+			ApplySmoothFreelook(m_flLastDir, td);
+		} else {
+			if (m_flResetTimer > 0.0f) {
+				m_flResetTimer = std::max(m_flResetTimer - Pi::GetFrameTime(), 0.0f);
+				m_extOrient.Identity();
+			} else {
+				m_tweenRotX->Update(td);
+				m_tweenRotY->Update(td);
+				m_rotX = m_tweenRotX->GetValue();
+				m_rotY = m_tweenRotY->GetValue();
+				m_extOrient = matrix3x3d::RotateY(DEG2RAD(m_rotY)) *
+					matrix3x3d::RotateX(DEG2RAD(m_rotX));
+				SetOrient(m_extOrient);
+			}
+		}
+	} else {
+		m_extOrient.Identity();
+	}
+
+	m_flDir.x = 0.0;
+	m_flDir.y = 0.0;
+	CameraController::Update();
+}
+
+bool InternalCameraController::IsFreelooking() const
+{
+	if((std::abs(m_rotX) + std::abs(m_rotY)) > std::numeric_limits<double>::epsilon()) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void InternalCameraController::ResetFreelook()
+{
+	m_rotX = 0.0;
+	m_rotY = 0.0;
+	m_dist = m_distTo = 200.0;
+	m_flDir.x = 0.0;
+	m_flDir.y = 0.0;
+	m_flResetTimer = 0.0f;
+	m_tweenRotX->Reset(m_rotX);
+	m_tweenRotY->Reset(m_rotY);
+}
+
 void InternalCameraController::Save(Serializer::Writer &wr)
 {
 	wr.Int32(m_mode);
+	wr.Double(m_rotX);
+	wr.Double(m_rotY);
+	wr.Double(m_dist);
+	wr.Float(m_flResetTimer);
+	CameraController::Save(wr);
 }
 
 void InternalCameraController::Load(Serializer::Reader &rd)
 {
 	SetMode(static_cast<Mode>(rd.Int32()));
+	m_rotX = rd.Double();
+	m_rotY = rd.Double();
+	m_dist = rd.Double();
+	m_distTo = m_dist;
+	m_flResetTimer = rd.Float();
+	CameraController::Load(rd);
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------- ExternalCameraController
 ExternalCameraController::ExternalCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship) :
-	MoveableCameraController(camera, ship),
+	CameraController(camera, ship),
 	m_dist(200), m_distTo(m_dist),
 	m_rotX(0),
 	m_rotY(0),
@@ -225,6 +374,7 @@ void ExternalCameraController::Save(Serializer::Writer &wr)
 	wr.Double(m_rotX);
 	wr.Double(m_rotY);
 	wr.Double(m_dist);
+	CameraController::Save(wr);
 }
 
 void ExternalCameraController::Load(Serializer::Reader &rd)
@@ -233,11 +383,12 @@ void ExternalCameraController::Load(Serializer::Reader &rd)
 	m_rotY = rd.Double();
 	m_dist = rd.Double();
 	m_distTo = m_dist;
+	CameraController::Load(rd);
 }
 
 
 SiderealCameraController::SiderealCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship) :
-	MoveableCameraController(camera, ship),
+	CameraController(camera, ship),
 	m_dist(200), m_distTo(m_dist),
 	m_sidOrient(matrix3x3d::Identity())
 {
@@ -326,6 +477,7 @@ void SiderealCameraController::Save(Serializer::Writer &wr)
 {
 	for (int i = 0; i < 9; i++) wr.Double(m_sidOrient[i]);
 	wr.Double(m_dist);
+	CameraController::Save(wr);
 }
 
 void SiderealCameraController::Load(Serializer::Reader &rd)
@@ -333,4 +485,5 @@ void SiderealCameraController::Load(Serializer::Reader &rd)
 	for (int i = 0; i < 9; i++) m_sidOrient[i] = rd.Double();
 	m_dist = rd.Double();
 	m_distTo = m_dist;
+	CameraController::Load(rd);
 }

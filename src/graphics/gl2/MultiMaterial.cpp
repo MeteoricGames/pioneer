@@ -65,7 +65,7 @@ Program *MultiMaterial::CreateProgram(const MaterialDescriptor &desc)
 
 Program *LitMultiMaterial::CreateProgram(const MaterialDescriptor &desc)
 {
-	m_curNumLights = m_renderer->m_numDirLights;
+	m_curNumLights = m_renderer->GetNumDirLights();
 	return new MultiProgram(desc, m_curNumLights);
 }
 
@@ -112,8 +112,8 @@ void MultiMaterial::Apply()
 void LitMultiMaterial::Apply()
 {
 	//request a new light variation
-	if (m_curNumLights != m_renderer->m_numDirLights) {
-		m_curNumLights = m_renderer->m_numDirLights;
+	if (m_curNumLights != m_renderer->GetNumDirLights()) {
+		m_curNumLights = m_renderer->GetNumDirLights();
 		if (m_programs[m_curNumLights] == 0) {
 			m_descriptor.dirLights = m_curNumLights; //hax
 			m_programs[m_curNumLights] = m_renderer->GetOrCreateProgram(this);

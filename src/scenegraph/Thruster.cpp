@@ -10,6 +10,7 @@
 #include "graphics/Material.h"
 #include "graphics/TextureBuilder.h"
 #include "graphics/RenderState.h"
+#include "MainMaterial.h"
 
 namespace SceneGraph {
 
@@ -30,11 +31,15 @@ Thruster::Thruster(Graphics::Renderer *r, bool _linear, const vector3f &_pos, co
 	Graphics::MaterialDescriptor desc;
 	desc.textures = 1;
 
-	m_tMat.Reset(r->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_tMat.Reset(new MainMaterial(r, desc));
+		m_glowMat.Reset(new MainMaterial(r, desc));
+	} else {
+		m_tMat.Reset(r->CreateMaterial(desc));
+		m_glowMat.Reset(r->CreateMaterial(desc));
+	}
 	m_tMat->texture0 = Graphics::TextureBuilder::Billboard(thrusterTextureFilename).GetOrCreateTexture(r, "billboard");
 	m_tMat->diffuse = baseColor;
-
-	m_glowMat.Reset(r->CreateMaterial(desc));
 	m_glowMat->texture0 = Graphics::TextureBuilder::Billboard(thrusterGlowTextureFilename).GetOrCreateTexture(r, "billboard");
 	m_glowMat->diffuse = baseColor;
 

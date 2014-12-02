@@ -19,12 +19,16 @@ MeterBar::MeterBar(float width, const char *label, const ::Color &graphCol, Mete
 	Gui::Screen::PushFont("HudFont");
 	m_label = new Gui::Label(label);
 	m_label->Color(labelCol);
+
 	if (m_alignment == METERBAR_LEFT) {
 		Add(m_label, m_requestedWidth - LABEL_WIDTH, 0.0f);
 	} else {
-		Add(m_label, 0.0f, 0.0f);
+		Add(m_label, 0.0f, -1.0f);
 	}
 	m_label->Show();
+	m_labelIter = std::find_if(m_children.begin(), m_children.end(), 
+		[this](const Gui::Container::widget_pos& wi)->bool{ return wi.w == m_label; });
+	assert(m_labelIter != m_children.end());
 	Gui::Screen::PopFont();
 }
 
@@ -42,6 +46,9 @@ void MeterBar::Draw()
 		r->Translate(METERBAR_PADDING, METERBAR_PADDING, 0.0f);
 	} else {
 		r->Translate(METERBAR_PADDING + LABEL_WIDTH, METERBAR_PADDING, 0.0f);
+		vector2f s;
+		m_label->GetSize(&s.x);
+		m_labelIter->pos[0] = LABEL_WIDTH - s.x - 4.0f;
 	}
 
 	sizeback[0] = (size[0] - LABEL_WIDTH) - 2.0f * METERBAR_PADDING;

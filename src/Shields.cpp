@@ -9,6 +9,7 @@
 #include "Ship.h"
 #include "Pi.h"
 #include <sstream>
+#include "MainMaterial.h"
 
 namespace {
 	static RefCountedPtr<Graphics::Material> s_matShield;
@@ -73,7 +74,11 @@ void Shields::Init(Graphics::Renderer *renderer)
 	desc.lighting = true;
 	desc.alphaTest = false;
 	desc.effect = Graphics::EffectType::EFFECT_SHIELD;
-	s_matShield.Reset(renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		s_matShield.Reset(new MainMaterial(renderer, desc));
+	} else {
+		s_matShield.Reset(renderer->CreateMaterial(desc));
+	}
 	s_matShield->diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 	s_initialised = true;
@@ -277,7 +282,7 @@ void Shields::Update(const float coolDown, const float shieldStrength)
 		s_renderParams.coolDown = coolDown;
 
 		Uint32 numHits = m_hits.size();
-		for (Uint32 i = 0; i<numHits && i<ShieldRenderParameters::MAX_SHIELD_HITS;  ++i) {
+		for (Uint32 i = 0; i<numHits && i < MAX_SHIELD_HITS;  ++i) {
 			const  Hits &hit = m_hits[i];
 			s_renderParams.hitPos[i] = vector3f(hit.pos.x, hit.pos.y, hit.pos.z);
 

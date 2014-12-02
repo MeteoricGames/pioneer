@@ -15,18 +15,33 @@ namespace Graphics {
 	class Renderer;
 	class PostProcessing;
 
+	namespace GL3 {
+		class Effect;
+	}
+
 	enum PostProcessPassType
 	{
 		PP_PASS_THROUGH, // Normal pass: last pass as input, new pass as output
 		PP_PASS_COMPOSE, // Composition pass: main rt and last pass as input, new pass as output
 	};
 
+	enum PostProcessEffectType
+	{
+		PP_ET_MATERIAL = 0,
+		PP_ET_EFFECT,
+	};
+
 	struct PostProcessPass
 	{
+		PostProcessPass() : effect_type(PP_ET_MATERIAL), texture0Id(-1), texture1Id(-1) {}
 		std::string name;
 		std::shared_ptr<Material> material;
+		std::shared_ptr<Graphics::GL3::Effect> effect;
 		std::unique_ptr<RenderTarget> renderTarget;
 		PostProcessPassType type;
+		PostProcessEffectType effect_type;
+		int texture0Id;
+		int texture1Id;
 	};
 
 	class PostProcess
@@ -36,11 +51,16 @@ namespace Graphics {
 		// Constructs a custom render target
 		PostProcess(const std::string& effect_name, RenderTargetDesc& rtd);
 		// Constructs a color render target that matches the display mode
-		PostProcess(const std::string& effect_name, WindowSDL* window);
+		PostProcess(const std::string& effect_name, WindowSDL* window, bool with_alpha = false);
 		virtual ~PostProcess();
 
-		void AddPass(Renderer* renderer, const std::string& pass_name, std::shared_ptr<Material>& material, PostProcessPassType pass_type = PP_PASS_THROUGH);
-		void AddPass(Renderer* renderer, const std::string& pass_name, Graphics::EffectType effect_type, PostProcessPassType pass_type = PP_PASS_THROUGH);
+		void AddPass(Renderer* renderer, const std::string& pass_name, 
+			std::shared_ptr<Material>& material, PostProcessPassType pass_type = PP_PASS_THROUGH);
+		void AddPass(Renderer* renderer, const std::string& pass_name, 
+			Graphics::EffectType effect_type, PostProcessPassType pass_type = PP_PASS_THROUGH);
+		void AddPass(Renderer* renderer, const std::string& pass_name,
+			std::shared_ptr<Graphics::GL3::Effect> effect, 
+			PostProcessPassType pass_type = PP_PASS_THROUGH);
 
 		// Accessors
 		unsigned int GetPassCount() const { return vPasses.size(); }

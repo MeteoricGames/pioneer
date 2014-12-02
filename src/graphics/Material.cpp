@@ -15,10 +15,12 @@ Material::Material() :
 	diffuse(Color::WHITE),
 	specular(Color::BLACK),
 	emissive(Color::BLACK),
-	tint(Color::WHITE),
 	shininess(100), //somewhat sharp
+	tint(Color::WHITE),
 	specialParameter0(0),
-	pointSize(1.0f)
+	pointSize(1.0f),
+	atmosphereColor(Color(0)),
+	atmosphereDensity(0.0f)
 {
 }
 
@@ -35,6 +37,7 @@ MaterialDescriptor::MaterialDescriptor()
 , textures(0)
 , dirLights(0)
 , quality(0)
+, testMode(false)
 {
 }
 
@@ -52,7 +55,8 @@ bool operator==(const MaterialDescriptor &a, const MaterialDescriptor &b)
 		a.colorTint == b.colorTint && 
 		a.textures == b.textures &&
 		a.dirLights == b.dirLights &&
-		a.quality == b.quality
+		a.quality == b.quality &&
+		a.testMode == b.testMode
 	);
 }
 

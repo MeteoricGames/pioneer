@@ -17,14 +17,16 @@ MouseCursor::MouseCursor(Graphics::Renderer* renderer) : m_renderer(renderer),
 	Gui::TexturedQuad *normal_cursor, *flight_cursor;
 
 	Graphics::TextureBuilder b = Graphics::TextureBuilder::UI("icons/mouse_normal.png");
-	normal_cursor = new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui"));
+	normal_cursor = new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
+		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui"));
 	m_vCursor.push_back(normal_cursor);
 	const Graphics::TextureDescriptor &d = b.GetDescriptor();
 	m_vHotspot.push_back(vector2f(3.0f/33.0f, 3.0f/33.0f));
 	m_vSize.push_back(vector2f(d.dataSize.x * d.texSize.x, d.dataSize.y * d.texSize.y));
 
 	b = Graphics::TextureBuilder::UI("icons/mouse_follow.png");
-	flight_cursor = new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui"));
+	flight_cursor = new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
+		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui"));
 	m_vCursor.push_back(flight_cursor);
 	const Graphics::TextureDescriptor &d2 = b.GetDescriptor();
 	m_vHotspot.push_back(vector2f(16.0f/33.0f, 16.0f/33.0f));
@@ -32,7 +34,8 @@ MouseCursor::MouseCursor(Graphics::Renderer* renderer) : m_renderer(renderer),
 
 	// Mouse flight zone
 	b = Graphics::TextureBuilder::UI("icons/mouse_flight_zone.png");
-	m_mouseFlightZone.reset(new Gui::TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_mouseFlightZone.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
+		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
 
 	SDL_ShowCursor(0);
 
@@ -91,15 +94,14 @@ void MouseCursor::Draw()
 				m_mouseFlightZonePos.y = (window_height - diameter) / 2.0f;
 				m_mouseFlightZoneSize.x = diameter;
 				m_mouseFlightZoneSize.y = diameter;
-				m_mouseFlightZone->Draw(Pi::renderer, m_mouseFlightZonePos, m_mouseFlightZoneSize);
+				m_mouseFlightZone->Draw(m_mouseFlightZonePos, m_mouseFlightZoneSize);
 			}
 
 		}
 		
 		// Draw cursor
 		if (m_type == MCT_NORMAL) {
-			m_vCursor[c]->Draw(m_renderer,
-				m_pos + vector2f(-m_vHotspot[c].x * m_vSize[c].x,
+			m_vCursor[c]->Draw(m_pos + vector2f(-m_vHotspot[c].x * m_vSize[c].x,
 				-m_vHotspot[c].y * m_vSize[c].y),
 				m_vSize[c]);
 		} else { // MCT_FLIGHT
@@ -115,8 +117,7 @@ void MouseCursor::Draw()
 			}
 			mouse_pos.x += -m_vHotspot[c].x * m_vSize[c].x + window_width / 2.0f;
 			mouse_pos.y += -m_vHotspot[c].y * m_vSize[c].y + window_height / 2.0f;
-			m_vCursor[c]->Draw(m_renderer, mouse_pos, 
-				m_vSize[c]);
+			m_vCursor[c]->Draw(mouse_pos, m_vSize[c]);
 		}
 	}
 }

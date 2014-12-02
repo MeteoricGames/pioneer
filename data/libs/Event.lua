@@ -181,8 +181,21 @@ Event = {
 		while #pending > 0 do
 			local p = table.remove(pending, 1)
 			if callbacks[p.name] then
-				for cb,_ in pairs(callbacks[p.name]) do
-					do_callback[p.name](cb, p)
+				if p.name == "onGameStart" then
+					local callbacks_count = 0
+					for cb,_ in pairs(callbacks[p.name]) do
+						callbacks_count = callbacks_count + 1
+					end
+					local current_cb = 0
+					for cb,_ in pairs(callbacks[p.name]) do
+						do_callback[p.name](cb, p)
+						current_cb = current_cb + 1
+						Engine.UpdateLoadingEmit(callbacks_count, current_cb)
+					end
+				else
+					for cb,_ in pairs(callbacks[p.name]) do
+						do_callback[p.name](cb, p)
+					end
 				end
 			end
 		end

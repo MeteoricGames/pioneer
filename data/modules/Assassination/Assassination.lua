@@ -338,7 +338,7 @@ local onShipDocked = function (ship, station)
 				Character.persistent.player.reputation = Character.persistent.player.reputation + 8
 				mission:Remove()
 				missions[ref] = nil
-			elseif mission.status == 'FAILED' then
+			elseif mission.status == 'FAILED' or mission.status == 'EXPIRED' or mission.status == 'CANCELED' then
 				local text
 				if mission.notplayer == 'TRUE' then
 					text = string.interp(flavours[mission.flavour].failuremsg2, {

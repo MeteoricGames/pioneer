@@ -98,7 +98,9 @@ void PlayerShipController::StaticUpdate(const float timeStep)
 	vector3d v;
 	matrix4x4d m;
 	bool any_linthrust_keydown = IsAnyLinearThrusterKeyDown();
-	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || !GetMouseFlightZeroOffset();
+	bool any_axis = IsAnyAxisDown();
+	bool any_angthrust_keydown = IsAnyAngularThrusterKeyDown() || !GetMouseFlightZeroOffset() 
+		|| KeyBindings::decreaseSpeed.IsActive() || any_axis;
 
 	// Get altitude from WorldView (that's where altitude is being calculated for UI display
 	// and since it's a bit expensive retrieving it is better than calculating it twice per frame)
@@ -191,7 +193,9 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		vector3d wantAngVel(0.0);
 		double angThrustSoftness = 10.0;
 
-		const float linearThrustPower = (KeyBindings::thrustLowPower.IsActive() ? m_lowThrustPower : 1.0f);
+		// Manual thruster controls are removed in Paragon
+		//const float linearThrustPower = (KeyBindings::thrustLowPower.IsActive() ? m_lowThrustPower : 1.0f);
+		const float linearThrustPower = 1.0f;
 
 		// have to use this function. SDL mouse position event is bugged in windows
 		int mouseMotion[2];
@@ -303,12 +307,14 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 			}
 		}
 
+		/* Manual thruster controls are removed in Paragon
 		if (KeyBindings::thrustForward.IsActive()) m_ship->SetThrusterState(2, -linearThrustPower);
 		if (KeyBindings::thrustBackwards.IsActive()) m_ship->SetThrusterState(2, linearThrustPower);
 		if (KeyBindings::thrustUp.IsActive()) m_ship->SetThrusterState(1, linearThrustPower);
 		if (KeyBindings::thrustDown.IsActive()) m_ship->SetThrusterState(1, -linearThrustPower);
 		if (KeyBindings::thrustLeft.IsActive()) m_ship->SetThrusterState(0, -linearThrustPower);
 		if (KeyBindings::thrustRight.IsActive()) m_ship->SetThrusterState(0, linearThrustPower);
+		*/
 
 		if (KeyBindings::fireLaser.IsActive() || (Pi::MouseButtonState(SDL_BUTTON_LEFT) && m_mouseFlightToggle)) {
 				//XXX worldview? madness, ask from ship instead
@@ -322,8 +328,9 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 		if (KeyBindings::rollLeft.IsActive()) wantAngVel.z += 1.0;
 		if (KeyBindings::rollRight.IsActive()) wantAngVel.z -= 1.0;
 
-		if (KeyBindings::thrustLowPower.IsActive())
-			angThrustSoftness = 50.0;
+		// Manual thruster controls are removed in Paragon
+		//if (KeyBindings::thrustLowPower.IsActive())
+		//	angThrustSoftness = 50.0;
 
 		vector3d changeVec;
 		changeVec.x = KeyBindings::pitchAxis.GetValue();
@@ -366,16 +373,31 @@ bool PlayerShipController::IsAnyAngularThrusterKeyDown()
 	);
 }
 
+bool PlayerShipController::IsAnyAxisDown()
+{
+	float axis_state;
+	axis_state = fabs(KeyBindings::pitchAxis.GetValue());
+	axis_state += fabs(KeyBindings::yawAxis.GetValue());
+	axis_state += fabs(KeyBindings::rollAxis.GetValue());
+	if(axis_state > m_joystickDeadzone) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 bool PlayerShipController::IsAnyLinearThrusterKeyDown()
 {
-	return !Pi::IsConsoleActive() && (
+	return false;
+	// Manual thruster controls are removed in Paragon
+	/*return !Pi::IsConsoleActive() && (
 		KeyBindings::thrustForward.IsActive()	||
 		KeyBindings::thrustBackwards.IsActive()	||
 		KeyBindings::thrustUp.IsActive()		||
 		KeyBindings::thrustDown.IsActive()		||
 		KeyBindings::thrustLeft.IsActive()		||
 		KeyBindings::thrustRight.IsActive()
-	);
+	);*/
 }
 
 void PlayerShipController::SetFlightControlState(FlightControlState s)

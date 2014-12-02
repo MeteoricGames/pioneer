@@ -34,6 +34,15 @@ namespace Background
 
 	class UniverseBox : public BackgroundElement
 	{
+	// Static
+	public:
+		static void InitEmptyCubemap(Graphics::Renderer* renderer);
+		static Graphics::Texture* s_cubeMap;
+
+	private:
+		static Graphics::Texture* s_emptyCube;
+
+	// Non-static
 	public:
 		UniverseBox(Graphics::Renderer *r);
 		~UniverseBox();
@@ -42,6 +51,7 @@ namespace Background
 		void LoadCubeMap(Random* randomizer = nullptr);
 
 		virtual void SetIntensity(float intensity) override;
+		Graphics::Texture* GetCubeMap() const { return m_cubemap.get(); }
 
 	private:
 		void Init();
@@ -51,7 +61,12 @@ namespace Background
 		std::unique_ptr<Graphics::VertexBuffer> m_vertexBuffer;
 		std::unique_ptr<Graphics::Texture> m_cubemap;
 		float fIntensity;		
+		float fSkyboxFactor;
 		Graphics::RenderState* m_cubeRS;
+
+		int m_viewPositionId;
+		int m_skyboxIntensityId;
+
 	};
 
 	class Starfield : public BackgroundElement
@@ -67,10 +82,13 @@ namespace Background
 		void Init();
 		static const int BG_STAR_MAX = 10000;
 		std::unique_ptr<Graphics::VertexBuffer> m_vertexBuffer;
-
+		std::unique_ptr<Graphics::VertexBuffer> m_hyperVB;
+		struct StarVert {
+			vector4f pos;
+			Color4ub col;
+		};
 		//hyperspace animation vertex data
-		vector3f m_hyperVtx[BG_STAR_MAX*3];
-		Color m_hyperCol[BG_STAR_MAX*3];
+		StarVert m_hyper[BG_STAR_MAX * 3];
 		Graphics::RenderState* m_starfieldRS;
 	};
 
@@ -100,6 +118,8 @@ namespace Background
 
 		void SetIntensity(float intensity);
 		void SetDrawFlags(const Uint32 flags);
+
+		UniverseBox* GetUniverseBox() const { return m_universeBox.get(); }
 
 	private:
 		Graphics::Renderer *m_renderer;

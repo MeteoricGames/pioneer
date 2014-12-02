@@ -54,6 +54,37 @@
     <ClCompile Include="..\..\..\src\graphics\gl2\GL2VertexBuffer.cpp">
       <Filter>gl2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\Effect.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\EffectShader.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\EffectProgram.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\RendererGL3.cpp" />
+    <ClCompile Include="..\..\..\src\graphics\gl3\ProgramGL3.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\RenderStateGL3.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\RenderTargetGL3.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\UniformGL3.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\VertexBufferGL3.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\EffectMaterial.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphics\gl3\AttributeGL3.cpp">
+      <Filter>gl3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\graphics\Drawables.h" />
@@ -138,14 +169,52 @@
     <ClInclude Include="..\..\..\src\graphics\effects\sector_view\SectorViewIconMaterial.h">
       <Filter>effects\sector_view</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\Effect.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\effects\transit\TransitEffectMaterial.h">
       <Filter>effects\transit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\data\shaders\gl2\smaa\smaa_gl2.h">
+      <Filter>effects\smaa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\effects\RadialBlurMaterial.h">
       <Filter>effects</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\EffectShader.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\graphics\effects\transit\TransitCompositionMaterial.h">
       <Filter>effects\transit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\EffectProgram.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\RendererGL3.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl3\ProgramGL3.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\RenderStateGL3.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\RenderTargetGL3.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\UniformGL3.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\VertexBufferGL3.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\EffectMaterial.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\gl3\BuiltInShaders.h">
+      <Filter>gl3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphics\GraphicsHardware.h" />
+    <ClInclude Include="..\..\..\src\graphics\gl3\AttributeGL3.h">
+      <Filter>gl3</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -164,8 +233,17 @@
     <Filter Include="effects\sector_view">
       <UniqueIdentifier>{4ff0b5bb-2f96-49d8-8a30-4eee330964ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gl3">
+      <UniqueIdentifier>{5c9061de-7768-4fec-a598-e4f89fff0636}</UniqueIdentifier>
+    </Filter>
     <Filter Include="effects\transit">
       <UniqueIdentifier>{8b37c513-6e93-4f83-919c-9b48a45a2870}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gl3">
+      <UniqueIdentifier>{0b19041c-aca1-404f-a6d4-a7c3e523fc59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects\smaa">
+      <UniqueIdentifier>{c11c834a-a34e-49a0-a1f7-01ba3653e2c3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -187,17 +265,35 @@
     <None Include="..\..\..\data\shaders\gl2\thruster_trails\tt_draw.vert">
       <Filter>effects\thruster_trails</Filter>
     </None>
+    <None Include="..\..\..\data\shaders\gl2\smaa\smaa_BlendingWeightCalculation.frag">
+      <Filter>effects\smaa</Filter>
+    </None>
     <None Include="..\..\..\data\shaders\gl2\transit\t_tunnel.frag">
       <Filter>effects\transit</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\smaa\smaa_BlendingWeightCalculation.vert">
+      <Filter>effects\smaa</Filter>
     </None>
     <None Include="..\..\..\data\shaders\gl2\transit\t_tunnel.vert">
       <Filter>effects\transit</Filter>
     </None>
+    <None Include="..\..\..\data\shaders\gl2\smaa\smaa_LumaEdgeDetection.frag">
+      <Filter>effects\smaa</Filter>
+    </None>
     <None Include="..\..\..\data\shaders\gl2\pp_radialblur.frag">
       <Filter>effects</Filter>
     </None>
+    <None Include="..\..\..\data\shaders\gl2\smaa\smaa_LumaEdgeDetection.vert">
+      <Filter>effects\smaa</Filter>
+    </None>
     <None Include="..\..\..\data\shaders\gl2\pp_rardialblur.vert">
       <Filter>effects</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\smaa\smaa_NeighborhoodBlending.frag">
+      <Filter>effects\smaa</Filter>
+    </None>
+    <None Include="..\..\..\data\shaders\gl2\smaa\smaa_NeighborhoodBlending.vert">
+      <Filter>effects\smaa</Filter>
     </None>
   </ItemGroup>
 </Project>

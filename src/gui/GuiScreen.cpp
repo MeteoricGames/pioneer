@@ -4,6 +4,7 @@
 #include "Gui.h"
 #include "vector3.h"		// for projection
 #include "text/TextSupport.h"
+#include "MainMaterial.h"
 
 namespace Gui {
 
@@ -58,7 +59,11 @@ void Screen::Init(Graphics::Renderer *renderer, int real_width, int real_height,
 	alphaBlendState = renderer->CreateRenderState(rsd);
 
 	Graphics::MaterialDescriptor mdesc;
-	flatColorMaterial = renderer->CreateMaterial(mdesc);
+	if(Graphics::Hardware::GL3()) {
+		flatColorMaterial = new MainMaterial(renderer, mdesc);
+	} else {
+		flatColorMaterial = renderer->CreateMaterial(mdesc);
+	}
 }
 
 void Screen::Uninit()

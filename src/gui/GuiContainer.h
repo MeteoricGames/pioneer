@@ -42,14 +42,14 @@ namespace Gui {
 		bool HandleMouseEvent(MouseButtonEvent *e);
 		Color m_bgcol;
 		bool m_transparent;
-	protected:
+	public:
 		struct widget_pos {
 			Widget *w;
 			float pos[2];
 			Uint32 flags;
 		};
 		typedef std::list<widget_pos> WidgetList;
-
+	protected:
 		void PrependChild(Widget *w, float x, float y);
 		void AppendChild(Widget *w, float x, float y);
 		void MoveChild(Widget *w, float x, float y);

@@ -34,6 +34,7 @@ VertexBufferDesc::VertexBufferDesc()
 
 	assert(sizeof(vector2f) == 8);
 	assert(sizeof(vector3f) == 12);
+	assert(sizeof(vector4f) == 16);
 	assert(sizeof(Color4ub) == 4);
 }
 

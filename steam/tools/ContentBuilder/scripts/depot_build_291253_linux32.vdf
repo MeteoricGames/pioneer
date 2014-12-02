@@ -1,0 +1,44 @@
+"DepotBuildConfig"
+{
+	// Set your assigned depot ID here
+	"DepotID" "291253"
+
+	// Set a root for all content.
+	// All relative paths specified below (LocalPath in FileMapping entries, and FileExclusion paths)
+	// will be resolved relative to this root.
+	// If you don't define ContentRoot, then it will be assumed to be
+	// the location of this script file, which probably isn't what you want
+	"ContentRoot"	"../content"
+
+	// include all files recursivley
+  "FileMapping"
+  {
+  	// This can be a full path, or a path relative to ContentRoot
+    "LocalPath" "./linux32/*"
+    
+    // This is a path relative to the install folder of your game
+    "DepotPath" "."
+    
+    // If LocalPath contains wildcards, setting this means that all
+    // matching files within subdirectories of LocalPath will also
+    // be included.
+    "recursive" "1"
+  }
+
+	// but exclude all symbol files  
+	// This can be a full path, or a path relative to ContentRoot
+  "FileExclusion" "*.pdb"
+  "FileExclusion" "*what_goes_here.txt"
+  
+  "FileProperties"
+  {
+	"LocalPath" "./linux32/paragon"
+	"Attributes" "executable"
+  }
+  
+  "FileProperties"
+  {
+	"LocalPath" "./linux32/paragon_launcher"
+	"Attributes" "executable"
+  }
+}

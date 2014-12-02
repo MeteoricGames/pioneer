@@ -17,6 +17,8 @@
 #include "graphics/VertexArray.h"
 #include "graphics/TextureBuilder.h"
 #include "StringF.h"
+#include "graphics/gl3/EffectMaterial.h"
+#include "graphics/gl3/Effect.h"
 
 #include <SDL_stdinc.h>
 #include <sstream>
@@ -52,18 +54,8 @@ namespace Background
 
 #pragma pack(push, 4)
 struct MilkyWayVert {
-	vector3f pos;
+	vector4f pos;
 	Color4ub col;
-};
-
-struct StarVert {
-	vector3f pos;
-	Color4ub col;
-};
-
-struct SkyboxVert {
-	vector3f pos;
-	vector2f uv;
 };
 #pragma pack(pop)
 
@@ -72,9 +64,22 @@ void BackgroundElement::SetIntensity(float intensity)
 	m_material->emissive = Color(intensity*255);
 }
 
+Texture* UniverseBox::s_cubeMap = nullptr;
+Texture* UniverseBox::s_emptyCube = nullptr;
+
+void UniverseBox::InitEmptyCubemap(Renderer* renderer)
+{
+	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/ub.dds");
+	UniverseBox::s_emptyCube = texture_builder.CreateTexture(renderer);
+}
+
 UniverseBox::UniverseBox(Graphics::Renderer *renderer)
 {
 	m_renderer = renderer;
+	if(s_emptyCube == nullptr) {
+		UniverseBox::InitEmptyCubemap(m_renderer);
+	}
+	s_cubeMap = s_emptyCube;
 	Init();
 }
 
@@ -88,73 +93,80 @@ void UniverseBox::Init()
 	TextureBuilder texture_builder = TextureBuilder::Cube("textures/cube/ub0.dds");
 	m_cubemap.reset(texture_builder.CreateTexture(m_renderer));
 
-	// Create skybox geometry
-	std::unique_ptr<Graphics::VertexArray> box(new VertexArray(ATTRIB_POSITION | ATTRIB_UV0, 36));
+	// Skybox geometry
 	const float vp = 1000.0f;
-	// Top +Y
-	box->Add(vector3f(-vp,  vp,  vp), vector2f(0.0f, 0.0f));
-	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp,  vp, -vp), vector2f(1.0f, 1.0f));
-	// Bottom -Y
-	box->Add(vector3f(-vp, -vp, -vp), vector2f(0.0f, 0.0f));
-	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp, -vp, -vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f( vp, -vp, -vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp, -vp,  vp), vector2f(1.0f, 1.0f));
-	// Front -Z
-	box->Add(vector3f(-vp,  vp, -vp), vector2f(0.0f, 0.0f));
-	box->Add(vector3f(-vp, -vp, -vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp,  vp, -vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f( vp,  vp, -vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f(-vp, -vp, -vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp, -vp, -vp), vector2f(1.0f, 1.0f));
-	// Back +Z
-	box->Add(vector3f( vp,  vp,  vp), vector2f(0.0f, 0.0f));
-	box->Add(vector3f( vp, -vp,  vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f(-vp,  vp,  vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f(-vp,  vp,  vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f( vp, -vp,  vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f(-vp, -vp,  vp), vector2f(1.0f, 1.0f));
-	// Right +X
-	box->Add(vector3f( vp,  vp, -vp), vector2f(0.0f, 0.0f));
-	box->Add(vector3f( vp, -vp, -vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f( vp,  vp,  vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f( vp, -vp, -vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f( vp, -vp,  vp), vector2f(1.0f, 1.0f));
-	// Left -X
-	box->Add(vector3f(-vp,  vp,  vp), vector2f(0.0f, 0.0f));
-	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f(-vp,  vp, -vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f(-vp,  vp, -vp), vector2f(1.0f, 0.0f));
-	box->Add(vector3f(-vp, -vp,  vp), vector2f(0.0f, 1.0f));
-	box->Add(vector3f(-vp, -vp, -vp), vector2f(1.0f, 1.0f));
+	std::vector<vector4f> skybox_verts = {
+		// Top +Y
+		vector4f(-vp, vp, vp, 1.0f),
+		vector4f(-vp, vp, -vp, 1.0f),
+		vector4f(vp, vp, vp, 1.0f),
+		vector4f(vp, vp, vp, 1.0f),
+		vector4f(-vp, vp, -vp, 1.0f),
+		vector4f(vp, vp, -vp, 1.0f),
+		// Bottom -Y
+		vector4f(-vp, -vp, -vp, 1.0f),
+		vector4f(-vp, -vp, vp, 1.0f),
+		vector4f(vp, -vp, -vp, 1.0f),
+		vector4f(vp, -vp, -vp, 1.0f),
+		vector4f(-vp, -vp, vp, 1.0f),
+		vector4f(vp, -vp, vp, 1.0f),
+		// Front -Z
+		vector4f(-vp, vp, -vp, 1.0f),
+		vector4f(-vp, -vp, -vp, 1.0f),
+		vector4f(vp, vp, -vp, 1.0f),
+		vector4f(vp, vp, -vp, 1.0f),
+		vector4f(-vp, -vp, -vp, 1.0f),
+		vector4f(vp, -vp, -vp, 1.0f),
+		// Back +Z
+		vector4f(vp, vp, vp, 1.0f),
+		vector4f(vp, -vp, vp, 1.0f),
+		vector4f(-vp, vp, vp, 1.0f),
+		vector4f(-vp, vp, vp, 1.0f),
+		vector4f(vp, -vp, vp, 1.0f),
+		vector4f(-vp, -vp, vp, 1.0f),
+		// Right +X
+		vector4f(vp, vp, -vp, 1.0f),
+		vector4f(vp, -vp, -vp, 1.0f),
+		vector4f(vp, vp, vp, 1.0f),
+		vector4f(vp, vp, vp, 1.0f),
+		vector4f(vp, -vp, -vp, 1.0f),
+		vector4f(vp, -vp, vp, 1.0f),
+		// Left -X
+		vector4f(-vp, vp, vp, 1.0f),
+		vector4f(-vp, -vp, vp, 1.0f),
+		vector4f(-vp, vp, -vp, 1.0f),
+		vector4f(-vp, vp, -vp, 1.0f),
+		vector4f(-vp, -vp, vp, 1.0f),
+		vector4f(-vp, -vp, -vp, 1.0f),
+	};
 
-	Graphics::MaterialDescriptor desc;
-	desc.effect = EFFECT_SKYBOX;
-	m_material.Reset(m_renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptor sb_desc;
+		sb_desc.uniforms.push_back("su_ModelViewProjectionMatrix");
+		sb_desc.uniforms.push_back("u_viewPosition");
+		sb_desc.uniforms.push_back("u_skyboxIntensity");
+		sb_desc.uniforms.push_back("texture0");
+		sb_desc.vertex_shader = "gl3/skybox.vert";
+		sb_desc.fragment_shader = "gl3/skybox.frag";
+		m_material.Reset(new Graphics::GL3::EffectMaterial(m_renderer, sb_desc));
+	} else {
+		Graphics::MaterialDescriptor desc;
+		desc.effect = EFFECT_SKYBOX;
+		m_material.Reset(m_renderer->CreateMaterial(desc));
+	}
 	m_material->texture0 = m_cubemap.get();
-	//create buffer and upload data
+
 	Graphics::VertexBufferDesc vbd;
 	vbd.attrib[0].semantic = Graphics::ATTRIB_POSITION;
-	vbd.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
-	vbd.attrib[1].semantic = Graphics::ATTRIB_UV0;
-	vbd.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT2;
-	vbd.numVertices = box->GetNumVerts();
+	vbd.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
+	vbd.numVertices = skybox_verts.size();
 	vbd.usage = Graphics::BUFFER_USAGE_STATIC;
 
 	m_vertexBuffer.reset(m_renderer->CreateVertexBuffer(vbd));
 
-	SkyboxVert* vtxPtr = m_vertexBuffer->Map<SkyboxVert>(Graphics::BUFFER_MAP_WRITE);
-	assert(m_vertexBuffer->GetDesc().stride == sizeof(SkyboxVert));
-	for (Uint32 i = 0; i < box->GetNumVerts(); i++) {
-		vtxPtr[i].pos = box->position[i];
-		vtxPtr[i].uv = box->uv0[i];
-	}
+	Uint8* vtxPtr = m_vertexBuffer->Map<Uint8>(Graphics::BUFFER_MAP_WRITE);
+	assert(m_vertexBuffer->GetDesc().stride == sizeof(vector4f));
+	memcpy(vtxPtr, &skybox_verts[0], sizeof(vector4f) * skybox_verts.size());
 	m_vertexBuffer->Unmap();
 
 	SetIntensity(1.0f);
@@ -164,11 +176,23 @@ void UniverseBox::Init()
 	rsd.depthTest = false;
 	rsd.depthWrite = false;
 	m_cubeRS = m_renderer->CreateRenderState(rsd);
+
+	m_viewPositionId = m_material->GetEffect()->GetUniformID("u_viewPosition");
+	m_skyboxIntensityId = m_material->GetEffect()->GetUniformID("u_skyboxIntensity");
+
+	fSkyboxFactor = 0.8f;
+
+	m_material->GetEffect()->SetProgram();
+	m_material->GetEffect()->GetUniform(m_viewPositionId).Set(vector4f(0.0f, 0.0f, 0.0f, 0.0f));
+
+	UniverseBox::s_cubeMap = m_cubemap.get();
 }
 
 void UniverseBox::Draw()
 {
 	if(m_cubemap) {
+		m_material->GetEffect()->SetProgram();
+		m_material->GetEffect()->GetUniform(m_skyboxIntensityId).Set(fIntensity * fSkyboxFactor);
 		m_renderer->DrawBuffer(m_vertexBuffer.get(), m_cubeRS, m_material.Get());
 	}
 }
@@ -177,6 +201,7 @@ void UniverseBox::LoadCubeMap(Random* randomizer)
 {
 	// Clean old texture
 	m_cubemap.reset();
+	UniverseBox::s_cubeMap = s_emptyCube;
 	
 	if(randomizer) {
 		int new_ubox_index = randomizer->Int32(0, 4);
@@ -186,6 +211,7 @@ void UniverseBox::LoadCubeMap(Random* randomizer)
 			os << "textures/cube/ub" << (new_ubox_index - 1) << ".dds";
 			TextureBuilder texture_builder = TextureBuilder::Cube(os.str().c_str());
 			m_cubemap.reset(texture_builder.CreateTexture(m_renderer));
+			UniverseBox::s_cubeMap = m_cubemap.get();
 			m_material->texture0 = m_cubemap.get();
 		}
 	}
@@ -206,48 +232,64 @@ Starfield::Starfield(Graphics::Renderer *renderer, Random &rand)
 
 void Starfield::Init()
 {
-	Graphics::MaterialDescriptor desc;
-	desc.effect = Graphics::EFFECT_STARFIELD;
-	desc.vertexColors = true;
-	m_material.Reset(m_renderer->CreateMaterial(desc));
+	if (Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptor sf_desc;
+		sf_desc.uniforms.push_back("su_ModelViewProjectionMatrix");
+		sf_desc.uniforms.push_back("material.emission");
+		sf_desc.vertex_shader = "gl3/starfield.vert";
+		sf_desc.fragment_shader = "gl3/starfield.frag";
+		m_material.Reset(new Graphics::GL3::EffectMaterial(m_renderer, sf_desc));
+	} else {
+		Graphics::MaterialDescriptor desc;
+		desc.effect = Graphics::EFFECT_STARFIELD;
+		desc.vertexColors = true;
+		m_material.Reset(m_renderer->CreateMaterial(desc));
+	}
 	m_material->emissive = Color::WHITE;
+
 }
 
 void Starfield::Fill(Random &rand)
 {
 	Graphics::VertexBufferDesc vbd;
 	vbd.attrib[0].semantic = Graphics::ATTRIB_POSITION;
-	vbd.attrib[0].format = Graphics::ATTRIB_FORMAT_FLOAT3;
+	vbd.attrib[0].format = Graphics::ATTRIB_FORMAT_FLOAT4;
 	vbd.attrib[1].semantic = Graphics::ATTRIB_DIFFUSE;
 	vbd.attrib[1].format = Graphics::ATTRIB_FORMAT_UBYTE4;
 	vbd.usage = Graphics::BUFFER_USAGE_STATIC;
 	vbd.numVertices = BG_STAR_MAX;
 	m_vertexBuffer.reset(m_renderer->CreateVertexBuffer(vbd));
+	vbd.numVertices = BG_STAR_MAX * 3;
+	vbd.usage = Graphics::BUFFER_USAGE_DYNAMIC;
+	m_hyperVB.reset(m_renderer->CreateVertexBuffer(vbd));
 
-	assert(sizeof(StarVert) == 16);
+	assert(sizeof(StarVert) == 20);
 	assert(m_vertexBuffer->GetDesc().stride == sizeof(StarVert));
 	auto vtxPtr = m_vertexBuffer->Map<StarVert>(Graphics::BUFFER_MAP_WRITE);
+	auto hyperPtr = m_hyperVB->Map<StarVert>(Graphics::BUFFER_MAP_WRITE);
 	//fill the array
 	for (int i=0; i<BG_STAR_MAX; i++) {
-		const Uint8 col = rand.Double(0.2,0.7)*255;
+		Uint8 col = rand.Double(0.2,0.7) * 255.0;
 
 		// this is proper random distribution on a sphere's surface
 		const float theta = float(rand.Double(0.0, 2.0*M_PI));
 		const float u = float(rand.Double(-1.0, 1.0));
 
-		vtxPtr->pos = vector3f(
+		vtxPtr->pos = vector4f(
 			1000.0f * sqrt(1.0f - u*u) * cos(theta),
 			1000.0f * u,
-			1000.0f * sqrt(1.0f - u*u) * sin(theta));
+			1000.0f * sqrt(1.0f - u*u) * sin(theta),
+			1.0f);
 		vtxPtr->col = Color(col, col, col,	255);
 
 		//need to keep data around for HS anim - this is stupid
-		m_hyperVtx[BG_STAR_MAX * 2 + i] = vtxPtr->pos;
-		m_hyperCol[BG_STAR_MAX * 2 + i] = vtxPtr->col;
+		hyperPtr[BG_STAR_MAX * 2 + i].pos = vtxPtr->pos;
+		hyperPtr[BG_STAR_MAX * 2 + i].col = vtxPtr->col;
 
 		vtxPtr++;
 	}
 	m_vertexBuffer->Unmap();
+	m_hyperVB->Unmap();
 }
 
 void Starfield::Draw(Graphics::RenderState *rs)
@@ -260,21 +302,25 @@ void Starfield::Draw(Graphics::RenderState *rs)
 		// the time-looking bits in this are completely arbitrary - I figured
 		// it out by tweaking the numbers until it looked sort of right
 		double mult = 0.0015 / (Pi::player->GetHyperspaceDuration() / (60.0*60.0*24.0*7.0));
-
 		double hyperspaceProgress = Pi::game->GetHyperspaceProgress();
 
-		const vector3d pz = Pi::player->GetOrient().VectorZ();	//back vector
+		vector3d pz3 = Pi::player->GetOrient().VectorZ();
+		vector4f pz(pz3.x*hyperspaceProgress*mult, pz3.y*hyperspaceProgress*mult, pz3.z*hyperspaceProgress*mult, 1.0);
+		
+		auto hyperPtr = m_hyperVB->Map<StarVert>(Graphics::BUFFER_MAP_WRITE);
 		for (int i=0; i<BG_STAR_MAX; i++) {
-			vector3f v = m_hyperVtx[BG_STAR_MAX * 2 + i] + vector3f(pz*hyperspaceProgress*mult);
-			const Color &c = m_hyperCol[BG_STAR_MAX * 2 + i];
+			vector4f v = hyperPtr[BG_STAR_MAX * 2 + i].pos + pz;
+			const Color &c = hyperPtr[BG_STAR_MAX * 2 + i].col;
+			
+			hyperPtr[i*2].pos = hyperPtr[BG_STAR_MAX * 2 + i].pos + v;
+			hyperPtr[i*2].col = c;
 
-			m_hyperVtx[i*2] = m_hyperVtx[BG_STAR_MAX * 2 + i] + v;
-			m_hyperCol[i*2] = c;
-
-			m_hyperVtx[i*2+1] = v;
-			m_hyperCol[i*2+1] = c;
+			hyperPtr[i*2+1].pos = v;
+			hyperPtr[i*2+1].col = c;
 		}
-		m_renderer->DrawLines(BG_STAR_MAX*2, m_hyperVtx, m_hyperCol, rs);
+		m_hyperVB->Unmap();
+
+		m_renderer->DrawLinesBuffer(BG_STAR_MAX * 2, m_hyperVB.get(), rs);
 	}
 }
 
@@ -323,15 +369,24 @@ MilkyWay::MilkyWay(Graphics::Renderer *renderer)
 		vector3f(100.0f*sin(theta), float(40.0 + 30.0*noise(sin(theta),-1.0,cos(theta))), 100.0f*cos(theta)),
 		dark);
 
-	Graphics::MaterialDescriptor desc;
-	desc.effect = Graphics::EFFECT_STARFIELD;
-	desc.vertexColors = true;
-	m_material.Reset(m_renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptor sf_desc;
+		sf_desc.uniforms.push_back("su_ModelViewProjectionMatrix");
+		sf_desc.uniforms.push_back("material.emission");
+		sf_desc.vertex_shader = "gl3/starfield.vert";
+		sf_desc.fragment_shader = "gl3/starfield.frag";
+		m_material.Reset(new Graphics::GL3::EffectMaterial(renderer, sf_desc));
+	} else {
+		Graphics::MaterialDescriptor desc;
+		desc.effect = Graphics::EFFECT_STARFIELD;
+		desc.vertexColors = true;
+		m_material.Reset(m_renderer->CreateMaterial(desc));
+	}
 	m_material->emissive = Color::WHITE;
 
 	Graphics::VertexBufferDesc vbd;
 	vbd.attrib[0].semantic = Graphics::ATTRIB_POSITION;
-	vbd.attrib[0].format = Graphics::ATTRIB_FORMAT_FLOAT3;
+	vbd.attrib[0].format = Graphics::ATTRIB_FORMAT_FLOAT4;
 	vbd.attrib[1].semantic = Graphics::ATTRIB_DIFFUSE;
 	vbd.attrib[1].format = Graphics::ATTRIB_FORMAT_UBYTE4;
 	vbd.numVertices = bottom->GetNumVerts() + top->GetNumVerts();

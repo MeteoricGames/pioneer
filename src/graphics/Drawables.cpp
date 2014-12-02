@@ -3,6 +3,7 @@
 
 #include "Drawables.h"
 #include "Texture.h"
+#include "MainMaterial.h"
 
 namespace Graphics {
 
@@ -13,7 +14,12 @@ Disk::Disk(Graphics::Renderer *r, Graphics::RenderState *state, const Color &c, 
 	m_renderState = state;
 
 	m_vertices.reset(new VertexArray(ATTRIB_POSITION));
-	m_material.Reset(r->CreateMaterial(MaterialDescriptor()));
+	if(Graphics::Hardware::GL3()) {
+		MaterialDescriptor md = MaterialDescriptor();
+		m_material.Reset(new MainMaterial(r, md));
+	} else {
+		m_material.Reset(r->CreateMaterial(MaterialDescriptor()));
+	}
 	m_material->diffuse = c;
 
 	m_vertices->Add(vector3f(0.f, 0.f, 0.f));
@@ -81,9 +87,9 @@ void Line3D::Draw(Renderer *renderer, RenderState *rs)
 {
 	// XXX would be nicer to draw this as a textured triangle strip
 	// can't guarantee linewidth support
-	glLineWidth(m_width);
+	renderer->SetLineWidth(m_width);
 	renderer->DrawLines(2, m_points, m_colors, rs);
-	glLineWidth(1.f);
+	renderer->SetLineWidth(1.f);
 }
 
 static const float ICOSX = 0.525731112119133f;
@@ -144,10 +150,10 @@ Sphere3D::Sphere3D(Renderer *renderer, RefCountedPtr<Material> mat, Graphics::Re
 	//Create vtx & index buffers and copy data
 	VertexBufferDesc vbd;
 	vbd.attrib[0].semantic = ATTRIB_POSITION;
-	vbd.attrib[0].format   = ATTRIB_FORMAT_FLOAT3;
+	vbd.attrib[0].format   = ATTRIB_FORMAT_FLOAT4;
 	vbd.attrib[0].offset   = offsetof(Sphere3DVertex, pos);
 	vbd.attrib[1].semantic = ATTRIB_NORMAL;
-	vbd.attrib[1].format   = ATTRIB_FORMAT_FLOAT3;
+	vbd.attrib[1].format   = ATTRIB_FORMAT_FLOAT4;
 	vbd.attrib[1].offset   = offsetof(Sphere3DVertex, nrm);
 	vbd.attrib[2].semantic = ATTRIB_UV0;
 	vbd.attrib[2].format   = ATTRIB_FORMAT_FLOAT2;
@@ -159,15 +165,15 @@ Sphere3D::Sphere3D(Renderer *renderer, RefCountedPtr<Material> mat, Graphics::Re
 
 	auto vtxPtr = m_vertexBuffer->Map<Sphere3DVertex>(Graphics::BUFFER_MAP_WRITE);
 	for (Uint32 i = 0; i < vts.GetNumVerts(); i++) {
-		vtxPtr->pos = vts.position[i];
-		vtxPtr->nrm = vts.normal[i];
+		vts.position[i].CopyTo(vtxPtr->pos);
+		vts.normal[i].CopyTo(vtxPtr->nrm);
 		vtxPtr->uv = vts.uv0[i];
 		vtxPtr++;
 	}
 	m_vertexBuffer->Unmap();
 
 	m_indexBuffer.reset(renderer->CreateIndexBuffer(indices.size(), BUFFER_USAGE_STATIC));
-	Uint16 *idxPtr = m_indexBuffer->Map(Graphics::BUFFER_MAP_WRITE);
+	Uint32 *idxPtr = m_indexBuffer->Map(Graphics::BUFFER_MAP_WRITE);
 	for (auto it : indices) {
 		*idxPtr = it;
 		idxPtr++;
@@ -182,8 +188,8 @@ void Sphere3D::Draw(Renderer *r)
 
 int Sphere3D::AddVertex(VertexArray &vts, const vector3f &v, const vector3f &n)
 {
-	vts.position.push_back(v);
-	vts.normal.push_back(n);
+	vts.position.push_back(vector4f(v, 1.0f));
+	vts.normal.push_back(vector4f(n, 0.0f));
 	//http://www.mvps.org/directx/articles/spheremap.htm
 	vts.uv0.push_back(vector2f(asinf(n.x)/M_PI+0.5f, asinf(n.y)/M_PI+0.5f));
 	return vts.GetNumVerts() - 1;
@@ -227,7 +233,11 @@ TexturedQuad::TexturedQuad(Graphics::Renderer *r, Graphics::Texture *texture, co
 	m_vertices.reset(new VertexArray(ATTRIB_POSITION | ATTRIB_UV0));
 	Graphics::MaterialDescriptor desc;
 	desc.textures = 1;
-	m_material.reset(r->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_material.reset(new MainMaterial(r, desc));
+	} else {
+		m_material.reset(r->CreateMaterial(desc));
+	}
 	m_material->texture0 = m_texture.Get();
 
 	// these might need to be reversed

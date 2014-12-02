@@ -21,7 +21,7 @@ def generateCommand(path, name, ext):
     front = path + name + "_front5." + ext
     back = path + name + "_back6." + ext
     output = path + "../" + name + ".dds"
-    command = ("""CubeMapGen -importFaceXPos:"%s" -importFaceXNeg:"%s" -importFaceYPos:"%s" -importFaceYNeg:"%s" -importFaceZPos:"%s" -importFaceZNeg:"%s" -exportFilename:"%s" -exportCubeDDS -exportPixelFormat:DXT1 -consoleErrorOutput -exit"""
+    command = ("""CubeMapGen -importFaceXPos:"%s" -importFaceXNeg:"%s" -importFaceYPos:"%s" -importFaceYNeg:"%s" -importFaceZPos:"%s" -importFaceZNeg:"%s" -exportFilename:"%s" -exportCubeDDS -exportPixelFormat:DXT1 -exportMipChain -consoleErrorOutput -exit"""
         % (right, left, top, bottom, front, back, output))
     return command
 
@@ -46,7 +46,7 @@ def main():
     print("This script will parse all directories found in data/textures/cube ")
     print("and convert any SpaceScape cubemaps it finds to DDS cubemaps using ")
     print("CubeMapGen.                                                        ")
-    print("All cubemaps are compressed to DXT1 and include no mipmaps.      \n")
+    print("All cubemaps are compressed to DXT1 and include mipmaps.         \n")
     directories = next(os.walk(CUBEMAPS_PATH))[1]
     for d in directories:
         convertDirectory(d)

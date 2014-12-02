@@ -8,6 +8,9 @@
 #include "graphics/TextureBuilder.h"
 #include "graphics/VertexArray.h"
 #include "StringF.h"
+#include "Frame.h"
+#include "Body.h"
+#include "galaxy/StarSystem.h"
 
 namespace SceneGraph {
 
@@ -103,9 +106,11 @@ void Model::Render(const matrix4x4f &trans, const RenderData *rd)
 	}
 
 	//update decals (materials and geometries are shared)
-	for (unsigned int i=0; i < MAX_DECAL_MATERIALS; i++)
-		if (m_decalMaterials[i])
+	for (unsigned int i=0; i < MAX_DECAL_MATERIALS; i++) {
+		if (m_decalMaterials[i]) {
 			m_decalMaterials[i]->texture0 = m_curDecals[i];
+		}
+	}
 
 	//Override renderdata if this model is called from ModelNode
 	RenderData params = (rd != 0) ? (*rd) : m_renderData;
@@ -115,9 +120,16 @@ void Model::Render(const matrix4x4f &trans, const RenderData *rd)
 	//BR could also be a property of Node.
 	params.boundingRadius = GetDrawClipRadius();
 
+	// Set atmospheric properties for rendering
+	for (MaterialContainer::const_iterator it = m_materials.begin(); it != m_materials.end(); ++it) {
+		(*it).second->atmosphereColor = params.atmosColor;
+		(*it).second->atmosphereDensity = params.atmosDensity;
+	}
+
 	//render in two passes, if this is the top-level model
-	if (m_debugFlags & DEBUG_WIREFRAME)
+	if (m_debugFlags & DEBUG_WIREFRAME) {
 		m_renderer->SetWireFrameMode(true);
+	}
 
 	if (params.nodemask & MASK_IGNORE) {
 		m_root->Render(trans, &params);
@@ -128,11 +140,13 @@ void Model::Render(const matrix4x4f &trans, const RenderData *rd)
 		m_root->Render(trans, &params);
 	}
 
-	if (!m_debugFlags)
+	if (!m_debugFlags) {
 		return;
+	}
 
-	if (m_debugFlags & DEBUG_WIREFRAME)
+	if (m_debugFlags & DEBUG_WIREFRAME) {
 		m_renderer->SetWireFrameMode(false);
+	}
 
 	if (m_debugFlags & DEBUG_BBOX) {
 		m_renderer->SetTransform(trans);
@@ -382,6 +396,31 @@ void Model::SetThrust(const vector3f &lin, const vector3f &ang)
 	m_renderData.angthrust[0] = ang.x;
 	m_renderData.angthrust[1] = ang.y;
 	m_renderData.angthrust[2] = ang.z;
+}
+
+void Model::CalcAtmosphericProperties(Body* model_body, Frame* sframe)
+{
+	float atmos_density = 0.0f;
+	Color atmos_color(0);
+	if (sframe) {
+		SystemBody* sbody = sframe->GetSystemBody();
+		Body* body = sframe->GetBody();
+		if (sbody && sbody->HasAtmosphere() && body) {
+			SystemBody::AtmosphereParameters ap = sbody->CalcAtmosphereParams();
+			float body_dist = (model_body->GetPositionRelTo(sframe) - body->GetPosition()).Length();
+			atmos_density = (body_dist - ap.planetRadius) /
+				((ap.atmosRadius - 1.0f) * ap.planetRadius);
+			atmos_density = 1.0f - Clamp(atmos_density, 0.0f, 1.0f);
+			atmos_color = ap.atmosCol;
+		}
+	}
+	SetAtmosphericProperties(atmos_density, atmos_color);
+}
+
+void Model::SetAtmosphericProperties(float atmos_density, const Color& atmos_color)
+{
+	m_renderData.atmosDensity = Clamp(atmos_density, 0.0f, 1.0f);
+	m_renderData.atmosColor = atmos_color;
 }
 
 class SaveVisitor : public NodeVisitor {

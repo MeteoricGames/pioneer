@@ -68,6 +68,13 @@ enum FaceCullMode {
 	CULL_NONE
 };
 
+// Used for Light Sources uniform block buffer
+struct LightSource {
+	vector4f position;
+	vector4f diffuse;
+	vector4f specular;
+};
+
 }
 
 #endif // GRAPHICS_TYPES_H

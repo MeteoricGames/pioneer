@@ -218,7 +218,7 @@ void GeoPatchContext::Init() {
 		assert(0 == res);
 		//create buffer & copy
 		indices_list[i].Reset(Pi::renderer->CreateIndexBuffer(pl_short[i].size(), Graphics::BUFFER_USAGE_STATIC));
-		Uint16* idxPtr = indices_list[i]->Map(Graphics::BUFFER_MAP_WRITE);
+		Uint32* idxPtr = indices_list[i]->Map(Graphics::BUFFER_MAP_WRITE);
 		for (Uint32 j = 0; j < pl_short[i].size(); j++) {
 			idxPtr[j] = pl_short[i][j];
 		}

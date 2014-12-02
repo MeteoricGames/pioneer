@@ -6,6 +6,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/VertexArray.h"
 #include "graphics/Material.h"
+#include "MainMaterial.h"
 
 namespace UI {
 
@@ -14,7 +15,11 @@ Gradient::Gradient(Context *context, const Color &beginColor, const Color &endCo
 {
 	Graphics::MaterialDescriptor desc;
 	desc.vertexColors = true;
-	m_material.reset(GetContext()->GetRenderer()->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_material.reset(new MainMaterial(GetContext()->GetRenderer(), desc));
+	} else {
+		m_material.reset(GetContext()->GetRenderer()->CreateMaterial(desc));
+	}
 }
 
 void Gradient::Draw()

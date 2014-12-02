@@ -23,6 +23,8 @@
 
 namespace Graphics {
 
+	namespace GL3 { class Effect; }
+
 const Uint32 MAX_ATTRIBS = 8;
 
 struct VertexAttribDesc {
@@ -68,8 +70,8 @@ public:
 	virtual ~VertexBuffer();
 	const VertexBufferDesc &GetDesc() const { return m_desc; }
 
-	template <typename T> T *Map(BufferMapMode mode) {
-		return reinterpret_cast<T*>(MapInternal(mode));
+	template <typename T> T *Map(BufferMapMode mode, size_t vcount = 0) {
+		return reinterpret_cast<T*>(MapInternal(mode, vcount));
 	}
 
 	//Vertex count used for rendering.
@@ -78,23 +80,36 @@ public:
 	Uint32 GetVertexCount() const;
 	void SetVertexCount(Uint32);
 
+	// Binds buffer for rendering (required for GL3 only)
+	virtual void Bind() {}
+	virtual void Unbind() {}
+
+	// Used to set arrays for rendering
+	virtual void SetAttribPointers(GL3::Effect* effect = nullptr) { assert(false); }
+	virtual void UnsetAttribPointers(GL3::Effect* effect = nullptr) { assert(false); }
+
 protected:
-	virtual Uint8 *MapInternal(BufferMapMode) = 0;
+	virtual Uint8 *MapInternal(BufferMapMode, size_t) = 0;
 	VertexBufferDesc m_desc;
 	Uint32 m_numVertices;
 };
 
-// Index buffer, limited to Uint16 index format for better portability
+// Index buffer, limited to Uint32 index format for better portability
 class IndexBuffer : public RefCounted, public Mappable {
 public:
 	IndexBuffer(Uint32 size, BufferUsage);
 	virtual ~IndexBuffer();
-	virtual Uint16 *Map(BufferMapMode) = 0;
+
+	virtual Uint32 *Map(BufferMapMode) = 0;
 
 	Uint32 GetSize() const { return m_size; }
 	Uint32 GetIndexCount() const { return m_indexCount; }
 	void SetIndexCount(Uint32);
 	BufferUsage GetUsage() const { return m_usage; }
+
+	// Binds buffer for rendering
+	virtual void Bind() {}
+	virtual void Unbind() {}
 
 protected:
 	Uint32 m_size;

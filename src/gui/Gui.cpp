@@ -5,6 +5,7 @@
 #include "Gui.h"
 #include "graphics/Graphics.h"
 #include "graphics/RenderState.h"
+#include "graphics/gl3/VertexBufferGL3.h"
 
 namespace Gui {
 
@@ -178,99 +179,137 @@ namespace Theme {
 		Screen::GetRenderer()->DrawTriangles(&vts, state, Screen::flatColorMaterial, Graphics::TRIANGLE_FAN);
 	}
 
+	Graphics::GL3::VertexBuffer* uiVB = nullptr;
+	Graphics::GL3::IndexBuffer* uiIB = nullptr;
+
+	void InitVB()
+	{
+		if (!uiVB) {
+			Graphics::VertexBufferDesc vbd;
+			vbd.attrib[0].semantic = Graphics::ATTRIB_POSITION;
+			vbd.attrib[0].format = Graphics::ATTRIB_FORMAT_FLOAT4;
+			vbd.numVertices = 8;
+			vbd.usage = Graphics::BUFFER_USAGE_DYNAMIC;
+			uiVB = new Graphics::GL3::VertexBuffer(vbd);
+		}	
+		if (!uiIB) {
+			uiIB = new Graphics::GL3::IndexBuffer(30, Graphics::BUFFER_USAGE_DYNAMIC);
+		}
+	}
+
 	void DrawHollowRect(const float size[2], const Color &color, Graphics::RenderState *state)
 	{
+		InitVB();
+
+		const float vertices[] = { 
+			0, 0, 0, 1,
+			0, size[1], 0, 1,
+			size[0], size[1], 0, 1,
+			size[0], 0, 0, 1,
+			BORDER_WIDTH, BORDER_WIDTH, 0, 1,
+			BORDER_WIDTH, size[1] - BORDER_WIDTH, 0, 1,
+			size[0] - BORDER_WIDTH, size[1] - BORDER_WIDTH, 0, 1,
+			size[0] - BORDER_WIDTH, BORDER_WIDTH, 0, 1
+		};
+		const Uint32 indices[] = {
+			0,1,5, 0,5,4,
+			0,4,7, 0,7,3,
+			3,7,6, 3,6,2,
+			1,2,6, 1,6,5
+		};
+
+		Uint8* vb = uiVB->Map<Uint8>(Graphics::BUFFER_MAP_WRITE);
+		memcpy(vb, vertices, sizeof(float) * 8 * 4);
+		uiVB->Unmap();
+
+		Uint32* ib = uiIB->Map(Graphics::BUFFER_MAP_WRITE);
+		memcpy(ib, indices, sizeof(Uint32) * 4 * 2 * 3);
+		uiIB->Unmap();
+
 		Screen::flatColorMaterial->diffuse = color;
-		Screen::GetRenderer()->SetRenderState(state);
-		Screen::flatColorMaterial->Apply();
-
-		GLfloat vertices[] = { 0,0,
-			0,size[1],
-			size[0],size[1],
-			size[0],0,
-			BORDER_WIDTH,BORDER_WIDTH,
-			BORDER_WIDTH,size[1]-BORDER_WIDTH,
-			size[0]-BORDER_WIDTH,size[1]-BORDER_WIDTH,
-			size[0]-BORDER_WIDTH,BORDER_WIDTH };
-		GLubyte indices[] = {
-			0,1,5,4, 0,4,7,3,
-			3,7,6,2, 1,2,6,5 };
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, vertices);
-		glDrawElements(GL_QUADS, 16, GL_UNSIGNED_BYTE, indices);
-		glDisableClientState(GL_VERTEX_ARRAY);
-
-		Screen::flatColorMaterial->Unapply();
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 0, 24);
 	}
 
 	void DrawIndent(const float size[2], Graphics::RenderState *state)
 	{
-		Screen::GetRenderer()->SetRenderState(state);
+		InitVB();
 
-		GLfloat vertices[] = { 0,0,
-			0,size[1],
-			size[0],size[1],
-			size[0],0,
-			BORDER_WIDTH,BORDER_WIDTH,
-			BORDER_WIDTH,size[1]-BORDER_WIDTH,
-			size[0]-BORDER_WIDTH,size[1]-BORDER_WIDTH,
-			size[0]-BORDER_WIDTH,BORDER_WIDTH };
-		GLubyte indices[] = {
-			0,1,5,4, 0,4,7,3,
-			3,7,6,2, 1,2,6,5,
-			4,5,6,7 };
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, vertices);
+		const float vertices[] = {
+			0, 0, 0, 1,
+			0, size[1], 0, 1,
+			size[0], size[1], 0, 1,
+			size[0], 0, 0, 1,
+			BORDER_WIDTH, BORDER_WIDTH, 0, 1,
+			BORDER_WIDTH, size[1] - BORDER_WIDTH, 0, 1,
+			size[0] - BORDER_WIDTH, size[1] - BORDER_WIDTH, 0, 1,
+			size[0] - BORDER_WIDTH, BORDER_WIDTH, 0, 1, };
+		const Uint32 indices[] = {
+			0, 1, 5, 0, 5, 4,
+			0, 4, 7, 0, 7, 3,
+			3, 7, 6, 3, 6, 2,
+			1, 2, 6, 1, 6, 5,
+			4, 5, 6, 4, 6, 7,
+		};
+		Uint8* vs = uiVB->Map<Uint8>(Graphics::BUFFER_MAP_WRITE);
+		memcpy(vs, vertices, sizeof(float) * 8 * 4);
+		uiVB->Unmap();
+
+		Uint32* is = uiIB->Map(Graphics::BUFFER_MAP_WRITE);
+		memcpy(is, indices, sizeof(Uint32) * 5 * 2 * 3);
+		uiIB->Unmap();
 
 		Screen::flatColorMaterial->diffuse = Colors::bgShadow;
-		Screen::flatColorMaterial->Apply();
-		glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, indices);
-
-		Screen::flatColorMaterial->diffuse = Color(153,153,153,255);
-		Screen::flatColorMaterial->Apply();
-		glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, indices+8);
-
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 0, 12);
+		Screen::flatColorMaterial->diffuse = Color(153, 153, 153, 255);
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 12, 12);
 		Screen::flatColorMaterial->diffuse = Colors::bg;
-		Screen::flatColorMaterial->Apply();
-		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, indices+16);
-		glDisableClientState(GL_VERTEX_ARRAY);
-
-		Screen::flatColorMaterial->Unapply();
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 24, 6);
 	}
 
 	void DrawOutdent(const float size[2], Graphics::RenderState *state)
 	{
-		Screen::GetRenderer()->SetRenderState(state);
+		InitVB();
 
-		GLfloat vertices[] = { 0,0,
-			0,size[1],
-			size[0],size[1],
-			size[0],0,
-			BORDER_WIDTH,BORDER_WIDTH,
-			BORDER_WIDTH,size[1]-BORDER_WIDTH,
-			size[0]-BORDER_WIDTH,size[1]-BORDER_WIDTH,
-			size[0]-BORDER_WIDTH,BORDER_WIDTH };
-		GLubyte indices[] = {
-			0,1,5,4, 0,4,7,3,
-			3,7,6,2, 1,2,6,5,
-			4,5,6,7 };
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, vertices);
+		const float vertices[] = { 
+			0, 0, 0, 1,
+			0, size[1], 0, 1,
+			size[0], size[1], 0, 1,
+			size[0], 0, 0, 1,
+			BORDER_WIDTH, BORDER_WIDTH, 0, 1,
+			BORDER_WIDTH, size[1] - BORDER_WIDTH, 0, 1,
+			size[0] - BORDER_WIDTH, size[1] - BORDER_WIDTH, 0, 1,
+			size[0] - BORDER_WIDTH, BORDER_WIDTH, 0, 1 
+		};
 
-		Screen::flatColorMaterial->diffuse = Color(153,153,153,255);
-		Screen::flatColorMaterial->Apply();
-		glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, indices);
+		const Uint32 indices[] = {
+			0, 1, 5, 0, 5, 4,
+			0, 4, 7, 0, 7, 3,
+			3, 7, 6, 3, 6, 2,
+			1, 2, 6, 1, 6, 5,
+			4, 5, 6, 4, 6, 7,
+		};
 
+		Uint8* vs = uiVB->Map<Uint8>(Graphics::BUFFER_MAP_WRITE);
+		memcpy(vs, vertices, sizeof(float) * 8 * 4);
+		uiVB->Unmap();
+
+		Uint32* is = uiIB->Map(Graphics::BUFFER_MAP_WRITE);
+		memcpy(is, indices, sizeof(Uint32) * 5 * 2 * 3);
+		uiIB->Unmap();
+
+		Screen::flatColorMaterial->diffuse = Color(153, 153, 153, 255);
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 0, 12);
 		Screen::flatColorMaterial->diffuse = Colors::bgShadow;
-		Screen::flatColorMaterial->Apply();
-		glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, indices+8);
-
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 12, 12);
 		Screen::flatColorMaterial->diffuse = Colors::bg;
-		Screen::flatColorMaterial->Apply();
-		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, indices+16);
-		glDisableClientState(GL_VERTEX_ARRAY);
-
-		Screen::flatColorMaterial->Unapply();
+		Screen::GetRenderer()->DrawBufferIndexed(uiVB, uiIB, state, Screen::flatColorMaterial,
+			Graphics::TRIANGLES, 24, 6);
 	}
 }
 

@@ -52,19 +52,17 @@ GL2::MultiProgram *pointsColorProg;
 
 RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 : Renderer(window, window->GetWidth(), window->GetHeight())
-, m_numDirLights(0)
 //the range is very large due to a "logarithmic z-buffer" trick used
 //http://outerra.blogspot.com/2009/08/logarithmic-z-buffer.html
 //http://www.gamedev.net/blog/73/entry-2006307-tip-of-the-day-logarithmic-zbuffer-artifacts-fix/
 , m_minZNear(0.0001f)
 , m_maxZFar(10000000.0f)
 , m_useCompressedTextures(false)
-, m_invLogZfarPlus1(0.f)
 , m_activeRenderTarget(nullptr)
 , m_activeRenderState(nullptr)
 , m_matrixMode(MatrixMode::MODELVIEW)
 {
-	m_viewportStack.push(Viewport());
+	m_invLogZfarPlus1 = 0.0f;
 
 	const bool useDXTnTextures = vs.useTextureCompression && glewIsSupported("GL_EXT_texture_compression_s3tc");
 	m_useCompressedTextures = useDXTnTextures;
@@ -100,13 +98,24 @@ RendererGL2::RendererGL2(WindowSDL *window, const Graphics::Settings &vs)
 	m_programs.push_back(std::make_pair(desc, pointsColorProg));
 
 	// Init fullscreen quad
+	/*const vector2f pixel_size = vector2f(
+		1.0f / static_cast<float>(window->GetWidth()), 
+		1.0f / static_cast<float>(window->GetHeight()));
 	const float screenquad_vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f
+		-1.0f + pixel_size.x,	-1.0f + pixel_size.y, 0.0f,
+		 1.0f + pixel_size.x,	-1.0f + pixel_size.y, 0.0f,
+		-1.0f + pixel_size.x,	 1.0f + pixel_size.y, 0.0f,
+		 1.0f + pixel_size.x,	-1.0f + pixel_size.y, 0.0f,
+		 1.0f + pixel_size.x,	 1.0f + pixel_size.y, 0.0f,
+		-1.0f + pixel_size.x,	 1.0f + pixel_size.y, 0.0f
+	};*/
+	const float screenquad_vertices[] = {
+		-1.0f,	-1.0f,	0.0f,
+		 1.0f,	-1.0f,	0.0f,
+		-1.0f,	 1.0f,	0.0f,
+		 1.0f,	-1.0f,	0.0f,
+		 1.0f,	 1.0f,	0.0f,
+		-1.0f,	 1.0f,	0.0f
 	};
 	glGenBuffers(1, &m_screenQuadBufferId);
 	glBindBuffer(GL_ARRAY_BUFFER, m_screenQuadBufferId);
@@ -169,29 +178,6 @@ bool RendererGL2::EndPostProcessing()
 bool RendererGL2::EndFrame()
 {
 	return true;
-}
-
-static std::string glerr_to_string(GLenum err)
-{
-	switch (err)
-	{
-	case GL_INVALID_ENUM:
-		return "GL_INVALID_ENUM";
-	case GL_INVALID_VALUE:
-		return "GL_INVALID_VALUE";
-	case GL_INVALID_OPERATION:
-		return "GL_INVALID_OPERATION";
-	case GL_OUT_OF_MEMORY:
-		return "GL_OUT_OF_MEMORY";
-	case GL_STACK_OVERFLOW: //deprecated in GL3
-		return "GL_STACK_OVERFLOW";
-	case GL_STACK_UNDERFLOW: //deprecated in GL3
-		return "GL_STACK_UNDERFLOW";
-	case GL_INVALID_FRAMEBUFFER_OPERATION_EXT:
-		return "GL_INVALID_FRAMEBUFFER_OPERATION";
-	default:
-		return stringf("Unknown error 0x0%0{x}", err);
-	}
 }
 
 bool RendererGL2::SwapBuffers()
@@ -271,7 +257,7 @@ bool RendererGL2::SetClearColor(const Color &c)
 bool RendererGL2::SetViewport(int x, int y, int width, int height)
 {
 	assert(!m_viewportStack.empty());
-	Viewport& currentViewport = m_viewportStack.top();
+	ViewportState& currentViewport = m_viewportStack.top();
 	currentViewport.x = x;
 	currentViewport.y = y;
 	currentViewport.w = width;
@@ -343,6 +329,8 @@ bool RendererGL2::SetWireFrameMode(bool enabled)
 
 bool RendererGL2::SetLights(int numlights, const Light *lights)
 {
+	assert(!m_lightsStack.empty());
+	LightsState &ls = m_lightsStack.top();
 	if (numlights < 1) return false;
 
 	// XXX move lighting out to shaders
@@ -353,7 +341,8 @@ bool RendererGL2::SetLights(int numlights, const Light *lights)
 	SetTransform(matrix4x4f::Identity());
 
 	m_numLights = numlights;
-	m_numDirLights = 0;
+	ls.numLights = 0;
+	memcpy(ls.lights, lights, sizeof(Light) * std::min(MATERIAL_MAX_LIGHTS, numlights));
 
 	for (int i=0; i < numlights; i++) {
 		const Light &l = lights[i];
@@ -370,9 +359,9 @@ bool RendererGL2::SetLights(int numlights, const Light *lights)
 		glEnable(GL_LIGHT0+i);
 
 		if (l.GetType() == Light::LIGHT_DIRECTIONAL)
-			m_numDirLights++;
+			ls.numLights++;
 
-		assert(m_numDirLights < 5);
+		assert(ls.numLights < 5);
 	}
 
 	return true;
@@ -386,12 +375,16 @@ bool RendererGL2::SetAmbientColor(const Color &c)
 
 bool RendererGL2::SetScissor(bool enabled, const vector2f &pos, const vector2f &size)
 {
+	assert(!m_scissorStack.empty());
 	if (enabled) {
-		glScissor(pos.x,pos.y,size.x,size.y);
+		glScissor(pos.x, pos.y, size.x, size.y);
 		glEnable(GL_SCISSOR_TEST);
-	}
-	else
+	} else {
 		glDisable(GL_SCISSOR_TEST);
+	}
+	m_scissorStack.top().enable = enabled;
+	m_scissorStack.top().position = pos;
+	m_scissorStack.top().size = size;
 	return true;
 }
 
@@ -474,7 +467,7 @@ bool RendererGL2::DrawPoints(int count, const vector3f *points, const Color *col
 	return true;
 }
 
-bool RendererGL2::DrawTriangles(const VertexArray *v, RenderState *rs, Material *m, PrimitiveType t)
+bool RendererGL2::DrawTriangles(VertexArray *v, RenderState *rs, Material *m, PrimitiveType t)
 {
 	if (!v || v->position.size() < 3) return false;
 
@@ -491,7 +484,7 @@ bool RendererGL2::DrawTriangles(const VertexArray *v, RenderState *rs, Material 
 	return true;
 }
 
-bool RendererGL2::DrawTriangles(int vertCount, const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type)
+bool RendererGL2::DrawTriangles(int vertCount, VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type)
 {
 	if(!vertices || vertices->position.size() < 3 || static_cast<unsigned>(vertCount) > vertices->GetNumVerts()) return false;
 
@@ -566,7 +559,8 @@ bool RendererGL2::DrawBuffer(VertexBuffer* vb, RenderState* state, Material* mat
 	return true;
 }
 
-bool RendererGL2::DrawBufferIndexed(VertexBuffer *vb, IndexBuffer *ib, RenderState *state, Material *mat, PrimitiveType pt)
+bool RendererGL2::DrawBufferIndexed(VertexBuffer *vb, IndexBuffer *ib, RenderState *state, 
+	Material *mat, PrimitiveType pt, unsigned start_index, unsigned index_count)
 {
 	SetRenderState(state);
 	mat->Apply();
@@ -580,7 +574,8 @@ bool RendererGL2::DrawBufferIndexed(VertexBuffer *vb, IndexBuffer *ib, RenderSta
 	gvb->SetAttribPointers();
 	EnableClientStates(gvb);
 
-	glDrawElements(pt, ib->GetIndexCount(), GL_UNSIGNED_SHORT, 0);
+	unsigned ic = index_count == 0? ib->GetIndexCount() : index_count;
+	glDrawElements(pt, ic, GL_UNSIGNED_INT, (void*)(start_index * sizeof(Uint32)));
 
 	gvb->UnsetAttribPointers();
 	DisableClientStates();
@@ -594,26 +589,10 @@ bool RendererGL2::DrawBufferIndexed(VertexBuffer *vb, IndexBuffer *ib, RenderSta
 bool RendererGL2::DrawFullscreenQuad(Material *mat, RenderState *state, bool clear_rt)
 {
 	assert(mat);
-	state = state == nullptr? m_screenQuadRS : state;
-
-	SetRenderState(state);
 	mat->Apply();
-
-	if(clear_rt) {
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_screenQuadBufferId);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<void*>(0));
-	
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	bool result = DrawFullscreenQuad(state, clear_rt);
 	mat->Unapply();
-
-	glDisableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	return true;
+	return result;
 }
 
 bool RendererGL2::DrawFullscreenQuad(Texture *texture, RenderState *state, bool clear_rt)
@@ -623,6 +602,26 @@ bool RendererGL2::DrawFullscreenQuad(Texture *texture, RenderState *state, bool 
 	bool result = DrawFullscreenQuad(m_screenQuadMtrl.get(), state, clear_rt);
 	m_screenQuadMtrl->texture0 = nullptr;
 	return result;
+}
+
+bool RendererGL2::DrawFullscreenQuad(RenderState *state, bool clear_rt)
+{
+	state = state == nullptr ? m_screenQuadRS : state;
+	SetRenderState(state);
+	if(clear_rt) {
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_screenQuadBufferId);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<void*>(0));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return true;
 }
 
 
@@ -704,7 +703,7 @@ Material *RendererGL2::CreateMaterial(const MaterialDescriptor &d)
 	GL2::Program *p = 0;
 
 	if (desc.lighting) {
-		desc.dirLights = m_numDirLights;
+		desc.dirLights = m_lightsStack.top().numLights;
 	}
 
 	// Create the material. It will be also used to create the shader,
@@ -882,30 +881,6 @@ VertexBuffer *RendererGL2::CreateVertexBuffer(const VertexBufferDesc &desc)
 IndexBuffer *RendererGL2::CreateIndexBuffer(Uint32 size, BufferUsage usage)
 {
 	return new GL2::IndexBuffer(size, usage);
-}
-
-// XXX very heavy. in the future when all GL calls are made through the
-// renderer, we can probably do better by trackingn current state and
-// only restoring the things that have changed
-void RendererGL2::PushState()
-{
-	SetMatrixMode(MatrixMode::PROJECTION);
-	PushMatrix();
-	SetMatrixMode(MatrixMode::MODELVIEW);
-	PushMatrix();
-	m_viewportStack.push( m_viewportStack.top() );
-	glPushAttrib(GL_ALL_ATTRIB_BITS & (~GL_POINT_BIT));
-}
-
-void RendererGL2::PopState()
-{
-	glPopAttrib();
-	m_viewportStack.pop();
-	assert(!m_viewportStack.empty());
-	SetMatrixMode(MatrixMode::PROJECTION);
-	PopMatrix();
-	SetMatrixMode(MatrixMode::MODELVIEW);
-	PopMatrix();
 }
 
 static void dump_opengl_value(std::ostream &out, const char *name, GLenum id, int num_elems)

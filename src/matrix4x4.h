@@ -56,6 +56,17 @@ class matrix4x4 {
 		r[3] = cell[1]; r[4] = cell[5]; r[5] = cell[9];
 		r[6] = cell[2]; r[7] = cell[6]; r[8] = cell[10];
 	}
+	matrix3x3<T> To3x3Matrix() const
+	{
+		matrix3x3<T> m;
+		/*m[0] = cell[0]; m[1] = cell[1]; m[2] = cell[2];
+		m[3] = cell[4]; m[4] = cell[5]; m[5] = cell[6];
+		m[6] = cell[8]; m[7] = cell[9]; m[8] = cell[10];*/
+		m[0] = cell[0]; m[1] = cell[4]; m[2] = cell[8];
+		m[3] = cell[1]; m[4] = cell[5]; m[5] = cell[9];
+		m[6] = cell[2]; m[7] = cell[6]; m[8] = cell[10];
+		return m;
+	}
 	static matrix4x4 Identity () {
 		matrix4x4 m = matrix4x4(0.0);
 		m.cell[0] = m.cell[5] = m.cell[10] = m.cell[15] = 1.0f;
@@ -356,7 +367,7 @@ class matrix4x4 {
 	}
 	matrix4x4 InverseOf () const {
 		matrix4x4 m;
-		// this only works for matrices containing only rotation and transform
+		// this only works for matrices containing only rotation and translation
 		m[0] = cell[0]; m[1] = cell[4]; m[2] = cell[8];
 		m[4] = cell[1]; m[5] = cell[5]; m[6] = cell[9];
 		m[8] = cell[2]; m[9] = cell[6]; m[10] = cell[10];
@@ -365,7 +376,27 @@ class matrix4x4 {
 		m[14] = -(cell[8]*cell[12] + cell[9]*cell[13] + cell[10]*cell[14]);
 		m[3] = m[7] = m[11] = 0;
 		m[15] = 1.0f;
-
+		return m;
+	}
+	matrix4x4 Transpose() const {
+		matrix4x4 m;
+		m[0]  = cell[0]; m[1]  = cell[4]; m[2]  = cell[8];  m[3]  = cell[12];
+		m[4]  = cell[1]; m[5]  = cell[5]; m[6]  = cell[9];  m[7]  = cell[13];
+		m[8]  = cell[2]; m[9]  = cell[6]; m[10] = cell[10]; m[11] = cell[14];
+		m[12] = cell[3]; m[13] = cell[7]; m[14] = cell[11]; m[15] = cell[15];
+		return m;
+	}
+	matrix4x4 InverseTranspose() const {
+		matrix4x4 m;
+		// this only works for matrices containing only rotation and transform
+		m[0] = cell[0]; m[4] = cell[4]; m[8] = cell[8];
+		m[1] = cell[1]; m[5] = cell[5]; m[9] = cell[9];
+		m[2] = cell[2]; m[6] = cell[6]; m[10] = cell[10];
+		m[3] = -(cell[0] * cell[12] + cell[1] * cell[13] + cell[2] * cell[14]);
+		m[7] = -(cell[4] * cell[12] + cell[5] * cell[13] + cell[6] * cell[14]);
+		m[11] = -(cell[8] * cell[12] + cell[9] * cell[13] + cell[10] * cell[14]);
+		m[12] = m[13] = m[14] = 0;
+		m[15] = 1.0f;
 		return m;
 	}
 	void Print () const {

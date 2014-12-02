@@ -6,6 +6,7 @@
 #include "graphics/TextureBuilder.h"
 #include "graphics/VertexArray.h"
 #include "FileSystem.h"
+#include "MainMaterial.h"
 
 namespace UI {
 
@@ -28,12 +29,20 @@ Skin::Skin(const std::string &filename, Graphics::Renderer *renderer, float scal
 
 	Graphics::MaterialDescriptor desc;
 	desc.textures = 1;
-	m_textureMaterial.Reset(m_renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_textureMaterial.Reset(new MainMaterial(m_renderer, desc));
+	} else {
+		m_textureMaterial.Reset(m_renderer->CreateMaterial(desc));
+	}
 	m_textureMaterial->texture0 = m_texture.Get();
 	m_textureMaterial->diffuse = Color::WHITE;
 
 	desc.textures = 0;
-	m_colorMaterial.Reset(m_renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_colorMaterial.Reset(new MainMaterial(m_renderer, desc));
+	} else {
+		m_colorMaterial.Reset(m_renderer->CreateMaterial(desc));
+	}
 
 	Graphics::RenderStateDesc rsd;
 	rsd.blendMode = Graphics::BLEND_ALPHA;

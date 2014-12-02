@@ -6,6 +6,7 @@
 #define _COLOR_H
 
 #include <SDL_stdinc.h>
+#include "vector4.h"
 
 struct lua_State;
 
@@ -53,6 +54,7 @@ struct Color4ub {
 	Color4ub operator/(const float f) const { return Color4ub(r/f, g/f, b/f, a/f); }
 
 	Color4f ToColor4f() const { return Color4f(r/255.0f, g/255.0f, b/255.0f, a/255.0f); }
+	vector4f ToVector4f() const { return vector4f(r/255.0f, g/255.0f, b/255.0f, a/255.0f); }
 
 	void ToLuaTable(lua_State *l);
 	static Color4ub FromLuaTable(lua_State *l, int idx);

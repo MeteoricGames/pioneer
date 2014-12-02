@@ -8,16 +8,20 @@
 #include "WindowSDL.h"
 #include "Renderer.h"
 #include "RenderState.h"
+#include "gl3/Effect.h"
+#include "gl3/EffectMaterial.h"
+#include "gl3/BuiltInShaders.h"
+#include "utils.h"
 
 namespace Graphics {
 
 PostProcessing::PostProcessing(Renderer *renderer) :
-	mtrlFullscreenQuad(nullptr), 
-	mRenderer(renderer), 
-	rtDevice(nullptr),
-	bPerformPostProcessing(false)
+	m_mtrlFullscreenQuad(nullptr), 
+	m_renderer(renderer), 
+	m_rtDevice(nullptr),
+	m_bPerformPostProcessing(false)
 {
-	assert(mRenderer != nullptr);
+	assert(m_renderer != nullptr);
 	Init();
 }
 
@@ -28,56 +32,51 @@ PostProcessing::~PostProcessing()
 
 void PostProcessing::Init()
 {
-	// Init quad used for rendering
-	const float screenquad_vertices [] = {
-		-1.0f,	-1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		-1.0f,	 1.0f, 0.0f,
-		 1.0f,	-1.0f, 0.0f,
-		 1.0f,	 1.0f, 0.0f,
-		-1.0f,   1.0f, 0.0f
-	};
-	glGenBuffers(1, &uScreenQuadBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, uScreenQuadBufferId);
-	glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(float), screenquad_vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// Init postprocessing fullscreen quad effect
+	//MaterialDescriptor tfquad_mtrl_desc;
+	//tfquad_mtrl_desc.effect = EFFECT_TEXTURED_FULLSCREEN_QUAD;
+	//m_mtrlFullscreenQuad.reset(m_renderer->CreateMaterial(tfquad_mtrl_desc));
 
-	// Init postprocessing materials
-	MaterialDescriptor tfquad_mtrl_desc;
-	tfquad_mtrl_desc.effect = EFFECT_TEXTURED_FULLSCREEN_QUAD;
-	mtrlFullscreenQuad.reset(mRenderer->CreateMaterial(tfquad_mtrl_desc));
+	GL3::EffectDescriptorDirect fq_desc;
+	fq_desc.vertex_shader_debug_name = "PP->FullscreenQuadVS";
+	fq_desc.vertex_shader = GL3::Shaders::FullscreenTexturedQuadVS;
+	fq_desc.fragment_shader_debug_name = "PP->FullscreenQuadFS";
+	fq_desc.fragment_shader = GL3::Shaders::FullscreenTexturedQuadFS;
+	fq_desc.uniforms.push_back("texture0");
+	GL3::Effect* fq_effect = new GL3::Effect(m_renderer, fq_desc);
+	m_mtrlFullscreenQuad.reset(new GL3::EffectMaterial(m_renderer, fq_effect));
 
 	// Init render targets
-	WindowSDL* window = mRenderer->GetWindow();
+	WindowSDL* window = m_renderer->GetWindow();
 	RenderTargetDesc rt_desc(
 		window->GetWidth(), window->GetHeight(), 
 		TextureFormat::TEXTURE_RGBA_8888, TextureFormat::TEXTURE_DEPTH,
 		true);
-	rtMain = mRenderer->CreateRenderTarget(rt_desc);
+	m_rtMain = m_renderer->CreateRenderTarget(rt_desc);
 
 	// Init render state
 	RenderStateDesc rsd;
 	rsd.blendMode = BlendMode::BLEND_SOLID;
 	rsd.depthTest = false;
 	rsd.depthWrite = false;
-	mRenderState = mRenderer->CreateRenderState(rsd);
+	m_renderState = m_renderer->CreateRenderState(rsd);
 }
 
 // rt_device is added so device render target can be changed
 void PostProcessing::BeginFrame()
 {
-	if(bPerformPostProcessing) {
-		mRenderer->SetRenderTarget(rtMain);
-		mRenderer->ClearScreen();
+	if(m_bPerformPostProcessing) {
+		m_renderer->SetRenderTarget(m_rtMain);
+		m_renderer->ClearScreen();
 	} else {
-		mRenderer->SetRenderTarget(rtDevice);
+		m_renderer->SetRenderTarget(m_rtDevice);
 	}
 }
 
 void PostProcessing::EndFrame()
 {
-	if(bPerformPostProcessing) {
-		mRenderer->SetRenderTarget(rtDevice);
+	if(m_bPerformPostProcessing) {
+		m_renderer->SetRenderTarget(m_rtDevice);
 	}
 }
 
@@ -89,14 +88,14 @@ void PostProcessing::EndFrame()
 //		texture1: set to previous output
 void PostProcessing::Run(PostProcess* pp)
 {
-	if(!bPerformPostProcessing) return;
+	if(!m_bPerformPostProcessing) return;
 	if(pp == nullptr || pp->GetPassCount() == 0) {
 		// No post-processing
-		mRenderer->SetRenderTarget(rtDevice);
-		mtrlFullscreenQuad->texture0 = rtMain->GetColorTexture();
-		mRenderer->DrawFullscreenQuad(mtrlFullscreenQuad.get(), mRenderState, true);
+		m_renderer->SetRenderTarget(m_rtDevice);
+		m_mtrlFullscreenQuad->texture0 = m_rtMain->GetColorTexture();
+		m_renderer->DrawFullscreenQuad(m_mtrlFullscreenQuad.get(), m_renderState, true);
 	} else {
-		RenderTarget* rt_src = rtMain;
+		RenderTarget* rt_src = m_rtMain;
 		RenderTarget* rt_dest = 0;
 		for(unsigned int i = 0; i < pp->vPasses.size(); ++i) {
 			if(i == pp->vPasses.size() - 1) {
@@ -104,16 +103,28 @@ void PostProcessing::Run(PostProcess* pp)
 			} else {
 				rt_dest = pp->vPasses[i]->renderTarget.get();
 			}
-			Material *mtrl = pp->vPasses[i]->material.get();
-			mRenderer->SetRenderTarget(rt_dest);
-			glDepthMask(GL_FALSE);
-			if(pp->vPasses[i]->type == PP_PASS_COMPOSE) {
-				mtrl->texture0 = rtMain->GetColorTexture();
-				mtrl->texture1 = rt_src->GetColorTexture();
-			} else {
-				mtrl->texture0 = rt_src->GetColorTexture();
+			if(pp->vPasses[i]->effect_type == PostProcessEffectType::PP_ET_MATERIAL) {
+				Material *mtrl = pp->vPasses[i]->material.get();
+				m_renderer->SetRenderTarget(rt_dest);
+				if(pp->vPasses[i]->type == PP_PASS_COMPOSE) {
+					mtrl->texture0 = m_rtMain->GetColorTexture();
+					mtrl->texture1 = rt_src->GetColorTexture();
+				} else {
+					mtrl->texture0 = rt_src->GetColorTexture();
+				}
+				m_renderer->DrawFullscreenQuad(mtrl, m_renderState, true);
+			} else { // Effect
+				m_renderer->SetRenderTarget(rt_dest);
+				m_renderer->SetEffect(pp->vPasses[i]->effect.get());
+				pp->vPasses[i]->effect->SetProgram();
+				if(pp->vPasses[i]->type == PP_PASS_COMPOSE) {
+					pp->vPasses[i]->effect->GetUniform(pp->vPasses[i]->texture0Id).Set(m_rtMain->GetColorTexture(), 0);
+					pp->vPasses[i]->effect->GetUniform(pp->vPasses[i]->texture1Id).Set(rt_src->GetColorTexture(), 1);
+				} else {
+					pp->vPasses[i]->effect->GetUniform(pp->vPasses[i]->texture0Id).Set(rt_src->GetColorTexture(), 0);
+				}
+				m_renderer->DrawFullscreenQuad(m_renderState, true);
 			}
-			mRenderer->DrawFullscreenQuad(mtrl, mRenderState, true);
 			rt_src = rt_dest;
 		}
 	}
@@ -121,8 +132,8 @@ void PostProcessing::Run(PostProcess* pp)
 
 void PostProcessing::SetPerformPostProcessing(bool enabled) 
 {
-	if(bPerformPostProcessing != enabled) {
-		bPerformPostProcessing = enabled;
+	if(m_bPerformPostProcessing != enabled) {
+		m_bPerformPostProcessing = enabled;
 		if(enabled) {
 			// TODO: Reinitialize all render target buffers
 		} else {
@@ -133,7 +144,7 @@ void PostProcessing::SetPerformPostProcessing(bool enabled)
 
 void PostProcessing::SetDeviceRT(RenderTarget* rt_device)
 {
-	rtDevice = rt_device;
+	m_rtDevice = rt_device;
 }
 
 }

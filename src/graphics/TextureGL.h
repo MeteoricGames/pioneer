@@ -25,6 +25,7 @@ public:
 
 private:
 	friend class RendererGL2;
+	friend class RendererGL3;
 	TextureGL(const TextureDescriptor &descriptor, const bool useCompressed);
 
 	GLenum m_target;

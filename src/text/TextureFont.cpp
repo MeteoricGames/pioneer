@@ -9,6 +9,7 @@
 #include "TextSupport.h"
 #include "utils.h"
 #include <algorithm>
+#include "MainMaterial.h"
 
 #include FT_GLYPH_H
 
@@ -220,7 +221,9 @@ void TextureFont::RenderString(const char *str, float x, float y, const Color &c
 		}
 	}
 
-	m_renderer->DrawTriangles(&m_vertices, m_renderState, m_mat.get());
+	if(m_vertices.GetNumVerts() > 0) {
+		m_renderer->DrawTriangles(&m_vertices, m_renderState, m_mat.get());
+	}
 }
 
 Color TextureFont::RenderMarkup(const char *str, float x, float y, const Color &color)
@@ -282,7 +285,9 @@ Color TextureFont::RenderMarkup(const char *str, float x, float y, const Color &
 		}
 	}
 
-	m_renderer->DrawTriangles(&m_vertices, m_renderState, m_mat.get());
+	if(m_vertices.GetNumVerts() > 0) {
+		m_renderer->DrawTriangles(&m_vertices, m_renderState, m_mat.get());
+	}
 	return c;
 }
 
@@ -523,7 +528,11 @@ TextureFont::TextureFont(const FontDescriptor &descriptor, Graphics::Renderer *r
 	Graphics::MaterialDescriptor desc;
 	desc.vertexColors = true; //to allow per-character colors
 	desc.textures = 1;
-	m_mat.reset(m_renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_mat.reset(new MainMaterial(m_renderer, desc));
+	} else {
+		m_mat.reset(m_renderer->CreateMaterial(desc));
+	}
 	Graphics::TextureDescriptor textureDescriptor(m_texFormat, vector2f(ATLAS_SIZE), Graphics::NEAREST_CLAMP, false, false);
 	m_texture.Reset(m_renderer->CreateTexture(textureDescriptor));
 	m_mat->texture0 = m_texture.Get();

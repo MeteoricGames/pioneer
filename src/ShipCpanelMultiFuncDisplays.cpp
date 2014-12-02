@@ -403,11 +403,11 @@ void ScannerWidget::DrawBlobs(bool below)
 
 		float pointSize = 1.f;
 		if (weight == WEIGHT_LIGHT) {
-			glLineWidth(1);
+			m_renderer->SetLineWidth(1.0f);
 			pointSize = 3.f;
 		}
 		else {
-			glLineWidth(2);
+			m_renderer->SetLineWidth(2.0f);
 			pointSize = 4.f;
 		}
 

@@ -10,6 +10,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/Texture.h"
 #include "graphics/Drawables.h"
+#include "Background.h"
 #include "scenegraph/SceneGraph.h"
 #include "ui/Context.h"
 
@@ -105,6 +106,7 @@ private:
 	std::string m_modelName;
 	RefCountedPtr<UI::Context> m_ui;
 	Graphics::RenderState *m_bgState;
+	Background::UniverseBox* m_universeBox;
 
 	//undecided on this input stuff
 	//updating the states of all inputs during PollEvents

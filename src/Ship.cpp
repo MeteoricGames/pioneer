@@ -260,10 +260,10 @@ void Ship::Init()
 	for(unsigned int i = 0; i < GetModel()->GetNumTags(); ++i) {
 		tag_name = GetModel()->GetTagNameByIndex(i);
 		tag_scale = GetModel()->GetTagByIndex(i)->GetTransform().DecomposeScaling();
-		 if(tag_scale.x >= THRUSTER_TRAILS_UPPER_BOUND && tag_name.substr(0, 9) == "thruster_") {
-			 vector3f trans = GetModel()->GetTagByIndex(i)->GetTransform().DecomposeTranslation();
-			 m_thrusterTrails.push_back(new ThrusterTrail(Pi::renderer, this, THRUSTER_TRAILS_COLOR, trans, tag_scale.x));
-		 }
+		if (tag_name.substr(0, 15) == "thruster_engine") {
+			vector3f trans = GetModel()->GetTagByIndex(i)->GetTransform().DecomposeTranslation();
+			m_thrusterTrails.push_back(new ThrusterTrail(Pi::renderer, this, THRUSTER_TRAILS_COLOR, trans, tag_scale.x));
+		}
 	}
 
 	InitMaterials();
@@ -1809,6 +1809,8 @@ void Ship::Render(Graphics::Renderer *renderer, const Camera *camera, const vect
 			vector3f(GetVelocity().Normalized()) * speed_factor,
 			-vector3f(m_angThrusters));
 	}
+
+	GetModel()->CalcAtmosphericProperties(this, GetFrame());
 
 	matrix3x3f mt;
 	matrix3x3dtof(viewTransform.InverseOf().GetOrient(), mt);

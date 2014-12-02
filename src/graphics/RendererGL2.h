@@ -93,13 +93,14 @@ public:
 	virtual bool DrawLines(int vertCount, const vector3f *vertices, const Color &color, RenderState*, LineType type=LINE_SINGLE) override;
 	virtual bool DrawLines2D(int vertCount, const vector2f *vertices, const Color &color, RenderState*, LineType type=LINE_SINGLE) override;
 	virtual bool DrawPoints(int count, const vector3f *points, const Color *colors, RenderState*, float pointSize=1.f) override;
-	virtual bool DrawTriangles(const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES) override;
-	virtual bool DrawTriangles(int vertCount, const VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES);
+	virtual bool DrawTriangles(VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES) override;
+	virtual bool DrawTriangles(int vertCount, VertexArray *vertices, RenderState *state, Material *material, PrimitiveType type=TRIANGLES);
 	virtual bool DrawPointSprites(int count, const vector3f *positions, RenderState *rs, Material *material, float size) override;
 	virtual bool DrawBuffer(VertexBuffer*, RenderState*, Material*, PrimitiveType) override;
-	virtual bool DrawBufferIndexed(VertexBuffer*, IndexBuffer*, RenderState*, Material*, PrimitiveType) override;
+	virtual bool DrawBufferIndexed(VertexBuffer*, IndexBuffer*, RenderState*, Material*, PrimitiveType, unsigned start_index = 0, unsigned index_count = 0) override;
 	virtual bool DrawFullscreenQuad(Material* mat, RenderState* state = nullptr, bool clear_rt = true) override;
 	virtual bool DrawFullscreenQuad(Texture* texture, RenderState* state = nullptr, bool clear_rt = true) override;
+	virtual bool DrawFullscreenQuad(RenderState *state, bool clear_rt = true) override;
 
 	virtual Material *CreateMaterial(const MaterialDescriptor &descriptor) override;
 	virtual Texture *CreateTexture(const TextureDescriptor &descriptor) override;
@@ -114,10 +115,6 @@ public:
 
 	virtual const matrix4x4f& GetCurrentModelView() const { return m_modelViewStack.top(); }
 	virtual const matrix4x4f& GetCurrentProjection() const { return m_projectionStack.top(); }
-	virtual void GetCurrentViewport(Sint32 *vp) const {
-		const Viewport &cur = m_viewportStack.top();
-		vp[0] = cur.x; vp[1] = cur.y; vp[2] = cur.w; vp[3] = cur.h;
-	}
 
 	virtual void SetMatrixMode(MatrixMode mm);
 	virtual void PushMatrix();
@@ -128,8 +125,6 @@ public:
 	virtual void Scale( const float x, const float y, const float z );
 
 protected:
-	virtual void PushState();
-	virtual void PopState();
 
 	//figure out states from a vertex array and enable them
 	//also sets vertex pointers
@@ -138,7 +133,6 @@ protected:
 	//disable previously enabled
 	virtual void DisableClientStates();
 	int m_numLights;
-	int m_numDirLights;
 	std::vector<GLenum> m_clientStates;
 	float m_minZNear;
 	float m_maxZFar;
@@ -168,7 +162,6 @@ protected:
 	friend class Effects::TransitCompositionMaterial;
 	std::vector<std::pair<MaterialDescriptor, GL2::Program*> > m_programs;
 	std::unordered_map<Uint32, GL2::RenderState*> m_renderStates;
-	float m_invLogZfarPlus1;
 	GL2::RenderTarget *m_activeRenderTarget;
 	RenderState *m_activeRenderState;
 
@@ -176,13 +169,7 @@ protected:
 	std::stack<matrix4x4f> m_modelViewStack;
 	std::stack<matrix4x4f> m_projectionStack;
 
-	struct Viewport {
-		Viewport() : x(0), y(0), w(0), h(0) {}
-		Sint32 x, y, w, h;
-	};
-	std::stack<Viewport> m_viewportStack;
-
-	unsigned int m_screenQuadBufferId;
+	GLuint m_screenQuadBufferId;
 	RenderState* m_screenQuadRS;
 	std::unique_ptr<Material> m_screenQuadMtrl;
 };

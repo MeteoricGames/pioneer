@@ -6,6 +6,7 @@
 #include "SDL.h"
 #include "SDLWrappers.h"
 #include "OS.h"
+#include <iostream>
 
 namespace Graphics {
 
@@ -15,8 +16,27 @@ bool WindowSDL::CreateWindowAndContext(const char *name, int w, int h, bool full
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depth_bits);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, samples ? 1 : 0);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, samples);
+
+	int major, minor;
+	if (glewIsSupported("GL_VERSION_3_2")) {
+		major = 3;
+		minor = 2;
+	} else if(glewIsSupported("GL_VERSION_3_1")) {
+		major = 3;
+		minor = 1;
+	} else {
+		major = 2;
+		minor = 1;
+	}
+	std::cout<<"Creating context for OpenGL "<<major<<"."<<minor<<std::endl;
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+#ifndef NDEBUG
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
 
 	// need full 32-bit color
 	// (need an alpha channel because of the way progress bars are drawn)

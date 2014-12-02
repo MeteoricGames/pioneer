@@ -1,0 +1,18 @@
+"appbuild"
+{
+	"appid"	"291250"
+	"desc" "Alpha 8 Preview" // description for this build
+	"buildoutput" "../output/" // build output folder for .log, .csm & .csd files, relative to location of this file
+	"contentroot" "../content" // root content folder, relative to location of this file
+	"setlive"	"" // branch to set live after successful build, non if empty
+	"preview" "1" // to enable preview builds
+	"local"	""	// set to flie path of local content server 
+	
+	"depots"
+	{
+		"291251" "depot_build_291251_common.vdf"
+		"291252" "depot_build_291252_windows.vdf"
+		"291253" "depot_build_291253_linux32.vdf"
+		"291254" "depot_build_291254_linux64.vdf"
+	}
+}

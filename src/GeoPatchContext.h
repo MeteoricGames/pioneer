@@ -31,8 +31,8 @@ public:
 	#pragma pack(push, 4)
 	struct VBOVertex
 	{
-		vector3f pos;
-		vector3f norm;
+		vector4f pos;
+		vector4f norm;
 		Color4ub col;
 	};
 	#pragma pack(pop)

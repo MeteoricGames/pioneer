@@ -8,6 +8,7 @@
 #include "GeoPatchJobs.h"
 #include "perlin.h"
 #include "Pi.h"
+#include "GeoSphereEffects.h"
 #include "RefCounted.h"
 #include "graphics/Material.h"
 #include "graphics/Renderer.h"
@@ -489,6 +490,9 @@ void GeoSphere::Render(Graphics::Renderer *renderer, const matrix4x4d &modelView
 
 void GeoSphere::SetUpMaterials()
 {
+	// GL3 Effects system
+	Effects::STerrainOptions t_opts;
+
 	//solid
 	Graphics::RenderStateDesc rsd;
 	m_surfRenderState = Pi::renderer->CreateRenderState(rsd);
@@ -502,12 +506,15 @@ void GeoSphere::SetUpMaterials()
 	// atmosphere. Separate material for surface and sky.
 	Graphics::MaterialDescriptor surfDesc;
 	const Uint32 effect_flags = m_terrain->GetSurfaceEffects();
-	if (effect_flags & Terrain::EFFECT_LAVA)
+	if (effect_flags & Terrain::EFFECT_LAVA) {
 		surfDesc.effect = Graphics::EFFECT_GEOSPHERE_TERRAIN_WITH_LAVA;
-	else if (effect_flags & Terrain::EFFECT_WATER)
+		t_opts.lava = true;
+	} else if (effect_flags & Terrain::EFFECT_WATER) {
 		surfDesc.effect = Graphics::EFFECT_GEOSPHERE_TERRAIN_WITH_WATER;
-	else
+		t_opts.water = true;
+	} else { 
 		surfDesc.effect = Graphics::EFFECT_GEOSPHERE_TERRAIN;
+	}
 
 	if ((m_sbody->GetType() == SystemBody::TYPE_BROWN_DWARF) ||
 		(m_sbody->GetType() == SystemBody::TYPE_STAR_M)) {
@@ -525,6 +532,7 @@ void GeoSphere::SetUpMaterials()
 		surfDesc.lighting = true;
 		if(ap.atmosDensity > 0.0) {
 			surfDesc.quality |= Graphics::HAS_ATMOSPHERE;
+			t_opts.atmosphere = true;
 		} else {
 			surfDesc.quality &= ~Graphics::HAS_ATMOSPHERE;
 		}
@@ -533,8 +541,13 @@ void GeoSphere::SetUpMaterials()
 	const bool bEnableEclipse = (Pi::config->Int("DisableEclipse") == 0);
 	if (bEnableEclipse) {
 		surfDesc.quality |= Graphics::HAS_ECLIPSES;
+		t_opts.eclipse = true;
 	}
-	m_surfaceMaterial.reset(Pi::renderer->CreateMaterial(surfDesc));
+	if(Graphics::Hardware::GL3()) {
+		m_surfaceMaterial.reset(new Effects::TerrainEffect(Pi::renderer, t_opts));
+	} else {
+		m_surfaceMaterial.reset(Pi::renderer->CreateMaterial(surfDesc));
+	}
 
 	//Shader-less atmosphere is drawn in Planet
 	{
@@ -544,6 +557,10 @@ void GeoSphere::SetUpMaterials()
 		if (bEnableEclipse) {
 			skyDesc.quality |= Graphics::HAS_ECLIPSES;
 		}
-		m_atmosphereMaterial.reset(Pi::renderer->CreateMaterial(skyDesc));
+		if(Graphics::Hardware::GL3()) {
+			m_atmosphereMaterial.reset(new Effects::SkyEffect(Pi::renderer, t_opts.eclipse));
+		} else {
+			m_atmosphereMaterial.reset(Pi::renderer->CreateMaterial(skyDesc));
+		}
 	}
 }

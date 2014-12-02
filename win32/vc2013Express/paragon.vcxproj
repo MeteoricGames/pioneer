@@ -198,6 +198,7 @@
     <ClCompile Include="..\..\src\GeoPatchID.cpp" />
     <ClCompile Include="..\..\src\GeoPatchJobs.cpp" />
     <ClCompile Include="..\..\src\GeoSphere.cpp" />
+    <ClCompile Include="..\..\src\GeoSphereEffects.cpp" />
     <ClCompile Include="..\..\src\HyperspaceCloud.cpp" />
     <ClCompile Include="..\..\src\IniConfig.cpp" />
     <ClCompile Include="..\..\src\Intro.cpp" />
@@ -245,6 +246,7 @@
     <ClCompile Include="..\..\src\LuaUtils.cpp" />
     <ClCompile Include="..\..\src\LuaVector.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\MainMaterial.cpp" />
     <ClCompile Include="..\..\src\MathUtil.cpp" />
     <ClCompile Include="..\..\src\Missile.cpp" />
     <ClCompile Include="..\..\src\ModelBody.cpp" />
@@ -291,6 +293,7 @@
     <ClCompile Include="..\..\src\ShipCpanel.cpp" />
     <ClCompile Include="..\..\src\ShipCpanelMultiFuncDisplays.cpp" />
     <ClCompile Include="..\..\src\ShipType.cpp" />
+    <ClCompile Include="..\..\src\SMAA.cpp" />
     <ClCompile Include="..\..\src\Sound.cpp" />
     <ClCompile Include="..\..\src\SoundMusic.cpp" />
     <ClCompile Include="..\..\src\Space.cpp" />
@@ -335,8 +338,12 @@
     <ClInclude Include="..\..\src\Colors.h" />
     <ClInclude Include="..\..\src\CRC32.h" />
     <ClInclude Include="..\..\src\DeathView.h" />
+    <ClInclude Include="..\..\src\GeoSphereEffects.h" />
+    <ClInclude Include="..\..\src\MainMaterial.h" />
     <ClInclude Include="..\..\src\SectorViewLabelSet.h" />
     <ClInclude Include="..\..\src\ShipAICmdParagon.h" />
+    <ClInclude Include="..\..\src\SMAA.h" />
+    <ClInclude Include="..\..\src\vector4.h" />
     <ClInclude Include="..\..\src\VSLog.h" />
     <ClInclude Include="..\..\src\DeleteEmitter.h" />
     <ClInclude Include="..\..\src\DynamicBody.h" />

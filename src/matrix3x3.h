@@ -128,6 +128,40 @@ class matrix3x3 {
 		m[6] = cell[2]; m[7] = cell[5]; m[8] = cell[8];
 		return m;
 	}
+	T Determinant() const {
+		return
+			+ cell[0] * (cell[4] * cell[8] - cell[7] * cell[5])
+			- cell[3] * (cell[1] * cell[8] - cell[7] * cell[2])
+			+ cell[6] * (cell[1] * cell[5] - cell[4] * cell[2]);
+	}
+	matrix3x3 Inverse() const {
+		matrix3x3 inverse;
+		T det = Determinant();
+		inverse[0] = +(cell[4] * cell[8] - cell[7] * cell[5]) / det;
+		inverse[1] = -(cell[3] * cell[8] - cell[6] * cell[5]) / det;
+		inverse[2] = +(cell[3] * cell[7] - cell[6] * cell[4]) / det;
+		inverse[3] = -(cell[1] * cell[8] - cell[7] * cell[2]) / det;
+		inverse[4] = +(cell[0] * cell[8] - cell[6] * cell[2]) / det;
+		inverse[5] = -(cell[0] * cell[7] - cell[6] * cell[1]) / det;
+		inverse[6] = +(cell[1] * cell[5] - cell[4] * cell[2]) / det;
+		inverse[7] = -(cell[0] * cell[5] - cell[3] * cell[2]) / det;
+		inverse[8] = +(cell[0] * cell[4] - cell[3] * cell[1]) / det;
+		return inverse;
+	}
+	matrix3x3 InverseTranspose() const {
+		matrix3x3 invtrans;
+		T det = Determinant();
+		invtrans[0] = +(cell[4] * cell[8] - cell[7] * cell[5]) / det;
+		invtrans[3] = -(cell[3] * cell[8] - cell[6] * cell[5]) / det;
+		invtrans[6] = +(cell[3] * cell[7] - cell[6] * cell[4]) / det;
+		invtrans[1] = -(cell[1] * cell[8] - cell[7] * cell[2]) / det;
+		invtrans[4] = +(cell[0] * cell[8] - cell[6] * cell[2]) / det;
+		invtrans[7] = -(cell[0] * cell[7] - cell[6] * cell[1]) / det;
+		invtrans[2] = +(cell[1] * cell[5] - cell[4] * cell[2]) / det;
+		invtrans[5] = -(cell[0] * cell[5] - cell[3] * cell[2]) / det;
+		invtrans[8] = +(cell[0] * cell[4] - cell[3] * cell[1]) / det;
+		return invtrans;
+	}
 	void Renormalize() {
 		vector3<T> x = VectorX().Normalized();
 		vector3<T> y = VectorZ().Cross(x).Normalized();

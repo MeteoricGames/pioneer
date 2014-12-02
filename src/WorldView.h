@@ -100,7 +100,7 @@ private:
 	void DrawIconIndicator(const Indicator &marker, Gui::TexturedQuad* quad, const Color& c, 
 		vector2f size_in_px);
 	void DrawBodyIcons();
-	void DrawBodyIcon(Object::Type type, vector2f position);
+	void DrawBodyIcon(Object::Type type, vector2f position, bool current_mission = false);
 	void DrawEdgeMarker(const Indicator &marker, const Color &c);
 	void DrawThrusterTrails();
 
@@ -164,7 +164,8 @@ private:
 	Gui::Label *m_debugInfo;
 #endif
 
-	Gui::Label *m_hudVelocity, *m_hudTargetDist, *m_hudAltitude, *m_hudPressure, *m_hudHyperspaceInfo, *m_hudTargetInfo;
+	Gui::Label *m_hudVelocity, *m_hudTargetDist, *m_hudAltitude, *m_hudPressure, *m_hudHyperspaceInfo;
+	std::vector<Gui::Label*> vHudTargetInfo;
 	Gui::MeterBar *m_hudHullTemp, *m_hudWeaponTemp, *m_hudHullIntegrity, *m_hudShieldIntegrity;
 	Gui::MeterBar *m_hudTargetHullIntegrity, *m_hudTargetShieldIntegrity;
 	Gui::MeterBar *m_hudFuelGauge;
@@ -206,18 +207,28 @@ private:
 	std::unique_ptr<Gui::TexturedQuad> m_hud2TargetOffscreen;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2TargetSelector;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2Unknown;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2CurrentMission1;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2CurrentMission2;
 
 	struct SBodyIcon
 	{
-		SBodyIcon(float _x, float _y, Object::Type _type) {
+		SBodyIcon(float _x, float _y, Object::Type _type, bool _current_mission = false) {
 			position.x = _x;
 			position.y = _y;
 			type = _type;
+			currentMission = _current_mission;
 		}
 		vector2f position;
 		Object::Type type;
+		bool currentMission;
 	};
 	std::vector<SBodyIcon> m_hud2BodyIcons;
+
+	std::unique_ptr<Graphics::Material> m_trailDepthMtrl;
+	std::unique_ptr<Graphics::RenderTarget> m_trailDepthRT;
+	std::unique_ptr<Graphics::Material> m_trailMtrl;
+	int m_windowSizeUniformId;
+	Graphics::Texture* m_trailGradient;
 };
 
 class NavTunnelWidget: public Gui::Widget {

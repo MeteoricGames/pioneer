@@ -5,6 +5,7 @@
 #include "graphics/TextureBuilder.h"
 #include "scenegraph/FindNodeVisitor.h"
 #include "scenegraph/SceneGraph.h"
+#include "MainMaterial.h"
 
 const float BILLBOARD_SIZE = 5.f;
 
@@ -43,11 +44,19 @@ void NavLights::Init(Graphics::Renderer *renderer)
 	assert(!g_initted);
 	Graphics::MaterialDescriptor desc;
 	desc.textures = 1;
-	matWhite.Reset(renderer->CreateMaterial(desc));
-	matRed.Reset(renderer->CreateMaterial(desc));
-	matGreen.Reset(renderer->CreateMaterial(desc));
-	matBlue.Reset(renderer->CreateMaterial(desc));
-	matYellow.Reset(renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		matWhite.Reset(new MainMaterial(renderer, desc));
+		matRed.Reset(new MainMaterial(renderer, desc));
+		matGreen.Reset(new MainMaterial(renderer, desc));
+		matBlue.Reset(new MainMaterial(renderer, desc));
+		matYellow.Reset(new MainMaterial(renderer, desc));
+	} else {
+		matWhite.Reset(renderer->CreateMaterial(desc));
+		matRed.Reset(renderer->CreateMaterial(desc));
+		matGreen.Reset(renderer->CreateMaterial(desc));
+		matBlue.Reset(renderer->CreateMaterial(desc));
+		matYellow.Reset(renderer->CreateMaterial(desc));
+	}
 
 	//not cached because modelviewer clears everything...
 	matWhite->texture0  = Graphics::TextureBuilder::Billboard("textures/halo.png").CreateTexture(renderer);

@@ -13,6 +13,7 @@
 #include "graphics/Material.h"
 #include "graphics/Renderer.h"
 #include "graphics/TextureBuilder.h"
+#include "MainMaterial.h"
 
 using namespace Graphics;
 
@@ -253,19 +254,31 @@ void Sfx::Init(Graphics::Renderer *r)
 	rsd.depthWrite = true;
 	alphaOneState = r->CreateRenderState(rsd);
 
+	RefCountedPtr<Graphics::Material> explosionMat;
 	Graphics::MaterialDescriptor desc;
-	RefCountedPtr<Graphics::Material> explosionMat(r->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		explosionMat.Reset(new MainMaterial(r, desc));
+	} else {
+		explosionMat.Reset(r->CreateMaterial(desc));
+	}
 
 	explosionEffect = new Graphics::Drawables::Sphere3D(r, explosionMat, alphaState, 2);
 
 	desc.textures = 1;
-	damageParticle = r->CreateMaterial(desc);
+	if(Graphics::Hardware::GL3()) {
+		damageParticle = new MainMaterial(r, desc);
+		ecmParticle = new MainMaterial(r, desc);
+		smokeParticle = new MainMaterial(r, desc);
+		explotionParticle = new MainMaterial(r, desc);
+	} else {
+		damageParticle = r->CreateMaterial(desc);
+		ecmParticle = r->CreateMaterial(desc);
+		smokeParticle = r->CreateMaterial(desc);
+		explotionParticle = r->CreateMaterial(desc);
+	}
 	damageParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/smoke.png").GetOrCreateTexture(r, "billboard");
-	ecmParticle = r->CreateMaterial(desc);
 	ecmParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/ecm.png").GetOrCreateTexture(r, "billboard");
-	smokeParticle = r->CreateMaterial(desc);
 	smokeParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/smoke.png").GetOrCreateTexture(r, "billboard");
-	explotionParticle = r->CreateMaterial(desc);
 	explotionParticle->texture0 = Graphics::TextureBuilder::Billboard("textures/smoke.png").GetOrCreateTexture(r, "billboard");
 }
 

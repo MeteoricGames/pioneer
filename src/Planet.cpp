@@ -12,6 +12,8 @@
 #include "graphics/Graphics.h"
 #include "graphics/Texture.h"
 #include "graphics/VertexArray.h"
+#include "graphics/gl3/Effect.h"
+#include "graphics/gl3/EffectMaterial.h"
 #include "Color.h"
 
 #ifdef _MSC_VER
@@ -234,11 +236,24 @@ void Planet::GenerateRings(Graphics::Renderer *renderer)
 			static_cast<void*>(buf.get()), texSize,
 			Graphics::TEXTURE_RGBA_8888);
 
-	Graphics::MaterialDescriptor desc;
-	desc.effect = Graphics::EFFECT_PLANETRING;
-	desc.lighting = true;
-	desc.textures = 1;
-	m_ringMaterial.reset(renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptor ed;
+		ed.uniforms.push_back("su_ModelViewProjectionMatrix");
+		ed.uniforms.push_back("u_ModelViewMatrixInverse");
+		ed.uniforms.push_back("invLogZfarPlus1");
+		ed.uniforms.push_back("texture0");
+		ed.uniforms.push_back("u_numLights");
+		ed.settings.push_back("LIGHTING");
+		ed.vertex_shader = "gl3/planetrings.vert";
+		ed.fragment_shader = "gl3/planetrings.frag";
+		m_ringMaterial.reset(new Graphics::GL3::EffectMaterial(renderer, ed));
+	} else {
+		Graphics::MaterialDescriptor desc;
+		desc.lighting = true;
+		desc.textures = 1;
+		desc.effect = Graphics::EFFECT_PLANETRING;
+		m_ringMaterial.reset(renderer->CreateMaterial(desc));
+	}
 	m_ringMaterial->texture0 = m_ringTexture.Get();
 
 	Graphics::RenderStateDesc rsd;

@@ -5,12 +5,14 @@
 
 namespace Gui {
 
-Label::Label(const char *text, TextLayout::ColourMarkupMode colourMarkupMode)
+Label::Label(const char *text, TextLayout::ColourMarkupMode colourMarkupMode, Gui::Alignment label_alignment)
+	: m_alignment(label_alignment), m_rightMargin(0.0f)
 {
 	Init(std::string(text), colourMarkupMode);
 }
 
-Label::Label(const std::string &text, TextLayout::ColourMarkupMode colourMarkupMode)
+Label::Label(const std::string &text, TextLayout::ColourMarkupMode colourMarkupMode, Gui::Alignment label_alignment)
+	: m_alignment(label_alignment), m_rightMargin(0.0f)
 {
 	Init(text, colourMarkupMode);
 }
@@ -73,8 +75,14 @@ void Label::Draw()
 	PROFILE_SCOPED()
 	if (!m_layout) UpdateLayout();
 	float size[2]; GetSize(size);
+	Graphics::Renderer *r = Gui::Screen::GetRenderer();
+	Graphics::Renderer::MatrixTicket mt(r, Graphics::MatrixMode::MODELVIEW);
+	if(m_alignment == ALIGN_CENTER) {
+		r->Translate(-size[0] / 2.0f, 0.0f, 0.0f);
+	} else if(m_alignment == ALIGN_RIGHT) {
+		r->Translate(-size[0] + m_rightMargin, 0.0f, 0.0f);
+	}
 	if (m_shadow) {
-		Graphics::Renderer *r = Gui::Screen::GetRenderer();
 		r->Translate(1,1,0);
 		m_layout->Render(size[0], Color::BLACK);
 		r->Translate(-1,-1,0);

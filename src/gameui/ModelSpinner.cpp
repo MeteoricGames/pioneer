@@ -52,7 +52,8 @@ void ModelSpinner::Draw()
 {
 	Graphics::Renderer *r = GetContext()->GetRenderer();
 
-	Graphics::Renderer::StateTicket ticket(r);
+	Graphics::Renderer::ViewportTicket vt(r);
+	Graphics::Renderer::LightsTicket lt(r);
 
 	const float fov = 45.f;
 	r->SetPerspectiveProjection(fov, 1.f, 1.f, 10000.f);

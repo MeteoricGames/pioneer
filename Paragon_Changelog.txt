@@ -1,3 +1,65 @@
+Alpha 9.22
+	* Fixes
+	  * Fixed issue causing missions to be wiped out at times between save/load leading to a crash after loading
+	  * Fixed issue causing an exception after jumping to destination when a taxi mission is active
+	  * Fixed issue causing hyperspace lines to be drawn in paragon blue instead of white gradient
+Alpha 9.2
+	* Game
+	  * Optimization pass for loading times and game
+	* UI
+	  * Default look around controls changed to SHIFT + WSAD
+	  * Minor adjustments to UI
+	  * Holding "S" (decelerate key) while in transit speed 2 will drop speed to 1
+	  * Transit drop speed respects Joystick axes motion
+	* Fixes
+	  * Fixed crash caused by some projectile types
+	  * Fixed crash caused by planetrings effect
+	  * Fixed issue causing shield to not be visible
+	  * Fixed inconsistencies in irradiance lighting between different types of models
+
+Alpha 9.1
+	* Art
+	  * New ship models
+	  * Polish for multiple ship models and cockpits
+	
+	* UI
+	  * New HUD indicator for current mission that shows destination space station
+	  * Added new default controls for external camera rotation to match cockpit camera
+	  * Multiple adjustments to UI
+	  
+	* Fixes
+	  * Fixed issue with mipmap generation that lead to corrupted textures in UI
+
+Alpha 9
+	* Art
+	  * Completely revamped cities (15+ new buildings)
+	  * New City Starport
+	  * New Small Starport
+	* Core
+	  * Renderer code went through a full upgrade to OpenGL 3.1/3.2 core profile (3.2 prefered)
+	  * All shaders ported to GLSL 1.4/1.5 and uniform blocks for big data structs like Lighting
+	  * All Paragon rendering upgraded to the new renderer
+	  * Tested for visual and stability bugs on intel, NVIDIA and AMD graphics cards
+	  * New renderer ported to linux successfully. OSX WIP
+	* Graphics
+	  * New shader-based antialiasing (FXAA)
+	  * New tone mapping effect that includes: gamma, exposure, color balance and vignette
+	  * New approximate irradiance diffuse/gloss lighting effect on all game models
+	* Game
+	  * New camera freelook feature by default SHIFT + cursor keys
+	  * New current mission feature allowing player to set a specific mission as current
+	  * Extended mission system to include a variety of new states
+	  * New ability to cancel active missions
+	* UI
+	  * Mission info menu now includes Cancel mission button
+	  * Missions list shows and allows setting of current mission
+	  * Sector view shows destination of current mission
+	  * Modified control system to allow more flexibility
+	  * Added loading screen between main menu and game start
+	* Fixes
+	  * Fixed issue with specular shininess being set incorrectly
+	  * Lots of other small adjustments and fixes
+
 Alpha 8.02
   * Art
     * Polishing for models and textures

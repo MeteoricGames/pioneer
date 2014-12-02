@@ -4,6 +4,7 @@
 #include "Image.h"
 #include "Context.h"
 #include "graphics/TextureBuilder.h"
+#include "MainMaterial.h"
 
 namespace UI {
 
@@ -13,12 +14,19 @@ Image::Image(Context *context, const std::string &filename, Uint32 sizeControlFl
 	m_texture.Reset(b.GetOrCreateTexture(GetContext()->GetRenderer(), "ui"));
 
 	const Graphics::TextureDescriptor &descriptor = b.GetDescriptor();
-	m_initialSize = Point(descriptor.dataSize.x*descriptor.texSize.x,descriptor.dataSize.y*descriptor.texSize.y);
+	m_initialSize = Point(descriptor.dataSize.x*descriptor.texSize.x, descriptor.dataSize.y*descriptor.texSize.y);
+	m_tintColor = Color::WHITE;
 
 	Graphics::MaterialDescriptor material_desc;
 	material_desc.textures = 1;
-	m_material.Reset(GetContext()->GetRenderer()->CreateMaterial(material_desc));
+	material_desc.colorTint = true;
+	if(Graphics::Hardware::GL3()) {
+		m_material.Reset(new MainMaterial(GetContext()->GetRenderer(), material_desc));
+	} else {
+		m_material.Reset(GetContext()->GetRenderer()->CreateMaterial(material_desc));
+	}
 	m_material->texture0 = m_texture.Get();
+	m_material->tint = m_tintColor;
 
 	SetSizeControlFlags(sizeControlFlags);
 }
@@ -35,6 +43,12 @@ Image *Image::SetHeightLines(Uint32 lines)
 	m_initialSize = UI::Point(height * float(m_initialSize.x) / float(m_initialSize.y), height);
 	GetContext()->RequestLayout();
 	return this;
+}
+
+void Image::SetTintColor(const Color& tint)
+{
+	m_tintColor = tint;
+	m_material->tint = m_tintColor;
 }
 
 void Image::Draw()

@@ -76,12 +76,14 @@
 #include "graphics/PostProcessing.h"
 #include "graphics/PostProcess.h"
 #include "graphics/gl2/HorizontalBlurMaterial.h"
+#include "graphics/gl3/Effect.h"
 #include "gui/Gui.h"
 #include "scenegraph/Model.h"
 #include "scenegraph/Lua.h"
 #include "ui/Context.h"
 #include "ui/Lua.h"
 #include "MouseCursor.h"
+#include "SMAA.h"
 #include <algorithm>
 #include <sstream>
 
@@ -147,6 +149,7 @@ ModelCache *Pi::modelCache;
 Intro *Pi::intro;
 SDLGraphics *Pi::sdl;
 Graphics::PostProcess* Pi::m_gamePP;
+SMAA* Pi::m_smaa = nullptr;
 Graphics::PostProcess* Pi::m_guiPP;
 Graphics::RenderTarget *Pi::renderTarget;
 RefCountedPtr<Graphics::Texture> Pi::renderTexture;
@@ -462,8 +465,6 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 
 	LuaInit();
 
-	// Gui::Init shouldn't initialise any VBOs, since we haven't tested
-	// that the capability exists. (Gui does not use VBOs so far)
 	Gui::Init(renderer, Graphics::GetScreenWidth(), Graphics::GetScreenHeight(), 800, 600);
 
 	UI::Box *box = Pi::ui->VBox(5);
@@ -516,6 +517,9 @@ void Pi::Init(const std::map<std::string,std::string> &options)
     );
 
 	draw_progress(gauge, label, 0.1f);
+	
+	// Beginning game loading
+	double start_game_loading = SDL_GetTicks();
 
 	Galaxy::Init();
 	draw_progress(gauge, label, 0.2f);
@@ -570,6 +574,10 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 		if (config->Int("MusicMuted")) GetMusicPlayer().SetEnabled(false);
 	}
 	draw_progress(gauge, label, 1.0f);
+
+	// End of game loading
+	double end_game_loading = SDL_GetTicks();
+	Output("Game loading time: %.3f seconds\n", (end_game_loading - start_game_loading) * 0.001);
 
 	Pi::ui->DropAllLayers();
 
@@ -690,20 +698,111 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 
 	// Define post processes
 	m_gamePP = new Graphics::PostProcess("Bloom", renderer->GetWindow());
-	m_gamePP->AddPass(renderer, "HBlur", Graphics::EFFECT_HORIZONTAL_BLUR);
-	m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
-	m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR, Graphics::PP_PASS_COMPOSE);
 
+	if(Graphics::Hardware::GL3()) {
+		// FXAA
+		Graphics::GL3::EffectDescriptor fxaa_desc;
+		fxaa_desc.strict = true;
+		fxaa_desc.uniforms = {
+			"texture0",
+			"u_texCoordOffset",
+			"u_fxaaSpanMax",
+			"u_fxaaReduceMul",
+			"u_fxaaReduceMin",
+		};
+		fxaa_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
+		fxaa_desc.fragment_shader = "gl3/postprocessing/fxaa.frag";
+		Graphics::GL3::Effect* fxaa = new Graphics::GL3::Effect(renderer, fxaa_desc);
+		fxaa->SetProgram();
+		fxaa->GetUniform(fxaa->GetUniformID("u_texCoordOffset")).Set(vector2f(
+			1.0f / static_cast<float>(renderer->GetWindow()->GetWidth()), 
+			1.0f / static_cast<float>(renderer->GetWindow()->GetHeight())));
+		fxaa->GetUniform(fxaa->GetUniformID("u_fxaaSpanMax")).Set(8.0f);
+		fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMul")).Set(1.0f / 8.0f);
+		fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMin")).Set(1.0f / 128.0f);
+
+		m_gamePP->AddPass(renderer, "FXAA", std::shared_ptr<Graphics::GL3::Effect>(fxaa));
+
+		// Bloomless Tone Mapping
+		Graphics::GL3::EffectDescriptor tonemap_desc;
+		tonemap_desc.uniforms = {
+			"texture0",
+			"u_defog",
+			"u_fogColor",
+			"u_exposure",
+			"u_gamma",
+			"u_vignetteCenter",
+			"u_vignetteRadius",
+			"u_vignetteAmount",
+			"u_blueShift",
+		};
+		tonemap_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
+		tonemap_desc.fragment_shader = "gl3/postprocessing/tonemapping.frag";
+		Graphics::GL3::Effect* tonemap = new Graphics::GL3::Effect(renderer, tonemap_desc);
+		tonemap->SetProgram();
+		tonemap->GetUniform(tonemap->GetUniformID("u_defog")).Set(0.01f);
+		tonemap->GetUniform(tonemap->GetUniformID("u_fogColor")).Set(vector4f(1.0f, 1.0f, 1.0f, 1.0f));
+		tonemap->GetUniform(tonemap->GetUniformID("u_exposure")).Set(0.35f);
+		tonemap->GetUniform(tonemap->GetUniformID("u_gamma")).Set(0.8f);
+		tonemap->GetUniform(tonemap->GetUniformID("u_vignetteCenter")).Set(vector2f(0.5f, 0.5f));
+		tonemap->GetUniform(tonemap->GetUniformID("u_vignetteRadius")).Set(1.0f);
+		tonemap->GetUniform(tonemap->GetUniformID("u_vignetteAmount")).Set(-1.0f);
+		tonemap->GetUniform(tonemap->GetUniformID("u_blueShift")).Set(0.25f);
+		
+		m_gamePP->AddPass(renderer, "ToneMapping", std::shared_ptr<Graphics::GL3::Effect>(tonemap));
+		
+
+		/* // Old Bloom
+		Graphics::GL3::EffectDescriptor hblur_desc, vblur_desc, compose_desc;
+		
+		hblur_desc.uniforms.push_back("texture0");
+		hblur_desc.vertex_shader = "gl3/postprocessing/hblur.vert";
+		hblur_desc.fragment_shader = "gl3/postprocessing/hblur.frag";
+		
+		vblur_desc.uniforms.push_back("texture0");
+		vblur_desc.vertex_shader = "gl3/postprocessing/vblur.vert";
+		vblur_desc.fragment_shader = "gl3/postprocessing/vblur.frag";
+		
+		compose_desc.settings.push_back("BlendMode 1");
+		compose_desc.uniforms.push_back("texture0");
+		compose_desc.uniforms.push_back("texture1");
+		compose_desc.vertex_shader = "gl3/postprocessing/compositor.vert";
+		compose_desc.fragment_shader = "gl3/postprocessing/compositor.frag";
+
+		Graphics::GL3::Effect* hblur = new Graphics::GL3::Effect(renderer, hblur_desc);
+		Graphics::GL3::Effect* vblur = new Graphics::GL3::Effect(renderer, vblur_desc);
+		Graphics::GL3::Effect* compose = new Graphics::GL3::Effect(renderer, compose_desc);
+
+		m_gamePP->AddPass(renderer, "HBlur", std::shared_ptr<Graphics::GL3::Effect>(hblur));
+		m_gamePP->AddPass(renderer, "VBlur", std::shared_ptr<Graphics::GL3::Effect>(vblur));
+		m_gamePP->AddPass(renderer, "Compose", std::shared_ptr<Graphics::GL3::Effect>(compose),
+			Graphics::PP_PASS_COMPOSE);*/
+	} else {
+		m_gamePP->AddPass(renderer, "HBlur", Graphics::EFFECT_HORIZONTAL_BLUR);
+		m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
+		m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR, 
+			Graphics::PP_PASS_COMPOSE);
+	}
+		
+	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
+	
 	// Set post processing option
 	Pi::renderer->GetPostProcessing()->SetPerformPostProcessing(postProcessingEnabled);
 
+	//m_smaa = new SMAA(renderer);
 
 	// Preload noise texture for tunnel effect
  	Graphics::TextureBuilder noise_tb("textures/noise.png", Graphics::LINEAR_CLAMP, 
 		false, false, false, true);
 	noise_tb.GetOrCreateTexture(renderer, "effect");
 
-	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
+	// TEMP: Pending conversion to 3.X
+	//m_smaa = new SMAA(renderer);
+	// Preload SMAA static textures
+	//Graphics::TextureBuilder("textures/smaa/AreaTex.png", Graphics::LINEAR_CLAMP,
+	//	false, false, false, true).GetOrCreateTexture(renderer, "effect");
+	//Graphics::TextureBuilder("textures/smaa/SearchTex.png", Graphics::NEAREST_CLAMP,
+	//	false, false, false, true).GetOrCreateTexture(renderer, "effect");
 
 	// Mouse cursor
 	mouseCursor = new MouseCursor(renderer);
@@ -1087,6 +1186,54 @@ static void OnPlayerChangeEquipment(Equip::Type e)
 	Pi::onPlayerChangeEquipment.emit();
 }
 
+UI::Gauge* PreStartGauge = nullptr;
+UI::Context* PreStartUI = nullptr;
+double PreStartTime = 0.0;
+
+void Pi::PreStartGame()
+{
+	PreStartUI = new UI::Context(Lua::manager, Pi::renderer, 
+		Graphics::GetScreenWidth(), Graphics::GetScreenHeight(), Lang::GetCore().GetLangCode());
+	
+	UI::Box *box = PreStartUI->VBox(5);
+	UI::Label *label = PreStartUI->Label("");
+	label->SetFont(UI::Widget::FONT_HEADING_NORMAL);
+	label->SetColor(Color::PARAGON_BLUE);
+	label->SetText("WARMING UP");
+	UI::Gauge *gauge = PreStartUI->Gauge();
+	gauge->SetValue(0.0f);
+
+	UI::Layer *_layer = PreStartUI->NewLayer();
+	_layer->SetInnerWidget(
+		PreStartUI->Margin(10)->SetInnerWidget(
+			PreStartUI->Expand()->SetInnerWidget(
+				PreStartUI->Align(UI::Align::BOTTOM)->SetInnerWidget(
+					box->PackEnd(UI::WidgetSet(label, gauge))
+				)
+			)
+		)
+	);
+
+	Pi::renderer->ClearScreen();
+	PreStartUI->Update();
+	PreStartUI->Draw();
+	Pi::renderer->SwapBuffers();
+
+	PreStartGauge = gauge;
+
+	PreStartTime = SDL_GetTicks();
+}
+
+void Pi::PreStartUpdateProgress(float total, float current)
+{
+	PreStartGauge->SetValue(current / total);
+
+	Pi::renderer->ClearScreen();
+	PreStartUI->Update();
+	PreStartUI->Draw();
+	Pi::renderer->SwapBuffers();
+}
+
 void Pi::StartGame()
 {
 	Pi::player->onDock.connect(sigc::ptr_fun(&OnPlayerDockOrUndock));
@@ -1101,6 +1248,12 @@ void Pi::StartGame()
 	// fire event before the first frame
 	LuaEvent::Queue("onGameStart");
 	LuaEvent::Emit();
+}
+
+void Pi::PostStartGame()
+{
+	Output("Start game loading time: %.3f seconds\n", (SDL_GetTicks() - PreStartTime) * 0.001);
+	delete PreStartUI;
 }
 
 void Pi::Start()
@@ -1147,12 +1300,15 @@ void Pi::Start()
 		renderer->ClearDepthBuffer();
 		Pi::renderer->BeginPostProcessing();
 		intro->Draw(_time);		
+		
+		// Test
+		//m_smaa->PostProcess();
 		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 
 		ui->Update();
-		ui->Draw();		
+		ui->Draw();
 		
 		if(mouseCursor) {
 			mouseCursor->Update();
@@ -1179,7 +1335,10 @@ void Pi::Start()
 	Pi::musicPlayer.Stop();
 
 	InitGame();
+	// PreStartGame should be called by LuaGame:: start game function because Game constructor takes some time?
+	PreStartGame();
 	StartGame();
+	PostStartGame();
 	MainLoop();
 }
 
@@ -1324,6 +1483,8 @@ void Pi::MainLoop()
 		if(currentView != worldView) {
 			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
 		} else {
+			// TEMP: Pending conversion to 3.X
+			//m_smaa->PostProcess();
 			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
 		}
 
@@ -1570,6 +1731,7 @@ void Pi::SetMouseGrab(bool on)
 
 float Pi::GetMoveSpeedShiftModifier() {
 	// Suggestion: make x1000 speed on pressing both keys?
+	// This is only used for UI views: systems, sector, and galaxy
 	if (Pi::KeyState(SDLK_LSHIFT)) return 100.f;
 	if (Pi::KeyState(SDLK_RSHIFT)) return 10.f;
 	return 1;

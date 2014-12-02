@@ -45,11 +45,16 @@ struct RenderData
 	float boundingRadius;	//updated by model and passed to submodels
 	unsigned int nodemask;
 
+	float atmosDensity;		// Density of atmosphere in current location, necessary for lighting effects
+	Color atmosColor;
+
 	RenderData()
 	: linthrust()
 	, angthrust()
 	, boundingRadius(0.f)
 	, nodemask(NODE_SOLID) //draw solids
+	, atmosDensity(1.0f)
+	, atmosColor(Color(0))
 	{
 	}
 };

@@ -6,6 +6,7 @@
 #include "SDLWrappers.h"
 #include "graphics/TextureBuilder.h"
 #include "FaceGenManager.h"
+#include "MainMaterial.h"
 
 using namespace UI;
 
@@ -28,12 +29,17 @@ Face::Face(Context *context, Uint32 flags, Uint32 seed) : Single(context), m_pre
 	Sint8 gender=0;
 	FaceGenManager::BlitFaceIm(faceim, gender, flags, seed);
 
-	m_texture.reset(Graphics::TextureBuilder(faceim, Graphics::LINEAR_CLAMP, true, true).CreateTexture(GetContext()->GetRenderer()));
+	m_texture.reset(Graphics::TextureBuilder(faceim, Graphics::LINEAR_CLAMP, true, true).
+		CreateTexture(GetContext()->GetRenderer()));
 
 	if (!s_material) {
 		Graphics::MaterialDescriptor matDesc;
 		matDesc.textures = 1;
-		s_material.Reset(GetContext()->GetRenderer()->CreateMaterial(matDesc));
+		if(Graphics::Hardware::GL3()) {
+			s_material.Reset(new MainMaterial(GetContext()->GetRenderer(), matDesc));
+		} else {
+			s_material.Reset(GetContext()->GetRenderer()->CreateMaterial(matDesc));
+		}
 	}
 
 	m_preferredSize = UI::Point(FACE_WIDTH, FACE_HEIGHT);

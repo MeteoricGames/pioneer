@@ -26,7 +26,8 @@ static const float WHEEL_SENSITIVITY = .2f;		// Should be a variable in user set
 static const Color BACKGROUND_COLOR = Color(0, 89, 178, 255);
 
 GalacticView::GalacticView() : UIView(),
-	m_quad(Graphics::TextureBuilder::UI("galaxy.png").CreateTexture(Gui::Screen::GetRenderer()))
+	m_quad(Gui::Screen::GetRenderer(), 
+	Graphics::TextureBuilder::UI("galaxy.png").CreateTexture(Gui::Screen::GetRenderer()))
 {
 
 	SetTransparency(true);
@@ -128,7 +129,7 @@ void GalacticView::Draw3D()
 	// galaxy image
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	m_quad.Draw(m_renderer, vector2f(-1.0f), vector2f(2.0f));
+	m_quad.Draw(vector2f(-1.0f), vector2f(2.0f));
 	glDisable(GL_BLEND);
 
 	// "you are here" dot

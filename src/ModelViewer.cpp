@@ -3,6 +3,7 @@
 
 #include "ModelViewer.h"
 #include "FileSystem.h"
+#include "Background.h"
 #include "graphics/Graphics.h"
 #include "graphics/Light.h"
 #include "graphics/TextureBuilder.h"
@@ -118,6 +119,9 @@ ModelViewer::ModelViewer(Graphics::Renderer *r, LuaManager *lm)
 	rsd.depthWrite = false;
 	rsd.cullMode = Graphics::CULL_NONE;
 	m_bgState = m_renderer->CreateRenderState(rsd);
+
+	// Universe box
+	m_universeBox = new Background::UniverseBox(m_renderer);
 }
 
 ModelViewer::~ModelViewer()
@@ -155,6 +159,7 @@ void ModelViewer::Run(const std::string &modelName)
 
 	NavLights::Init(renderer);
 	Shields::Init(renderer);
+	Background::UniverseBox::InitEmptyCubemap(renderer);
 
 	//run main loop until quit
 	viewer = new ModelViewer(renderer, Lua::manager);
@@ -175,7 +180,10 @@ void ModelViewer::Run(const std::string &modelName)
 
 bool ModelViewer::OnPickModel(UI::List *list)
 {
+	double start_load = SDL_GetTicks();
 	SetModel(list->GetSelectedOption());
+	double end_load = SDL_GetTicks();
+	AddLog(stringf("Loading time: %0{f.3} seconds", (end_load - start_load) * 0.001));
 	ResetCamera();
 	return true;
 }

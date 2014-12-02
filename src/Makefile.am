@@ -46,6 +46,7 @@ noinst_HEADERS = \
 	GalacticView.h \
 	Game.h \
 	GeoSphere.h \
+	GeoSphereEffects.h \
 	HyperspaceCloud.h \
 	IniConfig.h \
 	Intro.h \
@@ -84,6 +85,7 @@ noinst_HEADERS = \
 	LuaTimer.h \
 	LuaUtils.h \
 	LuaWrappable.h \
+	MainMaterial.h \
 	MathUtil.h \
 	Missile.h \
 	ModelBody.h \
@@ -119,12 +121,13 @@ noinst_HEADERS = \
 	Shields.h \
 	Ship.h \
 	ShipAICmd.h \
-	ShipAICmdParagon.h \ 
+	ShipAICmdParagon.h \
 	ShipCockpit.h \
 	ShipController.h \
 	ShipCpanel.h \
 	ShipCpanelMultiFuncDisplays.h \
 	ShipType.h \
+	SMAA.h \
 	Sound.h \
 	SoundMusic.h \
 	Space.h \
@@ -151,7 +154,8 @@ noinst_HEADERS = \
 	utils.h \
 	vector2.h \
 	vector3.h \
-	VSLog.h \ 
+	vector4.h \
+	VSLog.h \
 	enum_table.h
 
 paragon_SOURCES	= \
@@ -183,6 +187,7 @@ paragon_SOURCES	= \
 	GeoPatchID.cpp \
 	GeoPatchJobs.cpp \
 	GeoSphere.cpp \
+	GeoSphereEffects.cpp \
 	HyperspaceCloud.cpp \
 	IniConfig.cpp \
 	Intro.cpp \
@@ -230,6 +235,7 @@ paragon_SOURCES	= \
 	LuaStarSystem.cpp \
 	LuaTimer.cpp \
 	LuaUtils.cpp \
+	MainMaterial.cpp \
 	MathUtil.cpp \
 	Missile.cpp \
 	ModelBody.cpp \
@@ -258,12 +264,13 @@ paragon_SOURCES	= \
 	Ship-AI.cpp \
 	Ship.cpp \
 	ShipAICmd.cpp \
-	ShipAICmdParagon.cpp \ 
+	ShipAICmdParagon.cpp \
 	ShipCockpit.cpp \
 	ShipController.cpp \
 	ShipCpanel.cpp \
 	ShipCpanelMultiFuncDisplays.cpp \
 	ShipType.cpp \
+	SMAA.cpp \
 	Sound.cpp \
 	SoundMusic.cpp \
 	Space.cpp \

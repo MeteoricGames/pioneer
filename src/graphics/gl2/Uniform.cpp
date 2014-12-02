@@ -3,6 +3,7 @@
 
 #include "Uniform.h"
 #include "graphics/TextureGL.h"
+#include "utils.h"
 
 namespace Graphics {
 namespace GL2 {
@@ -15,6 +16,12 @@ Uniform::Uniform()
 void Uniform::Init(const char *name, GLuint program)
 {
 	m_location = glGetUniformLocation(program, name);
+	//assert(m_location != -1);
+#ifndef NDEBUG
+	if(m_location == -1) {
+        Output("Ueeniform init failed: %s (program %u)\n", name, static_cast<unsigned int>(program));
+	}
+#endif
 }
 
 void Uniform::Set(int i)

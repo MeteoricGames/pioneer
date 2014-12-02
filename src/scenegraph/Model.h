@@ -143,6 +143,11 @@ public:
 	//special for ship model use
 	void SetThrust(const vector3f &linear, const vector3f &angular);
 
+	// Calculates and sets atmospheric properties for this body if it is in atmosphere
+	void CalcAtmosphericProperties(Body* model_body, Frame* sframe);
+	// Set atmospheric properties (override)
+	void SetAtmosphericProperties(float atmos_density, const Color& atmos_color);
+
 	void Save(Serializer::Writer &wr) const;
 	void Load(Serializer::Reader &rd);
 

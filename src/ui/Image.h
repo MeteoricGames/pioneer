@@ -17,6 +17,7 @@ public:
 	virtual void Draw();
 
 	Image *SetHeightLines(Uint32 lines);
+	void SetTintColor(const Color& tint);
 
 protected:
 	friend class Context;
@@ -26,6 +27,7 @@ private:
 	RefCountedPtr<Graphics::Texture> m_texture;
 	RefCountedPtr<Graphics::Material> m_material;
 	Point m_initialSize;
+	Color m_tintColor;
 };
 
 }

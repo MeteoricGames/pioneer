@@ -14,9 +14,26 @@ static const float COCKPIT_ROTATION_INTERP_MULTIPLIER = 5.0f;
 static const float COCKPIT_ACCEL_INTERP_MULTIPLIER = 0.5f;
 static const float COCKPIT_MAX_GFORCE = 10000.0f;
 static const float COCKPIT_ACCEL_OFFSET = 0.075f;
+static const double COCKPIT_MAX_FREELOOK_ANGLE = 30.0;
+static const double COCKPIT_MAX_FREELOOK_SPEED = 45.0;
+static const float COCKPIT_RESET_TIME = 2.0f;
 
-namespace Graphics { namespace GL2 { class TexturedFullscreenQuad; } }
-namespace Graphics { namespace Effects { class TransitEffectMaterial; class TransitCompositionMaterial; } }
+namespace Graphics { 
+	class Material; 
+	namespace GL3
+	{
+		class EffectMaterial;
+	}
+	namespace GL2 
+	{ 
+		class TexturedFullscreenQuad; 
+	} 
+	namespace Effects 
+	{ 
+		class TransitEffectMaterial; 
+		class TransitCompositionMaterial; 
+	}
+}
 
 class CockpitTransitEffect
 {
@@ -32,12 +49,21 @@ private:
 	CockpitTransitEffect& operator=(const CockpitTransitEffect&);
 
 	Graphics::Renderer* m_renderer;
-	std::unique_ptr<Graphics::Effects::TransitEffectMaterial> m_tunnelMtrl;
-	std::unique_ptr<Graphics::Effects::TransitCompositionMaterial> m_compBlurMtrl;
-	std::unique_ptr<Graphics::GL2::TexturedFullscreenQuad> m_outputMtrl;
+	std::unique_ptr<Graphics::Material> m_tunnelMtrl;
+	std::unique_ptr<Graphics::Material> m_compBlurMtrl;
+	std::unique_ptr<Graphics::Material> m_outputMtrl;
 	std::unique_ptr<Graphics::RenderTarget> m_tunnelRT;
 	std::unique_ptr<Graphics::RenderTarget> m_compBlurRT;
 	Graphics::Texture* m_noiseTexture;
+	float m_time;
+
+	int m_fViewportDimensionsId;
+	int m_fTime0_XId;
+	int m_intensityId;
+	int m_speedId;
+
+	int m_sampleDistId;
+	int m_sampleStrengthId;
 };
 
 class ShipCockpit : public ModelBody

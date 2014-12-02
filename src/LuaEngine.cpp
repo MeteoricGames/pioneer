@@ -680,7 +680,7 @@ static int l_engine_set_key_binding(lua_State *l)
 {
 	const char *binding_id = luaL_checkstring(l, 1);
 
-#define KEY_BINDING(action, config_id, label, def1, def2) \
+#define KEY_BINDING(action, config_id, label, def1, def2, mod1, mod2) \
 	if (strcmp(binding_id, config_id) == 0) { return set_key_binding(l, config_id, &KeyBindings :: action); }
 #define AXIS_BINDING(action, config_id, label, default_axis) \
 	if (strcmp(binding_id, config_id) == 0) { return set_axis_binding(l, config_id, &KeyBindings :: action); }
@@ -736,6 +736,14 @@ static int l_engine_get_model(lua_State *l)
 	SceneGraph::Model *model = Pi::FindModel(name);
 	LuaObject<SceneGraph::Model>::PushToLua(model);
 	return 1;
+}
+
+static int l_engine_update_loading_emit(lua_State *l)
+{
+	float total = luaL_checknumber(l, 1);
+	float current = luaL_checknumber(l, 2);
+	Pi::PreStartUpdateProgress(total, current);
+	return 0;
 }
 
 void LuaEngine::Register()
@@ -804,6 +812,9 @@ void LuaEngine::Register()
 		{ "SetJoystickEnabled", l_engine_set_joystick_enabled },
 
 		{ "GetModel", l_engine_get_model },
+
+		// Used to update loading gauge before game starts
+		{ "UpdateLoadingEmit", l_engine_update_loading_emit },
 
 		{ 0, 0 }
 	};

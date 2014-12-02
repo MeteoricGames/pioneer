@@ -385,8 +385,8 @@ void Loader::CheckAnimationConflicts(const Animation* anim, const std::vector<An
 
 #pragma pack(push, 4)
 struct ModelVtx {
-	vector3f pos;
-	vector3f nrm;
+	vector4f pos;
+	vector4f nrm;
 	vector2f uv0;
 };
 #pragma pack(pop)
@@ -440,10 +440,10 @@ void Loader::ConvertAiMeshes(std::vector<RefCountedPtr<StaticGeometry> > &geoms,
 
 		Graphics::VertexBufferDesc vbd;
 		vbd.attrib[0].semantic = Graphics::ATTRIB_POSITION;
-		vbd.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
+		vbd.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
 		vbd.attrib[0].offset   = offsetof(ModelVtx, pos);
 		vbd.attrib[1].semantic = Graphics::ATTRIB_NORMAL;
-		vbd.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
+		vbd.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
 		vbd.attrib[1].offset   = offsetof(ModelVtx, nrm);
 		vbd.attrib[2].semantic = Graphics::ATTRIB_UV0;
 		vbd.attrib[2].format   = Graphics::ATTRIB_FORMAT_FLOAT2;
@@ -477,9 +477,10 @@ void Loader::ConvertAiMeshes(std::vector<RefCountedPtr<StaticGeometry> > &geoms,
 
 		//create buffer & copy
 		RefCountedPtr<Graphics::IndexBuffer> ib(m_renderer->CreateIndexBuffer(indices.size(), Graphics::BUFFER_USAGE_STATIC));
-		Uint16* idxPtr = ib->Map(Graphics::BUFFER_MAP_WRITE);
-		for (Uint32 j = 0; j < indices.size(); j++)
+		Uint32* idxPtr = ib->Map(Graphics::BUFFER_MAP_WRITE);
+		for (Uint32 j = 0; j < indices.size(); j++) {
 			idxPtr[j] = indices[j];
+		}
 		ib->Unmap();
 
 		//copy vertices, always assume normals
@@ -489,8 +490,8 @@ void Loader::ConvertAiMeshes(std::vector<RefCountedPtr<StaticGeometry> > &geoms,
 			const aiVector3D &vtx = mesh->mVertices[v];
 			const aiVector3D &norm = mesh->mNormals[v];
 			const aiVector3D &uv0 = hasUVs ? mesh->mTextureCoords[0][v] : aiVector3D(0.f);
-			vtxPtr[v].pos = vector3f(vtx.x, vtx.y, vtx.z);
-			vtxPtr[v].nrm = vector3f(norm.x, norm.y, norm.z);
+			vtxPtr[v].pos = vector4f(vtx.x, vtx.y, vtx.z, 1.0f);
+			vtxPtr[v].nrm = vector4f(norm.x, norm.y, norm.z, 0.0f);
 			vtxPtr[v].uv0 = vector2f(uv0.x, uv0.y);
 
 			//update bounding box
@@ -739,9 +740,10 @@ RefCountedPtr<CollisionGeometry> Loader::CreateCollisionGeometry(RefCountedPtr<S
 	std::vector<unsigned short> idx;
 	idx.reserve(numIdx);
 
-	Uint16 *idxPtr = mesh.indexBuffer->Map(Graphics::BUFFER_MAP_READ);
-	for (Uint32 i = 0; i < numIdx; i++)
+	Uint32 *idxPtr = mesh.indexBuffer->Map(Graphics::BUFFER_MAP_READ);
+	for (Uint32 i = 0; i < numIdx; i++) {
 		idx.push_back(idxPtr[i]);
+	}
 	mesh.indexBuffer->Unmap();
 	RefCountedPtr<CollisionGeometry> cgeom(new CollisionGeometry(m_renderer, pos, idx, collFlag));
 	return cgeom;

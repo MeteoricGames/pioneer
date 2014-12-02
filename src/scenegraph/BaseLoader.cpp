@@ -4,6 +4,7 @@
 #include "BaseLoader.h"
 #include "FileSystem.h"
 #include "graphics/TextureBuilder.h"
+#include "MainMaterial.h"
 
 using namespace SceneGraph;
 
@@ -36,7 +37,12 @@ void BaseLoader::ConvertMaterialDefinition(const MaterialDefinition &mdef)
 	matDesc.quality = Graphics::HAS_HEAT_GRADIENT;
 
 	//Create material and set parameters
-	RefCountedPtr<Graphics::Material> mat(m_renderer->CreateMaterial(matDesc));
+	RefCountedPtr<Graphics::Material> mat;
+	if(Graphics::Hardware::GL3()) {
+		mat.Reset(new MainMaterial(m_renderer, matDesc));
+	} else {
+		mat.Reset(m_renderer->CreateMaterial(matDesc));
+	}
 	mat->diffuse = mdef.diffuse;
 	mat->specular = mdef.specular;
 	mat->emissive = mdef.emissive;
@@ -70,7 +76,11 @@ RefCountedPtr<Graphics::Material> BaseLoader::GetDecalMaterial(unsigned int inde
 		Graphics::MaterialDescriptor matDesc;
 		matDesc.textures = 1;
 		matDesc.lighting = true;
-		decMat.Reset(m_renderer->CreateMaterial(matDesc));
+		if(Graphics::Hardware::GL3()) {
+			decMat.Reset(new MainMaterial(m_renderer, matDesc, true));
+		} else {
+			decMat.Reset(m_renderer->CreateMaterial(matDesc));
+		}
 		decMat->texture0 = Graphics::TextureBuilder::GetTransparentTexture(m_renderer);
 		decMat->specular = Color::BLACK;
 		decMat->diffuse = Color::WHITE;

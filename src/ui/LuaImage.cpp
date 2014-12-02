@@ -17,6 +17,14 @@ public:
 		return 1;
 	}
 
+	static int l_set_tint_color(lua_State *l) {
+		Image *img = LuaObject<UI::Image>::CheckFromLua(1);
+		Color c = Color::FromLuaTable(l, 2);
+		img->SetTintColor(c);
+		lua_pushvalue(l, 1);
+		return 1;
+	}
+
 };
 
 }
@@ -31,6 +39,7 @@ template <> void LuaObject<UI::Image>::RegisterClass()
 
 	static const luaL_Reg l_methods[] = {
 		{ "SetHeightLines", LuaImage::l_set_height_lines },
+		{ "SetTintColor", LuaImage::l_set_tint_color },
 		{ 0, 0 }
 	};
 

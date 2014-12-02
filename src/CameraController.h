@@ -9,8 +9,12 @@
 #include "Lang.h"
 #include "Serializer.h"
 #include "Camera.h"
+#include "Easing.h"
 
 class Ship;
+namespace Easing { 
+	template<typename T> class NumericTweener; 
+}
 
 class CameraController
 {
@@ -28,8 +32,8 @@ public:
 
 	virtual Type GetType() const = 0;
 	virtual const char *GetName() const { return ""; }
-	virtual void Save(Serializer::Writer &wr) { }
-	virtual void Load(Serializer::Reader &rd) { }
+	virtual void Save(Serializer::Writer &wr);
+	virtual void Load(Serializer::Reader &rd);
 	virtual bool IsExternal() const { return false; }
 
 	// camera position relative to the body
@@ -44,6 +48,24 @@ public:
 
 	const Ship *GetShip() const { return m_ship; }
 	const CameraContext *GetCameraContext() const { assert(m_camera.Valid()); return m_camera.Get(); }
+
+	virtual void RollLeft(float frameTime) { }
+	virtual void RollRight(float frameTime) { }
+	virtual void RotateDown(float frameTime) { }
+	virtual void RotateLeft(float frameTime) { }
+	virtual void RotateRight(float frameTime) { }
+	virtual void RotateUp(float frameTime) { }
+	/// Zooming with this method will interrupt any animation launched by ZoomEvent().
+	virtual void ZoomIn(float frameTime) { }
+	/// Zooming with this method will interrupt any animation launched by ZoomEvent().
+	virtual void ZoomOut(float frameTime) { }
+	/// Animated zoom trigger (on each event), primarily designed for mouse wheel.
+	///\param amount The zoom delta to add or substract (>0: zoom out, <0: zoom in), indirectly controling the zoom animation speed.
+	virtual void ZoomEvent(float amount) { }
+	/// Animated zoom update (on each frame), primarily designed for mouse wheel.
+	virtual void ZoomEventUpdate(float frameTime) { }
+
+	virtual bool IsFreelooking() const { return false; }
 
 private:
 	RefCountedPtr<CameraContext> m_camera;
@@ -71,10 +93,26 @@ public:
 	const char *GetName() const { return m_name; }
 	void SetMode(Mode m);
 	Mode GetMode() const { return m_mode; }
+	virtual void Update() override;
 	void Save(Serializer::Writer &wr);
 	void Load(Serializer::Reader &rd);
 
+	virtual void RotateDown(float frameTime) override;
+	virtual void RotateLeft(float frameTime) override;
+	virtual void RotateRight(float frameTime) override;
+	virtual void RotateUp(float frameTime) override;
+	virtual void ZoomIn(float frameTime) override;
+	virtual void ZoomOut(float frameTime) override;
+
+	virtual bool IsFreelooking() const override;
+	virtual const matrix3x3d& GetExtOrient() const { return m_extOrient; }
+
+	void ResetFreelook();
+
 private:
+
+	void ApplySmoothFreelook(vector2d& dir, float td);
+
 	Mode m_mode;
 	const char *m_name;
 
@@ -84,35 +122,24 @@ private:
 	vector3d m_rightPos;  matrix3x3d m_rightOrient;
 	vector3d m_topPos;    matrix3x3d m_topOrient;
 	vector3d m_bottomPos; matrix3x3d m_bottomOrient;
+
+	double m_dist, m_distTo;
+	double m_rotX; //vertical rot
+	double m_rotY; //horizontal rot
+	matrix3x3d m_extOrient;
+
+	std::unique_ptr<Easing::NumericTweener<double> > m_tweenRotX;
+	std::unique_ptr<Easing::NumericTweener<double> > m_tweenRotY;
+	std::unique_ptr<Easing::NumericTweener<double> > m_tweenSpeed;
+
+	// Freelook
+	vector2d m_flDir; // Freelook direction
+	vector2d m_flLastDir; // Freelook last direction for smooth stop
+	float m_flResetTimer; // Freelook reset timer
 };
-
-
-class MoveableCameraController : public CameraController {
-public:
-	MoveableCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship) :
-		CameraController(camera, ship) {}
-	virtual void Reset() { }
-
-	virtual void RollLeft(float frameTime) { }
-	virtual void RollRight(float frameTime) { }
-	virtual void RotateDown(float frameTime) { }
-	virtual void RotateLeft(float frameTime) { }
-	virtual void RotateRight(float frameTime) { }
-	virtual void RotateUp(float frameTime) { }
-	/// Zooming with this method will interrupt any animation launched by ZoomEvent().
-	virtual void ZoomIn(float frameTime) { }
-	/// Zooming with this method will interrupt any animation launched by ZoomEvent().
-	virtual void ZoomOut(float frameTime) { }
-	/// Animated zoom trigger (on each event), primarily designed for mouse wheel.
-	///\param amount The zoom delta to add or substract (>0: zoom out, <0: zoom in), indirectly controling the zoom animation speed.
-	virtual void ZoomEvent(float amount) { }
-	/// Animated zoom update (on each frame), primarily designed for mouse wheel.
-	virtual void ZoomEventUpdate(float frameTime) { }
-};
-
 
 // Zoomable, rotatable orbit camera, always looks at the ship
-class ExternalCameraController : public MoveableCameraController {
+class ExternalCameraController : public CameraController {
 public:
 	ExternalCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship);
 
@@ -148,7 +175,7 @@ private:
 
 
 // Much like external camera, but does not turn when the ship turns
-class SiderealCameraController : public MoveableCameraController {
+class SiderealCameraController : public CameraController {
 public:
 	SiderealCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship);
 

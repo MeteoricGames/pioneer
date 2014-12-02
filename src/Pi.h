@@ -37,6 +37,7 @@ class UIView;
 class View;
 class WorldView;
 class SDLGraphics;
+class SMAA;
 namespace Graphics { class Renderer; class PostProcess; }
 namespace SceneGraph { class Model; }
 namespace Sound { class MusicPlayer; }
@@ -67,7 +68,10 @@ public:
 	static void Init(const std::map<std::string,std::string> &options);
 	static void InitGame();
 	static void StarportStart(Uint32 starport);
+	static void PreStartGame();
+	static void PreStartUpdateProgress(float total, float current);
 	static void StartGame();
+	static void PostStartGame();
 	static void EndGame();
 	static void Start();
 	static void MainLoop();
@@ -231,6 +235,7 @@ private:
 
 	static Graphics::PostProcess* m_gamePP;
 	static Graphics::PostProcess* m_guiPP;
+	static SMAA* m_smaa;
 	static Graphics::RenderTarget *renderTarget;
 	static RefCountedPtr<Graphics::Texture> renderTexture;
 	static std::unique_ptr<Graphics::Drawables::TexturedQuad> renderQuad;

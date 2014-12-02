@@ -19,7 +19,7 @@
 -- the character, and represent the chance of that character's success in
 -- various endeavours.  These chances are tested by the virtual roll of four
 -- sixteen-sided dice.  The target is to "roll under" for success.
---
+--d
 -- So, if a character is trying to steal something, and there is an attribute
 -- called "theft" (hypothetical as I write), then we can determine whether that
 -- character succeeds by rolling the dice.  A character who is a good thief
@@ -78,6 +78,36 @@ Character = {
 --   experimental
 --
 	player = false, -- Almost always.  One exception. (-:
+	currentMission = nil,
+	missions = nil,
+	SetCurrentMission = function(self, mission_ref)
+		self.currentMission = mission_ref
+		local mission_location = nil
+		if mission_ref ~= nil and self.missions ~= nil then
+			mission_data = self.missions[mission_ref]
+			if mission_data ~= nil then
+				mission_location = mission_data.location
+			end
+		end
+		Game.player:SetCurrentMission(mission_location)
+	end,
+	AddMission = function(self, new_mission)
+		table.insert(self.missions, new_mission)
+		if self.currentMission == nil and new_mission ~= nil and new_mission.status == "ACTIVE" then
+			for k,v in pairs(self.missions) do
+				if v == new_mission then
+					self:SetCurrentMission(k)
+					break
+				end
+			end
+		end
+	end,
+	RemoveMission = function(self, mission_ref)
+		if self.currentMission == mission_ref then
+			self:SetCurrentMission(nil)
+		end
+		table.remove(self.missions, mission_ref)
+	end,
 
 --
 -- Attribute: name
@@ -1173,6 +1203,9 @@ local onGameStart = function ()
 	if loaded_data then
 		for k,newCharacter in pairs(loaded_data.PersistentCharacters) do
 			Character.persistent[k] = newCharacter
+			if Character.persistent[k].player == true then
+				Character.persistent[k]:SetCurrentMission(Character.persistent[k].currentMission)
+			end
 		end
 	else
 		-- Make a new character sheet for the player, with just
@@ -1181,8 +1214,8 @@ local onGameStart = function ()
 		local PlayerCharacter = Character.New()
 		PlayerCharacter.title = 'Commander'
 		PlayerCharacter.player = true
-		-- Gave the player a missions table (for Misssions.lua)
 		PlayerCharacter.missions = {}
+		PlayerCharacter.currentMission = nil
 		-- Insert the player character into the persistent character
 		-- table.  Player won't be ennumerated with NPCs, because player
 		-- is not numerically keyed.

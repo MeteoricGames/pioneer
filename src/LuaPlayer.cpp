@@ -294,6 +294,14 @@ static int l_set_hyperspace_target(lua_State *l)
 		return luaL_error(l, "Player:SetHyperspaceTarget() cannot be used while in hyperspace");
 }
 
+static int l_set_current_mission(lua_State *l)
+{
+	Player *p = LuaObject<Player>::CheckFromLua(1);
+	SystemPath *sp = LuaObject<SystemPath>::GetFromLua(2);
+	p->SetCurrentMissionPath(sp);
+	return 0;
+}
+
 template <> const char *LuaObject<Player>::s_type = "Player";
 
 template <> void LuaObject<Player>::RegisterClass()
@@ -313,6 +321,7 @@ template <> void LuaObject<Player>::RegisterClass()
 		{ "SetCombatTarget", l_set_combat_target },
 		{ "GetHyperspaceTarget", l_get_hyperspace_target },
 		{ "SetHyperspaceTarget", l_set_hyperspace_target },
+		{ "SetCurrentMission", l_set_current_mission },
 		{ 0, 0 }
 	};
 

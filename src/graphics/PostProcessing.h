@@ -6,13 +6,14 @@
 #define _POST_PROCESSING_H_
 
 #include "libs.h"
-#include "Material.h"
 
 namespace Graphics {
 	class Renderer;
 	class PostProcess;
 	class RenderTarget;
 	class RenderState;
+
+	namespace GL3 { class EffectMaterial; }
 
 	class PostProcessing
 	{
@@ -25,7 +26,7 @@ namespace Graphics {
 		void Run(PostProcess* pp = nullptr);
 		void SetPerformPostProcessing(bool enabled);
 		void SetDeviceRT(RenderTarget* rt_device);
-		bool IsPostProcessingEnabled() const { return bPerformPostProcessing; }
+		bool IsPostProcessingEnabled() const { return m_bPerformPostProcessing; }
 
 	protected:
 
@@ -35,13 +36,13 @@ namespace Graphics {
 
 		void Init();
 		
-		std::unique_ptr<Material> mtrlFullscreenQuad;
-		unsigned int uScreenQuadBufferId;		
-		Renderer* mRenderer;
-		RenderTarget* rtDevice;
-		RenderTarget* rtMain;
-		RenderState* mRenderState;
-		bool bPerformPostProcessing;
+		std::unique_ptr<GL3::EffectMaterial> m_mtrlFullscreenQuad;
+		int m_uScreenQuadBufferId;		
+		Renderer* m_renderer;
+		RenderTarget* m_rtDevice;
+		RenderTarget* m_rtMain;
+		RenderState* m_renderState;
+		bool m_bPerformPostProcessing;
 	};
 }
 

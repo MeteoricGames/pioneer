@@ -167,6 +167,30 @@
       "description" : "",
       "message" : "Top camera"
    },
+   "CAMERA_FREE_VIEW" : {
+	  "description" : "",
+	  "message" : "Free camera"
+   },
+   "FREELOOK_UP" : {
+	  "description" : "",
+	  "message" : "Freelook Up"
+   },
+   "FREELOOK_DOWN" : {
+	  "description" : "",
+	  "message" : "Freelook Down"
+   },
+   "FREELOOK_LEFT" : {
+	  "description" : "",
+	  "message" : "Freelook Left"
+   },
+   "FREELOOK_RIGHT" : {
+	  "description" : "",
+	  "message" : "Freelook Right"
+   },
+   "FREELOOK_CENTRE" : {
+	  "description" : "",
+	  "message" : "Freelook Centre"
+   },
    "CANT_SAVE_IN_HYPERSPACE" : {
       "description" : "",
       "message" : "Can't save game while jumping"

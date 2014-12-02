@@ -5,6 +5,7 @@
 #include "NodeVisitor.h"
 #include "graphics/Renderer.h"
 #include "graphics/VertexArray.h"
+#include "MainMaterial.h"
 
 namespace SceneGraph {
 
@@ -17,7 +18,11 @@ Label3D::Label3D(Graphics::Renderer *r, RefCountedPtr<Text::DistanceFieldFont> f
 	matdesc.alphaTest = true;
 	matdesc.lighting = true;
 	m_geometry.reset(font->CreateVertexArray());
-	m_material.Reset(r->CreateMaterial(matdesc));
+	if(Graphics::Hardware::GL3()) {
+		m_material.Reset(r->CreateMaterial(matdesc));
+	} else {
+		m_material.Reset(new MainMaterial(r, matdesc));
+	}
 	m_material->texture0 = font->GetTexture();
 	m_material->diffuse = Color::WHITE;
 	m_material->emissive = Color(38);

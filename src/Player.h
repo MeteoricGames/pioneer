@@ -56,6 +56,12 @@ public:
 
 	Sensors *GetSensors() const { return m_sensors.get(); }
 
+	virtual void StartTransitDrive() override;
+	virtual void StopTransitDrive() override;
+
+	SystemPath* GetCurrentMissionPath() const;
+	void SetCurrentMissionPath(SystemPath* sp);
+
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
@@ -67,6 +73,7 @@ protected:
 private:
 	std::unique_ptr<ShipCockpit> m_cockpit;
 	std::unique_ptr<Sensors> m_sensors;
+	std::unique_ptr<SystemPath> m_currentMissionPath;
 };
 
 #endif /* _PLAYER_H */

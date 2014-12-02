@@ -32,7 +32,8 @@ Image::Image(const char *filename, float renderWidth, float renderHeight):
 void Image::InitTexture(const char* filename)
 {
 	Graphics::TextureBuilder b = Graphics::TextureBuilder::UI(filename);
-	m_quad.reset(new TexturedQuad(b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_quad.reset(new TexturedQuad(Gui::Screen::GetRenderer(),
+		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
 }
 
 void Image::GetSizeRequested(float size[2])
@@ -54,7 +55,7 @@ void Image::Draw()
 	GetSize(allocSize);
 
 	Graphics::Renderer *r = Gui::Screen::GetRenderer();
-	m_quad->Draw(r, vector2f(0.0f), vector2f(allocSize[0],allocSize[1]), m_color);
+	m_quad->Draw(vector2f(0.0f), vector2f(allocSize[0],allocSize[1]), m_color);
 }
 
 }

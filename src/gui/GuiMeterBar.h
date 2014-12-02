@@ -28,6 +28,7 @@ namespace Gui {
 	private:
 		float m_requestedWidth;
 		Gui::Label *m_label;
+		WidgetList::iterator m_labelIter; // Why on earth is the position of label stored in a different object collection?
 		::Color m_barColor;
 		float m_barValue;
 		MeterBarAlign m_alignment;

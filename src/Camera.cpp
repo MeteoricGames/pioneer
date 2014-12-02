@@ -17,6 +17,7 @@
 #include "graphics/VertexArray.h"
 #include "graphics/Material.h"
 #include "graphics/TextureBuilder.h"
+#include "MainMaterial.h"
 
 #include <SDL_stdinc.h>
 
@@ -89,7 +90,11 @@ Camera::Camera(RefCountedPtr<CameraContext> context, Graphics::Renderer *rendere
 	Graphics::MaterialDescriptor desc;
 	desc.textures = 1;
 
-	m_billboardMaterial.reset(m_renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_billboardMaterial.reset(new MainMaterial(m_renderer, desc));
+	} else {
+		m_billboardMaterial.reset(m_renderer->CreateMaterial(desc));
+	}
 	m_billboardMaterial->texture0 = Graphics::TextureBuilder::Billboard("textures/planet_billboard.png").GetOrCreateTexture(m_renderer, "billboard");
 }
 
@@ -226,9 +231,14 @@ void Camera::BeginDraw(const Body *excludeBody)
 		}
 	}
 
+	// Background drawing
 	Pi::game->GetSpace()->GetBackground()->SetIntensity(bgIntensity);
 	Pi::game->GetSpace()->GetBackground()->Draw(trans2bg);
 
+	// Set view transform for effect usage
+	m_renderer->SetCurrentViewTransform(trans2bg);
+	
+	// Light preparation for scene
 	{
 		std::vector<Graphics::Light> rendererLights;
 		rendererLights.reserve(m_lightSources.size());
@@ -237,6 +247,7 @@ void Camera::BeginDraw(const Body *excludeBody)
 		m_renderer->SetLights(rendererLights.size(), &rendererLights[0]);
 	}
 
+	// Body Drawing
 	for (std::list<BodyAttrs>::iterator i = m_sortedBodies.begin(); i != m_sortedBodies.end(); ++i) {
 		BodyAttrs *attrs = &(*i);
 
@@ -245,19 +256,19 @@ void Camera::BeginDraw(const Body *excludeBody)
 			continue;
 
 		// draw something!
-		if (attrs->billboard) {
+		if (attrs->billboard) { // Only billboards
 			Graphics::Renderer::MatrixTicket mt(m_renderer, Graphics::MatrixMode::MODELVIEW);
 			m_renderer->SetTransform(matrix4x4d::Identity());
 			m_billboardMaterial->diffuse = attrs->billboardColor;
 			m_renderer->DrawPointSprites(1, &attrs->billboardPos, Sfx::additiveAlphaState, m_billboardMaterial.get(), attrs->billboardSize);
-		}
-		else
+		} else { // All other bodies
+			// Render the actual body
 			attrs->body->Render(m_renderer, this, attrs->viewCoords, attrs->viewTransform);
+		}
 	}
 
+	// Effects drawing (smoke, explosions, etc)
 	Sfx::RenderAll(m_renderer, Pi::game->GetSpace()->GetRootFrame(), camFrame);
-
-	//glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_TRANSFORM_BIT);
 }
 
 void Camera::EndDraw(Frame* camFrame, ShipCockpit* cockpit)

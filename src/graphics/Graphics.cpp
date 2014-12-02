@@ -5,9 +5,19 @@
 #include "FileSystem.h"
 #include "Material.h"
 #include "RendererGL2.h"
+#include "RendererGL3.h"
 #include "OS.h"
+#include "GraphicsHardware.h"
+#include "gl3/BuiltInShaders.h"
+#include "gl3/Effect.h"
+#include "gl3/EffectMaterial.h"
+#include <iostream>
 
 namespace Graphics {
+
+Hardware::ERendererType Hardware::RendererType = Hardware::ERT_GL2;
+bool Hardware::supports_FramebufferObjects = false;
+bool Hardware::supports_sRGBFramebuffers = false;
 
 static bool initted = false;
 Material *vtxColorMaterial;
@@ -59,26 +69,91 @@ Renderer* Init(Settings vs)
 	width = window->GetWidth();
 	height = window->GetHeight();
 
+	glewExperimental = true;
 	glewInit();
-
-	if (!glewIsSupported("GL_ARB_vertex_buffer_object"))
-		Error("OpenGL extension ARB_vertex_buffer_object not supported. Paragon can not run on your graphics card.");
+	
+	int major, minor;
+	if(GLEW_VERSION_3_2) {
+		major = 3;
+		minor = 2;
+	} else if(GLEW_VERSION_3_1) {
+		major = 3;
+		minor = 1;
+	} else {
+		major = 2;
+		minor = 1;
+	}
+	std::cout<<"Glew reports support for OpenGL "<<major<<"."<<minor<<std::endl;
+	
+	if(GLEW_ARB_compatibility) {
+		std::cout<<"Running in compatibility mode"<<std::endl;
+	} else {
+		std::cout<<"Running in core mode"<<std::endl;
+	}
+	std::cout<<"Renderer Details"<<std::endl;
+	std::cout<<"  Vendor: "<<glGetString(GL_VENDOR)<<std::endl;
+	std::cout<<"  Version: "<<glGetString(GL_VERSION)<<std::endl;
+	std::cout<<"  Renderer: "<<glGetString(GL_RENDERER)<<std::endl;
 
 	Renderer *renderer = 0;
 
-	if (!glewIsSupported("GL_VERSION_2_1") )
-		Error("OpenGL Version 2.1 is not supported. Paragon cannot run on your graphics card.");
+	bool legacy_mode = false;
+
+	if (!glewIsSupported("GL_VERSION_3_2") && !glewIsSupported("GL_VERSION_3_1") ) {
+		Warning("OpenGL Version 3.1 and 3.2 are not supported. Paragon will try to run in legacy OpenGL 2.1 mode.");
+		if (!glewIsSupported("GL_VERSION_2_1")) {
+			Error("OpenGL Version 2.1 is not supported. Paragon cannot run on your graphics card.");
+		} else {
+			legacy_mode = true;
+		}
+	}
 	
-	renderer = new RendererGL2(window, vs);
+	if(legacy_mode) {
+		Hardware::RendererType = Hardware::ERendererType::ERT_GL2;
+		if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
+			Error("OpenGL extension ARB_vertex_buffer_object not supported. Paragon can not run on your graphics card.");
+		}
+		if (!glewIsSupported("GL_EXT_framebuffer_object") && !glewIsSupported("GL_ARB_framebuffer_object")) {
+			Warning("OpenGL extension EXT/ARB_framebuffer_object not supported. \nParagon's post-processing disabled.");
+			Hardware::supports_FramebufferObjects = false;
+		} else {
+			Hardware::supports_FramebufferObjects = true;
+		}
+		if (!glewIsSupported("GL_EXT_framebuffer_sRGB") && !glewIsSupported("GL_ARB_framebuffer_sRGB")) {
+			Warning("Required OpenGL extension EXT/ARB_framebuffer_sRGB not supported. \nParagon's enhanced anti-aliasing (SMAA) is disabled.");
+			Hardware::supports_sRGBFramebuffers = false;
+		} else {
+			Hardware::supports_sRGBFramebuffers = true;
+		}
+		renderer = new RendererGL2(window, vs);
+	} else {
+		Hardware::RendererType = Hardware::ERendererType::ERT_GL3;	// OpenGL 3.X renderer
+		Hardware::supports_FramebufferObjects = true;				// Core since 3.0
+		Hardware::supports_sRGBFramebuffers = true;					// Core since 3.0
+		renderer = new RendererGL3(window, vs);
+	}
 
 	Output("Initialized %s\n", renderer->GetName());
 
 	initted = true;
 
-	MaterialDescriptor desc;
-	desc.vertexColors = true;
-	vtxColorMaterial = renderer->CreateMaterial(desc);
-	vtxColorMaterial->IncRefCount();
+	if(Hardware::GL3()) {
+		GL3::EffectDescriptorDirect vc_desc;
+		vc_desc.settings.push_back("VERTEX_COLOR");
+		vc_desc.vertex_shader_debug_name = "G->VertexColorVS(Vertex)";
+		vc_desc.fragment_shader_debug_name = "G->FragmentColorFS(Vertex)";
+		vc_desc.vertex_shader = GL3::Shaders::VertexColorVS;
+		vc_desc.fragment_shader = GL3::Shaders::VertexColorFS;
+		vc_desc.uniforms.push_back("su_ModelViewProjectionMatrix");
+		vc_desc.uniforms.push_back("invLogZfarPlus1");
+		GL3::EffectMaterial* em = new GL3::EffectMaterial(renderer, vc_desc);
+		vtxColorMaterial = em;
+	} else {
+		MaterialDescriptor desc;
+		desc.vertexColors = true;
+		vtxColorMaterial = renderer->CreateMaterial(desc);
+		vtxColorMaterial->IncRefCount();
+	} 
 
 	return renderer;
 }

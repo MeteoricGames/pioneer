@@ -21,6 +21,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/VertexArray.h"
 #include "graphics/TextureBuilder.h"
+#include "MainMaterial.h"
 
 std::unique_ptr<Graphics::VertexArray> Projectile::s_sideVerts;
 std::unique_ptr<Graphics::VertexArray> Projectile::s_glowVerts;
@@ -33,8 +34,13 @@ void Projectile::BuildModel()
 	//set up materials
 	Graphics::MaterialDescriptor desc;
 	desc.textures = 1;
-	s_sideMat.reset(Pi::renderer->CreateMaterial(desc));
-	s_glowMat.reset(Pi::renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		s_sideMat.reset(new MainMaterial(Pi::renderer, desc));
+		s_glowMat.reset(new MainMaterial(Pi::renderer, desc));
+	} else {
+		s_sideMat.reset(Pi::renderer->CreateMaterial(desc));
+		s_glowMat.reset(Pi::renderer->CreateMaterial(desc));
+	}
 	s_sideMat->texture0 = Graphics::TextureBuilder::Billboard("textures/projectile_l.png").GetOrCreateTexture(Pi::renderer, "billboard");
 	s_glowMat->texture0 = Graphics::TextureBuilder::Billboard("textures/projectile_w.png").GetOrCreateTexture(Pi::renderer, "billboard");
 

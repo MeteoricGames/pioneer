@@ -104,6 +104,7 @@ public:
 
 private:
 	bool IsAnyAngularThrusterKeyDown();
+	bool IsAnyAxisDown();
 	bool IsAnyLinearThrusterKeyDown();
 	//do a variety of checks to see if input is allowed
 	void CheckControlsLock();

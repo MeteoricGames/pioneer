@@ -16,6 +16,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/VertexArray.h"
 #include "graphics/RenderState.h"
+#include "MainMaterial.h"
 
 using namespace Graphics;
 
@@ -47,7 +48,11 @@ void HyperspaceCloud::InitGraphics()
 
 	Graphics::MaterialDescriptor desc;
 	desc.vertexColors = true;
-	m_graphic.material.reset(Pi::renderer->CreateMaterial(desc));
+	if(Graphics::Hardware::GL3()) {
+		m_graphic.material.reset(new MainMaterial(Pi::renderer, desc));
+	} else {
+		m_graphic.material.reset(Pi::renderer->CreateMaterial(desc));
+	}
 
 	Graphics::RenderStateDesc rsd;
 	rsd.blendMode  = BLEND_ALPHA_ONE;

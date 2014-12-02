@@ -593,6 +593,8 @@ void SpaceStation::Render(Graphics::Renderer *r, const Camera *camera, const vec
 	Body *b = GetFrame()->GetBody();
 	assert(b);
 
+	GetModel()->CalcAtmosphericProperties(this, GetFrame());
+
 	if (!b->IsType(Object::PLANET)) {
 		// orbital spaceport -- don't make city turds or change lighting based on atmosphere
 		RenderModel(r, camera, viewCoords, viewTransform);

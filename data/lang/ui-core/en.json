@@ -7,6 +7,10 @@
       "description" : "",
       "message" : "Active"
    },
+   "ACTIVATE" : {
+	  "description" : "",
+	  "message" : "Activate"
+   },
    "AFTER_TRADE_IN" : {
       "description" : "",
       "message" : "After trade-in"
@@ -39,6 +43,10 @@
       "description" : "",
       "message" : "Average"
    },
+   "BACK" : {
+	  "description" : "",
+	  "message" : "Back"
+   },
    "BACKWARD_ACCEL" : {
       "description" : "",
       "message" : "Backward acceleration"
@@ -66,6 +74,14 @@
    "CANCEL" : {
       "description" : "",
       "message" : "Cancel"
+   },
+   "CANCELED" : {
+	  "description" : "",
+	  "message" : "Canceled"
+   },
+   "CANCEL_MISSION" : {
+	  "description" : "",
+	  "message" : "Cancel Mission"
    },
    "CAPACITY" : {
       "description" : "",
@@ -302,6 +318,10 @@
    "EXPERT" : {
       "description" : "For player reputation",
       "message" : "Expert"
+   },
+   "EXPIRED" : {
+      "description" : "",
+	  "message" : "Expired"
    },
    "FAILED" : {
       "description" : "",

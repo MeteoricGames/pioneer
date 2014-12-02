@@ -2,6 +2,8 @@
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
+// SYSTEM ORBIT
+
 #ifndef _SYSTEMVIEW_H
 #define _SYSTEMVIEW_H
 

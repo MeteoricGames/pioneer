@@ -20,6 +20,7 @@
 #include "scenegraph/ModelSkin.h"
 #include <list>
 #include <unordered_map>
+#include "graphics/gl2/Program.h"
 
 class SpaceStation;
 class HyperspaceCloud;
@@ -29,12 +30,6 @@ class CargoBody;
 class Missile;
 class ThrusterTrail;
 namespace Graphics { class Renderer; }
-
-struct HeatGradientParameters_t {
-	matrix3x3f heatingMatrix;
-	vector3f heatingNormal; // normalised
-	float heatingAmount; // 0.0 to 1.0 used for `u` component of heatGradient texture
-};
 
 struct shipstats_t {
 	int used_capacity;
@@ -183,8 +178,8 @@ public:
 	double GetHyperspaceDuration() const { return m_hyperspace.duration; }
 
 	// Transit Drive
-	void StartTransitDrive();
-	void StopTransitDrive();
+	virtual void StartTransitDrive();
+	virtual void StopTransitDrive();
 	
 	enum HyperjumpStatus { // <enum scope='Ship' name=ShipJumpStatus prefix=HYPERJUMP_ public>
 		HYPERJUMP_OK,

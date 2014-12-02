@@ -1,0 +1,10 @@
+"sku"
+{
+    "name" "Paragon Installer"
+    "appid" "291250"
+    "disk_size_mb"          "640"
+    "included_depots"
+    {
+        "1"     "291251"
+    }
+}

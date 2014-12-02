@@ -91,11 +91,12 @@ void StaticGeometry::Save(NodeDatabase &db)
 		mesh.vertexBuffer->Unmap();
 
 		//indices
-		const Uint16 *indexPtr = mesh.indexBuffer->Map(Graphics::BUFFER_MAP_READ);
+		const Uint32 *indexPtr = mesh.indexBuffer->Map(Graphics::BUFFER_MAP_READ);
 		const Uint32 numIndices = mesh.indexBuffer->GetSize();
 		db.wr->Int32(numIndices);
-		for (Uint32 i = 0; i < numIndices; i++)
-			db.wr->Int16(indexPtr[i]);
+		for (Uint32 i = 0; i < numIndices; i++) {
+			db.wr->Int32(indexPtr[i]);
+		}
 		mesh.indexBuffer->Unmap();
     }
 }
@@ -135,9 +136,9 @@ StaticGeometry *StaticGeometry::Load(NodeDatabase &db)
 		//vertex buffer
 		Graphics::VertexBufferDesc vbDesc;
 		vbDesc.attrib[0].semantic = Graphics::ATTRIB_POSITION;
-		vbDesc.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
+		vbDesc.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
 		vbDesc.attrib[1].semantic = Graphics::ATTRIB_NORMAL;
-		vbDesc.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
+		vbDesc.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
 		vbDesc.attrib[2].semantic = Graphics::ATTRIB_UV0;
 		vbDesc.attrib[2].format   = Graphics::ATTRIB_FORMAT_FLOAT2;
 		vbDesc.usage = Graphics::BUFFER_USAGE_STATIC;
@@ -161,9 +162,10 @@ StaticGeometry *StaticGeometry::Load(NodeDatabase &db)
 		//index buffer
 		const Uint32 numIndices = db.rd->Int32();
 		RefCountedPtr<Graphics::IndexBuffer> idxBuffer(db.loader->GetRenderer()->CreateIndexBuffer(numIndices, Graphics::BUFFER_USAGE_STATIC));
-		Uint16 *idxPtr = idxBuffer->Map(BUFFER_MAP_WRITE);
-		for (Uint32 i = 0; i < numIndices; i++)
-			idxPtr[i] = db.rd->Int16();
+		Uint32 *idxPtr = idxBuffer->Map(BUFFER_MAP_WRITE);
+		for (Uint32 i = 0; i < numIndices; i++) {
+			idxPtr[i] = db.rd->Int32();
+		}
 		idxBuffer->Unmap();
 
 		sg->AddMesh(vtxBuffer, idxBuffer, material);

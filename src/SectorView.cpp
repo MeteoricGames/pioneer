@@ -1,6 +1,9 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
+// SECTORS/SYSTEMS
+
 #include "VSLog.h"
 
 #include "libs.h"
@@ -27,6 +30,8 @@
 #include <algorithm>
 #include <sstream>
 #include <SDL_stdinc.h>
+#include "MainMaterial.h"
+#include "graphics/gl3/EffectMaterial.h"
 
 using namespace Graphics;
 
@@ -134,13 +139,17 @@ void SectorView::InitObject()
 {
 	SetTransparency(true);
 
-	m_lineVerts.reset(new Graphics::VertexArray(Graphics::ATTRIB_POSITION, 500));
-	m_secLineVerts.reset(new Graphics::VertexArray(Graphics::ATTRIB_POSITION, 500));
+	m_lineVerts.reset(new Graphics::VertexArray(
+		Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE, 500));
+	m_secLineVerts.reset(new Graphics::VertexArray(
+		Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE, 500));
 	m_starVerts.reset(new Graphics::VertexArray(
 		Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE | Graphics::ATTRIB_UV0, 500));
 	m_currentSectorVerts.reset(new Graphics::VertexArray(
 		Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE | Graphics::ATTRIB_UV0, 6));
 	m_selectedSectorVerts.reset(new Graphics::VertexArray(
+		Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE | Graphics::ATTRIB_UV0, 6));
+	m_currentMissionVerts.reset(new Graphics::VertexArray(
 		Graphics::ATTRIB_POSITION | Graphics::ATTRIB_DIFFUSE | Graphics::ATTRIB_UV0, 6));
 
 	Gui::Screen::PushFont("GuiFont");
@@ -183,11 +192,25 @@ void SectorView::InitObject()
 
 	Graphics::MaterialDescriptor bbMatDesc;
 	bbMatDesc.effect = Graphics::EFFECT_SECTORVIEW_ICON;
-	m_starMaterial.Reset(m_renderer->CreateMaterial(bbMatDesc));
+	if(Graphics::Hardware::GL3()) {
+		GL3::EffectDescriptor ie_desc;
+		ie_desc.uniforms.push_back("su_ModelViewProjectionMatrix");
+		ie_desc.uniforms.push_back("invLogZfarPlus1");
+		ie_desc.uniforms.push_back("texture0");
+		ie_desc.vertex_shader = "gl3/sector_view/icon.vert";
+		ie_desc.fragment_shader = "gl3/sector_view/icon.frag";
+		m_starMaterial.Reset(new GL3::EffectMaterial(m_renderer, ie_desc));
+	} else {
+		m_starMaterial.Reset(m_renderer->CreateMaterial(bbMatDesc));
+	}
 	m_starIcon = TextureBuilder::UI("icons/sectorview/star.png").GetOrCreateTexture(m_renderer, "ui");
 	m_starMaterial->texture0 = m_starIcon;
-	m_selectedSectorIcon = TextureBuilder::UI("icons/sectorview/selected.png").GetOrCreateTexture(m_renderer, "ui");
-	m_currentSectorIcon = TextureBuilder::UI("icons/sectorview/current.png").GetOrCreateTexture(m_renderer, "ui");
+	m_selectedSectorIcon = TextureBuilder::UI("icons/sectorview/selected.png").GetOrCreateTexture(
+		m_renderer, "ui");
+	m_currentSectorIcon = TextureBuilder::UI("icons/sectorview/current.png").GetOrCreateTexture(
+		m_renderer, "ui");
+	m_currentMissionTopIcon = TextureBuilder::UI("icons/missions/current_mission_up.png").GetOrCreateTexture(
+		m_renderer, "ui");
 
 	m_disk.reset(new Graphics::Drawables::Disk(m_renderer, m_solidState, Color::WHITE, 0.2f));
 
@@ -347,13 +370,14 @@ void SectorView::InitObject()
 	rsd2.depthTest = false;
 	rsd2.depthWrite = true;
 	m_jumpCircleState = m_renderer->CreateRenderState(rsd2);
-	m_jumpCircle.reset(new VertexArray(Graphics::ATTRIB_POSITION, 64));
-	for (unsigned int i = 0; i < 64; ++i) {
-		const float ca = (i / 63.0f) * 2.0f * M_PI;
+	m_jumpCircle.reset(new VertexArray(Graphics::ATTRIB_POSITION, 128));
+	const float div = 2.0f * M_PI / 127.0f;
+	for(unsigned i = 0; i < 128; i+=2) {
+		const float ca = i * div;
+		const float cb = (i + 1) * div;
 		m_jumpCircle->Add(vector3f(sin(ca), cos(ca), 0.0f));
+		m_jumpCircle->Add(vector3f(sin(cb), cos(cb), 0.0f));
 	}
-
-
 }
 
 SectorView::~SectorView()
@@ -474,6 +498,7 @@ void SectorView::Draw3D()
 	m_starVerts->Clear();
 	m_selectedSectorVerts->Clear();
 	m_currentSectorVerts->Clear();
+	m_currentMissionVerts->Clear();
 
 	const float ortho_width = 10.0f * m_zoom;
 	const float ortho_height = ortho_width / m_renderer->GetDisplayAspect();
@@ -529,15 +554,17 @@ void SectorView::Draw3D()
 	m_renderer->SetAmbientColor(Color(30));
 
 	//draw sector grid
-	if (m_secLineVerts->GetNumVerts() > 2) {
-		glLineWidth(0.5f);
-		m_renderer->DrawLines(m_secLineVerts->GetNumVerts(), &m_secLineVerts->position[0], &m_secLineVerts->diffuse[0], m_alphaBlendState);
-		glLineWidth(1.0f);
+	if (m_secLineVerts->GetNumVerts() >= 2) {
+		m_renderer->SetLineWidth(0.5f);
+		m_renderer->DrawLines(m_secLineVerts->GetNumVerts(), m_secLineVerts.get(), &m_secLineVerts->diffuse[0], m_alphaBlendState);
+		m_renderer->SetLineWidth(1.0f);
 	}
 
 	//draw star billboards in one go
 	m_starMaterial->texture0 = m_starIcon;
-	m_renderer->DrawTriangles(m_starVerts.get(), m_alphaBlendState, m_starMaterial.Get());
+	if(m_starVerts->GetNumVerts() > 2) {
+		m_renderer->DrawTriangles(m_starVerts.get(), m_alphaBlendState, m_starMaterial.Get());
+	}
 
 	//Draw current icon
 	m_starMaterial->texture0 = m_currentSectorIcon;
@@ -549,6 +576,12 @@ void SectorView::Draw3D()
 	m_starMaterial->texture0 = m_selectedSectorIcon;
 	if (m_selectedSectorVerts->GetNumVerts() > 2) {
 		m_renderer->DrawTriangles(m_selectedSectorVerts.get(), m_alphaBlendState, m_starMaterial.Get());
+	}
+
+	//Draw current mission
+	m_starMaterial->texture0 = m_currentMissionTopIcon;
+	if(m_currentMissionVerts->GetNumVerts() > 2) {
+		m_renderer->DrawTriangles(m_currentMissionVerts.get(), m_alphaBlendState, m_starMaterial.Get());
 	}
 
 	UpdateFactionToggles();
@@ -738,7 +771,14 @@ void SectorView::PutFactionLabels(const vector3f &origin)
 
 				Gui::Screen::MeasureString(labelText, labelWidth, labelHeight);
 
-				if (!m_material) m_material.Reset(m_renderer->CreateMaterial(Graphics::MaterialDescriptor()));
+				if (!m_material) {
+					if(Graphics::Hardware::GL3()) {
+						Graphics::MaterialDescriptor md;
+						m_material.Reset(new MainMaterial(m_renderer, md));
+					} else {
+						m_material.Reset(m_renderer->CreateMaterial(Graphics::MaterialDescriptor()));
+					}
+				}
 
 				auto renderState = Gui::Screen::alphaBlendState;
 				{
@@ -772,7 +812,7 @@ void SectorView::PutFactionLabels(const vector3f &origin)
 }
 
 void SectorView::AddStarBillboard(const matrix4x4f &trans, const vector3f &pos, const Color &col, float size,
-	bool current_sector, bool selected_sector)
+	bool current_sector, bool selected_sector, bool current_mission)
 {
 	size *= 2.0f;
 	const matrix3x3f rot = trans.GetOrient().Transpose();
@@ -811,6 +851,31 @@ void SectorView::AddStarBillboard(const matrix4x4f &trans, const vector3f &pos, 
 		va3.Add(offset + rotv2, col, vector2f(1.f, 0.f)); //top right
 		va3.Add(offset - rotv2, col, vector2f(0.f, 1.f)); //bottom left
 		va3.Add(offset + rotv1, col, vector2f(1.f, 1.f)); //bottom right
+	}
+
+	if (current_mission) {
+		Graphics::VertexArray &va4 = *m_currentMissionVerts;
+		vector3f offset_up = offset - rotv1 + rotv2;
+		vector3f offset_dn = offset - rotv2 + rotv1;
+		Color current_mission_color = Color::PARAGON_BLUE;
+
+		// Top icon
+		va4.Add(offset_up - rotv1, current_mission_color, vector2f(0.f, 0.f)); //top left
+		va4.Add(offset_up - rotv2, current_mission_color, vector2f(0.f, 1.f)); //bottom left
+		va4.Add(offset_up + rotv2, current_mission_color, vector2f(1.f, 0.f)); //top right
+		//
+		va4.Add(offset_up + rotv2, current_mission_color, vector2f(1.f, 0.f)); //top right
+		va4.Add(offset_up - rotv2, current_mission_color, vector2f(0.f, 1.f)); //bottom left
+		va4.Add(offset_up + rotv1, current_mission_color, vector2f(1.f, 1.f)); //bottom right
+
+		// Bottom icon
+		va4.Add(offset_dn - rotv1, current_mission_color, vector2f(0.f, 1.f)); //top left
+		va4.Add(offset_dn - rotv2, current_mission_color, vector2f(0.f, 0.f)); //bottom left
+		va4.Add(offset_dn + rotv2, current_mission_color, vector2f(1.f, 1.f)); //top right
+		//
+		va4.Add(offset_dn + rotv2, current_mission_color, vector2f(1.f, 1.f)); //top right
+		va4.Add(offset_dn - rotv2, current_mission_color, vector2f(0.f, 0.f)); //bottom left
+		va4.Add(offset_dn + rotv1, current_mission_color, vector2f(1.f, 0.f)); //bottom right
 	}
 }
 
@@ -981,7 +1046,8 @@ void SectorView::DrawNearSectors(const matrix4x4f& modelview)
 	m_visibleFactions.clear();
 
 	RefCountedPtr<const Sector> playerSec = GetCached(m_current);
-	const vector3f playerPos = Sector::SIZE * vector3f(float(m_current.sectorX), float(m_current.sectorY), float(m_current.sectorZ)) + playerSec->m_systems[m_current.systemIndex].p;
+	const vector3f playerPos = Sector::SIZE * vector3f(float(m_current.sectorX), float(m_current.sectorY), 
+		float(m_current.sectorZ)) + playerSec->m_systems[m_current.systemIndex].p;
 
 	for (int sx = -DRAW_RAD; sx <= DRAW_RAD; sx++) {
 		for (int sy = -DRAW_RAD; sy <= DRAW_RAD; sy++) {
@@ -1001,7 +1067,8 @@ void SectorView::DrawNearSectors(const matrix4x4f& modelview)
 	for (int sx = -DRAW_RAD; sx <= DRAW_RAD; sx++) {
 		for (int sy = -DRAW_RAD; sy <= DRAW_RAD; sy++) {
 			for (int sz = 0; sz == 0; sz++) {
-				PutSystemLabels(GetCached(SystemPath(sx + secOrigin.x, sy + secOrigin.y, sz + secOrigin.z)), Sector::SIZE * secOrigin, Sector::SIZE * DRAW_RAD);
+				PutSystemLabels(GetCached(SystemPath(sx + secOrigin.x, sy + secOrigin.y, sz + secOrigin.z)), 
+					Sector::SIZE * secOrigin, Sector::SIZE * DRAW_RAD);
 			}
 		}
 	}
@@ -1150,17 +1217,13 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 			}
 		}
 
+		// Jump Range Circle
 		if (bIsCurrentSystem && m_jumpCircle && m_playerHyperspaceRange>0.0f) {
 			const matrix4x4f sphTrans = trans * matrix4x4f::Translation((*i).p.x, (*i).p.y, (*i).p.z - 10.0f);
 			m_renderer->SetTransform(sphTrans * matrix4x4f::ScaleMatrix(m_playerHyperspaceRange));
 
-			glEnable(GL_LINE_STIPPLE);
-			glLineStipple(1, 0xff00);
-			glLineWidth(1.7f);
-			m_renderer->DrawLines(64, &m_jumpCircle->position[0], LINES_COLOR,
-				m_jumpCircleState, Graphics::LINE_STRIP);
-			glDisable(GL_LINE_STIPPLE);
-			glLineStipple(1, 0xffff);
+			m_renderer->DrawLines(128, m_jumpCircle.get(), LINES_COLOR,
+				m_jumpCircleState, Graphics::LINE_SINGLE);
 			
 			float factor;
 			if (m_playerHyperspaceRange > 100.0f) {
@@ -1171,7 +1234,7 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 				factor = 25.0f;
 			}
 		}
-		glLineWidth(1.0f);
+		m_renderer->SetLineWidth(1.0f);
 
 		// draw star blob itself
 		systrans.Rotate(DEG2RAD(-m_rotZ), 0, 0, 1);
@@ -1183,7 +1246,9 @@ void SectorView::DrawNearSector(const int sx, const int sy, const int sz, const 
 		//bool selected_sector = i->IsSameSystem(m_hyperspaceTarget) 
 		//	&& m_hyperspaceTarget != m_selected && (!m_inSystem || m_hyperspaceTarget != m_current);
 		bool selected_sector = i->IsSameSystem(m_selected) && !bIsCurrentSystem;
-		AddStarBillboard(systrans, vector3f(0.f), col, 0.5f, bIsCurrentSystem, selected_sector);
+		SystemPath* mission_system = Pi::player->GetCurrentMissionPath();
+		bool current_mission = mission_system && i->IsSameSystem(*mission_system);
+		AddStarBillboard(systrans, vector3f(0.f), col, 0.5f, bIsCurrentSystem, selected_sector, current_mission);
 
 		// player location indicator
 		/*
@@ -1258,7 +1323,7 @@ void SectorView::DrawFarSectors(const matrix4x4f& modelview)
 	// always draw the stars, slightly altering their size for different different resolutions, so they still look okay
 	if (m_farstars.size() > 0) {
 		m_renderer->DrawPoints(m_farstars.size(), &m_farstars[0], &m_farstarsColor[0],
-			m_alphaBlendState, 1.f + (Graphics::GetScreenHeight() / 720.f));
+			m_alphaBlendState, 2.f + (Graphics::GetScreenHeight() / 720.f));
 	}
 
 	// also add labels for any faction homeworlds among the systems we've drawn

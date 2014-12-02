@@ -76,9 +76,9 @@ void GeoPatch::_UpdateVBOs(Graphics::Renderer *renderer)
 		//create buffer and upload data
 		Graphics::VertexBufferDesc vbd;
 		vbd.attrib[0].semantic = Graphics::ATTRIB_POSITION;
-		vbd.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
+		vbd.attrib[0].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
 		vbd.attrib[1].semantic = Graphics::ATTRIB_NORMAL;
-		vbd.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT3;
+		vbd.attrib[1].format   = Graphics::ATTRIB_FORMAT_FLOAT4;
 		vbd.attrib[2].semantic = Graphics::ATTRIB_DIFFUSE;
 		vbd.attrib[2].format   = Graphics::ATTRIB_FORMAT_UBYTE4;
 		vbd.numVertices = ctx->NUMVERTICES();
@@ -101,10 +101,12 @@ void GeoPatch::_UpdateVBOs(Graphics::Renderer *renderer)
 				const vector3d p((GetSpherePoint(xFrac, yFrac) * (height + 1.0)) - clipCentroid);
 				clipRadius = std::max(clipRadius, p.Length());
 				vtxPtr->pos = vector3f(p);
+				vtxPtr->pos.w = 1.0f;
 				++pHts;	// next height
 
 				const vector3f norma(pNorm->Normalized());
 				vtxPtr->norm = norma;
+				vtxPtr->norm.w = 0.0f;
 				++pNorm; // next normal
 
 				vtxPtr->col[0] = pColr->r;

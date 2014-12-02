@@ -12,6 +12,7 @@
 
 #include "FloatComparison.h"
 #include <cmath>
+#include <functional>
 
 namespace Easing {
 
@@ -153,6 +154,92 @@ namespace Circ {
 	}
 }
 
-}
+template <typename T>
+class NumericTweener
+{
+public:
+	NumericTweener() : 
+		m_value(0), m_startValue(0), m_endValue(0),
+		m_easingFunction(Linear::EaseInOut), m_duration(0.0f), m_time(0.0f) { }
+	NumericTweener(T initial_value, std::function<T(T, T, T, T)> easing_function) : 
+		m_value(initial_value), m_startValue(initial_value), m_endValue(initial_value), 
+		m_easingFunction(easing_function), m_duration(0.0f), m_time(0.0f) { }
+	virtual ~NumericTweener() {}
+
+	void EaseTo(T end_value, float time_duration) {
+		m_startValue = m_value;
+		m_endValue = end_value; 
+		m_duration = time_duration;
+		m_time = 0.0f;
+	}
+
+	void Reset(T new_value) {
+		m_value = new_value;
+		m_startValue = new_value;
+		m_endValue = new_value;
+		m_duration = 0.0f;
+		m_time = 0.0f;
+	}
+
+	T Update(float time_delta) { 
+		if(IsTweening()) {
+			m_time += time_delta;
+			if(m_time >= m_duration) {
+				m_value = m_endValue;
+				m_startValue = m_value;
+				m_time = 0.0f;
+			} else {
+				m_value = m_easingFunction(m_time, m_startValue, m_endValue - m_startValue, m_duration);
+			}
+		}
+		return m_value;
+	}
+
+	bool IsTweening() const {
+		return std::abs(m_value - m_endValue) > std::numeric_limits<T>::epsilon()? true : false;
+	}
+
+	void SetEasingFunction(std::function<T(T, T, T, T)> easing_function) {
+		m_easingFunction = easing_function;
+	}
+
+	// Ends tweening: value = end_value
+	void End() {
+		if(IsTweening()) {
+			m_value = m_endValue;
+			m_startValue = m_value;
+			m_time = 0.0f;
+		}
+	}
+
+	// Stops tweening: value = value
+	void Stop() {
+		if(IsTweening()) {
+			m_endValue = m_value;
+			m_startValue = m_value;
+			m_time = 0.0f;
+		}
+	}
+
+	void SetValue(T new_value) { m_value = m_startValue = new_value; }
+	void SetEndValue(T new_value) { m_endValue = new_value; }
+
+	T GetValue() const { return m_value; }
+	T GetStartValue() const { return m_startValue; }
+	T GetEndValue() const { return m_endValue; }
+
+protected:
+	T m_value;
+	T m_startValue;
+	T m_endValue;
+	float m_time;
+	float m_duration;
+	std::function<T(T, T, T, T)> m_easingFunction;
+};
+
+typedef NumericTweener<float > NumericTweenerF;
+typedef NumericTweener<double> NumericTweenerD;
+
+} // namespace Easing
 
 #endif

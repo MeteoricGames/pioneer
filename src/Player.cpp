@@ -278,3 +278,38 @@ void Player::SetRelations(Body *other, Uint8 percent)
 		m_sensors->UpdateIFF(other);
 	}
 }
+
+void Player::StartTransitDrive()
+{
+	Ship::StartTransitDrive();
+	if(Pi::GetView() && Pi::GetView() == Pi::worldView && Pi::worldView->GetCameraController() &&
+		Pi::worldView->GetCamType() == WorldView::CamType::CAM_INTERNAL) 
+	{
+		InternalCameraController* cam = static_cast<InternalCameraController*>(
+			Pi::worldView->GetCameraController());
+		if (cam->GetMode() == InternalCameraController::Mode::MODE_FRONT) {
+			cam->Reset();
+			cam->ResetFreelook();
+		}
+	}
+}
+
+void Player::StopTransitDrive()
+{
+	Ship::StopTransitDrive();
+}
+
+SystemPath* Player::GetCurrentMissionPath() const
+{
+	return m_currentMissionPath? m_currentMissionPath.get() : nullptr;
+}
+
+void Player::SetCurrentMissionPath(SystemPath* sp)
+{
+	if(!sp) {
+		m_currentMissionPath.reset(nullptr);
+	} else {
+		m_currentMissionPath.reset(new SystemPath(sp));
+	}
+}
+

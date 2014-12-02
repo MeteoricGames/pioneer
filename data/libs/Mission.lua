@@ -249,7 +249,8 @@ Mission = {
 		if not (type(newMission.due) == "number") then newMission.due = nil end
 		if not (type(newMission.reward) == "number") then newMission.reward = nil end
 		if not (type(newMission.location) == "userdata") then newMission.location = Game.system.path end
-		table.insert(Character.persistent.player.missions,newMission)
+		--table.insert(Character.persistent.player.missions,newMission)
+		Character.persistent.player:AddMission(newMission)
 		return newMission;
 	end,
 --
@@ -275,7 +276,8 @@ Mission = {
 	Remove = function (self)
 		for k,v in pairs(Character.persistent.player.missions) do
 			if v == self then
-				table.remove(Character.persistent.player.missions,k)
+				--table.remove(Character.persistent.player.missions,k)
+				Character.persistent.player:RemoveMission(k)
 			end
 		end
 	end,

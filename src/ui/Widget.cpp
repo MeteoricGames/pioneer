@@ -291,7 +291,10 @@ bool Widget::TriggerClick(bool handled)
 {
 	HandleClick();
 	if (!handled) handled = onClick.emit();
-	if (GetContainer()) handled = GetContainer()->TriggerClick(handled);
+	UI::Container* container = GetContainer();
+	if (container) {
+		handled = container->TriggerClick(handled);
+	}
 	return handled;
 }
 

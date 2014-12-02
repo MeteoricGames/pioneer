@@ -5,6 +5,7 @@
 #include "ShipCockpit.h"
 #include "ShipType.h"
 #include "Pi.h"
+#include "WorldView.h"
 #include "Player.h"
 #include "Easing.h"
 #include "graphics/TextureBuilder.h"
@@ -12,10 +13,13 @@
 #include "graphics/effects/transit/TransitCompositionMaterial.h"
 #include "graphics/gl2/TexturedFullscreenQuad.h"
 #include "graphics/PostProcessing.h"
+#include "graphics/gl3/Effect.h"
+#include "graphics/gl3/EffectMaterial.h"
+#include "graphics/gl3/BuiltInShaders.h"
 
 //--------------------------------------------------- CockpitTransitEffect
 CockpitTransitEffect::CockpitTransitEffect(Graphics::Renderer* renderer) :
-	m_renderer(renderer)
+	m_renderer(renderer), m_time(0.0f)
 {
 	const int w = m_renderer->GetWindow()->GetWidth();
 	const int h = m_renderer->GetWindow()->GetHeight();
@@ -23,18 +27,57 @@ CockpitTransitEffect::CockpitTransitEffect(Graphics::Renderer* renderer) :
 
 	// Tunnel effect
 	ttd.effect = Graphics::EffectType::EFFECT_TRANSIT_TUNNEL;
-	m_tunnelMtrl.reset(
-		reinterpret_cast<Graphics::Effects::TransitEffectMaterial*>(m_renderer->CreateMaterial(ttd)));
+	if(Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptor desc;
+		desc.uniforms.push_back("texture0");
+		desc.uniforms.push_back("fViewportDimensions");
+		desc.uniforms.push_back("fTime0_X");
+		desc.uniforms.push_back("u_intensity");
+		desc.uniforms.push_back("u_speed");
+		desc.vertex_shader = "gl3/transit/tunnel.vert";
+		desc.fragment_shader = "gl3/transit/tunnel.frag";
+		m_tunnelMtrl.reset(new Graphics::GL3::EffectMaterial(m_renderer, desc));
+
+		m_fViewportDimensionsId = m_tunnelMtrl->GetEffect()->GetUniformID("fViewportDimensions");
+		m_fTime0_XId = m_tunnelMtrl->GetEffect()->GetUniformID("fTime0_X");
+		m_intensityId = m_tunnelMtrl->GetEffect()->GetUniformID("u_intensity");
+		m_speedId = m_tunnelMtrl->GetEffect()->GetUniformID("u_speed");
+	} else {
+		m_tunnelMtrl.reset(m_renderer->CreateMaterial(ttd));
+	}
 
 	// Radial blur effect
 	ttd.effect = Graphics::EffectType::EFFECT_TRANSIT_COMPOSITION;
-	m_compBlurMtrl.reset(
-		reinterpret_cast<Graphics::Effects::TransitCompositionMaterial*>(m_renderer->CreateMaterial(ttd)));
+	if(Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptor desc;
+		desc.uniforms.push_back("texture0");
+		desc.uniforms.push_back("texture1");
+		desc.uniforms.push_back("u_sampleDist");
+		desc.uniforms.push_back("u_sampleStrength");
+		desc.vertex_shader = "gl3/transit/composition.vert";
+		desc.fragment_shader = "gl3/transit/composition.frag";
+		m_compBlurMtrl.reset(new Graphics::GL3::EffectMaterial(m_renderer, desc));
+
+		m_sampleDistId = m_compBlurMtrl->GetEffect()->GetUniformID("u_sampleDist");
+		m_sampleStrengthId = m_compBlurMtrl->GetEffect()->GetUniformID("u_sampleStrength");
+	} else {
+		m_compBlurMtrl.reset(m_renderer->CreateMaterial(ttd));
+	}
 
 	// Fullscreen texture (for outputing)
 	ttd.effect = Graphics::EffectType::EFFECT_TEXTURED_FULLSCREEN_QUAD;
-	m_outputMtrl.reset(
-		reinterpret_cast<Graphics::GL2::TexturedFullscreenQuad*>(m_renderer->CreateMaterial(ttd)));
+	if(Graphics::Hardware::GL3()) {
+		Graphics::GL3::EffectDescriptorDirect desc;
+		desc.uniforms.push_back("texture0");
+		desc.vertex_shader = Graphics::GL3::Shaders::FullscreenTexturedQuadVS;
+		desc.vertex_shader_debug_name = "FullscreenVS";
+		desc.fragment_shader = Graphics::GL3::Shaders::FullscreenTexturedQuadFS;
+		desc.fragment_shader_debug_name = "FullscreenFS";
+		m_outputMtrl.reset(new Graphics::GL3::EffectMaterial(m_renderer, desc));
+	} else {
+		m_outputMtrl.reset(
+			reinterpret_cast<Graphics::GL2::TexturedFullscreenQuad*>(m_renderer->CreateMaterial(ttd)));
+	}
 
 	// Noise texture
 	m_noiseTexture = 
@@ -82,11 +125,30 @@ void CockpitTransitEffect::Update(float timeStep)
 		rblur_str = 2.0f + (p * 1.5f);
 	}
 
-	m_tunnelMtrl->UpdateParams(
-		std::max(2, w / 4), std::max(2, h / 4),
-		timeStep);
-	m_tunnelMtrl->SetTunnelParams(tunnel_intensity * 0.5f, tunnel_speed);
-	m_compBlurMtrl->SetRadialBlur(rblur_dist, rblur_str);
+	if(Graphics::Hardware::GL3()) {
+		m_tunnelMtrl->GetEffect()->SetProgram();
+		m_tunnelMtrl->GetEffect()->GetUniform(m_fViewportDimensionsId).Set(
+			vector2f(std::max(2, w/4), std::max(2, h/4)));
+		m_time += timeStep;
+		if (m_time > 25.0f) {
+			m_time = 5.0f;
+		}
+		m_tunnelMtrl->GetEffect()->GetUniform(m_fTime0_XId).Set(m_time);
+		m_tunnelMtrl->GetEffect()->GetUniform(m_intensityId).Set(tunnel_intensity * 0.5f);
+		m_tunnelMtrl->GetEffect()->GetUniform(m_speedId).Set(tunnel_speed);
+
+		m_compBlurMtrl->GetEffect()->SetProgram();
+		m_compBlurMtrl->GetEffect()->GetUniform(m_sampleDistId).Set(rblur_dist);
+		m_compBlurMtrl->GetEffect()->GetUniform(m_sampleStrengthId).Set(rblur_str);
+	} else {
+		auto tm = reinterpret_cast<Graphics::Effects::TransitEffectMaterial*>(m_tunnelMtrl.get());
+		tm->UpdateParams(
+			std::max(2, w / 4), std::max(2, h / 4),
+			timeStep);
+		tm->SetTunnelParams(tunnel_intensity * 0.5f, tunnel_speed);
+		auto cm = reinterpret_cast<Graphics::Effects::TransitCompositionMaterial*>(m_compBlurMtrl.get());
+		cm->SetRadialBlur(rblur_dist, rblur_str);
+	}
 }
 
 void CockpitTransitEffect::Render(const matrix4x4d &viewTransform)
@@ -150,11 +212,6 @@ ShipCockpit::ShipCockpit(const std::string &modelName) :
 ShipCockpit::~ShipCockpit()
 {
 
-}
-
-void ShipCockpit::Render(Graphics::Renderer *renderer, const Camera *camera, const vector3d &viewCoords, const matrix4x4d &viewTransform)
-{
-	RenderModel(renderer, camera, viewCoords, viewTransform);
 }
 
 void ShipCockpit::Update(float timeStep)
@@ -288,6 +345,17 @@ void ShipCockpit::Update(float timeStep)
 	} else {
 		m_rotInterp = 0.0f;
 	}
+
+	// Freelook transformation
+	if(Pi::GetView() && Pi::GetView() == dynamic_cast<View*>(Pi::worldView)) {
+		if (Pi::worldView->GetCameraController()->GetType() == CameraController::Type::INTERNAL) {
+			InternalCameraController* cam = static_cast<InternalCameraController*>(
+				Pi::worldView->GetCameraController());
+			if(cam->IsFreelooking()) {
+				m_transform = m_transform * matrix4x4d(cam->GetExtOrient().Transpose());
+			}
+		}
+	}
 }
 
 void ShipCockpit::RenderCockpit(Graphics::Renderer* renderer, const Camera* camera, Frame* frame)
@@ -303,6 +371,16 @@ void ShipCockpit::RenderCockpit(Graphics::Renderer* renderer, const Camera* came
 	}
 	Render(renderer, camera, m_translate, m_transform);
 	SetFrame(nullptr);
+}
+
+void ShipCockpit::Render(Graphics::Renderer *renderer, const Camera *camera, const vector3d &viewCoords, const matrix4x4d &viewTransform)
+{
+	if(Pi::player) {
+		GetModel()->CalcAtmosphericProperties(this, Pi::player->GetFrame());
+	} else {
+		GetModel()->SetAtmosphericProperties(0.0f, Color(0));
+	}
+	RenderModel(renderer, camera, viewCoords, viewTransform);
 }
 
 void ShipCockpit::OnActivated()

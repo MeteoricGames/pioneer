@@ -44,7 +44,7 @@ void Intro::Draw(float _time)
 	m_renderer->SetPerspectiveProjection(75, m_aspectRatio, 1.f, 10000.f);
 	m_renderer->SetTransform(matrix4x4f::Identity());
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS & (~GL_POINT_BIT));
+	Graphics::Renderer::LightsTicket lt(m_renderer);
 
 	const Color oldSceneAmbientColor = m_renderer->GetAmbientColor();
 	m_renderer->SetAmbientColor(m_ambientColor);
@@ -55,6 +55,4 @@ void Intro::Draw(float _time)
 	matrix4x4d brot = matrix4x4d::RotateXMatrix(-0.25*_time) * matrix4x4d::RotateZMatrix(0.6);
 	m_renderer->ClearDepthBuffer();
 	m_background->Draw(brot);
-
-	glPopAttrib();
 }
