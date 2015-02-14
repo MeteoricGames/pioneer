@@ -32,18 +32,8 @@ public:
 	MsgLogWidget();
 	void GetSizeRequested(float size[2]);
 
-	void ImportantMessage(const std::string &sender, const std::string &msg) {
-		if (m_msgQueue.size() > 0 && m_msgQueue.back().IsEqual(sender, msg)) {
-			return;
-		}
-		m_msgQueue.push_back(message_t(sender, msg, MUST_SEE));
-	}
-	void Message(const std::string &sender, const std::string &msg) {
-		if (m_msgQueue.size() > 0 && m_msgQueue.back().IsEqual(sender, msg)){
-			return;
-		}
-		m_msgQueue.push_back(message_t(sender, msg, NOT_IMPORTANT));
-	}
+	void ImportantMessage(const std::string &sender, const std::string &msg); 
+	void Message(const std::string &sender, const std::string &msg);
 	virtual void Update();
 private:
 	enum Type {
@@ -85,8 +75,9 @@ private:
 
 	std::list<message_t> m_msgQueue;
 	Uint32 m_msgAge;
-	Gui::Label *m_msgLabel;
-	std::string m_typeText;
+	std::vector<Gui::Label*> m_msgLabels;
+	std::vector<std::string> m_typeTexts;
+	int m_lineCount;
 	Type m_curMsgType;
 };
 

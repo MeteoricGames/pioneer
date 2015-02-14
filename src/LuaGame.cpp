@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaGame.h"
@@ -260,6 +261,24 @@ static int l_game_switch_to_world_view(lua_State *l)
 	return 0;
 }
 
+static int l_game_spawn_test_cargo(lua_State* l)
+{
+	std::string out;
+	if(!Pi::player) {
+		out = "Player is null!";
+	} else {
+		CargoBody* c_body = new CargoBody(Equip::Type::PRECIOUS_METALS);
+		bool success = Pi::player->SpawnCargo(c_body);
+		if(success) {
+			out = "Spawned 1 unit of test cargo";
+		} else {
+			out = "Failed to spawn test cargo";
+		}
+	}
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
 void LuaGame::Register()
 {
 	lua_State *l = Lua::manager->GetLuaState();
@@ -272,7 +291,9 @@ void LuaGame::Register()
 		{ "SaveGame",  l_game_save_game  },
 		{ "EndGame",   l_game_end_game   },
 
-		{ "SwitchToWorldView", l_game_switch_to_world_view },
+		{"SwitchToWorldView", l_game_switch_to_world_view},
+
+		{"SpawnTestCargo", l_game_spawn_test_cargo},
 
 		{ 0, 0 }
 	};

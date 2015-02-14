@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Context.h"
@@ -201,6 +202,12 @@ public:
 		return 1;
 	}
 
+	static int l_axisindicator(lua_State *l) {
+		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
+		LuaObject<UI::AxisIndicator>::PushToLua(c->AxisIndicator());
+		return 1;
+	}
+
 	static int l_numberlabel(lua_State *l) {
 		UI::Context *c = LuaObject<UI::Context>::CheckFromLua(1);
 		UI::NumberLabel::Format format = UI::NumberLabel::FORMAT_NUMBER;
@@ -338,6 +345,7 @@ template <> void LuaObject<UI::Context>::RegisterClass()
 		{ "DropDown",        LuaContext::l_dropdown        },
 		{ "Gauge",           LuaContext::l_gauge           },
 		{ "TextEntry",       LuaContext::l_textentry       },
+		{ "AxisIndicator",	 LuaContext::l_axisindicator   },
 
 		{ "NewLayer",        LuaContext::l_new_layer       },
 		{ "DropLayer",       LuaContext::l_drop_layer      },

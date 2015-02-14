@@ -1,4 +1,5 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+-- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 local Lang = import("Lang")
@@ -25,19 +26,22 @@ end
 
 
 local onShipDocked = function (ship, station)
-	if not ship:IsPlayer() then
-		ship:SetFuelPercent() -- refuel NPCs for free.
-		return
-	end
-	local fee = calculateFee()
-	if ship:GetMoney() < fee then
-		Comms.Message(l.THIS_IS_STATION_YOU_DO_NOT_HAVE_ENOUGH:interp({station = station.label,fee = Format.Money(fee)}))
-		ship:SetMoney(0)
-	else
-		Comms.Message(l.WELCOME_ABOARD_STATION_FEE_DEDUCTED:interp({station = station.label,fee = Format.Money(fee)}))
-		ship:AddMoney(0 - fee)
-		ship:SetFuelPercent()
-	end
+	-- Normal Fuel removed
+	ship:SetFuelPercent()
+
+	--if not ship:IsPlayer() then
+	--	ship:SetFuelPercent() -- refuel NPCs for free.
+	--	return
+	--end
+	--local fee = calculateFee()
+	--if ship:GetMoney() < fee then
+	--	Comms.Message(l.THIS_IS_STATION_YOU_DO_NOT_HAVE_ENOUGH:interp({station = station.label,fee = Format.Money(fee)}))
+	--	ship:SetMoney(0)
+	--else
+	--	Comms.Message(l.WELCOME_ABOARD_STATION_FEE_DEDUCTED:interp({station = station.label,fee = Format.Money(fee)}))
+	--	ship:AddMoney(0 - fee)
+	--	ship:SetFuelPercent()
+	--end
 end
 
 Event.Register("onShipDocked", onShipDocked)

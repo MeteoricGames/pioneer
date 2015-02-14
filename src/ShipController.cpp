@@ -321,6 +321,12 @@ void PlayerShipController::PollControls(const float timeStep, const bool force_r
 				m_ship->SetGunState(Pi::worldView->GetActiveWeapon(), 1);
 		}
 
+		if(KeyBindings::freightTeleporter.IsActive()) {
+			Pi::player->SetFreightTeleporterState(1);
+		} else {
+			Pi::player->SetFreightTeleporterState(0);
+		}
+
 		if (KeyBindings::yawLeft.IsActive()) wantAngVel.y += 1.0;
 		if (KeyBindings::yawRight.IsActive()) wantAngVel.y += -1.0;
 		if (KeyBindings::pitchDown.IsActive()) wantAngVel.x += -1.0;

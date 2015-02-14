@@ -30,6 +30,7 @@ static const float SCANNER_SCALE     = 0.00001f;
 static const float SCANNER_YSHRINK   = 0.75f;
 static const float A_BIT             = 1.1f;
 static const unsigned int SCANNER_STEPS = 100;
+static const int MSGLOG_LINE_COUNT = 5;
 
 enum ScannerBlobWeight { WEIGHT_LIGHT, WEIGHT_HEAVY };
 
@@ -46,9 +47,34 @@ static const Color scannerCloudColour         = Color( 128, 128, 255 );
 MsgLogWidget::MsgLogWidget()
 {
 	m_msgAge = 0;
-	m_msgLabel = new Gui::Label("");
 	m_curMsgType = NONE;
-	Add(m_msgLabel, 0, 4);
+	m_lineCount = 1;
+	int cursor = 4; int cursor_incr = 15;
+	m_msgLabels.resize(MSGLOG_LINE_COUNT);
+	m_typeTexts.resize(MSGLOG_LINE_COUNT);
+	for(int i = 0; i < MSGLOG_LINE_COUNT; ++i) {
+		m_msgLabels[i] = new Gui::Label("");
+		m_msgLabels[i]->Color(Color::PARAGON_GREEN);
+		m_msgLabels[i]->SetAlignment(Gui::ALIGN_CENTER);
+		Add(m_msgLabels[i], 0, cursor); 
+		cursor += cursor_incr;
+	}
+}
+
+void MsgLogWidget::ImportantMessage(const std::string &sender, const std::string &msg)
+{
+	if (m_msgQueue.size() > 0 && m_msgQueue.back().IsEqual(sender, msg)) {
+		return;
+	}
+	m_msgQueue.push_back(message_t(sender, msg, MUST_SEE));
+}
+
+void MsgLogWidget::Message(const std::string &sender, const std::string &msg) 
+{
+	if (m_msgQueue.size() > 0 && m_msgQueue.back().IsEqual(sender, msg)){
+		return;
+	}
+	m_msgQueue.push_back(message_t(sender, msg, NOT_IMPORTANT));
 }
 
 void MsgLogWidget::Update()
@@ -57,8 +83,11 @@ void MsgLogWidget::Update()
 
 		//set expiry
 		Uint32 timeout = 0;
-		if (m_curMsgType == MUST_SEE) timeout=10000;
-		else timeout=5000;
+		if (m_curMsgType == MUST_SEE) {
+			timeout = 10000;
+		} else {
+			timeout = 5000;
+		}
 
 		// has it expired?
 		bool expired = (SDL_GetTicks() - m_msgAge > timeout);
@@ -70,7 +99,9 @@ void MsgLogWidget::Update()
 		// Typewriter style
 		Uint8 typer = (SDL_GetTicks() - m_msgAge) * 0.05;
 		if (typer > 0 && !expired) {
-			m_msgLabel->SetText(m_typeText.substr(0, typer)+"              ");
+			for(int i = 0; i < m_lineCount; ++i) {
+				m_msgLabels[i]->SetText(m_typeTexts[i].substr(0, typer));
+			}
 		}
 	} else {
 		ShowNext();
@@ -81,7 +112,9 @@ void MsgLogWidget::ShowNext()
 {
     if (m_msgQueue.empty()) {
 		// current message expired and queue empty
-		m_msgLabel->SetText("");
+		for(int i = 0; i < MSGLOG_LINE_COUNT; ++i) {
+			m_msgLabels[i]->SetText("");
+		}
 		m_msgAge = 0;
 		onUngrabFocus.emit();
 	} else {
@@ -107,12 +140,38 @@ void MsgLogWidget::ShowNext()
 			m_msgQueue.pop_front();
 		}
 
-		if (msg.sender == "") {
-			m_typeText = std::string("#0f0") + msg.message;
-		} else {
-			m_typeText =
-				std::string("#ca0") + stringf(Lang::MESSAGE_FROM_X, formatarg("sender", msg.sender)) +
-				std::string("\n#0f0") + msg.message;
+		// Determine if the message is multiline
+		int idx = 0;
+		int line_count = 0;
+		std::vector<std::string> multiline;
+		do
+		{
+			const char* begin = &msg.message.c_str()[idx];
+			while(msg.message[idx] != '\n' && msg.message[idx]) {
+				idx++;
+			}
+			line_count += 1;
+			if (line_count >= MSGLOG_LINE_COUNT) {
+				// ran out of labels, so make this the last line
+				multiline.push_back(std::string(begin, const_cast<const char*>(&msg.message.back())));
+				break;
+			} else {
+				multiline.push_back(std::string(begin, const_cast<const char*>(&msg.message[idx])));
+			}
+		} while (msg.message[idx++] != 0);
+		for(unsigned i = 0; i < multiline.size(); ++i) {
+			Output("Line %d: %s\n", i, multiline[i].c_str());
+		}
+		m_lineCount = line_count;
+
+		for(unsigned i = 0; i < multiline.size(); ++i) {
+			if (msg.sender == "") {
+				m_typeTexts[i] = multiline[i];
+			} else {
+				m_typeTexts[i] =
+					stringf(Lang::MESSAGE_FROM_X, formatarg("sender", msg.sender)) +
+					std::string(": ") + multiline[i];
+			}
 		}
 		m_msgAge = SDL_GetTicks();
 		m_curMsgType = msg.type;
@@ -547,7 +606,8 @@ void UseEquipWidget::GetSizeRequested(float size[2])
 void UseEquipWidget::FireMissile(int idx)
 {
 	if (!Pi::player->GetCombatTarget()) {
-		Pi::cpan->MsgLog()->Message("", Lang::SELECT_A_TARGET);
+		//Pi::cpan->MsgLog()->Message("", Lang::SELECT_A_TARGET);
+		Pi::game->log->Add("", Lang::SELECT_A_TARGET);
 		return;
 	}
 

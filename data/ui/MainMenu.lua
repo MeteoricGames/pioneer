@@ -16,12 +16,13 @@ local c = {r = 0.0, g = 0.86, b = 1.0}
 local setupPlayerShip = function ()
 	Game.player:SetShipType("passenger_ultralight1")
 	Game.player:SetLabel(Ship.MakeRandomLabel())
-	Game.player:AddEquip("UNOCCUPIED_CABIN")
+	Game.player:AddEquip("UNOCCUPIED_CABIN", 5)
 	Game.player:AddEquip("ATMOSPHERIC_SHIELDING")
 	Game.player:AddEquip("AUTOPILOT")
 	Game.player:AddEquip("SCANNER")
-	Game.player:AddEquip("HYDROGEN", 2)
-	Game.player:SetMoney(1000)
+	Game.player:AddEquip("DRIVE_CLASS2")
+	Game.player:AddEquip("HYDROGEN", 5)
+	Game.player:SetMoney(3000)
 end
 
 local loadGame = function (path)

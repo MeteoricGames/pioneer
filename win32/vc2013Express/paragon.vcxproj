@@ -95,12 +95,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>../../../src;../../src;../../../pioneer-thirdparty/win32/include;../../../../pioneer-thirdparty/win32/include;../../win32/include;../../include;../../../contrib;../../../contrib/breakpoint;../../contrib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../src;../../../pioneer-thirdparty/win32/include;../../contrib;../../contrib/AntTweakBar/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>common.lib;crash_generation_client.lib;exception_handler.lib;profiler.lib;glew.lib;json.lib;assimp.lib;shlwapi.lib;libogg_static_vc2013_debug.lib;libvorbis_static_vc2013_debug.lib;libvorbisfile_static_vc2013_debug.lib;sdl2.lib;sdl2main.lib;opengl32.lib;glu32.lib;SDL2_image.lib;freetype2312MT.lib;glew32.lib;sigc-vc120-d-2_0.lib;libpng15.lib;zlib.lib;collider.lib;galaxy.lib;graphics.lib;gui.lib;ui.lib;jenkins.lib;lua.lib;terrain.lib;text.lib;scenegraph.lib;gameui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>common.lib;crash_generation_client.lib;exception_handler.lib;profiler.lib;glew.lib;json.lib;assimp.lib;shlwapi.lib;libogg_static_vc2013_debug.lib;libvorbis_static_vc2013_debug.lib;libvorbisfile_static_vc2013_debug.lib;sdl2.lib;sdl2main.lib;opengl32.lib;glu32.lib;SDL2_image.lib;freetype2312MT.lib;glew32.lib;sigc-vc120-d-2_0.lib;libpng15.lib;zlib.lib;collider.lib;galaxy.lib;graphics.lib;gui.lib;ui.lib;jenkins.lib;lua.lib;terrain.lib;text.lib;scenegraph.lib;gameui.lib;AntTweakBar_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../win32/lib;../../win32/lib/breakpad-debug;../../../pioneer-thirdparty/win32/lib;$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
@@ -114,14 +114,14 @@
     <ClCompile />
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>common.lib;crash_generation_client.lib;exception_handler.lib;profiler.lib;glew.lib;json.lib;assimp.lib;shlwapi.lib;libogg_static_vc2013_debug.lib;libvorbis_static_vc2013_debug.lib;libvorbisfile_static_vc2013_debug.lib;sdl2.lib;sdl2main.lib;opengl32.lib;glu32.lib;SDL2_image.lib;freetype2312MT.lib;glew32.lib;sigc-vc120-d-2_0.lib;libpng15.lib;zlib.lib;collider.lib;galaxy.lib;graphics.lib;gui.lib;ui.lib;jenkins.lib;lua.lib;terrain.lib;text.lib;scenegraph.lib;gameui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>common.lib;crash_generation_client.lib;exception_handler.lib;profiler.lib;glew.lib;json.lib;assimp.lib;shlwapi.lib;libogg_static_vc2013_debug.lib;libvorbis_static_vc2013_debug.lib;libvorbisfile_static_vc2013_debug.lib;sdl2.lib;sdl2main.lib;opengl32.lib;glu32.lib;SDL2_image.lib;freetype2312MT.lib;glew32.lib;sigc-vc120-d-2_0.lib;libpng15.lib;zlib.lib;collider.lib;galaxy.lib;graphics.lib;gui.lib;ui.lib;jenkins.lib;lua.lib;terrain.lib;text.lib;scenegraph.lib;gameui.lib;AntTweakBar.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../win32/lib;../../win32/lib/breakpad-debug;../../../pioneer-thirdparty/win32/lib;$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>../../../src;../../src;../../../pioneer-thirdparty/win32/include;../../../../pioneer-thirdparty/win32/include;../../win32/include;../../include;../../../contrib;../../contrib;../../../contrib/breakpoint</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../src;../../../pioneer-thirdparty/win32/include;../../contrib;../../contrib/AntTweakBar/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
@@ -133,14 +133,14 @@
     <ClCompile />
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>common.lib;crash_generation_client.lib;exception_handler.lib;profiler.lib;glew.lib;json.lib;assimp.lib;lua.lib;jenkins.lib;shlwapi.lib;libogg_static_vc2013_release.lib;libvorbis_static_vc2013_release.lib;libvorbisfile_static_vc2013_release.lib;sdl2.lib;sdl2main.lib;opengl32.lib;glu32.lib;SDL2_image.lib;freetype2312MT.lib;glew32.lib;sigc-vc120-2_0.lib;libpng15.lib;zlib.lib;text.lib;galaxy.lib;collider.lib;graphics.lib;terrain.lib;gui.lib;ui.lib;scenegraph.lib;gameui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>common.lib;crash_generation_client.lib;exception_handler.lib;profiler.lib;glew.lib;json.lib;assimp.lib;lua.lib;jenkins.lib;shlwapi.lib;libogg_static_vc2013_release.lib;libvorbis_static_vc2013_release.lib;libvorbisfile_static_vc2013_release.lib;sdl2.lib;sdl2main.lib;opengl32.lib;glu32.lib;SDL2_image.lib;freetype2312MT.lib;glew32.lib;sigc-vc120-2_0.lib;libpng15.lib;zlib.lib;text.lib;galaxy.lib;collider.lib;graphics.lib;terrain.lib;gui.lib;ui.lib;scenegraph.lib;gameui.lib;AntTweakBar.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../win32/lib;../../win32/lib/breakpad-release;../../../pioneer-thirdparty/win32/lib;$(SolutionDir)$(Configuration)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <ClCompile />
     <ClCompile>
-      <AdditionalIncludeDirectories>../../../src;../../src;../../../pioneer-thirdparty/win32/include;../../../../pioneer-thirdparty/win32/include;../../win32/include;../../include;../../../contrib;../../contrib;../../../contrib/breakpoint</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src;../../../pioneer-thirdparty/win32/include;../../contrib;../../contrib/AntTweakBar/include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLEW_STATIC;WIN32;_WINDOWS;RELEASE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FloatingPointExceptions>false</FloatingPointExceptions>
     </ClCompile>
     <PostBuildEvent>
@@ -193,6 +193,7 @@
     <ClCompile Include="..\..\src\GalacticView.cpp" />
     <ClCompile Include="..\..\src\Game.cpp" />
     <ClCompile Include="..\..\src\GameConfig.cpp" />
+    <ClCompile Include="..\..\src\GameLog.cpp" />
     <ClCompile Include="..\..\src\GeoPatch.cpp" />
     <ClCompile Include="..\..\src\GeoPatchContext.cpp" />
     <ClCompile Include="..\..\src\GeoPatchID.cpp" />
@@ -307,6 +308,7 @@
     <ClCompile Include="..\..\src\TerrainBody.cpp" />
     <ClCompile Include="..\..\src\ThrusterTrail.cpp" />
     <ClCompile Include="..\..\src\Tombstone.cpp" />
+    <ClCompile Include="..\..\src\Tweaker.cpp" />
     <ClCompile Include="..\..\src\UIView.cpp" />
     <ClCompile Include="..\..\src\utils.cpp" />
     <ClCompile Include="..\..\src\View.cpp" />
@@ -338,11 +340,14 @@
     <ClInclude Include="..\..\src\Colors.h" />
     <ClInclude Include="..\..\src\CRC32.h" />
     <ClInclude Include="..\..\src\DeathView.h" />
+    <ClInclude Include="..\..\src\GameLog.h" />
     <ClInclude Include="..\..\src\GeoSphereEffects.h" />
     <ClInclude Include="..\..\src\MainMaterial.h" />
     <ClInclude Include="..\..\src\SectorViewLabelSet.h" />
     <ClInclude Include="..\..\src\ShipAICmdParagon.h" />
     <ClInclude Include="..\..\src\SMAA.h" />
+    <ClInclude Include="..\..\src\Tweaker.h" />
+    <ClInclude Include="..\..\src\TweakerSettings.h" />
     <ClInclude Include="..\..\src\vector4.h" />
     <ClInclude Include="..\..\src\VSLog.h" />
     <ClInclude Include="..\..\src\DeleteEmitter.h" />

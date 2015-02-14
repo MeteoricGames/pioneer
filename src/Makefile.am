@@ -45,6 +45,7 @@ noinst_HEADERS = \
 	Frame.h \
 	GalacticView.h \
 	Game.h \
+	GameLog.h \
 	GeoSphere.h \
 	GeoSphereEffects.h \
 	HyperspaceCloud.h \
@@ -140,6 +141,8 @@ noinst_HEADERS = \
 	ThrusterTrail.h \
 	TerrainBody.h \
 	Tombstone.h \
+	Tweaker.h \
+	TweakerSettings.h \
 	UIView.h \
 	VideoLink.h \
 	View.h \
@@ -182,6 +185,7 @@ paragon_SOURCES	= \
 	Frame.cpp \
 	GalacticView.cpp \
 	Game.cpp \
+	GameLog.cpp \
 	GeoPatch.cpp \
 	GeoPatchContext.cpp \
 	GeoPatchID.cpp \
@@ -283,6 +287,7 @@ paragon_SOURCES	= \
 	ThrusterTrail.cpp \
 	TerrainBody.cpp \
 	Tombstone.cpp \
+	Tweaker.cpp \
 	UIView.cpp \
 	View.cpp \
 	WorldView.cpp \
@@ -305,12 +310,13 @@ paragon_LDADD = \
 	../contrib/jenkins/libjenkins.a \
 	../contrib/json/libjson.a \
 	../contrib/glew/libglew.a \
-	../contrib/profiler/libprofiler.a
+	../contrib/profiler/libprofiler.a \
+	../contrib/AntTweakBar/lib/libAntTweakBar.a
 
-paragon_LDADD += \
-	$(FREETYPE_LIBS) $(GL_LIBS) \
+paragon_LDADD += -lX11 \
+	$(EXTRA_LIBS) $(FREETYPE_LIBS) $(GL_LIBS) \
 	$(SDL2_LIBS) $(SIGC_LIBS) $(LUA_LIBS) $(VORBIS_LIBS) \
-	$(PNG_LIBS) $(ASSIMP_LIBS) $(EXTRA_LIBS)
+	$(PNG_LIBS) $(ASSIMP_LIBS)
 
 if BUILD_WIN32
 paragon_LDFLAGS = -Wl,-Map=paragon.map
@@ -422,6 +428,7 @@ textstress_LDADD += ../contrib/lua/liblua.a
 endif
 
 AM_CPPFLAGS += -isystem @top_srcdir@/contrib
+AM_CPPFLAGS += -isystem @top_srcdir@/contrib/AntTweakBar/include
 if !HAVE_LUA
 AM_CPPFLAGS += -isystem @top_srcdir@/contrib/lua
 endif

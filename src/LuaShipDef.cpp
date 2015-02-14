@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Lua.h"
@@ -216,6 +217,7 @@ void LuaShipDef::Register()
 		pi_lua_settable(l, "capacity",          st.capacity);
 		pi_lua_settable(l, "hullMass",          st.hullMass);
 		pi_lua_settable(l, "fuelTankMass",      st.fuelTankMass);
+		pi_lua_settable(l, "hydrogenTank",		st.hydrogenTank);
 		pi_lua_settable(l, "maxManeuverSpeed",	st.maxManeuverSpeed);
 		pi_lua_settable(l, "basePrice",         double(st.baseprice)*0.01);
 		pi_lua_settable(l, "minCrew",           st.minCrew);

@@ -6484,10 +6484,15 @@ CTwMgr::CCursor CTwMgr::PixmapCursor(int _CurIdx)
 
     XColor black, white, exact;
     Colormap colmap = DefaultColormap(m_CurrentXDisplay, DefaultScreen(m_CurrentXDisplay));
-    Status s1 = XAllocNamedColor(m_CurrentXDisplay, colmap, "black", &black, &exact);
+    /*
+Status s1 = XAllocNamedColor(m_CurrentXDisplay, colmap, "black", &black, &exact);
     Status s2 = XAllocNamedColor(m_CurrentXDisplay, colmap, "white", &white, &exact);
     if( s1==0 || s2==0 )
         return XC_left_ptr; // cannot allocate colors!
+*/
+    black.red = black.green = black.blue = 0;
+    white.red = white.green = white.blue = 65535;
+
     int x, y;
     unsigned int mask[32];
     unsigned int pict[32];

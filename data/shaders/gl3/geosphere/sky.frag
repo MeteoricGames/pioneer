@@ -1,3 +1,7 @@
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
+// Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
 // EFFECT: GEOSPHERE SKY
 
 //----------------------------------------------------- In/Out/Uniforms
@@ -38,7 +42,7 @@ uniform float u_geosphereAtmosInvScaleHeight;
 		vec4 position;
 		vec4 diffuse;
 		vec4 specular;
-	};	
+	};
 	layout(std140) uniform UBLightSources {
 		s_LightSourceParameters su_LightSource[4];
 	};
@@ -130,16 +134,16 @@ void main(void)
 	sphereEntryExitDist(skyNear, skyFar, u_geosphereCenter, v_eyepos.xyz, u_geosphereScaledRadius * u_geosphereAtmosTopRad);
 	float atmosDist = u_geosphereScale * (skyFar - skyNear);
 	float ldprod=0.0;
-	
+
 	// a&b scaled so length of 1.0 means planet surface.
 	vec3 a = (skyNear * eyenorm - u_geosphereCenter) / u_geosphereScaledRadius;
 	vec3 b = (skyFar * eyenorm - u_geosphereCenter) / u_geosphereScaledRadius;
 	ldprod = AtmosLengthDensityProduct(a, b, u_atmosColor.a * u_geosphereAtmosFogDensity, atmosDist, u_geosphereAtmosInvScaleHeight);
-	
+
 	float fogFactor = 1.0 / exp(ldprod);
 	vec4 atmosDiffuse = vec4(0.0);
 
-	#ifdef LIGHTING	
+	#ifdef LIGHTING
 		float INV_NUM_LIGHTS = 1.0 / u_numLights;
 		vec3 surfaceNorm = normalize(skyNear * eyenorm - u_geosphereCenter);
 		for (int i=0; i<u_numLights; ++i) {
@@ -195,9 +199,9 @@ void main(void)
 			atmosDiffuse +=  su_LightSource[i].diffuse * uneclipsed * 0.5*(nDotVP+0.5*clamp(1.0-nnDotVP*4.0,0.0,1.0) * INV_NUM_LIGHTS);
 
 			//Calculate Specular Highlight
-			vec3 L = normalize(su_LightSource[i].position.xyz - v_eyepos.xyz); 
+			vec3 L = normalize(su_LightSource[i].position.xyz - v_eyepos.xyz);
 			vec3 E = normalize(-v_eyepos.xyz);
-			vec3 R = normalize(-reflect(L,vec3(0.0))); 
+			vec3 R = normalize(-reflect(L,vec3(0.0)));
 			specularHighlight += pow(max(dot(R,E),0.0),64.0) * uneclipsed * INV_NUM_LIGHTS;
 
 		}

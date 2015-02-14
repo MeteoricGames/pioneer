@@ -1,5 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright � 2013-14 Meteoric Games Ltd
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 // EFFECT: MULTI MATERIAL
@@ -18,9 +18,9 @@ in vec4 a_Normal;
 #ifdef NORMAL_SHADER							// Not Shield
 	in vec4 a_Color;
 	in vec2 a_MultiTexCoord0;
-#endif // NORMAL_SHADER	
+#endif // NORMAL_SHADER
 
-// OUT	
+// OUT
 out float varLogDepth;
 
 #ifdef TEXTURE0
@@ -75,7 +75,7 @@ uniform mat3 su_NormalMatrix;
 		vec4 position;
 		vec4 diffuse;
 		vec4 specular;
-	};	
+	};
 	layout(std140) uniform UBLightSources {
 		s_LightSourceParameters su_LightSource [MAX_NUM_LIGHTS];
 	};
@@ -123,4 +123,3 @@ void main(void)
 	varyingVertex = a_Vertex.xyz;
 #endif
 }
-

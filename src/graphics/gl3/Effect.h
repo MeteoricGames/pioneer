@@ -1,4 +1,5 @@
-// Copyright � 2013-14 Meteoric Games Ltd
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _EFFECT_H_
@@ -11,7 +12,7 @@
 #include "utils.h"
 
 namespace Graphics {
-	class Renderer; 
+	class Renderer;
 	namespace GL3 {
 
 class EffectProgram;
@@ -28,9 +29,9 @@ enum EffectGLSLVersion
 };
 
 static const char* GLSLVersions[] = {
-	"#version 110\n", 
-	"#version 120\n", 
-	"#version 140\n", 
+	"#version 110\n",
+	"#version 120\n",
+	"#version 140\n",
 	"#version 150\n",
 #if defined(_WIN32) || defined(__linux) || defined(__unix)
 	"#version 140\n"
@@ -59,7 +60,7 @@ struct EffectDescriptor
 };
 
 // Describes loading of vertex/fragment shaders directly by string.
-struct EffectDescriptorDirect 
+struct EffectDescriptorDirect
 {
 	EffectDescriptorDirect() : version(ESV_GLSL_GL3), strict(false) { }
 
@@ -126,6 +127,10 @@ static const std::vector<std::string> StandardParameters = {
 "su_ViewMatrix",
 // 14
 "su_ViewMatrixInverse",
+// 15
+"su_ViewportSize",
+// 16
+"su_GameTime",
 };
 
 enum EEffectAttributes
@@ -227,6 +232,7 @@ private:
 public:
 	static int DefineSharedUniformBlock(const char* name, size_t data_size);
 	static int GetSharedUniformBlock(const char* name);
+	static void StaticUpdate(float timeStep);
 
 private: // Static
 
@@ -239,6 +245,9 @@ private: // Static
 	// A good candidate for weak_ptr. If cache holds shared_ptr and Effect have a weak_ptr
 	// it can figure out when cache is purged and reinit everything.
 	//static void PurgeCache();
+
+	// Parameters
+	static float s_gameTime;
 
 	// Standard parameters
 	static std::map<std::string, unsigned> s_stdParams; // <"std parameter", std parameter id>

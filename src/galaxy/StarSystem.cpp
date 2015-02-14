@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "StarSystem.h"
@@ -2072,9 +2073,11 @@ void StarSystem::Populate(bool addSpaceStations)
 	for (int i=Equip::FIRST_COMMODITY; i<=Equip::LAST_COMMODITY; i++) {
 		maximum = std::max(abs(m_tradeLevel[i]), maximum);
 	}
-	if (maximum) for (int i=Equip::FIRST_COMMODITY; i<=Equip::LAST_COMMODITY; i++) {
-		m_tradeLevel[i] = (m_tradeLevel[i] * MAX_COMMODITY_BASE_PRICE_ADJUSTMENT) / maximum;
-		m_tradeLevel[i] += rand.Int32(-5, 5);
+	if (maximum) {
+		for (int i=Equip::FIRST_COMMODITY; i<=Equip::LAST_COMMODITY; i++) {
+			m_tradeLevel[i] = (m_tradeLevel[i] * MAX_COMMODITY_BASE_PRICE_ADJUSTMENT) / maximum;
+			m_tradeLevel[i] += rand.Int32(-5, 5);
+		}
 	}
 
 // Unused?

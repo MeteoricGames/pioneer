@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaObject.h"
@@ -474,16 +475,25 @@ static int l_ship_add_equip(lua_State *l)
 	Equip::Type e = static_cast<Equip::Type>(LuaConstants::GetConstantFromArg(l, "EquipType", 2));
 
 	int num = luaL_optinteger(l, 3, 1);
-	if (num < 0)
-		return luaL_error(l, "Can't add a negative number of equipment items.");
+	if(e != Equip::HYDROGEN) {
+		if (num < 0) {
+			return luaL_error(l, "Can't add a negative number of equipment items.");
+		}
+		const shipstats_t &stats = s->GetStats();
+		if (Equip::types[e].mass != 0)
+			num = std::min(stats.free_capacity / (Equip::types[e].mass), num);
 
-	const shipstats_t &stats = s->GetStats();
-	if (Equip::types[e].mass != 0)
-		num = std::min(stats.free_capacity / (Equip::types[e].mass), num);
-
-	lua_pushinteger(l, s->m_equipment.Add(e, num));
-	s->UpdateEquipStats();
-	return 1;
+		lua_pushinteger(l, s->m_equipment.Add(e, num));
+		s->UpdateEquipStats();
+		return 1;
+	} else {
+		if (num < 0) {
+			return luaL_error(l, "Can't add a negative number of hydrogen units.");
+		}
+		lua_pushinteger(l, s->AddHydrogenUnits(num));
+		s->UpdateEquipStats();
+		return 1;
+	}
 }
 
 /*
@@ -521,10 +531,17 @@ static int l_ship_remove_equip(lua_State *l)
 	Equip::Type e = static_cast<Equip::Type>(LuaConstants::GetConstantFromArg(l, "EquipType", 2));
 
 	int num = luaL_optinteger(l, 3, 1);
-	if (num < 0)
-		return luaL_error(l, "Can't remove a negative number of equipment items.");
-
-	lua_pushinteger(l, s->m_equipment.Remove(e, num));
+	if(e != Equip::HYDROGEN) {
+		if (num < 0) {
+			return luaL_error(l, "Can't remove a negative number of equipment items.");
+		}
+		lua_pushinteger(l, s->m_equipment.Remove(e, num));
+	} else {
+		if (num < 0) {
+			return luaL_error(l, "Can't remove a negative number of hydrogen units.");
+		}
+		lua_pushinteger(l, s->RemoveHydrogenUnits(num));
+	}
 	s->UpdateEquipStats();
 	return 1;
 }
@@ -592,6 +609,58 @@ static int l_ship_get_equip_free(lua_State *l)
 	Equip::Slot slot = static_cast<Equip::Slot>(LuaConstants::GetConstantFromArg(l, "EquipSlot", 2));
 
 	lua_pushinteger(l, s->m_equipment.FreeSpace(slot));
+	return 1;
+}
+
+/*
+* Method: GetHydrogenFree
+*
+* Returns number of free hydrogen units in hydrogen tank.
+*
+*/
+static int l_ship_get_hydrogen_free(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	lua_pushinteger(l, s->GetHydrogenFree());
+	return 1;
+}
+
+/*
+ * Method: GetHydrogen
+ *
+ * Returns number of hydrogen units in hydrogen tank.
+ *
+ */
+static int l_ship_get_hydrogen(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	lua_pushinteger(l, s->GetHydrogen());
+	return 1;
+}
+
+/*
+ * Method: GetHydrogenCapacity
+ *
+ * Get hydrogen tank total capacity.
+ *
+ */
+static int l_ship_get_hydrogen_capacity(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	lua_pushinteger(l, s->GetHydrogenCapacity());
+	return 1;
+}
+
+/*
+ * Method: GetHydrogenPercentage
+ *
+ * Get hydrogen percentage in tank.
+ *
+ */
+static int l_ship_get_hydrogen_percentage(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	lua_pushinteger(l, s->GetHydrogenPercentage());
 	return 1;
 }
 
@@ -763,7 +832,7 @@ static int l_ship_undock(lua_State *l)
  * Spawn a missile near the ship.
  *
  * > missile = ship:SpawnMissile(type, target, power)
- * 
+ *
  * Parameters:
  *
  *   shiptype - a string for the missile type. specifying an
@@ -1526,6 +1595,10 @@ template <> void LuaObject<Ship>::RegisterClass()
 		{ "RemoveEquip",      l_ship_remove_equip        },
 		{ "GetEquipCount",    l_ship_get_equip_count     },
 		{ "GetEquipFree",     l_ship_get_equip_free      },
+		{ "GetHydrogenFree",  l_ship_get_hydrogen_free   },
+		{ "GetHydrogen",	  l_ship_get_hydrogen		 },
+		{ "GetHydrogenCapacity", l_ship_get_hydrogen_capacity },
+		{ "GetHydrogenPercentage", l_ship_get_hydrogen_percentage },
 
 		{ "SpawnCargo", l_ship_spawn_cargo },
 

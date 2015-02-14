@@ -3,6 +3,7 @@
 
 local Game = import("Game")
 local Engine = import("Engine")
+local Timer = import("Timer")
 local Lang = import("Lang")
 local utils = import("utils")
 local TabGroup = import("ui/TabGroup")
@@ -110,6 +111,18 @@ ui.templates.Settings = function (args)
 		local cockpitCheckBox = optionCheckBox(
 			Engine.GetCockpitEnabled, Engine.SetCockpitEnabled,
 			l.ENABLE_COCKPIT)
+			
+		local chromaticAberrationCheckBox = optionCheckBox(
+			Engine.GetExpChromaticAberrationEnabled, Engine.SetExpChromaticAberrationEnabled,
+			l.EXP_CHROMATIC_ABERRATION)
+			
+		local scanlinesCheckBox = optionCheckBox(
+			Engine.GetExpScanlinesEnabled, Engine.SetExpScanlinesEnabled,
+			l.EXP_SCANLINES)
+			
+		local filmgrainCheckBox = optionCheckBox(
+			Engine.GetExpFilmGrainEnabled, Engine.SetExpFilmGrainEnabled,
+			l.EXP_FILMGRAIN)
 
 		local fullScreenCheckBox = optionCheckBox(
 			Engine.GetFullscreen, Engine.SetFullscreen,
@@ -133,24 +146,28 @@ ui.templates.Settings = function (args)
 				cityDetailDropDown,
 				navTunnelsCheckBox,
 				speedLinesCheckBox,
-				postProcessingCheckBox,
 				cockpitCheckBox,
+				postProcessingCheckBox,
+				ui:Label(l.EXPERIMENTAL_EFFECTS):SetColor(c),
+				chromaticAberrationCheckBox,
+				scanlinesCheckBox,
+				filmgrainCheckBox,
 			})))
+	end
+	
+	local volumeSlider = function (caption, getter, setter)
+		local initial_value = getter()
+		local slider = ui:HSlider()
+		local label = ui:Label(caption .. " " .. math.floor(initial_value * 100)):SetColor(c)
+		slider:SetValue(initial_value)
+		slider.onValueChanged:Connect(function (new_value)
+				label:SetText(caption .. " " .. math.floor(new_value * 100))
+				setter(new_value)
+			end)
+		return ui:VBox():PackEnd({label, slider})
 	end
 
 	local soundTemplate = function()
-		local volumeSlider = function (caption, getter, setter)
-			local initial_value = getter()
-			local slider = ui:HSlider()
-			local label = ui:Label(caption .. " " .. math.floor(initial_value * 100)):SetColor(c)
-			slider:SetValue(initial_value)
-			slider.onValueChanged:Connect(function (new_value)
-					label:SetText(caption .. " " .. math.floor(new_value * 100))
-					setter(new_value)
-				end)
-			return ui:VBox():PackEnd({label, slider})
-		end
-
 		local muteBox = function(getter, setter)
 			return optionCheckBox(getter, setter, l.MUTE)
 		end
@@ -356,19 +373,219 @@ ui.templates.Settings = function (args)
 			end
 		)
 		
+		local TestGetter = function ()
+			return 0
+		end
+		
+		local TestSetter = function(v)
+		end
+		
+		--///////////////////////////////////
+		--         Joystick stuff
+		--///////////////////////////////////
+		
+		-- Functions
+		local GetCurrentJoystick, SetCurrentJoystick
+		local GetCurrentAxis, SetCurrentAxis
+		local GetAxisDeadZone, SetAxisDeadZone
+		local GetAxisInverted, SetAxisInverted
+		local ClearJoystickSettings, ClearAxisSettings
+		local UpdateJoystickList, UpdateJoystickSettings
+		local UpdateAxisSettings, UpdateAxisInput
+		
+		-- Data
+		local optionsBox = ui:VBox()
+		local joystickBox = ui:Margin(1)
+		local axisBox = ui:Margin(1)
+		local joystickDropDown = nil						-- Drop down menu for joysticks
+		local axisDropDowns = {}
+		
+		local joystickCount = Engine.GetJoystickCount() 	-- Number of joysticks
+		local joystickIDs = {}								-- ID of joysticks (0-indexed)
+		local joystickNames = {}							-- Joystick names as reported by system (per joystick)
+		
+		local axisCount = {}								-- Number of joystick axes
+		local axisNames = {}								-- Joystick axis names generated (per joystick)
+		local axisIDs = {}
+		
+		local invertCheckboxContainer = ui:HBox(5)
+		local invertCheckbox = nil
+		local rawInputLabel = ui:Margin(1)
+		local deadzoneSliderContainer = ui:VBox()
+		local deadzoneSlider = nil
+		local deadzoneLabel = nil
+		local currentAxis = 0
+		
+		GetCurrentJoystick = function ()
+			return Engine.GetActiveJoystick()
+		end
+		
+		ClearJoystickSettings = function ()
+			if axisBox.innerWidget ~= nil then
+				axisBox:RemoveInnerWidget()
+			end
+			ClearAxisSettings()
+		end
+		
+		ClearAxisSettings = function ()
+			invertCheckboxContainer:Clear()
+			deadzoneSliderContainer:Clear()
+			if rawInputLabel.innerWidget ~= nil then
+				rawInputLabel:RemoveInnerWidget()
+			end
+		end
+		
+		SetCurrentJoystick = function (jid)
+			Engine.SetActiveJoystick(jid)
+			ClearJoystickSettings()
+			UpdateJoystickSettings(jid + 1)
+			print("Joystick: "..tostring(jid))
+		end
+		
+		GetCurrentAxis = function ()
+			return currentAxis
+		end
+		
+		SetCurrentAxis = function (axis_id)
+			currentAxis = axis_id
+			UpdateAxisSettings(currentAxis)
+		end
+		
+		GetAxisInverted = function ()
+			return Engine.GetJoystickAxisInvertState(currentAxis)
+		end
+		
+		SetAxisInverted = function (inverted)
+			Engine.SetJoystickAxisInvertState(currentAxis, inverted)
+		end
+		
+		GetAxisDeadZone = function ()
+			return Engine.GetJoystickAxisDeadZone(currentAxis)
+		end
+		
+		SetAxisDeadZone = function (deadzone)
+			Engine.SetJoystickAxisDeadZone(currentAxis, deadzone * 100)
+		end
+		
+		UpdateJoystickList = function ()
+			joystickCount = Engine.GetJoystickCount()
+			joystickIDs = {}
+			joystickNames = {}
+			axisCount = {}
+			axisNames = {}
+			axisIDs = {}
+			axisDropDowns = {}
+			if joystickBox.innerWidget ~= nil then
+				joystickBox:RemoveInnerWidget()
+			end
+			if joystickCount > 0 then
+				for i = 1, joystickCount do
+					joystickIDs[i] = i - 1
+					joystickNames[i] = Engine.GetJoystickName(joystickIDs[i])
+					UpdateJoystickSettings(i)
+				end	
+				SetCurrentAxis(0)
+				joystickDropDown = optionDropDown(GetCurrentJoystick, SetCurrentJoystick, "Joystick", joystickNames, joystickIDs)				
+				joystickBox:SetInnerWidget(joystickDropDown)
+			else
+				joystickDropDown = nil
+			end
+		end
+		
+		UpdateJoystickSettings = function (jid)
+			axisCount[jid] = Engine.GetJoystickAxisCount(joystickIDs[jid])
+			axisNames[jid] = {}
+			axisIDs[jid] = {}
+			if axisCount[jid] > 0 then
+				for j = 1, axisCount[jid] do
+					axisNames[jid][j] = "Axis "..tostring(j - 1).." ("..tostring(jid)..")"
+					axisIDs[jid][j] = j - 1
+				end
+				
+				axisDropDowns[jid] = optionDropDown(GetCurrentAxis, SetCurrentAxis, "Axes Settings", axisNames[jid], axisIDs[jid])
+			
+				if GetCurrentJoystick() == jid - 1 then
+					axisBox:SetInnerWidget(axisDropDowns[jid])
+				end
+			else
+				axisDropDowns[juid] = nil
+			end
+		end
+		
+		UpdateAxisSettings = function (axis_id)
+			local jid = GetCurrentJoystick() + 1
+			if axis_id < axisCount[jid] then
+				if rawInputLabel.innerWidget == nil then
+					-- invert
+					invertCheckbox = ui:CheckBox()
+					invertCheckbox:SetState(GetAxisInverted())
+					invertCheckbox.onClick:Connect(function () SetAxisInverted(invertCheckbox.isChecked) end)
+					invertCheckboxContainer:PackEnd({invertCheckbox, ui:Label("Invert"):SetColor(c)})
+					
+					-- raw input
+					rawInputLabel:SetInnerWidget(ui:AxisIndicator(axis_id))
+					
+					-- deadzone
+					deadzoneSlider = ui:HSlider()
+					local dz_value = GetAxisDeadZone() / 100.0
+					deadzoneLabel = ui:Label("DeadZone" .. " " .. GetAxisDeadZone()):SetColor(c)deadzoneSlider.onValueChanged:Connect(function (new_value)
+						SetAxisDeadZone(new_value)
+						deadzoneLabel:SetText("DeadZone" .. " " .. GetAxisDeadZone())
+					end)
+					deadzoneSlider:SetValue(dz_value)
+					deadzoneSliderContainer:PackEnd({deadzoneLabel, deadzoneSlider})
+					
+					--local initial_value = getter()
+					--local slider = ui:HSlider()
+					--local label = ui:Label(caption .. " " .. math.floor(initial_value * 100)):SetColor(c)
+					--slider:SetValue(initial_value)
+					--slider.onValueChanged:Connect(function (new_value)
+					--		label:SetText(caption .. " " .. math.floor(new_value * 100))
+					--		setter(new_value)
+					--	end)
+					--return ui:VBox():PackEnd({label, slider})
+				end
+				invertCheckbox:SetState(GetAxisInverted())
+				deadzoneSlider:SetValue(GetAxisDeadZone() / 100.0)
+				rawInputLabel.innerWidget:SetAxis(GetCurrentAxis())
+			end
+		end
+		
+		UpdateJoystickList()
+		
+		optionsBox:PackEnd({
+			optionCheckBox(Engine.GetMouseYInverted, Engine.SetMouseYInverted, l.INVERT_MOUSE_Y),
+			optionCheckBox(Engine.GetJoystickEnabled, Engine.SetJoystickEnabled, l.ENABLE_JOYSTICK),
+			--joystickBox,			
+			ui:HBox(5):PackEnd({
+				axisBox, 
+				ui:Margin(20):SetInnerWidget( 
+					ui:VBox(2):PackEnd({
+						ui:Align('MIDDLE', invertCheckboxContainer),
+						ui:Align('MIDDLE', rawInputLabel)
+					})
+				)
+			}),
+			deadzoneSliderContainer
+		})
+		
 		local options = ui:Grid(2, 1):
 			SetCell(0, 0,
 				ui:Margin(10, 'LEFT', 
-					ui:VBox():PackEnd({
-						optionCheckBox(Engine.GetMouseYInverted, Engine.SetMouseYInverted, l.INVERT_MOUSE_Y),
-						optionCheckBox(Engine.GetJoystickEnabled, Engine.SetJoystickEnabled, l.ENABLE_JOYSTICK)
-					})
+					ui:VBox():PackEnd(
+						optionsBox
+					)
 				)
 			):
 			SetCell(1, 0,
-				ui:Align('RIGHT', 
-					ui:Margin(15, 'RIGHT',
+				ui:Align('TOP_RIGHT', 
+					ui:Margin(10, 'HORIZONTAL', 
 						btn_reset_bindings
+						--ui:VBox():PackEnd({
+						--	btn_reset_bindings,
+						--	deadzoneSliderContainer, 
+						--	ui:Label("INPUT: 0")
+						--})
 					)
 				)
 			)
@@ -397,6 +614,9 @@ ui.templates.Settings = function (args)
 				box:PackEnd(ui:Margin(30, 'LEFT', grid))
 			end
 		end
+		
+		--UpdateAxisInput()
+		
 		return box
 	end
 

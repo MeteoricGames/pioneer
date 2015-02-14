@@ -12,6 +12,7 @@ endif
 noinst_LIBRARIES = libui.a
 noinst_HEADERS = \
 	Align.h \
+	AxisIndicator.h \
 	Background.h \
 	Box.h \
 	Button.h \
@@ -51,6 +52,7 @@ noinst_HEADERS = \
 
 libui_a_SOURCES = \
 	Align.cpp \
+	AxisIndicator.cpp \
 	Background.cpp \
 	Box.cpp \
 	Button.cpp \
@@ -85,6 +87,7 @@ libui_a_SOURCES = \
 	Widget.cpp \
 	Lua.cpp \
 	LuaAlign.cpp \
+	LuaAxisIndicator.cpp \
 	LuaBackground.cpp \
 	LuaBox.cpp \
 	LuaButton.cpp \

@@ -54,7 +54,7 @@ local equipIcon = {
 local defaultFuncs = {
 	-- can we trade in this item
 	canTrade = function (e)
-		return EquipDef[e].purchasable and EquipDef[e].slot == "CARGO" and Game.system:IsCommodityLegal(e)
+		return EquipDef[e].purchasable and (EquipDef[e].slot == "CARGO" or EquipDef[e].slot == "HYDROGENTANK") and Game.system:IsCommodityLegal(e)
 	end,
 
 	-- how much of this item do we have in stock?
@@ -220,20 +220,27 @@ local stationColumnValue = {
 				else 				
 					local player_free_equip = player:GetEquipFree(EquipDef[e].slot)
 					local player_free_capacity = player.freeCapacity
+					local player_free_hydrogen_capacity = player:GetHydrogenFree()
 					local player_money = player:GetMoney()
 					local item_price = funcs.getPrice(e)
 					local item_mass = EquipDef[e].mass
 					
-					if  player_free_equip < 1 then
-						Comms.Message(l.SHIP_IS_FULLY_LADEN)
-						return
+					if e ~= "HYDROGEN" then
+						if  player_free_equip < 1 then
+							Comms.Message(l.SHIP_IS_FULLY_LADEN)
+							return
+						end
+						
+						if player_free_capacity < item_mass then
+							Comms.Message(l.SHIP_IS_FULLY_LADEN)
+							return
+						end
+					else						
+						if player_free_hydrogen_capacity < 1 then
+							Comms.Message(l.SHIP_HYDROGEN_TANK_FULL)
+							return
+						end
 					end
-					
-					if player_free_capacity < item_mass then
-						Comms.Message(l.SHIP_IS_FULLY_LADEN)
-						return
-					end
-
 					if player_money < item_price then
 						Comms.Message(l.YOU_NOT_ENOUGH_MONEY)
 						return
@@ -243,11 +250,21 @@ local stationColumnValue = {
 					-- * station stock
 					-- * free capacity (mass)
 					-- * money
-					local limit_table = {
-						station_stock,
-						player_free_capacity / item_mass,
-						player_money / item_price,
-					}					
+					local limit_table = {}
+					
+					if e ~= "HYDROGEN" then
+						limit_table = {
+							station_stock,
+							player_free_capacity / item_mass,
+							player_money / item_price,
+						}
+					else
+						limit_table = {
+							station_stock,
+							player_free_hydrogen_capacity,
+							player_money / item_price,
+						}
+					end
 					table.sort(limit_table)
 					
 					local buy_dialog = bulkDialog(funcs, "Buy", e, limit_table[1])
@@ -380,14 +397,23 @@ function EquipmentTableWidgets.Pair (config)
 
 		local player = Game.player
 
-		if player:GetEquipFree(EquipDef[e].slot) < 1 then
-			Comms.Message(l.SHIP_IS_FULLY_LADEN)
-			return
-		end
+		--if EquipDef[e].
+		
+		if e ~= "HYDROGEN" then 
+			if player:GetEquipFree(EquipDef[e].slot) < 1 then
+				Comms.Message(l.SHIP_IS_FULLY_LADEN)
+				return
+			end
 
-		if player.freeCapacity < EquipDef[e].mass then
-			Comms.Message(l.SHIP_IS_FULLY_LADEN)
-			return
+			if player.freeCapacity < EquipDef[e].mass then
+				Comms.Message(l.SHIP_IS_FULLY_LADEN)
+				return
+			end
+		else
+			if player:GetHydrogenFree() < 1 then
+				Comms.Message(l.SHIP_HYDROGEN_TANK_FULL)
+				return
+			end
 		end
 
 		local price = funcs.getPrice(e)
@@ -398,7 +424,9 @@ function EquipmentTableWidgets.Pair (config)
 
 		assert(player:AddEquip(e) == 1)
 		player:AddMoney(-price)
-
+		--if player:AddEquip(e) == 1 then
+		--	player:AddMoney(-price)
+		--end
 		funcs.sold(e)
 	end
 

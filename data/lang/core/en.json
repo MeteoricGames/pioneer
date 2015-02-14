@@ -191,6 +191,30 @@
 	  "description" : "",
 	  "message" : "Freelook Centre"
    },
+   "FREIGHT_TELEPORTER" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter"
+   },
+   "FREIGHT_TELEPORTER_DESCRIPTION" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter is able to teleports cargo into your ship"
+   },
+   "BASIC_FREIGHT_TELEPORTER" : {
+	  "description" : "",
+	  "message" : "Basic Freight Teleporter"
+   },
+   "BASIC_FREIGHT_TELEPORTER_DESCRIPTION" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter with basic capabilities"
+   },
+   "ADVANCED_FREIGHT_TELEPORTER" : {
+	  "description" : "",
+	  "message" : "Advanced Freight Teleporter"
+   },
+   "ADVANCED_FREIGHT_TELEPORTER_DESCRIPTION" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter with advanced capabilities"
+   },
    "CANT_SAVE_IN_HYPERSPACE" : {
       "description" : "",
       "message" : "Can't save game while jumping"
@@ -1189,7 +1213,7 @@
    },
    "NO_HYPERDRIVE" : {
       "description" : "",
-      "message" : "No phase drive jump module"
+      "message" : "No jump module"
    },
    "NO_REGISTERED_INHABITANTS" : {
       "description" : "",
@@ -1254,6 +1278,10 @@
    "P_UI_FUEL" : {
 	  "description" : "",
 	  "message" : "fuel"
+   },
+   "P_UI_HYDROGEN" : {
+	  "description" : "",
+	  "message" : "hydr"
    },
    "P_UI_TEMP" : {
 	  "description" : "",

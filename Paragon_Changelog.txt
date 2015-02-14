@@ -1,3 +1,43 @@
+Alpha 10.5
+	* Input
+	  * Joystick support fully upgraded for multiple axes, invert and deadzones
+	  
+	* UI
+	  * New message log
+	  * Multiple HUD improvements and adjustments
+	  
+	* Game
+	  * Hydrogen is now the only and main fuel in the game
+	  * New equipment: hydrogen tanks for storing hydrogen (no cargo space loss)
+	  * Added hydrogen tanks to all ships
+	  * Starting ship changes
+	  * Lots of minor additions and changes
+	  
+	* Art
+	  * New cockpits
+	  * New music
+	  * New sound effects and sound improvements
+
+Alpha 10
+	* UI
+	  * Lots of improvements and changes to the UI
+	  
+	* Art
+	  * New models including stations and cockpits
+	  * New ships and improvements to cockpits
+	  * Space stations polish
+	  * Icons overhaul
+	  
+	* Game
+	  * New gameplay feature: Freight Teleporter
+	  * Freight Teleporter allows you to teleport floating cargo and cargo from enemy's freight-bay into your ship's freight-bay
+	  * New equipments to access Freight Teleporter feature
+	  
+	* Graphics
+	  * New chromatic aberration post-processing effect
+	  * New filmgrain and scanlines post-procesing effects
+	  
+
 Alpha 9.22
 	* Fixes
 	  * Fixed issue causing missions to be wiped out at times between save/load leading to a crash after loading

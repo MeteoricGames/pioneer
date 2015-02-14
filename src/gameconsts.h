@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _GAMECONSTS_H
@@ -28,8 +29,9 @@ static const int	EPOCH_START_YEAR = 2184;
 // 75: +PlayerController read and write ShipController
 // 76: +small starport upgraded to have more landing pads (LUA) -> BASE SAVE
 // 77: +Docking AI changes to flyto, goto, and new dock command (WIP)
-static const int  s_baseSaveVersion = 76;		
-static const int  s_latestSaveVersion = 77;		
+// 78: +New Fuel System and hydrogen tanks, normal fuel eliminated
+static const int  s_baseSaveVersion = 78;
+static const int  s_latestSaveVersion = 78;
 
 
 #endif /* _GAMECONSTS_H */

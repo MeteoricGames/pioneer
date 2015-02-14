@@ -7703,7 +7703,8 @@ bool CTwBar::EditInPlaceGetClipboard(std::string *_OutString)
     if( g_TwMgr->m_CurrentXDisplay!=NULL )
     {
         int NbBytes = 0;
-        char *Buffer = XFetchBytes(g_TwMgr->m_CurrentXDisplay, &NbBytes);
+        //char *Buffer = XFetchBytes(g_TwMgr->m_CurrentXDisplay, &NbBytes);
+	char *Buffer = NULL;
         if( Buffer!=NULL )
         {
             if( NbBytes>0 )
@@ -7756,7 +7757,7 @@ bool CTwBar::EditInPlaceSetClipboard(const std::string& _String)
         char *Text = new char[_String.length()+1];
         memcpy(Text, _String.c_str(), _String.length());
         Text[_String.length()] = '\0';
-        XStoreBytes(g_TwMgr->m_CurrentXDisplay, Text, _String.length());
+       // XStoreBytes(g_TwMgr->m_CurrentXDisplay, Text, _String.length());
         delete[] Text;
     }
 

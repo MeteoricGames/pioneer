@@ -36,6 +36,7 @@ struct shipstats_t {
 	int used_cargo;
 	int free_capacity;
 	int total_mass; // cargo, equipment + hull
+	//int hydrogen_tank_left;
 	float hull_mass_left; // effectively hitpoints
 	float hyperspace_range;
 	float hyperspace_range_max;
@@ -295,6 +296,14 @@ public:
 	void SetFuel(const double f);
 	double GetFuelReserve() const { return m_reserveFuel; }
 	void SetFuelReserve(const double f) { m_reserveFuel = Clamp(f, 0.0, 1.0); }
+
+	int GetHydrogenCapacity() const;
+	int GetHydrogen() const;
+	int GetHydrogenFree() const;
+	double GetHydrogenPercentage() const;
+	int AddHydrogenUnits(int num);
+	int RemoveHydrogenUnits(int num);
+	void SetHydrogenUnits(int hydrogen);
 
 	// available delta-V given the ship's current fuel state
 	double GetSpeedReachedWithFuel() const;

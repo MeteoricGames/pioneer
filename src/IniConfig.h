@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _INICONFIG_H
@@ -18,8 +19,8 @@ class IniConfig {
 public:
 	IniConfig() {}
 
-	void Read(FileSystem::FileSource &fs, const std::string &path);
-	void Read(const FileSystem::FileData &data);
+	bool Read(FileSystem::FileSource &fs, const std::string &path);
+	bool Read(const FileSystem::FileData &data);
 	bool Write(FileSystem::FileSourceFS &fs, const std::string &path);
 
 	void SetInt(const std::string &section, const std::string &key, int val);

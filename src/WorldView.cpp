@@ -199,7 +199,7 @@ void WorldView::InitObject()
 
 	Gui::Screen::PushFont("OverlayFont");
 	m_flightStatus = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
-	Add(m_flightStatus, 2, Gui::Screen::GetHeight() - flightstatus_margin);
+	//Add(m_flightStatus, 2, Gui::Screen::GetHeight() - flightstatus_margin);
 	Gui::Screen::PopFont();
 
 #if WITH_DEVKEYS
@@ -210,40 +210,91 @@ void WorldView::InitObject()
 #endif
 
 	m_hudHyperspaceInfo = (new Gui::Label(""))->Color(s_hudTextColor);
-	Add(m_hudHyperspaceInfo, Gui::Screen::GetWidth()*0.4f, Gui::Screen::GetHeight()*0.3f);
+	m_hudHyperspaceInfo->SetAlignment(Gui::ALIGN_CENTER);
+	Add(m_hudHyperspaceInfo, Gui::Screen::GetWidth() * 0.5f, Gui::Screen::GetHeight()*0.3f);
+
+	float cursor, cursor_incr = 13.0f;
+
+	// Location
+	Gui::Screen::PushFont("HudFontLarge");
+	m_hudLocationPrimary = (new Gui::Label("PROCYON"))->Color(Color::PARAGON_BLUE);
+	m_hudLocationPrimary->SetAlignment(Gui::Alignment::ALIGN_CENTER);
+	Gui::Screen::PopFont();
+	Gui::Screen::PushFont("HudFont");
+	m_hudLocationSecondary = (new Gui::Label("CLEARSPACE"))->Color(Color::PARAGON_GREEN);
+	m_hudLocationSecondary->SetAlignment(Gui::Alignment::ALIGN_CENTER);
+	Gui::Screen::PopFont();
+	Add(m_hudLocationPrimary, Gui::Screen::GetWidth() / 2.0f, 2.0f);
+	Add(m_hudLocationSecondary, Gui::Screen::GetWidth() / 2.0f, 14.0f);
 
 	// Player guages
-	m_hudHullTemp = new Gui::MeterBar(200.0f, Lang::P_UI_TEMP, Color::PARAGON_GREEN);
-	m_hudWeaponTemp = new Gui::MeterBar(200.0f, Lang::P_UI_WEAP, Color::PARAGON_GREEN);
-	m_hudHullIntegrity = new Gui::MeterBar(200.0f, Lang::P_UI_HULL, Color::PARAGON_GREEN,
-		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT);
-	m_hudShieldIntegrity = new Gui::MeterBar(200.0f, Lang::P_UI_SHLD, Color::PARAGON_GREEN,
-		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT);
-	m_hudFuelGauge = new Gui::MeterBar(200.f, Lang::P_UI_FUEL, Color::PARAGON_GREEN);
-	Add(m_hudFuelGauge, 5.0f, 4.0f);
-	Add(m_hudHullTemp, 5.0f, 19.0f);
-	Add(m_hudWeaponTemp, 5.0f, 34.0f);
-	Add(m_hudHullIntegrity, Gui::Screen::GetWidth() - 205.0f, 4.0f);
-	Add(m_hudShieldIntegrity, Gui::Screen::GetWidth() - 205.0f, 19.0f);
+	Gui::Screen::PushFont("HudFont");
+	m_hudPlayerShip = (new Gui::Label(Pi::player->GetLabel().c_str()))->Color(s_hudTextColor);
+	Gui::Screen::PopFont();
+	m_hudFuelGauge = new Gui::MeterBar(120.f, Lang::P_UI_FUEL, Color::PARAGON_GREEN);
+	m_hudHydrogenGauge = new Gui::MeterBar(120.0f, Lang::P_UI_HYDROGEN, Color::PARAGON_GREEN);
+	m_hudHullTemp = new Gui::MeterBar(120.0f, Lang::P_UI_TEMP, Color::PARAGON_GREEN);
+	m_hudWeaponTemp = new Gui::MeterBar(120.0f, Lang::P_UI_WEAP, Color::PARAGON_GREEN);
+	m_hudHullIntegrity = new Gui::MeterBar(120.0f, Lang::P_UI_HULL, Color::PARAGON_GREEN);
+	m_hudShieldIntegrity = new Gui::MeterBar(120.0f, Lang::P_UI_SHLD, Color::PARAGON_GREEN);
+
+	cursor = 8.0f;
+	Add(m_hudPlayerShip, 10.0f, cursor); cursor += cursor_incr;
+	//Add(m_hudFuelGauge, 5.0f, cursor); cursor += cursor_incr;
+	Add(m_hudHydrogenGauge, 5.0f, cursor); cursor += cursor_incr;
+	Add(m_hudHullTemp, 5.0f, cursor); cursor += cursor_incr;
+	Add(m_hudWeaponTemp, 5.0f, cursor); cursor += cursor_incr;
+	Add(m_hudHullIntegrity, 5.0f, cursor); cursor += cursor_incr;
+	Add(m_hudShieldIntegrity, 5.0f, cursor); cursor += cursor_incr;
+
 	m_hudShieldIntegrity->Hide();
 
-	// Target guages
-	m_hudTargetHullIntegrity = new Gui::MeterBar(200.0f, Lang::P_UI_HULL, Color(255, 255, 0, 204),
-		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT, Color::WHITE);
-	m_hudTargetShieldIntegrity = new Gui::MeterBar(200.0f, Lang::P_UI_SHLD, Color(255, 255, 0, 204),
-		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT, Color::WHITE);
-	Add(m_hudTargetHullIntegrity, Gui::Screen::GetWidth() - 205.0f, 34.0f);
-	Add(m_hudTargetShieldIntegrity, Gui::Screen::GetWidth() - 205.0f, 49.0f);
+	// Target name and gauges
+	Gui::Screen::PushFont("HudFont");
+	m_hudTargetShip = (new Gui::Label(""))->Color(Color::PARAGON_TARGET);
+	m_hudTargetDesc = (new Gui::Label(""))->Color(Color::PARAGON_TARGET);
+	m_hudTargetCargo = (new Gui::Label(""))->Color(Color::PARAGON_TARGET);
+	Gui::Screen::PopFont();
+	m_hudTargetShip->SetAlignment(Gui::Alignment::ALIGN_RIGHT);
+	m_hudTargetDesc->SetAlignment(Gui::Alignment::ALIGN_RIGHT);
+	m_hudTargetCargo->SetAlignment(Gui::Alignment::ALIGN_RIGHT);
+
+	m_hudTargetHullIntegrity = new Gui::MeterBar(120.0f, Lang::P_UI_HULL, Color::PARAGON_TARGET,
+		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT, Color::PARAGON_TARGET);
+	m_hudTargetShieldIntegrity = new Gui::MeterBar(120.0f, Lang::P_UI_SHLD, Color::PARAGON_TARGET,
+		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT, Color::PARAGON_TARGET);
+	m_hudTargetFuel = new Gui::MeterBar(120.0f, Lang::P_UI_FUEL, Color::PARAGON_TARGET,
+		Gui::MeterBar::MeterBarAlign::METERBAR_RIGHT, Color::PARAGON_TARGET);
+
+	cursor = 8.0f;
+	float target_x = 0.0f;
+
+	Add(m_hudTargetShip, Gui::Screen::GetWidth() - 150.0f, cursor); cursor += cursor_incr;
+	m_hudTargetShip->SetRightMargin(140.0f);
+	Add(m_hudTargetDesc, Gui::Screen::GetWidth() - 150.0f, cursor); cursor += cursor_incr;
+	m_hudTargetDesc->SetRightMargin(140.0f);
+	Add(m_hudTargetCargo, Gui::Screen::GetWidth() - 150.0f, cursor); cursor += cursor_incr;
+	m_hudTargetCargo->SetRightMargin(140.0f);
+
+	target_x = Gui::Screen::GetWidth() - 125.0f;
+	Add(m_hudTargetHullIntegrity, target_x, cursor); cursor += cursor_incr;
+	Add(m_hudTargetShieldIntegrity, target_x, cursor); cursor += cursor_incr;
+	Add(m_hudTargetFuel, target_x, cursor); cursor += cursor_incr + 5.0f;
+
+	m_hudTargetShip->Hide();
+	m_hudTargetDesc->Hide();
+	m_hudTargetCargo->Hide();
 	m_hudTargetHullIntegrity->Hide();
 	m_hudTargetShieldIntegrity->Hide();
+	m_hudTargetFuel->Hide();
 
 	Gui::Screen::PushFont("HudFont");
 
-	for (unsigned i = 0; i < 6; ++i) {
-		Gui::Label* lbl = (new Gui::Label(""))->Color(s_hudTextColor);
+	for (unsigned i = 0; i < 5; ++i) {
+		Gui::Label* lbl = (new Gui::Label(""))->Color(Color::PARAGON_TARGET);
 		lbl->SetAlignment(Gui::Alignment::ALIGN_RIGHT);
-		vHudTargetInfo.push_back(lbl);
-		Add(lbl, 0, 85.0f + (14.0f * i));
+		m_vHudTargetInfo.push_back(lbl);
+		Add(lbl, target_x, cursor + (cursor_incr * i));
 	}
 
 	m_bodyLabels = new Gui::LabelSet();
@@ -259,13 +310,19 @@ void WorldView::InitObject()
 	}
 
 	m_navTargetIndicator.label = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_navTargetIndicator.label2 = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_navTargetIndicator.label->SetAlignment(Gui::ALIGN_CENTER);
+	m_navTargetIndicator.label2->SetAlignment(Gui::ALIGN_CENTER);
 	m_navVelIndicator.label = (new Gui::Label(""))->Color(Color::PARAGON_GREEN);
+	m_navVelIndicator.label->SetAlignment(Gui::ALIGN_CENTER);
 	m_combatTargetIndicator.label = new Gui::Label(""); // colour set dynamically
+	m_combatTargetIndicator.label->SetAlignment(Gui::ALIGN_CENTER);
 
 	Gui::Screen::PopFont();
 
 	// these labels are repositioned during Draw3D()
 	Add(m_navTargetIndicator.label, 0, 0);
+	Add(m_navTargetIndicator.label2, 0, 0);
 	Add(m_navVelIndicator.label, 0, 0);
 	Add(m_combatTargetIndicator.label, 0, 0);
 
@@ -410,6 +467,10 @@ void WorldView::InitObject()
 		Add(m_tutorialDialog, 
 			(Gui::Screen::GetWidth() - dw) / 2.0f, (Gui::Screen::GetHeight() - dh) / 2.0f);
 		Gui::Screen::PopFont();
+
+		if(Pi::cpan) {
+			Pi::cpan->SetCircleOverlayVisiblity(false);
+		}
 	} else {
 		m_tutorialDialog = nullptr;
 	}
@@ -585,7 +646,8 @@ void WorldView::OnClickJumpButton(Gui::MultiStateImageButton *b)
 	if (Pi::player->IsHyperspaceActive()) {
 		// Hyperspace countdown in effect.. abort!
 		Pi::player->ResetHyperspaceCountdown();
-		Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		//Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		Pi::game->log->Add("", Lang::HYPERSPACE_JUMP_ABORTED);
 		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_OFF);
 	} else {
 		// Initiate hyperspace drive
@@ -622,8 +684,9 @@ void WorldView::OnClickBlastoff()
 	Pi::BoinkNoise();
 	if (Pi::player->GetFlightState() == Ship::DOCKED) {
 		if (!Pi::player->Undock()) {
-			Pi::cpan->MsgLog()->ImportantMessage(Pi::player->GetDockedWith()->GetLabel(),
-					Lang::LAUNCH_PERMISSION_DENIED_BUSY);
+			//Pi::cpan->MsgLog()->ImportantMessage(
+			Pi::game->log->Add(
+				Pi::player->GetDockedWith()->GetLabel(), Lang::LAUNCH_PERMISSION_DENIED_BUSY);
 		}
 	} else {
 		Pi::player->Blastoff();
@@ -635,6 +698,10 @@ void WorldView::OnClickTutorial()
 	Pi::BoinkNoise();
 	m_tutorialSeen = true;
 	Remove(m_tutorialDialog);
+	m_tutorialDialog = nullptr;
+	if(Pi::cpan) { 
+		Pi::cpan->SetCircleOverlayVisiblity(true);
+	}
 }
 
 void WorldView::OnClickHyperspace()
@@ -642,7 +709,9 @@ void WorldView::OnClickHyperspace()
 	if (Pi::player->IsHyperspaceActive()) {
 		// Hyperspace countdown in effect.. abort!
 		Pi::player->ResetHyperspaceCountdown();
-		Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		//Pi::cpan->MsgLog()->Message(
+		Pi::game->log->Add(
+			"", Lang::HYPERSPACE_JUMP_ABORTED);
 	} else {
 		// Initiate hyperspace drive
 		SystemPath path = Pi::sectorView->GetHyperspaceTarget();
@@ -785,6 +854,61 @@ void WorldView::RefreshHyperspaceButton() {
 	}
 }
 
+void WorldView::RefreshFreightTeleporterState() {
+	std::ostringstream ss;
+	int teleporter_level = Pi::player->GetFreightTeleporterLevel();
+	if (teleporter_level > 0 && Pi::player->GetFlightState() != Ship::FlightState::HYPERSPACE) {
+		ss << "FT" << teleporter_level << " ";
+		EFreightTeleporterStatus teleporter_status = Pi::player->GetFreightTeleporterStatus();
+		EFreightTeleporterTargetType teleporter_target_type = Pi::player->GetFreightTeleporterTargetType();
+		Body* ft_tgt = Pi::player->GetFreightTeleporterTarget();
+		if(ft_tgt) {
+			if(ft_tgt->GetType() == Body::Type::SHIP) {
+				ss << "SHIP TGT";
+			} else if(ft_tgt->GetType() == Body::Type::CARGOBODY) {
+				ss << "CARGO TGT";
+			}
+		} else {
+			switch(teleporter_status) {
+				case EFT_S_NOT_AVAILABLE:
+					ss << "Not Available";
+					break;
+				case EFT_S_NO_TGT:
+					ss << "No Target";
+					break;
+				case EFT_S_FREIGHT_FULL:
+					ss << "Freight Full";
+					break;
+				case EFT_S_TGT_OUT_OF_RANGE:
+					ss << "Out of Range";
+					break;
+				case EFT_S_TGT_SHIELDED:
+					ss << "Shielded";
+					break;
+				default:
+					ss << "Inactive";
+			}
+		}
+	}
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_5, ss.str().c_str());
+}
+
+void WorldView::RefreshOverlayHud() {
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT, m_overlayBuffer[0]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_2, m_overlayBuffer[1]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_3, m_overlayBuffer[2]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_4, m_overlayBuffer[3]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_TOP_1, "");
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_TOP_2, "");
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_LEFT_1, m_circleTitleBuffer[0]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_LEFT_2, m_circleDataBuffer[0]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_RIGHT_1, m_circleTitleBuffer[1]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_RIGHT_2, m_circleDataBuffer[1]);
+	//Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_BOTTOM_1, m_circleTitleBuffer[2]);
+	//Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_CIRCLE_BOTTOM_2, m_circleDataBuffer[2]);
+	Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_DEV, m_devBuffer);
+}
+
 void WorldView::RefreshButtonStateAndVisibility()
 {
 	assert(Pi::game);
@@ -793,10 +917,11 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 	Pi::cpan->ClearOverlay();
 
-	if (Pi::game->IsPaused())
+	if (Pi::game->IsPaused()) {
 		m_pauseText->Show();
-	else
+	} else {
 		m_pauseText->Hide();
+	}
 
 	if (Pi::player->GetFlightState() != Ship::HYPERSPACE) {
 		Pi::cpan->SetOverlayToolTip(ShipCpanel::OVERLAY_HUD2_LEFT,     Lang::SHIP_VELOCITY_BY_REFERENCE_OBJECT);
@@ -806,6 +931,9 @@ void WorldView::RefreshButtonStateAndVisibility()
 	}
 
 	RefreshHyperspaceButton();
+	RefreshFreightTeleporterState();
+	RefreshLocationInfo();
+	RefreshOverlayHud();
 
 	bool is_outside_gravity_bubble = false;
 	bool is_outside_gravity_bubble_2 = false;
@@ -989,18 +1117,23 @@ void WorldView::RefreshButtonStateAndVisibility()
 		m_debugInfo->Hide();
 	}
 #endif
+
 	if (Pi::player->GetFlightState() == Ship::HYPERSPACE) {
 		const SystemPath dest = Pi::player->GetHyperspaceDest();
 		RefCountedPtr<StarSystem> s = StarSystemCache::GetCached(dest);
 
-		Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT, stringf(Lang::IN_TRANSIT_TO_N_X_X_X,
+		m_overlayBuffer[0] = stringf(Lang::IN_TRANSIT_TO_N_X_X_X,
 			formatarg("system", dest.IsBodyPath() ? s->GetBodyByPath(dest)->GetName() : s->GetName()),
 			formatarg("x", dest.sectorX),
 			formatarg("y", dest.sectorY),
-			formatarg("z", dest.sectorZ)));
+			formatarg("z", dest.sectorZ));
+		m_circleTitleBuffer[1] = "SPEED";
+		m_circleDataBuffer[1] = "JUMPING";
 
 		Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_TOP_RIGHT, stringf(Lang::PROBABILITY_OF_ARRIVAL_X_PERCENT,
 			formatarg("probability", Pi::game->GetHyperspaceArrivalProbability()*100.0, "f3.1")));
+
+		m_devBuffer = "";
 	} else {
 		{
 			std::string str;
@@ -1014,20 +1147,38 @@ void WorldView::RefreshButtonStateAndVisibility()
 				rel_to = Pi::player->GetFrame()->GetLabel().c_str();
 				_vel = vel.Length();
 			}
+			_vel = Unjitter(_vel, Pi::player->GetController()->GetSpeedLimit());
 			if (_vel > 1000) {
 				str = stringf(Lang::KM_S_RELATIVE_TO, formatarg("speed", _vel*0.001), formatarg("frame", rel_to));
 			} else {
 				str = stringf(Lang::M_S_RELATIVE_TO, formatarg("speed", _vel), formatarg("frame", rel_to));
 			}
-			Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT, str);
+			m_overlayBuffer[0] = str;
+			m_circleTitleBuffer[1] = "SPEED";
+
+			if(_vel <= 1000) {
+				m_circleDataBuffer[1] = PadWithZeroes(_vel, 4) + " m/s";
+			} else if(_vel < TRANSIT_DRIVE_1_SPEED) {
+				m_circleDataBuffer[1] = PadWithZeroes(_vel * 0.001, 3) + " km/s";
+			} else if(_vel >= (TRANSIT_DRIVE_1_SPEED - 100000) && 
+					    _vel <= (TRANSIT_DRIVE_1_SPEED + 100000)) {
+				m_circleDataBuffer[1] = "TRANSIT1";
+			} else {
+				m_circleDataBuffer[1] = "TRANSIT2";
+			}
 		}
 
 		if (Body *navtarget = Pi::player->GetNavTarget()) {
 			double dist = Pi::player->GetPositionRelTo(navtarget).Length();
-			Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_3, stringf(Lang::N_DISTANCE_TO_TARGET,
-				formatarg("distance", format_distance(dist))));
+			m_overlayBuffer[2] = stringf(Lang::N_DISTANCE_TO_TARGET,
+				formatarg("distance", format_distance(dist)));
+			m_circleTitleBuffer[2] = "TARGET";
+			m_circleDataBuffer[2] = stringf("%distance AU",
+				formatarg("distance", format_distance(dist)));
 		} else {
-			Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_3, Lang::P_NO_TARGET);
+			m_overlayBuffer[2] = Lang::P_NO_TARGET;
+			m_circleTitleBuffer[2] = "";
+			m_circleDataBuffer[2] = "";
 		}
 
 		// altitude
@@ -1051,25 +1202,34 @@ void WorldView::RefreshButtonStateAndVisibility()
 				vector3d surface_pos = pos.Normalized();
 				double radius = terrain->GetTerrainHeight(surface_pos);
 				double altitude = center_dist - radius;
+
 				if (altitude < 10000000.0 && altitude < 0.5 * radius) {
 					vector3d velocity = (frame == Pi::player->GetFrame() ? vel : Pi::player->GetVelocityRelTo(frame));
 					double vspeed = velocity.Dot(surface_pos);
 					if (fabs(vspeed) < 0.05) vspeed = 0.0; // Avoid alternating between positive/negative zero
 					if (altitude < 0) altitude = 0;
 					if (altitude >= 100000.0) {
-						Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_4, stringf(Lang::ALT_IN_KM, formatarg("altitude", altitude / 1000.0),
-							formatarg("vspeed", vspeed / 1000.0)));
+						m_overlayBuffer[3] = stringf(Lang::ALT_IN_KM, formatarg("altitude", altitude / 1000.0),
+							formatarg("vspeed", vspeed / 1000.0));
+						m_circleTitleBuffer[0] = "ALTIM";
+						m_circleDataBuffer[0] = PadWithZeroes(altitude / 1000.0, 4) + " km";
 					} else {
-						Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_4, stringf(Lang::ALT_IN_METRES, formatarg("altitude", altitude),
-							formatarg("vspeed", vspeed)));
+						m_overlayBuffer[3] = stringf(Lang::ALT_IN_METRES, formatarg("altitude", altitude),
+							formatarg("vspeed", vspeed));
+						m_circleTitleBuffer[0] = "ALTIM";
+						m_circleDataBuffer[0] = PadWithZeroes(altitude, 5) + " m";
 					}
 					m_bAltitudeAvailable = true;
 					m_altitude = altitude;
 				} else {
-					Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_4, Lang::ALT_NO_DATA);
+					m_overlayBuffer[3] = Lang::ALT_NO_DATA;
+					m_circleTitleBuffer[0] = "ALTIM";
+					m_circleDataBuffer[0] = "TOO FAR";
 				}
 			} else {
-				Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_4, Lang::ALT_NO_DATA);
+				m_overlayBuffer[3] = Lang::ALT_NO_DATA;
+				m_circleTitleBuffer[0] = "ALTIM";
+				m_circleDataBuffer[0] = "TOO FAR";
 			}
 
 			// atmosphere and pressure
@@ -1077,17 +1237,26 @@ void WorldView::RefreshButtonStateAndVisibility()
 				double pressure, density;
 				static_cast<Planet*>(astro)->GetAtmosphericState(center_dist, &pressure, &density);
 
-				Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_2, stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", pressure)));
+				m_overlayBuffer[1] = stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", pressure));
 				m_hudHullTemp->SetValue(float(Pi::player->GetHullTemperature()));
 			} else {
-				Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_2, stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", 0.0))); // No atmosphere, no pressure
+				m_overlayBuffer[1] = stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", 0.0));
 			}
 		} else {
-			Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_2, stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", 0.0)));
-			Pi::cpan->SetOverlayText(ShipCpanel::OVERLAY_HUD2_LEFT_4, Lang::ALT_NO_DATA);
+			m_overlayBuffer[1] = stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", 0.0));
+			m_overlayBuffer[3] = Lang::ALT_NO_DATA;
 		}
 
 		m_hudFuelGauge->SetValue(Pi::player->GetFuel());
+		m_hudHydrogenGauge->SetValue(Pi::player->GetHydrogenPercentage() / 100.0);
+
+		/*{
+			std::ostringstream ss;
+			ss << "HYDROGEN: " << Pi::player->GetHydrogenPercentage() << "% ("<< 
+				Pi::player->GetHydrogen() << "/" <<
+				Pi::player->GetHydrogenCapacity() << ")";
+			m_devBuffer = ss.str();
+		}*/
 	}
 
 	const float activeWeaponTemp = Pi::player->GetGunTemperature(GetActiveWeapon());
@@ -1095,12 +1264,12 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 	float hull = Pi::player->GetPercentHull();
 
-	m_hudHullIntegrity->SetColor(get_color_for_warning_meter_bar(hull));
+	//m_hudHullIntegrity->SetColor(get_color_for_warning_meter_bar(hull));
 	m_hudHullIntegrity->SetValue(hull*0.01f);
 
 	float shields = Pi::player->GetPercentShields();
 
-	m_hudShieldIntegrity->SetColor(get_color_for_warning_meter_bar(shields));
+	//m_hudShieldIntegrity->SetColor(get_color_for_warning_meter_bar(shields));
 	m_hudShieldIntegrity->SetValue(shields*0.01f);
 	m_hudShieldIntegrity->Show();
 
@@ -1112,8 +1281,12 @@ void WorldView::RefreshButtonStateAndVisibility()
 
 			const shipstats_t &stats = s->GetStats();
 
+			m_hudTargetShip->Show();
+			m_hudTargetDesc->Show();
+			m_hudTargetCargo->Show();
+
 			float sHull = s->GetPercentHull();
-			m_hudTargetHullIntegrity->SetColor(get_color_for_warning_meter_bar(sHull));
+			//m_hudTargetHullIntegrity->SetColor(get_color_for_warning_meter_bar(sHull));
 			m_hudTargetHullIntegrity->SetValue(sHull*0.01f);
 			m_hudTargetHullIntegrity->Show();
 
@@ -1121,68 +1294,80 @@ void WorldView::RefreshButtonStateAndVisibility()
 			if (s->m_equipment.Count(Equip::SLOT_SHIELD, Equip::SHIELD_GENERATOR) > 0) {
 				sShields = s->GetPercentShields();
 			}
-			m_hudTargetShieldIntegrity->SetColor(get_color_for_warning_meter_bar(sShields));
+			//m_hudTargetShieldIntegrity->SetColor(get_color_for_warning_meter_bar(sShields));
 			m_hudTargetShieldIntegrity->SetValue(sShields*0.01f);
 			m_hudTargetShieldIntegrity->Show();
 
-			vHudTargetInfo[0]->SetText(s->GetShipType()->name);
-			vHudTargetInfo[1]->SetText(s->GetLabel());
+			m_hudTargetFuel->SetValue(s->GetFuel());
+			m_hudTargetFuel->Show();
+
+			m_hudTargetShip->SetText(s->GetLabel());
+			m_hudTargetDesc->SetText(s->GetShipType()->name);
+			m_hudTargetCargo->SetText(stringf(Lang::CARGO_N, formatarg("mass", stats.used_cargo)));
 			
 			if (s->m_equipment.Get(Equip::SLOT_ENGINE) == Equip::NONE) {
-				vHudTargetInfo[2]->SetText(Lang::NO_HYPERDRIVE);
+				m_vHudTargetInfo[0]->SetText(Lang::NO_HYPERDRIVE);
 			} else {
-				vHudTargetInfo[2]->SetText(Equip::types[s->m_equipment.Get(Equip::SLOT_ENGINE)].name);
+				m_vHudTargetInfo[0]->SetText(Equip::types[s->m_equipment.Get(Equip::SLOT_ENGINE)].name);
 			}
-			vHudTargetInfo[3]->SetText(stringf(Lang::MASS_N_TONNES, formatarg("mass", stats.total_mass)));
-			vHudTargetInfo[4]->SetText(stringf(Lang::SHIELD_STRENGTH_N, formatarg("shields",
+			m_vHudTargetInfo[1]->SetText(stringf(Lang::MASS_N_TONNES, formatarg("mass", stats.total_mass)));
+			m_vHudTargetInfo[2]->SetText(stringf(Lang::SHIELD_STRENGTH_N, formatarg("shields",
 				(sShields*0.01f) * float(s->m_equipment.Count(Equip::SLOT_SHIELD, Equip::SHIELD_GENERATOR)))));
-			vHudTargetInfo[5]->SetText(stringf(Lang::CARGO_N, formatarg("mass", stats.used_cargo)));
 
-			for(unsigned it = 0; it < 6; ++it) {
-				MoveChild(vHudTargetInfo[it], Gui::Screen::GetWidth() - 150.0f, 85.0f + (14.0f * it));
-				vHudTargetInfo[it]->SetRightMargin(140.0f);
-				vHudTargetInfo[it]->Show();
+			for (unsigned it = 0; it < m_vHudTargetInfo.size(); ++it) {
+				MoveChild(m_vHudTargetInfo[it], Gui::Screen::GetWidth() - 150.0f, 90.0f + (14.0f * it));
+				m_vHudTargetInfo[it]->SetRightMargin(140.0f);
+				if (it <= 2) {
+					//m_vHudTargetInfo[it]->Show(); 
+				} else {
+					m_vHudTargetInfo[it]->SetText("");
+				}
 			}
 		}
 
 		else if (b->IsType(Object::HYPERSPACECLOUD) && Pi::player->m_equipment.Get(Equip::SLOT_HYPERCLOUD) == Equip::HYPERCLOUD_ANALYZER) {
 			HyperspaceCloud *cloud = static_cast<HyperspaceCloud*>(b);
 
+			m_hudTargetShip->Hide();
+			m_hudTargetDesc->Hide();
+			m_hudTargetCargo->Hide();
 			m_hudTargetHullIntegrity->Hide();
 			m_hudTargetShieldIntegrity->Hide();
+			m_hudTargetFuel->Hide();
 
 			std::string text;
 
 			Ship *ship = cloud->GetShip();
 			if (!ship) {
-				vHudTargetInfo[0]->SetText(Lang::HYPERSPACE_ARRIVAL_CLOUD_REMNANT);
-				for(unsigned it = 1; it < 6; ++it) {
-					vHudTargetInfo[it]->SetText("");
+				m_hudTargetShip->SetText(Lang::HYPERSPACE_ARRIVAL_CLOUD_REMNANT);
+				m_hudTargetDesc->SetText("");
+				m_hudTargetCargo->SetText("");
+				for(unsigned it = 0; it < m_vHudTargetInfo.size(); ++it) {
+					m_vHudTargetInfo[it]->SetText("");
 				}
 			}
 			else {
 				const SystemPath dest = ship->GetHyperspaceDest();
 				RefCountedPtr<const Sector> s = Sector::cache.GetCached(dest);
-				vHudTargetInfo[0]->SetText(
-					cloud->IsArrival() ? Lang::HYPERSPACE_ARRIVAL_CLOUD : Lang::HYPERSPACE_DEPARTURE_CLOUD);
-				vHudTargetInfo[1]->SetText(
+				m_hudTargetShip->SetText(cloud->IsArrival() ? Lang::HYPERSPACE_ARRIVAL_CLOUD : Lang::HYPERSPACE_DEPARTURE_CLOUD);
+				m_vHudTargetInfo[0]->SetText(
 					stringf(Lang::SHIP_MASS_N_TONNES, formatarg("mass", ship->GetStats().total_mass)));
 				text = (cloud->IsArrival() ? Lang::SOURCE : Lang::DESTINATION);
 				text += ": ";
 				text += s->m_systems[dest.systemIndex].name;
-				vHudTargetInfo[2]->SetText(text);
-				vHudTargetInfo[3]->SetText(
+				m_vHudTargetInfo[1]->SetText(text);
+				m_vHudTargetInfo[2]->SetText(
 					stringf(Lang::DATE_DUE_N, formatarg("date", format_date(cloud->GetDueDate()))));
 
-				for (unsigned it = 4; it < 6; ++it) {
-					vHudTargetInfo[it]->SetText("");
+				for (unsigned it = 3; it < m_vHudTargetInfo.size(); ++it) {
+					m_vHudTargetInfo[it]->SetText("");
 				}
 			}
 
-			for (unsigned it = 0; it < 6; ++it) {
-				MoveChild(vHudTargetInfo[it], Gui::Screen::GetWidth() - 180.0f, 5.0f + (14.0f * it));
-				vHudTargetInfo[it]->SetRightMargin(170.0f);
-				vHudTargetInfo[it]->Show();
+			for (unsigned it = 0; it < m_vHudTargetInfo.size(); ++it) {
+				MoveChild(m_vHudTargetInfo[it], Gui::Screen::GetWidth() - 180.0f, 5.0f + (14.0f * it));
+				m_vHudTargetInfo[it]->SetRightMargin(170.0f);
+				//m_vHudTargetInfo[it]->Show();
 			}
 		}
 
@@ -1191,11 +1376,15 @@ void WorldView::RefreshButtonStateAndVisibility()
 		}
 	}
 	if (!b) {
+		m_hudTargetShip->Hide();
+		m_hudTargetDesc->Hide();
+		m_hudTargetCargo->Hide();
 		m_hudTargetHullIntegrity->Hide();
 		m_hudTargetShieldIntegrity->Hide();
+		m_hudTargetFuel->Hide();
 
-		for(unsigned it = 0; it < 6; ++it) {
-			vHudTargetInfo[it]->Hide();
+		for(unsigned it = 0; it < m_vHudTargetInfo.size(); ++it) {
+			m_vHudTargetInfo[it]->Hide();
 		}
 	}
 
@@ -1210,6 +1399,34 @@ void WorldView::RefreshButtonStateAndVisibility()
 		}
 	} else {
 		m_hudHyperspaceInfo->Hide();
+	}
+}
+
+void WorldView::RefreshLocationInfo()
+{
+	if(Pi::player) {
+		if(Pi::player->GetFlightState() == Ship::FlightState::HYPERSPACE) {
+			return;
+		} else {
+			// TODO Primary and Secondary location m_LocationPrimary and m_LocationSecondary
+			// Primary Location: system name
+			if(Pi::game && Pi::game->GetSpace()) {
+				m_hudLocationPrimary->SetText(Pi::game->GetSpace()->GetStarSystem()->GetName());
+			}
+			// Secondary Location: frame body name or CLEARSPACE when in freespace.
+			Frame* pframe = Pi::player->GetFrame();
+			std::string secondary_location;
+			if(pframe) {
+				if(pframe->GetBody() && pframe->GetLabel() != "System") {
+					secondary_location = pframe->GetLabel();
+				} else {
+					secondary_location = "CLEARSPACE";
+				}
+			} else {
+				secondary_location = "CLEARSPACE";
+			}
+			m_hudLocationSecondary->SetText(secondary_location);
+		}
 	}
 }
 
@@ -1465,7 +1682,8 @@ static void PlayerRequestDockingClearance(SpaceStation *s)
 {
 	std::string msg;
 	s->GetDockingClearance(Pi::player, msg);
-	Pi::cpan->MsgLog()->ImportantMessage(s->GetLabel(), msg);
+	//Pi::cpan->MsgLog()->ImportantMessage(s->GetLabel(), msg);
+	Pi::game->log->Add("", msg);
 }
 
 // XXX paying fine remotely can't really be done until crime and
@@ -1477,18 +1695,21 @@ static void PlayerPayFine()
 	Sint64 crime, fine;
 	Polit::GetCrime(&crime, &fine);
 	if (Pi::player->GetMoney() == 0) {
-		Pi::cpan->MsgLog()->Message("", Lang::YOU_NO_MONEY);
+		//Pi::cpan->MsgLog()->Message("", Lang::YOU_NO_MONEY);
+		Pi::game->log->Add("", Lang::YOU_NO_MONEY);
 	} else if (fine > Pi::player->GetMoney()) {
 		Polit::AddCrime(0, -Pi::player->GetMoney());
 		Polit::GetCrime(&crime, &fine);
-		Pi::cpan->MsgLog()->Message("", stringf(
+		//Pi::cpan->MsgLog()->Message("", stringf(
+		Pi::game->log->Add("", stringf(
 			Lang::FINE_PAID_N_BUT_N_REMAINING,
 				formatarg("paid", format_money(Pi::player->GetMoney())),
 				formatarg("fine", format_money(fine))));
 		Pi::player->SetMoney(0);
 	} else {
 		Pi::player->SetMoney(Pi::player->GetMoney() - fine);
-		Pi::cpan->MsgLog()->Message("", stringf(Lang::FINE_PAID_N,
+		//Pi::cpan->MsgLog()->Message("", stringf(Lang::FINE_PAID_N,
+		Pi::game->log->Add("", stringf(Lang::FINE_PAID_N,
 				formatarg("fine", format_money(fine))));
 		Polit::AddCrime(0, -fine);
 	}
@@ -1499,14 +1720,16 @@ void WorldView::OnHyperspaceTargetChanged()
 {
 	if (Pi::player->IsHyperspaceActive()) {
 		Pi::player->ResetHyperspaceCountdown();
-		Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		//Pi::cpan->MsgLog()->Message("", Lang::HYPERSPACE_JUMP_ABORTED);
+		Pi::game->log->Add("", Lang::HYPERSPACE_JUMP_ABORTED);
 	}
 
 	const SystemPath path = Pi::sectorView->GetHyperspaceTarget();
 
 	RefCountedPtr<StarSystem> system = StarSystemCache::GetCached(path);
 	const std::string& name = path.IsBodyPath() ? system->GetBodyByPath(path)->GetName() : system->GetName() ;
-	Pi::cpan->MsgLog()->Message("", stringf(Lang::SET_HYPERSPACE_DESTINATION_TO, formatarg("system", name)));
+	//Pi::cpan->MsgLog()->Message("", stringf(Lang::SET_HYPERSPACE_DESTINATION_TO, formatarg("system", name)));
+	Pi::game->log->Add("", stringf(Lang::SET_HYPERSPACE_DESTINATION_TO, formatarg("system", name)));
 }
 
 void WorldView::OnPlayerChangeTarget()
@@ -1665,7 +1888,7 @@ void WorldView::SelectBody(Body *target, bool reselectIsDeselect)
 		} else {
 			Pi::player->SetCombatTarget(target, Pi::KeyState(SDLK_LCTRL) || Pi::KeyState(SDLK_RCTRL));
 		}
-	} else {
+	} else { // For cargo as well
 		if (Pi::player->GetNavTarget() == target) {
 			if (reselectIsDeselect) Pi::player->SetNavTarget(0);
 		} else {
@@ -1793,8 +2016,8 @@ void WorldView::UpdateProjectedObjects()
 		// navtarget distance/target square indicator (displayed with navtarget label)
 		double dist2 = (navtarget->GetTargetIndicatorPosition(cam_frame)
 			- Pi::player->GetPositionRelTo(cam_frame)).Length();
-		m_navTargetIndicator.label->SetText(navtarget->GetLabel() + "\n" +
-			format_distance(dist2).c_str());
+		m_navTargetIndicator.label->SetText(navtarget->GetLabel());
+		m_navTargetIndicator.label2->SetText(format_distance(dist2).c_str());
 		UpdateIndicator(m_navTargetIndicator, navtarget->GetTargetIndicatorPosition(cam_frame));
 
 		// velocity relative to navigation target
@@ -1970,6 +2193,9 @@ void WorldView::UpdateIndicator(Indicator &indicator, const vector3d &cameraSpac
 			if (indicator.side != INDICATOR_HIDDEN) {
 				float labelSize[2] = { 500.0f, 500.0f };
 				indicator.label->GetSizeRequested(labelSize);
+				if(indicator.label2) {
+					indicator.label2->GetSizeRequested(labelSize);
+				}
 
 				int pos[2] = {0,0};
 				switch (indicator.side) {
@@ -2003,11 +2229,21 @@ void WorldView::UpdateIndicator(Indicator &indicator, const vector3d &cameraSpac
 				pos[1] = Clamp(pos[1] + indicator.pos.y, BORDER, h - BORDER_BOTTOM - labelSize[1]);
 				MoveChild(indicator.label, pos[0], pos[1]);
 				indicator.label->Show();
+				if(indicator.label2) {
+					MoveChild(indicator.label2, pos[0], pos[1] + 10);
+					indicator.label2->Show();
+				}
 			} else {
 				indicator.label->Hide();
+				if(indicator.label2) {
+					indicator.label2->Hide();
+				}
 			}
 		} else {
 			indicator.label->Hide();
+			if(indicator.label2) {
+				indicator.label2->Hide();
+			}
 		}
 	}
 }
@@ -2108,9 +2344,17 @@ void WorldView::Draw()
 
 		if ((GetCamType() == CAM_INTERNAL
 			&& m_internalCameraController->GetMode() == InternalCameraController::MODE_FRONT
-			&& !m_internalCameraController->IsFreelooking()))
+			&& !m_internalCameraController->IsFreelooking())
+			&& m_tutorialDialog == nullptr)
 		{
 			m_reticle->Draw(reticle_pos, reticle_size);
+			if(Pi::cpan) {
+				Pi::cpan->SetCircleOverlayVisiblity(true);
+			}
+		} else {
+			if(Pi::cpan) {
+				Pi::cpan->SetCircleOverlayVisiblity(false);
+			}
 		}
 
 		// Mouse dir
@@ -2388,6 +2632,33 @@ void WorldView::MouseWheel(bool up)
 		}
 	}
 }
+
+std::string WorldView::PadWithZeroes(int number, int desired_digits)
+{
+	std::ostringstream ss;
+	ss << number;
+	int pad_zeroes = std::max<int>(0, desired_digits - ss.str().length());
+	if(pad_zeroes > 0) {
+		ss.str("");
+		ss.clear();
+		for(int i = 0; i < pad_zeroes; ++i) {
+			ss << "0";
+		}
+		ss << number;
+	}
+	return ss.str();
+}
+
+double WorldView::Unjitter(double value, double max_value)
+{
+	// Anything within 1% of the max value will be replaced by maximum value
+	if(abs(max_value - value) <= max_value * 0.01) {
+		return max_value; 
+	} else {
+		return value;
+	}
+}
+
 NavTunnelWidget::NavTunnelWidget(WorldView *worldview, Graphics::RenderState *rs)
 	: Widget()
 	, m_worldView(worldview)

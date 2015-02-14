@@ -1,5 +1,5 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright Â© 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "PostProcess.h"
@@ -43,7 +43,7 @@ PostProcess::~PostProcess()
 	}
 }
 
-void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, 
+unsigned PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
 	std::shared_ptr<Material>& material, PostProcessPassType pass_type)
 {
 	assert(renderer != nullptr);
@@ -51,6 +51,7 @@ void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
 	ppp->name = pass_name;
 	ppp->material = material;
 	ppp->type = pass_type;
+	ppp->bypass = false;
 	ppp->texture0Id = ppp->material->GetEffect()->GetUniformID("texture0");
 	assert(ppp->texture0Id != -1);
 	if(pass_type == PostProcessPassType::PP_PASS_COMPOSE) {
@@ -61,9 +62,10 @@ void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
 		vPasses.back()->renderTarget.reset(renderer->CreateRenderTarget(*mRTDesc.get()));
 	}
 	vPasses.push_back(ppp);
+	return vPasses.size() - 1;
 }
 
-void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, Graphics::EffectType effect_type, PostProcessPassType pass_type)
+unsigned PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, Graphics::EffectType effect_type, PostProcessPassType pass_type)
 {
 	assert(renderer != nullptr);
 	MaterialDescriptor md;
@@ -73,7 +75,7 @@ void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, Grap
 	return AddPass(renderer, pass_name, mtrl, pass_type);
 }
 
-void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
+unsigned PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
 	std::shared_ptr<Effect> effect, PostProcessPassType pass_type)
 {
 	assert(renderer != nullptr);
@@ -81,6 +83,7 @@ void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
 	ppp->name = pass_name;
 	ppp->effect = effect;
 	ppp->type = pass_type;
+	ppp->bypass = false;
 	ppp->effect_type = PostProcessEffectType::PP_ET_EFFECT;
 	ppp->texture0Id = ppp->effect->GetUniformID("texture0");
 	if (pass_type == PostProcessPassType::PP_PASS_COMPOSE) {
@@ -90,6 +93,17 @@ void PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
 		vPasses.back()->renderTarget.reset(renderer->CreateRenderTarget(*mRTDesc.get()));
 	}
 	vPasses.push_back(ppp);
+	return vPasses.size() - 1;
+}
+
+bool PostProcess::GetBypassState(unsigned pass_id) const
+{
+	return vPasses[pass_id]->bypass;
+}
+
+void PostProcess::SetBypassState(unsigned pass_id, bool bypass)
+{
+	vPasses[pass_id]->bypass = bypass;
 }
 
 }

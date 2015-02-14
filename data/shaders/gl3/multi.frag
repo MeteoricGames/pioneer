@@ -1,5 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright � 2013-14 Meteoric Games Ltd
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 // EFFECT: MULTI MATERIAL
@@ -73,7 +73,7 @@ uniform float invLogZfarPlus1;
 	uniform float shieldCooldown;
 
 	#define MAX_SHIELD_HITS 5
-	
+
 	// hitPos entries should be in object local space
 	uniform vec3 hitPos[MAX_SHIELD_HITS];
 	uniform float radii[MAX_SHIELD_HITS];
@@ -99,7 +99,7 @@ layout(std140) uniform UBMaterial {
 		vec4 position;
 		vec4 diffuse;
 		vec4 specular;
-	};	
+	};
 	layout(std140) uniform UBLightSources {
 		s_LightSourceParameters su_LightSource[MAX_NUM_LIGHTS];
 	};
@@ -124,7 +124,7 @@ layout(std140) uniform UBMaterial {
 		float life = radii[shieldIndex];
 		float radius = 50.0 * life;
 		vec3 dif = varyingVertex - current_position;
-		
+
 		float sqrDist = dot(dif,dif);
 
 		return clamp(1.0/sqrDist*radius, 0.0, 0.9) * (1.0 - life);
@@ -217,9 +217,9 @@ void main(void)
 				vec3 reflected_dir = reflect(viewDir, normal);
 				float MIPlevel = log2(512.0 * sqrt(3.0)) - 0.5 * log2(4.0 + 1.0);
 				float MaxMIPlevel = 5.0;
-				hemi_diff = vec4(textureLod(u_universeBox, worldNormal, 
+				hemi_diff = vec4(textureLod(u_universeBox, worldNormal,
 					MaxMIPlevel).rgb, 0.0);
-				hemi_gloss = vec4(textureLod(u_universeBox, reflected_dir, 
+				hemi_gloss = vec4(textureLod(u_universeBox, reflected_dir,
 					MIPlevel).rgb, 0.0);
 			#endif
 			vec4 specular = vec4(0.0);
@@ -234,16 +234,16 @@ void main(void)
 			}
 			diffuse_coefficient = diffuse_coefficient / u_numLights;
 			gloss_coefficient = gloss_coefficient / u_numLights;
-			
+
 			#ifdef HEMISPHERE_LIGHT
 				// Indirect light should deminish when there is more light and
 				// shine through when there is less.
 				hemi_diff.rgb *= clamp((1.0 - diffuse_coefficient) * 0.35 * (1.0 - u_atmosDensity), 0.0, 1.0);
 				hemi_gloss.rgb *= clamp((1.0 - gloss_coefficient) * 0.35 * (1.0 - u_atmosDensity), 0.0, 1.0);
 			#endif // HEMISPHERE_LIGHT
-			
+
 			o_FragColor = color * (light + hemi_diff) + (specular + hemi_gloss);
-			
+
 			#ifdef HEAT_COLOURING
 				if (heatingAmount > 0.0)
 				{
@@ -260,32 +260,31 @@ void main(void)
 		#ifdef COLOR_TINT
 			o_FragColor.rgb = o_FragColor.rgb * colorTint.rgb;
 		#endif // COLOR_TINT
-		
+
 	#else 										// Shield shader
 		vec4 color = mix(red, blue, shieldStrength);
 		vec4 fillColour = color * 0.15;
-		
+
 		vec3 eyenorm = normalize(-varyingEyepos);
 
 		float fresnel = 1.0 - abs(dot(eyenorm, varyingNormal)); // Calculate fresnel.
 		fresnel = pow(fresnel, 10.0);
 		fresnel += 0.05 * (1.0 - fresnel);
-		
+
 		float sumIntensity = 0.0;
 		for ( int hit=0; hit<numHits; hit++ )
 		{
 			sumIntensity += calcIntensity(hit);
 		}
 		float clampedInt = clamp(sumIntensity, 0.0, 1.0);
-		
+
 		// combine a base colour with the (clamped) fresnel value and fade it out according to the cooldown period.
 		color.a = (fillColour.a + clamp(fresnel * 0.5, 0.0, 1.0)) * shieldCooldown;
 		// add on our hit effect colour
 		color = color + (hitColour * clampedInt);
-		
+
 		o_FragColor = color;
 	#endif // FRAGMENT_SHADER
-	
+
 	SetFragDepth();
 }
-

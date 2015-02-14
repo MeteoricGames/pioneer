@@ -1,4 +1,5 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+-- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 local Ship = import_core("Ship")
@@ -143,7 +144,8 @@ Ship.Refuel = function (self,amount)
     local fuelTankMass = ShipDef[self.shipId].fuelTankMass
     local needed = math.clamp(math.ceil(fuelTankMass - self.fuelMassLeft),0, amount)
     local removed = self:RemoveEquip('HYDROGEN', needed)
-    self:SetFuelPercent(math.clamp(self.fuel + removed * 100 / fuelTankMass, 0, 100))
+    --self:SetFuelPercent(math.clamp(self.fuel + removed * 100 / fuelTankMass, 0, 100))
+	self:SetFuelPercent(100)
     return removed
 end
 

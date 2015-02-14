@@ -28,5 +28,5 @@ define_ship {
 	price = 0,
 	hyperdrive_class = 15,
 	-- Paragon Flight System
-    max_maneuver_speed = 200,
+    max_maneuver_speed = 150,
 }

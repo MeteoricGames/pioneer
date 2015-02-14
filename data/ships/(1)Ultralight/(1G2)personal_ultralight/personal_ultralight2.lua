@@ -1,8 +1,8 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='PF90',
-	ship_class = 'personal',
+	name='PF90 fighter',
+	ship_class = 'military',
 	manufacturer = 'ncom',
 	model = 'personal_ultralight2',
 	cockpit='personal_fighter_cockpit',
@@ -21,12 +21,13 @@ define_ship {
 	max_crew = 1,
 	capacity = 9,
 	hull_mass = 5,
+	hydrogen_tank = 10,
 	fuel_tank_mass = 2,
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 120000e3,
-	price = 55000,
+	price = 70000,
 	hyperdrive_class = 0,
 	-- Paragon Flight System
-    max_maneuver_speed = 900,
+    max_maneuver_speed = 750,
 }

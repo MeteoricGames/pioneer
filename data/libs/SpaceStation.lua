@@ -1,4 +1,5 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+-- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 local SpaceStation = import_core("SpaceStation")
@@ -26,7 +27,7 @@ local function updateEquipmentStock (station)
 	equipmentStock[station] = {}
 
 	for e,def in pairs(EquipDef) do
-		if def.slot == "CARGO" then
+		if def.slot == "CARGO" or def.slot == "HYDROGENTANK" then
 			equipmentStock[station][e] = Engine.rand:Integer(0,100) * Engine.rand:Integer(1,100)
         else
 			equipmentStock[station][e] = Engine.rand:Integer(0,100)
@@ -66,7 +67,7 @@ function SpaceStation:GetEquipmentPrice (e)
 		return equipmentPrice[self][e]
 	end
 	local def = EquipDef[e]
-	local mul = def.slot == "CARGO" and ((100 + Game.system:GetCommodityBasePriceAlterations()[e]) / 100) or 1
+	local mul = (def.slot == "CARGO" or def.slot == "HYDROGENTANK") and ((100 + Game.system:GetCommodityBasePriceAlterations()[e]) / 100) or 1
 	return mul * EquipDef[e].basePrice
 end
 

@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _EQUIPTYPE_H
@@ -30,10 +31,12 @@ namespace Equip {
 		SLOT_LASERCOOLER,
 		SLOT_CARGOLIFESUPPORT,
 		SLOT_AUTOPILOT,
+		SLOT_FREIGHTTELEPORTER,
+		SLOT_HYDROGENTANK,
 		SLOT_MAX // <enum skip>
 	};
 	enum Type { // <enum scope='Equip' name=EquipType public>
-		NONE,
+		NONE = 0,
 		HYDROGEN,
 		LIQUID_OXYGEN,
 		METAL_ORE,
@@ -120,6 +123,8 @@ namespace Equip {
 		MININGCANNON_17MW,
 		SMALL_PLASMA_ACCEL,
 		LARGE_PLASMA_ACCEL,
+		BASIC_FREIGHT_TELEPORTER,
+		ADVANCED_FREIGHT_TELEPORTER,
 
 		TYPE_MAX, // <enum skip>
 
@@ -127,7 +132,7 @@ namespace Equip {
 		FIRST_COMMODITY = HYDROGEN, // <enum skip>
 		LAST_COMMODITY = RADIOACTIVES, // <enum skip>
 		FIRST_SHIPEQUIP = MISSILE_UNGUIDED, // <enum skip>
-		LAST_SHIPEQUIP = LARGE_PLASMA_ACCEL, // <enum skip>
+		LAST_SHIPEQUIP = ADVANCED_FREIGHT_TELEPORTER, // <enum skip>
 	};
 
 	const int LASER_MINING = 0x1;

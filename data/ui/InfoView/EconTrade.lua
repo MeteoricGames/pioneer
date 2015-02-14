@@ -41,7 +41,7 @@ local econTrade = function ()
 			if type ~= "NONE" then
 				local et = EquipDef[type]
 				local slot = et.slot
-				if slot == "CARGO" then
+				if slot == "CARGO" or slot == "HYDROGENTANK" then
 					local count = Game.player:GetEquipCount(slot, type)
 					if count > 0 then
 						table.insert(cargoNameColumn, ui:Label(et.name):SetColor(c))
@@ -84,7 +84,7 @@ local econTrade = function ()
 		cargoGauge:SetUpperValue(player.totalCargo)
 		cargoGauge:SetValue(player.usedCargo)
 		cargoUsedLabel:SetText(string.interp(l.CARGO_T_USED, { amount = player.usedCargo }))
-		cargoFreeLabel:SetText(string.interp(l.CARGO_T_FREE, { amount = player.totalCargo-player.usedCargo }))
+		cargoFreeLabel:SetText(string.interp(l.CARGO_T_FREE, { amount = player.totalCargo - player.usedCargo }))
 	end
 	player:Connect("usedCargo", cargoUpdate)
 	player:Connect("totalCargo", cargoUpdate)
@@ -147,16 +147,18 @@ local econTrade = function ()
 										})),
 									ui:Margin(10),
 								})
-							}),
-						ui:Grid({50,10,40},1)
-							:SetRow(0, {
-								ui:HBox(5):PackEnd({
-									ui:Label(l.FUEL..":"):SetColor(c),
-									fuelGauge,
-								}),
-								nil,
-								refuelButton.widget,
 							})
+						-- Normal fuel removed
+						--,
+						--ui:Grid({50,10,40},1)
+						--:SetRow(0, {
+						--ui:HBox(5):PackEnd({
+						--			ui:Label(l.FUEL..":"):SetColor(c),
+						--			fuelGauge,
+						--		}),
+						--		nil,
+						--		refuelButton.widget,
+						--	})
 					})
 				)
 			})

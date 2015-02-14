@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef UI_CONTEXT_H
@@ -15,6 +16,7 @@
 
 #include "Margin.h"
 #include "Align.h"
+#include "AxisIndicator.h"
 #include "Background.h"
 #include "ColorBackground.h"
 #include "Gradient.h"
@@ -89,6 +91,7 @@ public:
 	UI::Label *Label(const std::string &text) { return new UI::Label(this, text); }
 	UI::NumberLabel *NumberLabel(NumberLabel::Format format = NumberLabel::FORMAT_NUMBER) { return new UI::NumberLabel(this, format); }
 	UI::Icon *Icon(const std::string &iconName) { return new UI::Icon(this, iconName); }
+	UI::AxisIndicator *AxisIndicator() { return new UI::AxisIndicator(this, 0); }
 
 	UI::MultiLineText *MultiLineText(const std::string &text) { return new UI::MultiLineText(this, text); }
 

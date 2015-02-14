@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaTimer.h"
@@ -222,8 +223,7 @@ static int l_timer_call_at(lua_State *l)
  */
 static int l_timer_call_every(lua_State *l)
 {
-	if (!Pi::game)
-		luaL_error(l, "Game is not started");
+	double time = Pi::GetLazyTimer() * 1000.0;
 
 	double every = luaL_checknumber(l, 2);
 	luaL_checktype(l, 3, LUA_TFUNCTION); // any type of function
@@ -235,7 +235,7 @@ static int l_timer_call_every(lua_State *l)
 
 	lua_newtable(l);
 	pi_lua_settable(l, "every", every);
-	pi_lua_settable(l, "at", Pi::game->GetTime() + every);
+	pi_lua_settable(l, "at", time + every);
 
 	_finish_timer_create(l);
 

@@ -63,6 +63,7 @@ struct ShipType {
 	int hullMass;
 	float effectiveExhaustVelocity; // velocity at which the propellant escapes the engines
 	int fuelTankMass; //full fuel tank mass, on top of hullMass
+	int hydrogenTank; //builtin hydrogen tank capacity (read only)
 	int baseprice;
 	Equip::Type hyperdrive;
 	vector3d cameraOffset;

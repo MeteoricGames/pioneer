@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaConstants.h"
@@ -274,6 +275,7 @@ void LuaConstants::Register(lua_State *l)
 	 * LASERCOOLER - laser cooling booster
 	 * CARGOLIFESUPPORT - cargo bay life support
 	 * AUTOPILOT - autopilot
+	 * FREIGHTTELEPORTER - freight teleporter
 	 *
 	 * Availability:
 	 *
@@ -292,7 +294,7 @@ void LuaConstants::Register(lua_State *l)
 	 * equipment.
 	 *
 	 * NONE - no equipment. Usually used to indicate the absence of equipment
-	 * HYDROGEN - hydrogen (CARGO)
+	 * HYDROGEN - hydrogen (HYDROGENTANK)
 	 * LIQUID_OXYGEN - liquid oxygen (CARGO)
 	 * METAL_ORE - metal ore (CARGO)
 	 * CARBON_ORE - carbon ore (CARGO)
@@ -366,6 +368,8 @@ void LuaConstants::Register(lua_State *l)
 	 * MININGCANNON_17MW - 17MW blast-mining cannon (LASER)
 	 * SMALL_PLASMA_ACCEL - small plasma accelerator (LASER)
 	 * LARGE_PLASMA_ACCEL - large plasma accelerator (LASER)
+	 * BASIC_FREIGHT_TELEPORTER - Basic freight teleporter (FREIGHTTELEPORTER)
+	 * ADVANCED_FREIGHT_TELEPORTER - Advanced freight teleporter (FREIGHTTELEPORTER)
 	 *
 	 * Availability:
 	 *

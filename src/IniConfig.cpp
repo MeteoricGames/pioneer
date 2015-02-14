@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "libs.h"
@@ -67,13 +68,17 @@ std::string IniConfig::String(const std::string &section, const std::string &key
 	return it->second;
 }
 
-void IniConfig::Read(FileSystem::FileSource &fs, const std::string &path)
+bool IniConfig::Read(FileSystem::FileSource &fs, const std::string &path)
 {
 	RefCountedPtr<FileSystem::FileData> data = fs.ReadFile(path);
-	if (data) Read(*data);
+	if (data) {
+		return Read(*data);
+	} else {
+		return false;
+	}
 }
 
-void IniConfig::Read(const FileSystem::FileData &data)
+bool IniConfig::Read(const FileSystem::FileData &data)
 {
 	StringRange buffer = data.AsStringRange();
 	buffer = buffer.StripUTF8BOM();
@@ -114,6 +119,8 @@ void IniConfig::Read(const FileSystem::FileData &data)
 
 		(*section_map)[key.ToString()] = value.ToString();
 	}
+
+	return true;
 }
 
 bool IniConfig::Write(FileSystem::FileSourceFS &fs, const std::string &path)

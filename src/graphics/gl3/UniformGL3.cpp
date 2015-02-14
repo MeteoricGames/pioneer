@@ -69,6 +69,12 @@ void Uniform::Set(const Color &c)
 		glUniform4f(m_location, c4f.r, c4f.g, c4f.b, c4f.a);
 }
 
+void Uniform::Set(const Color4f &c)
+{
+	if (m_location != -1)
+		glUniform4f(m_location, c.r, c.g, c.b, c.a);
+}
+
 void Uniform::Set(const int v[3])
 {
 	if (m_location != -1)

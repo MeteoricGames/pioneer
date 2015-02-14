@@ -1,5 +1,5 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright Â© 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _POST_PROCESS_H_
@@ -33,7 +33,7 @@ namespace Graphics {
 
 	struct PostProcessPass
 	{
-		PostProcessPass() : effect_type(PP_ET_MATERIAL), texture0Id(-1), texture1Id(-1) {}
+		PostProcessPass() : effect_type(PP_ET_MATERIAL), texture0Id(-1), texture1Id(-1), bypass(false) {}
 		std::string name;
 		std::shared_ptr<Material> material;
 		std::shared_ptr<Graphics::GL3::Effect> effect;
@@ -42,6 +42,8 @@ namespace Graphics {
 		PostProcessEffectType effect_type;
 		int texture0Id;
 		int texture1Id;
+		// Bypass deactivates this pass but only when it's not the first or last pass in the process.
+		bool bypass;
 	};
 
 	class PostProcess
@@ -54,18 +56,20 @@ namespace Graphics {
 		PostProcess(const std::string& effect_name, WindowSDL* window, bool with_alpha = false);
 		virtual ~PostProcess();
 
-		void AddPass(Renderer* renderer, const std::string& pass_name, 
+		unsigned AddPass(Renderer* renderer, const std::string& pass_name,
 			std::shared_ptr<Material>& material, PostProcessPassType pass_type = PP_PASS_THROUGH);
-		void AddPass(Renderer* renderer, const std::string& pass_name, 
+		unsigned AddPass(Renderer* renderer, const std::string& pass_name,
 			Graphics::EffectType effect_type, PostProcessPassType pass_type = PP_PASS_THROUGH);
-		void AddPass(Renderer* renderer, const std::string& pass_name,
-			std::shared_ptr<Graphics::GL3::Effect> effect, 
+		unsigned AddPass(Renderer* renderer, const std::string& pass_name,
+			std::shared_ptr<Graphics::GL3::Effect> effect,
 			PostProcessPassType pass_type = PP_PASS_THROUGH);
+		bool GetBypassState(unsigned pass_id) const;
+		void SetBypassState(unsigned pass_id, bool bypass);
 
 		// Accessors
 		unsigned int GetPassCount() const { return vPasses.size(); }
 
-	protected:		
+	protected:
 
 	private:
 		PostProcess(const PostProcess&);

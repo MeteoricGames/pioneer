@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "ShipType.h"
@@ -91,7 +92,9 @@ int _define_ship(lua_State *L, ShipType::Tag tag, std::vector<ShipType::Id> *lis
 	lua_pop(L, 1);
 	s.cameraOffset = t.Get("camera_offset", vector3d(0.0));
 
-	for (int i=0; i<Equip::SLOT_MAX; i++) s.equipSlotCapacity[i] = 0;
+	for (int i=0; i<Equip::SLOT_MAX; i++) {
+		s.equipSlotCapacity[i] = 0;
+	}
 	s.equipSlotCapacity[Equip::SLOT_CARGO] = t.Get("max_cargo", 0);
 	s.equipSlotCapacity[Equip::SLOT_ENGINE] = t.Get("max_engine", 1);
 	s.equipSlotCapacity[Equip::SLOT_LASER] = t.Get("max_laser", 1);
@@ -107,6 +110,8 @@ int _define_ship(lua_State *L, ShipType::Tag tag, std::vector<ShipType::Id> *lis
 	s.equipSlotCapacity[Equip::SLOT_SHIELD] = t.Get("max_shield", 9999);
 	s.equipSlotCapacity[Equip::SLOT_FUELSCOOP] = t.Get("max_fuelscoop", 1);
 	s.equipSlotCapacity[Equip::SLOT_CARGOSCOOP] = t.Get("max_cargoscoop", 1);
+	s.equipSlotCapacity[Equip::SLOT_FREIGHTTELEPORTER] = t.Get("max_freightteleporter", 2);
+	s.equipSlotCapacity[Equip::SLOT_HYDROGENTANK] = t.Get("hydrogen_tank", 5);
 	s.equipSlotCapacity[Equip::SLOT_LASERCOOLER] = t.Get("max_lasercooler", 1);
 	s.equipSlotCapacity[Equip::SLOT_CARGOLIFESUPPORT] = t.Get("max_cargolifesupport", 1);
 	s.equipSlotCapacity[Equip::SLOT_AUTOPILOT] = t.Get("max_autopilot", 1);
@@ -114,6 +119,7 @@ int _define_ship(lua_State *L, ShipType::Tag tag, std::vector<ShipType::Id> *lis
 	s.capacity = t.Get("capacity", 0);
 	s.hullMass = t.Get("hull_mass", 100);
 	s.fuelTankMass = t.Get("fuel_tank_mass", 5);
+	s.hydrogenTank = s.equipSlotCapacity[Equip::SLOT_HYDROGENTANK];
 
 	// fuel_use_rate can be given in two ways
 	float thruster_fuel_use = 0;
@@ -316,4 +322,3 @@ void ShipType::Init()
 	if (ShipType::playable_atmospheric_ships.empty())
 		Error("No ships can fit atmospheric shields! The game cannot run.");
 }
-

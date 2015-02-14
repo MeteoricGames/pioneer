@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef KEY_BINDING
@@ -23,6 +24,7 @@ BINDING_GROUP(Lang::WEAPONS)
 KEY_BINDING(targetObject, "BindTargetObject", Lang::TARGET_OBJECT_IN_SIGHTS, SDLK_t, 0, 0, 0)
 KEY_BINDING(fireLaser, "BindFireLaser", Lang::FIRE_LASER, SDLK_SPACE, 0, 0, 0)
 KEY_BINDING(fireMissile, "BindFireMissile", Lang::FIRE_MISSILE, SDLK_m, 0, 0, 0)
+KEY_BINDING(freightTeleporter, "BindFreightTeleporter", Lang::FREIGHT_TELEPORTER, SDLK_f, 0, 0, 0)
 
 BINDING_GROUP(Lang::SHIP_ORIENTATION)
 KEY_BINDING(pitchUp, "BindPitchUp", Lang::PITCH_UP, SDLK_DOWN, 0, 0, 0)

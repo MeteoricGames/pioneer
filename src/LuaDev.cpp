@@ -1,10 +1,12 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaDev.h"
 #include "LuaObject.h"
 #include "Pi.h"
 #include "WorldView.h"
+#include "Tweaker.h"
 
 /*
  * Lua commands used in development & debugging
@@ -29,6 +31,35 @@ static int l_dev_set_camera_offset(lua_State *l)
 	return 0;
 }
 
+static int l_dev_tweaker_list(lua_State *l)
+{
+	std::string out = Tweaker::LUAListTweaks();
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
+static int l_dev_tweak(lua_State *l)
+{
+	const char *tweak_name = nullptr;
+	if (lua_isnone(l, 1) || (tweak_name = lua_tostring(l, 2)) == nullptr) {
+		return luaL_error(l, "Tweak takes one string argument (name of tweak)");
+	}
+	std::string out("Creating tweak...");
+	if(Tweaker::Tweak(tweak_name)) {
+		out += " ready";
+	} else {
+		out += " failed to create tweak. Use tweaker.list() to show all available tweaks";
+	}
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
+static int l_dev_tweaker_close(lua_State *l)
+{
+	Tweaker::Close();
+	return 0;
+}
+
 void LuaDev::Register()
 {
 	lua_State *l = Lua::manager->GetLuaState();
@@ -37,6 +68,9 @@ void LuaDev::Register()
 
 	static const luaL_Reg methods[]= {
 		{ "SetCameraOffset", l_dev_set_camera_offset },
+		{ "TweakerList", l_dev_tweaker_list },
+		{ "Tweak", l_dev_tweak },
+		{ "TweakerClose", l_dev_tweaker_close },
 		{ 0, 0 }
 	};
 

@@ -41,6 +41,11 @@ GameConfig::GameConfig(const std::map<std::string,std::string> &override_)
 	map["SpeedLines"] = "0";
 	map["TargetIndicators"] = "0";
 	map["EnableCockpit"] = "1";
+	map["PostProcessing"] = "1";
+	
+	map["EnableChromaticAberration"] = "1";
+	map["EnableScanlines"] = "0";
+	map["EnableFilmGrain"] = "1";
 
 #ifdef _WIN32
 	map["RedirectStdio"] = "1";

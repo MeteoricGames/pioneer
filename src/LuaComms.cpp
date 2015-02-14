@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaComms.h"
@@ -49,7 +50,8 @@ static int l_comms_message(lua_State *l)
 	if (lua_gettop(l) >= 2)
 		from = luaL_checkstring(l, 2);
 
-	Pi::cpan->MsgLog()->Message(from, msg);
+	//Pi::cpan->MsgLog()->Message(from, msg);
+	Pi::game->log->Add(from, msg);
 	return 0;
 }
 
@@ -92,7 +94,8 @@ static int l_comms_important_message(lua_State *l)
 	if (lua_gettop(l) >= 2)
 		from = luaL_checkstring(l, 2);
 
-	Pi::cpan->MsgLog()->ImportantMessage(from, msg);
+	//Pi::cpan->MsgLog()->ImportantMessage(from, msg);
+	Pi::game->log->Add(from, msg);
 	return 0;
 }
 

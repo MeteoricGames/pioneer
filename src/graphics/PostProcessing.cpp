@@ -1,5 +1,5 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright Â© 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "PostProcessing.h"
@@ -16,8 +16,8 @@
 namespace Graphics {
 
 PostProcessing::PostProcessing(Renderer *renderer) :
-	m_mtrlFullscreenQuad(nullptr), 
-	m_renderer(renderer), 
+	m_mtrlFullscreenQuad(nullptr),
+	m_renderer(renderer),
 	m_rtDevice(nullptr),
 	m_bPerformPostProcessing(false)
 {
@@ -49,7 +49,7 @@ void PostProcessing::Init()
 	// Init render targets
 	WindowSDL* window = m_renderer->GetWindow();
 	RenderTargetDesc rt_desc(
-		window->GetWidth(), window->GetHeight(), 
+		window->GetWidth(), window->GetHeight(),
 		TextureFormat::TEXTURE_RGBA_8888, TextureFormat::TEXTURE_DEPTH,
 		true);
 	m_rtMain = m_renderer->CreateRenderTarget(rt_desc);
@@ -81,7 +81,7 @@ void PostProcessing::EndFrame()
 }
 
 // For post processing material:
-// Normal pass: 
+// Normal pass:
 //		texture0: set to previous pass output (main if it's the first pass)
 // Compose pass: (at least 1 pass before it to work)
 //		texture0: set to main output always
@@ -98,7 +98,11 @@ void PostProcessing::Run(PostProcess* pp)
 		RenderTarget* rt_src = m_rtMain;
 		RenderTarget* rt_dest = 0;
 		for(unsigned int i = 0; i < pp->vPasses.size(); ++i) {
-			if(i == pp->vPasses.size() - 1) {
+			if(pp->vPasses[i]->bypass && i > 0 && i < pp->vPasses.size() - 1) {
+				// Bypass pass, move to the next one.
+				continue;
+			}
+			if(i == pp->vPasses.size() - 1) { // Last pass
 				rt_dest = 0;
 			} else {
 				rt_dest = pp->vPasses[i]->renderTarget.get();
@@ -130,7 +134,7 @@ void PostProcessing::Run(PostProcess* pp)
 	}
 }
 
-void PostProcessing::SetPerformPostProcessing(bool enabled) 
+void PostProcessing::SetPerformPostProcessing(bool enabled)
 {
 	if(m_bPerformPostProcessing != enabled) {
 		m_bPerformPostProcessing = enabled;

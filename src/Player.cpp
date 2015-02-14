@@ -2,6 +2,8 @@
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
+#include "VSLog.h"
+
 #include "Player.h"
 #include "Frame.h"
 #include "Game.h"
@@ -20,6 +22,7 @@
 //Some player specific sounds
 static Sound::Event s_soundUndercarriage;
 static Sound::Event s_soundHyperdrive;
+Random g_rand;
 
 Player::Player(ShipType::Id shipId): Ship(shipId)
 {
@@ -34,6 +37,7 @@ void Player::Save(Serializer::Writer &wr, Space *space)
 void Player::Load(Serializer::Reader &rd, Space *space)
 {
 	Pi::player = this;
+	InitFreightTeleporter();
 	Ship::Load(rd, space);
 }
 
@@ -41,7 +45,17 @@ void Player::Init()
 {
 	InitCockpit();
 	m_sensors.reset(new Sensors(this));
+	InitFreightTeleporter();
 	Ship::Init();
+}
+
+void Player::InitFreightTeleporter()
+{
+	m_ftTarget = nullptr;
+	m_ftState = 0;
+	m_ftTargetType = EFT_TT_NONE;
+	m_ftStatus = EFT_S_NOT_AVAILABLE;
+	m_ftRechargeTime = 0.0f;
 }
 
 void Player::InitCockpit()
@@ -112,20 +126,26 @@ void Player::SetAlertState(Ship::AlertState as)
 
 	switch (as) {
 		case ALERT_NONE:
-			if (prev != ALERT_NONE)
-				Pi::cpan->MsgLog()->Message("", Lang::ALERT_CANCELLED);
+			if (prev != ALERT_NONE) {
+				//Pi::cpan->MsgLog()->Message("", Lang::ALERT_CANCELLED);
+				Pi::game->log->Add(Lang::ALERT_CANCELLED);
+			}
 			break;
 
 		case ALERT_SHIP_NEARBY:
-			if (prev == ALERT_NONE)
-				Pi::cpan->MsgLog()->ImportantMessage("", Lang::SHIP_DETECTED_NEARBY);
-			else
-				Pi::cpan->MsgLog()->ImportantMessage("", Lang::DOWNGRADING_ALERT_STATUS);
+			if (prev == ALERT_NONE) {
+				//Pi::cpan->MsgLog()->ImportantMessage("", Lang::SHIP_DETECTED_NEARBY);
+				Pi::game->log->Add(Lang::SHIP_DETECTED_NEARBY);
+			} else {
+				//Pi::cpan->MsgLog()->ImportantMessage("", Lang::DOWNGRADING_ALERT_STATUS);
+				Pi::game->log->Add(Lang::DOWNGRADING_ALERT_STATUS);
+			}
 			Sound::PlaySfx("OK");
 			break;
 
 		case ALERT_SHIP_FIRING:
-			Pi::cpan->MsgLog()->ImportantMessage("", Lang::LASER_FIRE_DETECTED);
+			//Pi::cpan->MsgLog()->ImportantMessage("", Lang::LASER_FIRE_DETECTED);
+			Pi::game->log->Add(Lang::LASER_FIRE_DETECTED);
 			Sound::PlaySfx("warning", 0.2f, 0.2f, 0);
 			break;
 	}
@@ -264,6 +284,12 @@ void Player::StaticUpdate(const float timeStep)
 			m_cockpit->Shake(rx, rx);
 		}
 	}
+	if(m_ftRechargeTime > 0.0f) {
+		m_ftRechargeTime -= timeStep;
+	}
+	if(GetFlightState() != FlightState::HYPERSPACE) {
+		UpdateFreightTeleporter();
+	}
 }
 
 void Player::SetFrame(Frame *f)
@@ -283,7 +309,7 @@ void Player::StartTransitDrive()
 {
 	Ship::StartTransitDrive();
 	if(Pi::GetView() && Pi::GetView() == Pi::worldView && Pi::worldView->GetCameraController() &&
-		Pi::worldView->GetCamType() == WorldView::CamType::CAM_INTERNAL) 
+		Pi::worldView->GetCamType() == WorldView::CamType::CAM_INTERNAL)
 	{
 		InternalCameraController* cam = static_cast<InternalCameraController*>(
 			Pi::worldView->GetCameraController());
@@ -313,3 +339,181 @@ void Player::SetCurrentMissionPath(SystemPath* sp)
 	}
 }
 
+int Player::GetFreightTeleporterLevel() const
+{
+	switch(m_equipment.Get(Equip::SLOT_FREIGHTTELEPORTER)) {
+		case Equip::BASIC_FREIGHT_TELEPORTER:
+			return 1;
+		case Equip::ADVANCED_FREIGHT_TELEPORTER:
+			return 2;
+		default:
+			return 0;
+	}
+	return 0;
+}
+
+Body* Player::GetFreightTeleporterTarget() const
+{
+	return m_ftTarget;
+}
+
+void Player::UpdateFreightTeleporter()
+{
+	int ft_level = GetFreightTeleporterLevel();
+	if(ft_level > 0) {
+		m_ftStatus = EFT_S_NO_TGT;
+		m_ftTargetType = EFT_TT_NONE;
+		m_ftTarget = nullptr;
+
+		if(GetStats().free_capacity < 1) {
+			m_ftStatus = EFT_S_FREIGHT_FULL;
+			m_ftState = 0;
+			return;
+		}
+
+		// TODO:
+		// - I noticed that all ships show as "shielded" so perhaps I should check for equipment first.
+		const SFreightTeleporterSpecs& ft_specs = FreightTeleporterSpecs[ft_level - 1];
+		Body* combat_tgt = GetCombatTarget();
+		double combat_tgt_dist = combat_tgt != nullptr? combat_tgt->GetPositionRelTo(this).Length() : 0.0;
+		EFreightTeleporterStatus combat_tgt_status = EFT_S_NO_TGT;
+		Body* nav_tgt = GetNavTarget();
+		double nav_tgt_dist = nav_tgt != nullptr? nav_tgt->GetPositionRelTo(this).Length() : 0.0;
+		EFreightTeleporterStatus nav_tgt_status = EFT_S_NO_TGT;
+
+		if(combat_tgt) {
+			if(combat_tgt->GetType() != Body::Type::SHIP) {
+				combat_tgt = nullptr;
+			} else if(combat_tgt_dist > ft_specs.range) {
+				combat_tgt = nullptr;
+				combat_tgt_status = EFT_S_TGT_OUT_OF_RANGE;
+			} else {
+				Ship* tgt = dynamic_cast<Ship*>(combat_tgt);
+				if(tgt->m_equipment.Get(Equip::SLOT_SHIELD) != Equip::NONE &&
+					tgt->GetPercentShields() > ft_specs.shield_override * 100.0f)
+				{
+					combat_tgt = nullptr;
+					combat_tgt_status = EFT_S_TGT_SHIELDED;
+				} else {
+					combat_tgt_status = EFT_S_ACTIVE;
+				}
+			}
+		}
+		if(nav_tgt) {
+			if(nav_tgt->GetType() != Body::Type::SHIP && nav_tgt->GetType() != Body::Type::CARGOBODY) {
+				nav_tgt = nullptr;
+			} else if(nav_tgt_dist > ft_specs.range) {
+				nav_tgt = nullptr;
+				nav_tgt_status = EFT_S_TGT_OUT_OF_RANGE;
+			} else {
+				nav_tgt_status = EFT_S_ACTIVE;
+			}
+		}
+
+		// Because there could be two selected valid bodies at the same time, freight teleporter prioritizes
+		// the body closest to the player regardless of its type (combat or nav target).
+		if (combat_tgt && nav_tgt) {
+			m_ftStatus = EFT_S_ACTIVE;
+			if(nav_tgt_dist < combat_tgt_dist) {
+				m_ftTarget = nav_tgt;
+				m_ftTargetType = EFT_TT_NAV_TGT;
+			} else {
+				m_ftTarget = combat_tgt;
+				m_ftTargetType = EFT_TT_COMBAT_TGT;
+			}
+		} else if(combat_tgt) {
+			m_ftStatus = EFT_S_ACTIVE;
+			m_ftTarget = combat_tgt;
+			m_ftTargetType = EFT_TT_COMBAT_TGT;
+		} else if (nav_tgt) {
+			m_ftStatus = EFT_S_ACTIVE;
+			m_ftTarget = nav_tgt;
+			m_ftTargetType = EFT_TT_NAV_TGT;
+		} else if(nav_tgt_status == EFT_S_TGT_OUT_OF_RANGE || combat_tgt_status == EFT_S_TGT_OUT_OF_RANGE) {
+			m_ftStatus = EFT_S_TGT_OUT_OF_RANGE;
+		} else if(combat_tgt_status == EFT_S_TGT_SHIELDED) {
+			m_ftStatus = EFT_S_TGT_SHIELDED;
+		} else {
+			m_ftStatus = EFT_S_NO_TGT;
+		}
+
+		if(m_ftTarget && m_ftState > 0) {
+			FireFreightTeleporter();
+			m_ftState = 0;
+		}
+	} else {
+		m_ftTarget = nullptr;
+		m_ftState = 0;
+		m_ftTargetType = EFT_TT_NONE;
+		m_ftStatus = EFT_S_NOT_AVAILABLE;
+	}
+}
+
+void Player::SetFreightTeleporterState(int state)
+{
+	m_ftState = state;
+	if (m_ftState == 0 && m_ftSoundLoop.IsPlaying()) {
+		m_ftSoundLoop.Stop();
+	}
+}
+
+void Player::FireFreightTeleporter()
+{
+	int ft_level = GetFreightTeleporterLevel();
+	if(m_ftTarget == nullptr || ft_level == 0 || m_ftStatus != EFT_S_ACTIVE) {
+		assert(false);
+		return;
+	}
+	if (!m_ftSoundLoop.IsPlaying()) {
+		m_ftSoundLoop.Play("Freight_Teleport_Loop", 0.5f, 0.5f, Sound::OP_REPEAT);
+	}
+	const SFreightTeleporterSpecs& ft_specs = FreightTeleporterSpecs[ft_level - 1];
+	if(m_ftRechargeTime <= 0.0f) {
+		m_ftRechargeTime = g_rand.Double(ft_specs.max_rate - ft_specs.min_rate) + ft_specs.min_rate;
+		// - Steal freight!
+		if (GetStats().free_capacity) {
+			if(m_ftTarget->GetType() == Body::Type::CARGOBODY) {
+				Equip::Type cargo_type = dynamic_cast<CargoBody*>(m_ftTarget)->GetCargoType();
+				Pi::game->GetSpace()->KillBody(dynamic_cast<Body*>(m_ftTarget));
+				m_equipment.Add(cargo_type, 1);
+				UpdateEquipStats();
+				// Some sort of indication that cargo teleport is successful? (should be in HUD rather than message)
+				m_ftTarget = nullptr;
+			} else if(m_ftTarget->GetType() == Body::Type::SHIP) {
+				// - Select random cargo from freight bay
+				Ship* tgt = dynamic_cast<Ship*>(m_ftTarget);
+				int cargo_size = tgt->m_equipment.GetSlotSize(Equip::SLOT_CARGO);
+				int rc = g_rand.Int32(0, cargo_size - 1);
+				//VSLog::stream << "Cargo items count in target: " << cargo_size << std::endl;
+				Equip::Type chosen_equip = tgt->m_equipment.Get(Equip::SLOT_CARGO, rc);
+				//VSLog::stream << "Random cargo: " << rc << " is " << static_cast<int>(chosen_equip) << std::endl;
+				//VSLog::stream << "Ship has: " << tgt->m_equipment.Count(Equip::SLOT_CARGO, chosen_equip)
+				//	<< std::endl;
+				//VSLog::outputLog();
+				// - steal 1 unit of said random cargo
+				tgt->m_equipment.Remove(chosen_equip, 1);
+				m_equipment.Add(chosen_equip, 1);
+				tgt->UpdateEquipStats();
+				UpdateEquipStats();
+				// Some sort of indication that cargo teleport is successful? (should be in HUD rather than message)
+				m_ftTarget = nullptr;
+
+				// - Should there be a notification if someone is stealing from player ship? only player can
+				//   do this now so it's too early to add something like that.
+				// - Should player be set to enemy the moment he teleports a unit of freight? depends on how
+				//   notoriety will work. TBD
+			}
+			Sound::BodyMakeNoise(this, "Freight_Teleport", 0.5f);
+		}
+	}
+}
+
+EFreightTeleporterTargetType Player::GetFreightTeleporterTargetType() const
+{
+	return m_ftTargetType;
+}
+
+EFreightTeleporterStatus Player::GetFreightTeleporterStatus() const
+{
+	return m_ftStatus;
+}

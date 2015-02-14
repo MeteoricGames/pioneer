@@ -62,6 +62,9 @@ private:
 
 	void RefreshHyperspaceButton();
 	void RefreshButtonStateAndVisibility();
+	void RefreshFreightTeleporterState();
+	void RefreshLocationInfo();
+	void RefreshOverlayHud();
 	void UpdateCommsOptions();
 
 	void ChangeInternalCameraMode(InternalCameraController::Mode m);
@@ -80,7 +83,8 @@ private:
 		vector2f realpos;
 		IndicatorSide side;
 		Gui::Label *label;
-		Indicator(): pos(0.0f, 0.0f), realpos(0.0f, 0.0f), side(INDICATOR_HIDDEN), label(0) {}
+		Gui::Label *label2;
+		Indicator(): pos(0.0f, 0.0f), realpos(0.0f, 0.0f), side(INDICATOR_HIDDEN), label(0), label2(0) {}
 	};
 
 	void UpdateProjectedObjects();
@@ -130,6 +134,9 @@ private:
 	Body* PickBody(const double screenX, const double screenY) const;
 	void MouseWheel(bool up);
 
+	std::string PadWithZeroes(int number, int desired_digits);
+	double Unjitter(double speed, double max_speed);
+
 	NavTunnelWidget *m_navTunnel;
 	std::unique_ptr<SpeedLines> m_speedLines;
 
@@ -154,6 +161,11 @@ private:
 	bool m_bAltitudeAvailable;
 	double m_altitude;
 
+	std::string m_overlayBuffer [4];
+	std::string m_circleTitleBuffer[3];
+	std::string m_circleDataBuffer[3];
+	std::string m_devBuffer;
+
 	bool m_labelsOn;
 	enum CamType m_camType;
 	Uint32 m_showTargetActionsTimeout;
@@ -164,11 +176,13 @@ private:
 	Gui::Label *m_debugInfo;
 #endif
 
-	Gui::Label *m_hudVelocity, *m_hudTargetDist, *m_hudAltitude, *m_hudPressure, *m_hudHyperspaceInfo;
-	std::vector<Gui::Label*> vHudTargetInfo;
+	Gui::Label *m_hudHyperspaceInfo;
+	Gui::Label *m_hudLocationPrimary, *m_hudLocationSecondary;
+	std::vector<Gui::Label*> m_vHudTargetInfo;
+	Gui::Label *m_hudPlayerShip, *m_hudTargetShip, *m_hudTargetDesc, *m_hudTargetCargo;
 	Gui::MeterBar *m_hudHullTemp, *m_hudWeaponTemp, *m_hudHullIntegrity, *m_hudShieldIntegrity;
-	Gui::MeterBar *m_hudTargetHullIntegrity, *m_hudTargetShieldIntegrity;
-	Gui::MeterBar *m_hudFuelGauge;
+	Gui::MeterBar *m_hudTargetHullIntegrity, *m_hudTargetShieldIntegrity, *m_hudTargetFuel;
+	Gui::MeterBar *m_hudFuelGauge, *m_hudHydrogenGauge;
 
 	sigc::connection m_onHyperspaceTargetChangedCon;
 	sigc::connection m_onPlayerChangeTargetCon;

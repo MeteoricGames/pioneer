@@ -25,6 +25,7 @@ namespace Graphics {
 			void Set(const vector4f&);
 			void Set(const vector4d&);
 			void Set(const Color&);
+			void Set(const Color4f &c);
 			void Set(const int v[3]);
 			void Set(const float m[9]);
 			void Set(const matrix3x3f&);

@@ -24,7 +24,7 @@ public:
 	virtual ~ShipCpanel();
 	virtual void Draw();
 	void Update();
-	MsgLogWidget *MsgLog() { return m_msglog; }
+	//MsgLogWidget *MsgLog() { return m_msglog; }
 	MsgLogWidget *InfLog() { return m_inflog; }
 	void SetAlertState(Ship::AlertState as);
 
@@ -41,11 +41,24 @@ public:
 		OVERLAY_HUD2_LEFT_2,
 		OVERLAY_HUD2_LEFT_3,
 		OVERLAY_HUD2_LEFT_4,
+		OVERLAY_HUD2_LEFT_5,
+		OVERLAY_CIRCLE_TOP_1,
+		OVERLAY_CIRCLE_TOP_2,
+		OVERLAY_CIRCLE_LEFT_1,
+		OVERLAY_CIRCLE_LEFT_2,
+		OVERLAY_CIRCLE_RIGHT_1,
+		OVERLAY_CIRCLE_RIGHT_2,
+		OVERLAY_CIRCLE_BOTTOM_1,
+		OVERLAY_CIRCLE_BOTTOM_2,
+		OVERLAY_DEV,
+
+		OVERLAY_COUNT,
 	};
 	void SetOverlayText(OverlayTextPos pos, const std::string &text);
 	void SetOverlayToolTip(OverlayTextPos pos, const std::string &text);
 	void ClearOverlay();
 	void ChangeCamButtonState(WorldView::CamType cam_type);
+	void SetCircleOverlayVisiblity(bool visible);
 
 private:
 	void InitObject();
@@ -72,7 +85,7 @@ private:
 	sigc::connection m_connOnDockingClearanceExpired;
 
 	ScannerWidget *m_scanner;
-	MsgLogWidget *m_msglog;
+	//MsgLogWidget *m_msglog;
 	MsgLogWidget *m_inflog;
 	UseEquipWidget *m_useEquipWidget;
 	Gui::MultiStateImageButton *m_camButton;
@@ -81,7 +94,7 @@ private:
 	Gui::Widget *m_mapViewButtons[4];
 	Gui::Image *m_alertLights[3];
 
-	Gui::Label *m_overlay[8];
+	Gui::Label *m_overlay[OVERLAY_COUNT];
 };
 
 #endif /* _SHIP_CPANEL_H */

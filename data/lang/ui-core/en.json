@@ -277,7 +277,23 @@
    },
    "ENABLE_COCKPIT" : {
       "description" : "",
-      "message" : "Enable cockpit (EXPERIMENTAL)"
+      "message" : "Enable cockpit"
+   },
+   "EXPERIMENTAL_EFFECTS" : {
+      "description" : "",
+	  "message" : "Experimental Effects:"
+   },
+   "EXP_CHROMATIC_ABERRATION" : {
+      "description" : "",
+	  "message" : "Chromatic Aberration"
+   },
+   "EXP_SCANLINES" : {
+      "description" : "",
+	  "message" : "Scanlines"
+   },
+   "EXP_FILMGRAIN" : {
+      "description" : "",
+	  "message" : "Film Grain"
    },
    "ENABLE_JOYSTICK" : {
       "description" : "",
@@ -359,6 +375,14 @@
       "description" : "",
       "message" : "Fuel"
    },
+   "HYDROGEN_FUEL" : {
+	  "description" : "",
+	  "message" : "Hydrogen"
+   },
+   "HYDROGEN_CAPACITY" : {
+      "description" : "",
+	  "message" : "Hydrogen Tank Capacity"
+   },
    "FUEL_TANK_FULL" : {
       "description" : "",
       "message" : "Fuel tank full."
@@ -437,11 +461,11 @@
    },
    "HYPERDRIVE" : {
       "description" : "",
-      "message" : "Phase Drive Jump Module"
+      "message" : "Jump Module"
    },
    "HYPERDRIVE_FITTED" : {
       "description" : "",
-      "message" : "Hyperdrive fitted:"
+      "message" : "Jump module fitted:"
    },
    "HYPERSPACE_RANGE" : {
       "description" : "",
@@ -898,6 +922,10 @@
    "SHIP_IS_FULLY_LADEN" : {
       "description" : "",
       "message" : "Your ship is fully laden."
+   },
+   "SHIP_HYDROGEN_TANK_FULL" : {
+	  "description" : "",
+	  "message" : "Your Hydrogen tank is full."
    },
    "SHIP_MARKET" : {
       "description" : "",

@@ -86,6 +86,7 @@
 #include "SMAA.h"
 #include <algorithm>
 #include <sstream>
+#include "Tweaker.h"
 
 float Pi::gameTickAlpha;
 sigc::signal<void, SDL_Keysym*> Pi::onKeyPress;
@@ -123,6 +124,7 @@ LuaConsole *Pi::luaConsole;
 Game *Pi::game;
 Random Pi::rng;
 float Pi::frameTime;
+double Pi::lazyTimer = 0.0;
 #if WITH_DEVKEYS
 bool Pi::showDebugInfo = false;
 #endif
@@ -136,7 +138,10 @@ GameConfig *Pi::config;
 struct DetailLevel Pi::detail = { 0, 0 };
 bool Pi::joystickEnabled;
 bool Pi::mouseYInvert;
-std::map<SDL_JoystickID,Pi::JoystickState> Pi::joysticks;
+std::map<SDL_JoystickID, Pi::JoystickState> Pi::joysticks;
+std::vector<SDL_JoystickID> Pi::joystickIDs;
+int Pi::activeJoystick = -1;
+
 bool Pi::navTunnelDisplayed;
 bool Pi::speedLinesDisplayed = false;
 bool Pi::targetIndicatorsDisplayed = true;
@@ -157,12 +162,26 @@ std::unique_ptr<Graphics::Drawables::TexturedQuad> Pi::renderQuad;
 MouseCursor* Pi::mouseCursor = nullptr;
 Graphics::RenderState *Pi::quadRenderState = nullptr;
 
+unsigned Pi::m_chromaticAberrationId = -1;
+unsigned Pi::m_scanlinesId = -1;
+unsigned Pi::m_filmgrainId = -1;
+TS_ToneMapping Pi::ts_tonemapping, Pi::ts_default_tonemapping;
+TS_FilmGrain Pi::ts_filmgrain, Pi::ts_default_filmgrain;
+TS_Scanlines Pi::ts_scanlines, Pi::ts_default_scanlines;
+TS_ChromaticAberration Pi::ts_chromatic, Pi::ts_default_chromatic;
+TS_FXAA Pi::ts_fxaa;
+
 #if WITH_OBJECTVIEWER
 ObjectViewerView *Pi::objectViewerView;
 #endif
 
 Sound::MusicPlayer Pi::musicPlayer;
 std::unique_ptr<JobQueue> Pi::jobQueue;
+
+float Pi::GetLazyTimer()
+{
+	return lazyTimer += (SDL_GetTicks() / 1000.0f) - lazyTimer;
+}
 
 // XXX enabling this breaks UI gauge rendering. see #2627
 #define USE_RTT 0
@@ -696,32 +715,186 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	luaConsole = new LuaConsole();
 	KeyBindings::toggleLuaConsole.onPress.connect(sigc::mem_fun(Pi::luaConsole, &LuaConsole::Toggle));
 
+	// Tweaker
+	Tweaker::Init(renderer->GetWindow()->GetWidth(), renderer->GetWindow()->GetHeight());
+#if defined(RELEASE) || !defined(_WIN32)
+	Tweaker::Disable();
+#endif
+
+	// Create Test tweak
+	/*float* test_float = new float; *test_float = 1.0f;
+	int* test_int = new int; *test_int = 5;
+	bool* test_toggle = new bool; *test_toggle = false;
+	Color4f* test_color = new Color4f(0.75f, 0.5f, 0.25f, 1.0f);
+	{
+		std::vector<STweakValue> vtv = {
+			STweakValue(ETWEAK_FLOAT, "TestFloat", test_float, "label='Test Float' min=0.01 max=2.5 help='This is a float'"),
+			STweakValue(ETWEAK_INT, "TestInt", test_int, "label='Test Int' min=1 max=42 help='This is an integer'"),
+			STweakValue(ETWEAK_SEPERATOR, "TestSeperator", nullptr, ""),
+			STweakValue(ETWEAK_TOGGLE, "TestToggle", test_toggle, "label='Test Toggle' help='This is a toggle'"),
+			STweakValue(ETWEAK_COLOR, "TestColor", &test_color->r, "label='Test Color' opened=true help='This is a color'"),
+		};
+		Tweaker::DefineTweak("Test", vtv);
+	}*/
+
+	InitPostProcessing();
+
+	// Mouse cursor
+	mouseCursor = new MouseCursor(renderer);
+}
+
+void Pi::InitPostProcessing()
+{
 	// Define post processes
 	m_gamePP = new Graphics::PostProcess("Bloom", renderer->GetWindow());
 
-	if(Graphics::Hardware::GL3()) {
+	if (Graphics::Hardware::GL3()) {
 		// FXAA
-		Graphics::GL3::EffectDescriptor fxaa_desc;
-		fxaa_desc.strict = true;
-		fxaa_desc.uniforms = {
-			"texture0",
-			"u_texCoordOffset",
-			"u_fxaaSpanMax",
-			"u_fxaaReduceMul",
-			"u_fxaaReduceMin",
-		};
-		fxaa_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
-		fxaa_desc.fragment_shader = "gl3/postprocessing/fxaa.frag";
-		Graphics::GL3::Effect* fxaa = new Graphics::GL3::Effect(renderer, fxaa_desc);
-		fxaa->SetProgram();
-		fxaa->GetUniform(fxaa->GetUniformID("u_texCoordOffset")).Set(vector2f(
-			1.0f / static_cast<float>(renderer->GetWindow()->GetWidth()), 
-			1.0f / static_cast<float>(renderer->GetWindow()->GetHeight())));
-		fxaa->GetUniform(fxaa->GetUniformID("u_fxaaSpanMax")).Set(8.0f);
-		fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMul")).Set(1.0f / 8.0f);
-		fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMin")).Set(1.0f / 128.0f);
+		{
+			Graphics::GL3::EffectDescriptor fxaa_desc;
+			fxaa_desc.strict = true;
+			fxaa_desc.uniforms = {
+				"texture0",
+				"u_texCoordOffset",
+				"u_fxaaSpanMax",
+				"u_fxaaReduceMul",
+				"u_fxaaReduceMin",
+			};
+			fxaa_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
+			fxaa_desc.fragment_shader = "gl3/postprocessing/fxaa.frag";
+			Graphics::GL3::Effect* fxaa = new Graphics::GL3::Effect(renderer, fxaa_desc);
+			fxaa->SetProgram();
+			fxaa->GetUniform(fxaa->GetUniformID("u_texCoordOffset")).Set(vector2f(
+				1.0f / static_cast<float>(renderer->GetWindow()->GetWidth()),
+				1.0f / static_cast<float>(renderer->GetWindow()->GetHeight())));
+			fxaa->GetUniform(fxaa->GetUniformID("u_fxaaSpanMax")).Set(8.0f);
+			fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMul")).Set(1.0f / 8.0f);
+			fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMin")).Set(1.0f / 128.0f);
 
-		m_gamePP->AddPass(renderer, "FXAA", std::shared_ptr<Graphics::GL3::Effect>(fxaa));
+			m_gamePP->AddPass(renderer, "FXAA", std::shared_ptr<Graphics::GL3::Effect>(fxaa));
+		}
+
+		// Chromatic Aberration
+		{
+			Graphics::GL3::EffectDescriptor chromaber_desc;
+			chromaber_desc.strict = true;
+			chromaber_desc.uniforms = {
+				"texture0",
+				"su_ViewportSize",
+				"u_centerBuffer",
+				"u_aberrationStrength",
+			};
+			chromaber_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
+			chromaber_desc.fragment_shader = "gl3/postprocessing/chromatic_aberration.frag";
+			Graphics::GL3::Effect* chromaber = new Graphics::GL3::Effect(renderer, chromaber_desc);
+			chromaber->SetProgram();
+			
+			ts_chromatic.effect = chromaber;
+			ts_chromatic.centerBufferId = chromaber->GetUniformID("u_centerBuffer");
+			ts_chromatic.aberrationStrengthId = chromaber->GetUniformID("u_aberrationStrength");
+
+			{
+				std::vector<STweakValue> vtv = {
+					STweakValue(ETWEAK_FLOAT, "CenterBuffer", &ts_chromatic.centerBuffer, &ts_default_chromatic.centerBuffer,
+						"label='Center Buffer' min=0.0 max=1.0 step=0.01 help='Center Buffer'"),
+						STweakValue(ETWEAK_FLOAT, "AberrationStrength", &ts_chromatic.aberrationStrength, 
+						&ts_default_chromatic.centerBuffer, 
+						"label='AberrationStrength' min=0.0 max=1.0 step=0.01 help='Aberration Strength'"),
+				};
+				Tweaker::DefineTweak("ChromaticAberration", vtv);
+			}
+
+			m_chromaticAberrationId = m_gamePP->AddPass(renderer, "Chromatic Aberration",
+				std::shared_ptr<Graphics::GL3::Effect>(chromaber));
+			m_gamePP->SetBypassState(m_chromaticAberrationId,
+				Pi::config->Int("EnableChromaticAberration") == 0);
+		}
+
+		// Scanlines
+		{
+			Graphics::GL3::EffectDescriptor scanlines_desc;
+			scanlines_desc.strict = true;
+			scanlines_desc.uniforms = {
+				"texture0",
+				"su_ViewportSize",
+				"u_resolution",
+				"u_hardScan",
+				//"u_hardPix",
+				"u_warp",
+				"u_maskDark",
+				"u_maskLight",
+			};
+			scanlines_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
+			scanlines_desc.fragment_shader = "gl3/postprocessing/scanlines.frag";
+			Graphics::GL3::Effect* scanlines = new Graphics::GL3::Effect(renderer, scanlines_desc);
+			scanlines->SetProgram();
+
+			ts_scanlines.effect = scanlines;
+			ts_scanlines.resolutionId = scanlines->GetUniformID("u_resolution");
+			ts_scanlines.hardScanId = scanlines->GetUniformID("u_hardScan");
+			//ts_scanlines.hardPixId = scanlines->GetUniformID("u_hardPix");
+			ts_scanlines.warpId = scanlines->GetUniformID("u_warp");
+			ts_scanlines.maskDarkId = scanlines->GetUniformID("u_maskDark");
+			ts_scanlines.maskLightId = scanlines->GetUniformID("u_maskLight");
+
+			{
+				std::vector<STweakValue> vtv = {
+					STweakValue(ETWEAK_FLOAT, "ResolutionX", &ts_scanlines.resolution.x, &ts_default_scanlines.resolution.x,
+						"label='Resolution X' min=1.0 max=10.0 step=0.1 help='Emulated input resolution'"),
+					STweakValue(ETWEAK_FLOAT, "ResolutionY", &ts_scanlines.resolution.y, &ts_default_scanlines.resolution.y,
+						"label='Resolution Y' min=1.0 max=10.0 step=0.1 help='Emulated input resolution'"),
+					STweakValue(ETWEAK_FLOAT, "HardScan", &ts_scanlines.hardScan, &ts_default_scanlines.hardScan,
+						"label='Scan Hardness' min=-24.0 max=0.0 step=0.25 help='Hardness of scanline'"),
+					//STweakValue(ETWEAK_FLOAT, "HardPix", &ts_scanlines.hardPix, "label='Pixel Hardness' min=-8.0 max=0.0 step=0.1 help='Hardness of pixels in scanline'"),
+					STweakValue(ETWEAK_FLOAT, "Warp X", &ts_scanlines.warp.x, &ts_default_scanlines.warp.x,
+						"label='Warp X' min=0.0 max=1.0 step=0.01 help='Display warp'"),
+					STweakValue(ETWEAK_FLOAT, "Warp Y", &ts_scanlines.warp.y, &ts_default_scanlines.warp.y,
+						"label='Warp Y' min=0.0 max=1.0 step=0.01 help='Display warp'"),
+					STweakValue(ETWEAK_FLOAT, "MaskDark", &ts_scanlines.maskDark, &ts_default_scanlines.maskDark,
+						"label='Mask Dark' min=0.0 max=3.0 step=0.01 help='Amount of shadow mask'"),
+					STweakValue(ETWEAK_FLOAT, "MaskLight", &ts_scanlines.maskLight, &ts_default_scanlines.maskLight,
+						"label='Mask Light' min=0.0 max=3.0 step=0.01 help='Amount of shadow mask'"),
+				};
+				Tweaker::DefineTweak("Scanlines", vtv);
+			}
+
+			m_scanlinesId = m_gamePP->AddPass(renderer, "Scanlines",
+				std::shared_ptr<Graphics::GL3::Effect>(scanlines));
+			m_gamePP->SetBypassState(m_scanlinesId,
+				Pi::config->Int("EnableScanlines") == 0);
+		}
+
+		// FilmGrain
+		{
+			Graphics::GL3::EffectDescriptor fg_desc;
+			fg_desc.strict = true;
+			fg_desc.uniforms = {
+				"texture0",
+				"su_ViewportSize",
+				"su_GameTime",
+				"u_mode",
+			};
+			fg_desc.vertex_shader = "gl3/postprocessing/textured_fullscreen_quad.vert";
+			fg_desc.fragment_shader = "gl3/postprocessing/filmgrain.frag";
+			Graphics::GL3::Effect* filmgrain = new Graphics::GL3::Effect(renderer, fg_desc);
+			filmgrain->SetProgram();
+
+			ts_filmgrain.effect = filmgrain;
+			ts_filmgrain.modeId = filmgrain->GetUniformID("u_mode");
+
+			{
+				std::vector<STweakValue> vtv = {
+					STweakValue(ETWEAK_FLOAT, "Mode", &ts_filmgrain.mode, &ts_default_filmgrain.mode,
+						"label='Mode' min=0.0 max=1.0 step=1.0 help='Film grain has 2 modes'"),
+				};
+				Tweaker::DefineTweak("FilmGrain", vtv);
+			}
+
+			m_filmgrainId = m_gamePP->AddPass(renderer, "Film Grain",
+				std::shared_ptr<Graphics::GL3::Effect>(filmgrain));
+			m_gamePP->SetBypassState(m_filmgrainId,
+				Pi::config->Int("EnableFilmGrain") == 0);
+		}
 
 		// Bloomless Tone Mapping
 		Graphics::GL3::EffectDescriptor tonemap_desc;
@@ -740,59 +913,63 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 		tonemap_desc.fragment_shader = "gl3/postprocessing/tonemapping.frag";
 		Graphics::GL3::Effect* tonemap = new Graphics::GL3::Effect(renderer, tonemap_desc);
 		tonemap->SetProgram();
-		tonemap->GetUniform(tonemap->GetUniformID("u_defog")).Set(0.01f);
-		tonemap->GetUniform(tonemap->GetUniformID("u_fogColor")).Set(vector4f(1.0f, 1.0f, 1.0f, 1.0f));
-		tonemap->GetUniform(tonemap->GetUniformID("u_exposure")).Set(0.35f);
-		tonemap->GetUniform(tonemap->GetUniformID("u_gamma")).Set(0.8f);
-		tonemap->GetUniform(tonemap->GetUniformID("u_vignetteCenter")).Set(vector2f(0.5f, 0.5f));
-		tonemap->GetUniform(tonemap->GetUniformID("u_vignetteRadius")).Set(1.0f);
-		tonemap->GetUniform(tonemap->GetUniformID("u_vignetteAmount")).Set(-1.0f);
-		tonemap->GetUniform(tonemap->GetUniformID("u_blueShift")).Set(0.25f);
-		
+
+		ts_tonemapping.effect = tonemap;
+		ts_tonemapping.defogId = tonemap->GetUniformID("u_defog");
+		ts_tonemapping.fogColorId = tonemap->GetUniformID("u_fogColor");
+		ts_tonemapping.exposureId = tonemap->GetUniformID("u_exposure");
+		ts_tonemapping.gammaId = tonemap->GetUniformID("u_gamma");
+		ts_tonemapping.vignetteCenterId = tonemap->GetUniformID("u_vignetteCenter");
+		ts_tonemapping.vignetteRadiusId = tonemap->GetUniformID("u_vignetteRadius");
+		ts_tonemapping.vignetteAmountId = tonemap->GetUniformID("u_vignetteAmount");
+		ts_tonemapping.blueShiftId = tonemap->GetUniformID("u_blueShift");
+
+		{
+			std::vector<STweakValue> vtv = {
+				STweakValue(ETWEAK_FLOAT, "Defog", &ts_tonemapping.defog, &ts_default_tonemapping.defog,
+					"label='DeFog' min=0.0 max=1.0 step=0.01 help='The amount of fog to remove'"),
+				STweakValue(ETWEAK_COLOR, "FogColor", &ts_tonemapping.fogColor.r, &ts_default_tonemapping.fogColor.r, 
+					"label='Fog Color' opened=true help='The fog color'"),
+				STweakValue(ETWEAK_FLOAT, "Exposure", &ts_tonemapping.exposure, &ts_default_tonemapping.exposure,
+					"label='Exposure' min=-1.0 max=1.0 step=0.01 help='The exposure adjustment'"),
+				STweakValue(ETWEAK_FLOAT, "Gamma", &ts_tonemapping.gamma, &ts_default_tonemapping.gamma,
+					"label='Gamma' min=0.5 max=2.0 step=0.01 help='The gamma correction exponent'"),
+				STweakValue(ETWEAK_FLOAT, "VignettingCenterX", &ts_tonemapping.vignetteCenter.x, 
+					&ts_default_tonemapping.vignetteCenter.x,
+					"label='Vignetting Center X' min=0.0 max=1.0 step=0.01 help='The center of vignetting'"),
+				STweakValue(ETWEAK_FLOAT, "VignettingCenterY", &ts_tonemapping.vignetteCenter.y, 
+					&ts_default_tonemapping.vignetteCenter.y,
+					"label='Vignetting Center Y' min=0.0 max=1.0 step=0.01 help='The center of vignetting'"),
+				STweakValue(ETWEAK_FLOAT, "VignettingRadius", &ts_tonemapping.vignetteRadius,
+					&ts_default_tonemapping.vignetteRadius,
+					"label='Vignetting Radius' min=0.0 max=1.0 step=0.01 help='The radius of vignetting'"),
+				STweakValue(ETWEAK_FLOAT, "VignettingAmount", &ts_tonemapping.vignetteAmount, 
+					&ts_default_tonemapping.vignetteAmount,
+					"label='Vignetting Amount' min=-1.0 max=1.0 step=0.01 help='The amount of vignetting'"),
+				STweakValue(ETWEAK_FLOAT, "BlueShift", &ts_tonemapping.blueShift, 
+					&ts_default_tonemapping.blueShift,
+					"label='Blue Shift' min=0.0 max=1.0 step=0.01 help='The amount of blue shift'"),
+			};
+			Tweaker::DefineTweak("ToneMapping", vtv);
+		}
+
 		m_gamePP->AddPass(renderer, "ToneMapping", std::shared_ptr<Graphics::GL3::Effect>(tonemap));
-		
-
-		/* // Old Bloom
-		Graphics::GL3::EffectDescriptor hblur_desc, vblur_desc, compose_desc;
-		
-		hblur_desc.uniforms.push_back("texture0");
-		hblur_desc.vertex_shader = "gl3/postprocessing/hblur.vert";
-		hblur_desc.fragment_shader = "gl3/postprocessing/hblur.frag";
-		
-		vblur_desc.uniforms.push_back("texture0");
-		vblur_desc.vertex_shader = "gl3/postprocessing/vblur.vert";
-		vblur_desc.fragment_shader = "gl3/postprocessing/vblur.frag";
-		
-		compose_desc.settings.push_back("BlendMode 1");
-		compose_desc.uniforms.push_back("texture0");
-		compose_desc.uniforms.push_back("texture1");
-		compose_desc.vertex_shader = "gl3/postprocessing/compositor.vert";
-		compose_desc.fragment_shader = "gl3/postprocessing/compositor.frag";
-
-		Graphics::GL3::Effect* hblur = new Graphics::GL3::Effect(renderer, hblur_desc);
-		Graphics::GL3::Effect* vblur = new Graphics::GL3::Effect(renderer, vblur_desc);
-		Graphics::GL3::Effect* compose = new Graphics::GL3::Effect(renderer, compose_desc);
-
-		m_gamePP->AddPass(renderer, "HBlur", std::shared_ptr<Graphics::GL3::Effect>(hblur));
-		m_gamePP->AddPass(renderer, "VBlur", std::shared_ptr<Graphics::GL3::Effect>(vblur));
-		m_gamePP->AddPass(renderer, "Compose", std::shared_ptr<Graphics::GL3::Effect>(compose),
-			Graphics::PP_PASS_COMPOSE);*/
 	} else {
 		m_gamePP->AddPass(renderer, "HBlur", Graphics::EFFECT_HORIZONTAL_BLUR);
 		m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
-		m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR, 
+		m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR,
 			Graphics::PP_PASS_COMPOSE);
 	}
-		
+
 	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
-	
+
 	// Set post processing option
 	Pi::renderer->GetPostProcessing()->SetPerformPostProcessing(postProcessingEnabled);
 
 	//m_smaa = new SMAA(renderer);
 
 	// Preload noise texture for tunnel effect
- 	Graphics::TextureBuilder noise_tb("textures/noise.png", Graphics::LINEAR_CLAMP, 
+	Graphics::TextureBuilder noise_tb("textures/noise.png", Graphics::LINEAR_CLAMP,
 		false, false, false, true);
 	noise_tb.GetOrCreateTexture(renderer, "effect");
 
@@ -804,8 +981,7 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	//Graphics::TextureBuilder("textures/smaa/SearchTex.png", Graphics::NEAREST_CLAMP,
 	//	false, false, false, true).GetOrCreateTexture(renderer, "effect");
 
-	// Mouse cursor
-	mouseCursor = new MouseCursor(renderer);
+	UpdatePostProcessingEffects();
 }
 
 bool Pi::IsConsoleActive()
@@ -905,6 +1081,11 @@ void Pi::HandleEvents()
 			skipTextInput = false;
 			continue;
 		}
+
+		if(Tweaker::TranslateEvent(event)) {
+			continue;
+		}
+
 		if (ui->DispatchSDLEvent(event))
 			continue;
 
@@ -1045,19 +1226,23 @@ void Pi::HandleEvents()
 						{
 							if(Pi::game) {
 								if (Pi::game->IsHyperspace())
-									Pi::cpan->MsgLog()->Message("", Lang::CANT_SAVE_IN_HYPERSPACE);
+									//Pi::cpan->MsgLog()->Message("", Lang::CANT_SAVE_IN_HYPERSPACE);
+									Pi::game->log->Add(Lang::CANT_SAVE_IN_HYPERSPACE);
 
 								else {
 									const std::string name = "_quicksave";
 									const std::string path = FileSystem::JoinPath(GetSaveDir(), name);
 									try {
 										Game::SaveGame(name, Pi::game);
-										Pi::cpan->MsgLog()->Message("", Lang::GAME_SAVED_TO + path);
+										//Pi::cpan->MsgLog()->Message("", Lang::GAME_SAVED_TO + path);
+										Pi::game->log->Add(Lang::GAME_SAVED_TO + path);
 									} catch (CouldNotOpenFileException) {
-										Pi::cpan->MsgLog()->Message("", stringf(Lang::COULD_NOT_OPEN_FILENAME, formatarg("path", path)));
+										//Pi::cpan->MsgLog()->Message("", stringf(Lang::COULD_NOT_OPEN_FILENAME, formatarg("path", path)));
+										Pi::game->log->Add(stringf(Lang::COULD_NOT_OPEN_FILENAME, formatarg("path", path)));
 									}
 									catch (CouldNotWriteToFileException) {
-										Pi::cpan->MsgLog()->Message("", Lang::GAME_SAVE_CANNOT_WRITE);
+										//Pi::cpan->MsgLog()->Message("", Lang::GAME_SAVE_CANNOT_WRITE);
+										Pi::game->log->Add(Lang::GAME_SAVE_CANNOT_WRITE);
 									}
 								}
 							}
@@ -1099,6 +1284,14 @@ void Pi::HandleEvents()
 		//		SDL_GetRelativeMouseState(&Pi::mouseMotion[0], &Pi::mouseMotion[1]);
 				break;
 			case SDL_JOYAXISMOTION:
+				if (!joysticks[event.jaxis.which].joystick)	{
+					break;
+				} else {
+					joysticks[event.jaxis.which].axes[event.jaxis.axis] = 
+						static_cast<float>(Pi::ReadJoystickAxisValue(event.jaxis.axis)) / 1000.0f;
+				}
+				break;				
+				/*
 				if (!joysticks[event.jaxis.which].joystick)
 					break;
 				if (event.jaxis.value == -32768)
@@ -1106,6 +1299,7 @@ void Pi::HandleEvents()
 				else
 					joysticks[event.jaxis.which].axes[event.jaxis.axis] = -event.jaxis.value / 32767.f;
 				break;
+				*/
 			case SDL_JOYBUTTONUP:
 			case SDL_JOYBUTTONDOWN:
 				if (!joysticks[event.jaxis.which].joystick)
@@ -1137,8 +1331,13 @@ void Pi::TombStoneLoop()
 		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
 		Pi::renderer->BeginPostProcessing();
-		tombstone->Draw(_time);				
-		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		tombstone->Draw(_time);	
+		if(Pi::IsPostProcessingEnabled()) {
+			UpdatePostProcessingEffects();
+			Pi::renderer->PostProcessFrame(m_gamePP);
+		} else {
+			Pi::renderer->PostProcessFrame(nullptr);
+		}
 		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 		Gui::Draw();
@@ -1303,7 +1502,12 @@ void Pi::Start()
 		
 		// Test
 		//m_smaa->PostProcess();
-		Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+		if (Pi::IsPostProcessingEnabled()) {
+			UpdatePostProcessingEffects();
+			Pi::renderer->PostProcessFrame(m_gamePP);
+		} else {
+			Pi::renderer->PostProcessFrame(nullptr);
+		}
 		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 
@@ -1340,6 +1544,8 @@ void Pi::Start()
 	StartGame();
 	PostStartGame();
 	MainLoop();
+
+	Tweaker::Terminate();
 }
 
 void Pi::EndGame()
@@ -1481,11 +1687,21 @@ void Pi::MainLoop()
 		//SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
 		if(currentView != worldView) {
-			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_guiPP : nullptr);
+			if (Pi::IsPostProcessingEnabled()) {
+				UpdatePostProcessingEffects();
+				Pi::renderer->PostProcessFrame(m_guiPP);
+			} else {
+				Pi::renderer->PostProcessFrame(nullptr);
+			}
 		} else {
 			// TEMP: Pending conversion to 3.X
 			//m_smaa->PostProcess();
-			Pi::renderer->PostProcessFrame(Pi::IsPostProcessingEnabled() ? m_gamePP : nullptr);
+			if (Pi::IsPostProcessingEnabled()) {
+				UpdatePostProcessingEffects();
+				Pi::renderer->PostProcessFrame(m_gamePP);
+			} else {
+				Pi::renderer->PostProcessFrame(nullptr);
+			}
 		}
 
 		Pi::renderer->EndPostProcessing();
@@ -1493,6 +1709,9 @@ void Pi::MainLoop()
 		
 		if( DrawGUI ) {
 			Gui::Draw();
+			if (game) {
+				game->log->DrawHudMessages(renderer);
+			}
 		} else if (game && game->IsNormalSpace()) {
 			if (config->Int("DisableScreenshotInfo")==0) {
 				const RefCountedPtr<StarSystem> sys = game->GetSpace()->GetStarSystem();
@@ -1525,6 +1744,9 @@ void Pi::MainLoop()
 			Pi::mouseCursor->Update();
 			Pi::mouseCursor->Draw();
 		}
+
+		// Draw tweaker (when enabled)
+		Tweaker::Draw();
 
 #if WITH_DEVKEYS
 		if (Pi::showDebugInfo) {
@@ -1603,6 +1825,7 @@ void Pi::MainLoop()
 		}
 #endif /* MAKING_VIDEO */
 	}
+	Tweaker::Close();
 }
 
 float Pi::CalcHyperspaceRangeMax(int hyperclass, int total_mass_in_tonnes)
@@ -1650,17 +1873,18 @@ float Pi::CalcHyperspaceFuelOut(int hyperclass, float dist, float hyperspace_ran
 	return outFuelRequired;
 }
 
-void Pi::Message(const std::string &message, const std::string &from, enum MsgLevel level)
+/*void Pi::Message(const std::string &message, const std::string &from, enum MsgLevel level)
 {
 	if (level == MSG_IMPORTANT) {
 		Pi::cpan->MsgLog()->ImportantMessage(from, message);
 	} else {
 		Pi::cpan->MsgLog()->Message(from, message);
 	}
-}
+}*/
 
 void Pi::InitJoysticks() {
 	int joy_count = SDL_NumJoysticks();
+
 	for (int n = 0; n < joy_count; n++) {
 		JoystickState state;
 
@@ -1669,13 +1893,83 @@ void Pi::InitJoysticks() {
 			Output("SDL_JoystickOpen(%i): %s\n", n, SDL_GetError());
 			continue;
 		}
+
 		state.axes.resize(SDL_JoystickNumAxes(state.joystick));
 		state.buttons.resize(SDL_JoystickNumButtons(state.joystick));
 		state.hats.resize(SDL_JoystickNumHats(state.joystick));
+		state.name = SDL_JoystickName(state.joystick);
+
+		for(int i = 0; i < SDL_JoystickNumAxes(state.joystick); ++i) {
+			std::ostringstream ss1, ss2;
+			ss1 << "Axis" << i << "Invert";
+			bool invert_axis = Pi::config->Int(ss1.str(), 0) ? true : false;
+			ss2 << "Axis" << i << "DeadZone";
+			int deadzone_axis = Pi::config->Int(ss2.str(), 0);
+
+			state.invertAxes.push_back(invert_axis);
+			state.deadZoneAxes.push_back(deadzone_axis);
+		}
 
 		SDL_JoystickID joyID = SDL_JoystickInstanceID(state.joystick);
+		joystickIDs.push_back(joyID);
 		joysticks[joyID] = state;
 	}
+	// TODO this should come from config
+	if(joy_count > 0) {
+		activeJoystick = 0;
+	}
+}
+
+void Pi::SetActiveJoystick(int joystick_idx)
+{
+	assert(joystick_idx < GetJoystickCount());
+	activeJoystick = joystick_idx;
+}
+
+int Pi::ReadJoystickAxisValue(int aindex)
+{
+	assert(aindex < GetJoystickAxisCount(activeJoystick));	
+	float raw_max = 32767.0f;
+	float raw_value = SDL_JoystickGetAxis(joysticks[joystickIDs[activeJoystick]].joystick, aindex);
+	float deadzone = (GetJoystickAxisDeadZone(aindex) / 99.0f) * raw_max;
+	float livezone = raw_max - deadzone;
+
+	if(abs(raw_value) <= deadzone) {
+		return 0;
+	} else {
+		int value = static_cast<int>((1000.0f * (abs(raw_value) - deadzone)) / livezone);
+		if(raw_value < 0.0f) {
+			value *= -1;
+		}
+		if (GetJoystickAxisInvertState(aindex)) {
+			value *= -1;
+		}
+		return value;
+	}
+}
+
+void Pi::SetJoystickAxisInvertState(int aindex, bool state) 
+{ 
+	joysticks[GetActiveJoystick()].invertAxes[aindex] = state; 
+	std::ostringstream ss;
+	ss << "Axis" << aindex << "Invert";
+	Pi::config->SetInt(ss.str(), state);
+	Pi::config->Save();
+}
+
+int Pi::GetJoystickAxisDeadZone(int aindex)
+{
+	return joysticks[GetActiveJoystick()].deadZoneAxes[aindex];
+}
+
+void Pi::SetJoystickAxisDeadZone(int aindex, int deadzone)
+{
+	assert(aindex < GetJoystickAxisCount());
+	joysticks[GetActiveJoystick()].deadZoneAxes[aindex] = Clamp(deadzone, 0, 99);
+	std::ostringstream ss;
+	ss << "Axis" << aindex << "DeadZone";
+	Pi::config->SetInt(ss.str(), joysticks[GetActiveJoystick()].deadZoneAxes[aindex]);
+	Pi::config->Save();
 }
 
 int Pi::JoystickButtonState(int joystick, int button) {
@@ -1744,4 +2038,55 @@ void Pi::SetPostProcessingEnabled(bool state) {
 		Pi::renderer->GetPostProcessing()->SetPerformPostProcessing(state);
 	}
 	postProcessingEnabled = state;
+}
+
+void Pi::UpdatePostProcessingEffects(bool active_tweak)
+{
+	if(m_gamePP && active_tweak) {
+		ts_tonemapping.effect->SetProgram();
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.defogId).Set(ts_tonemapping.defog);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.fogColorId).Set(ts_tonemapping.fogColor);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.exposureId).Set(ts_tonemapping.exposure);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.gammaId).Set(ts_tonemapping.gamma);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.vignetteCenterId).Set(ts_tonemapping.vignetteCenter);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.vignetteRadiusId).Set(ts_tonemapping.vignetteRadius);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.vignetteAmountId).Set(ts_tonemapping.vignetteAmount);
+		ts_tonemapping.effect->GetUniform(ts_tonemapping.blueShiftId).Set(ts_tonemapping.blueShift);
+
+		ts_filmgrain.effect->SetProgram();
+		ts_filmgrain.effect->GetUniform(ts_filmgrain.modeId).Set(ts_filmgrain.mode);
+
+		ts_scanlines.effect->SetProgram();
+		ts_scanlines.effect->GetUniform(ts_scanlines.resolutionId).Set(ts_scanlines.resolution);
+		ts_scanlines.effect->GetUniform(ts_scanlines.hardScanId).Set(ts_scanlines.hardScan);
+		//ts_scanlines.effect->GetUniform(ts_scanlines.hardPixId).Set(ts_scanlines.hardPix);
+		ts_scanlines.effect->GetUniform(ts_scanlines.warpId).Set(ts_scanlines.warp);
+		ts_scanlines.effect->GetUniform(ts_scanlines.maskDarkId).Set(ts_scanlines.maskDark);
+		ts_scanlines.effect->GetUniform(ts_scanlines.maskLightId).Set(ts_scanlines.maskLight);
+
+		ts_chromatic.effect->SetProgram();
+		ts_chromatic.effect->GetUniform(ts_chromatic.centerBufferId).Set(ts_chromatic.centerBuffer);
+		ts_chromatic.effect->GetUniform(ts_chromatic.aberrationStrengthId).Set(ts_chromatic.aberrationStrength);
+	}
+}
+
+void Pi::SetExpChromaticAberrationEnabled(bool state)
+{
+	if(m_chromaticAberrationId != -1) {
+		m_gamePP->SetBypassState(m_chromaticAberrationId, !state);
+	}
+}
+
+void Pi::SetExpScanlinesEnabled(bool state)
+{
+	if (m_scanlinesId != -1) {
+		m_gamePP->SetBypassState(m_scanlinesId, !state);
+	}
+}
+
+void Pi::SetExpFilmGrainEnabled(bool state)
+{
+	if (m_filmgrainId != -1) {
+		m_gamePP->SetBypassState(m_filmgrainId, !state);
+	}
 }

@@ -1,3 +1,7 @@
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
+// Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
 // EFFECT: GEOSPHERE WITH TERRAIN + WATER/LAVA
 
 //----------------------------------------------------- In/Out/Uniforms
@@ -88,7 +92,7 @@ uniform Scene scene;
 		vec4 position;
 		vec4 diffuse;
 		vec4 specular;
-	};	
+	};
 	layout(std140) uniform UBLightSources {
 		s_LightSourceParameters su_LightSource[4];
 	};
@@ -172,7 +176,7 @@ void main(void)
 				for (int j = 0; j < u_shadows; j++) {
 					if (i != u_occultedLight[j]) {
 						continue;
-					}						
+					}
 					vec3 centre = vec3( u_shadowCentreX[j], u_shadowCentreY[j], u_shadowCentreZ[j]);
 					// Apply eclipse:
 					vec3 projectedPoint = v - dot(lightDir, v) * lightDir;
@@ -210,7 +214,7 @@ void main(void)
 
 			#ifdef TERRAIN_WITH_WATER
 					//Specular reflection
-					vec3 L = normalize(su_LightSource[i].position.xyz - eyepos); 
+					vec3 L = normalize(su_LightSource[i].position.xyz - eyepos);
 					vec3 E = normalize(-eyepos);
 					vec3 R = normalize(-reflect(L,tnorm));
 					//water only for specular
@@ -237,7 +241,7 @@ void main(void)
 			#ifdef TERRAIN_WITH_WATER
 				diff * specularReflection * sunset +
 			#endif
-			(0.02-clamp(fogFactor,0.0,0.01))*diff*ldprod*sunset +	      //increase fog scatter				
+			(0.02-clamp(fogFactor,0.0,0.01))*diff*ldprod*sunset +	      //increase fog scatter
 			(pow((1.0-pow(fogFactor,0.75)),256.0)*0.4*diff*u_atmosColor)*sunset * //distant fog.
 			clamp(1.0/sqrt(u_geosphereAtmosFogDensity*10000.0),0.4,1.0);  //darken atmosphere based on density
 	#else // atmosphere-less planetoids and dim stars

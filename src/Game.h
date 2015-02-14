@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _GAME_H
@@ -7,7 +8,11 @@
 #include "vector3.h"
 #include "galaxy/SystemPath.h"
 #include "Serializer.h"
+#include "libs.h"
 #include "gameconsts.h"
+#include "GameLog.h"
+#include "Serializer.h"
+#include "galaxy/SystemPath.h"
 
 class HyperspaceCloud;
 class Player;
@@ -85,6 +90,8 @@ public:
 	float GetInvTimeAccelRate() const { return s_timeInvAccelRates[m_timeAccel]; }
 
 	float GetTimeStep() const { return s_timeAccelRates[m_timeAccel]*(1.0f/PHYSICS_HZ); }
+
+	GameLog *log;
 
 private:
 	void CreateViews();

@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "EquipType.h"
@@ -11,7 +12,7 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	  0, 0, 0, 0, true, 0
 	},{
 	  Lang::HYDROGEN, Lang::HYDROGEN_DESCRIPTION,
-	  Equip::SLOT_CARGO, -1, {},
+	  Equip::SLOT_HYDROGENTANK, -1, {},
 	  100, 1, 0, ECON_MINING, true, 0
 	},{
 	  Lang::LIQUID_OXYGEN, Lang::LIQUID_OXYGEN_DESCRIPTION,
@@ -365,6 +366,16 @@ const EquipType Equip::types[Equip::TYPE_MAX] = {
 	  Lang::LARGE_PLASMA_ACCEL,0,
 	  Equip::SLOT_LASER, 10, {},
 	  39000000, 8, 100, 0, true, 0
+	},{
+	  Lang::BASIC_FREIGHT_TELEPORTER,
+	  Lang::BASIC_FREIGHT_TELEPORTER_DESCRIPTION,
+	  Equip::SLOT_FREIGHTTELEPORTER, -1, {},
+	  3900000, 1, 1, 0, true, 5.0f
+	},{
+	  Lang::ADVANCED_FREIGHT_TELEPORTER,
+	  Lang::ADVANCED_FREIGHT_TELEPORTER_DESCRIPTION,
+	  Equip::SLOT_FREIGHTTELEPORTER, -1, {},
+	  7300000, 1, 2, 0, true, 5.0f
 	}
 };
 

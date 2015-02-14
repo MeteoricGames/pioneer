@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Graphics.h"
@@ -16,6 +17,7 @@
 namespace Graphics {
 
 Hardware::ERendererType Hardware::RendererType = Hardware::ERT_GL2;
+bool Hardware::context_CoreProfile = false;
 bool Hardware::supports_FramebufferObjects = false;
 bool Hardware::supports_sRGBFramebuffers = false;
 
@@ -71,7 +73,7 @@ Renderer* Init(Settings vs)
 
 	glewExperimental = true;
 	glewInit();
-	
+
 	int major, minor;
 	if(GLEW_VERSION_3_2) {
 		major = 3;
@@ -84,11 +86,13 @@ Renderer* Init(Settings vs)
 		minor = 1;
 	}
 	std::cout<<"Glew reports support for OpenGL "<<major<<"."<<minor<<std::endl;
-	
+
 	if(GLEW_ARB_compatibility) {
 		std::cout<<"Running in compatibility mode"<<std::endl;
+		Graphics::Hardware::context_CoreProfile = false;
 	} else {
 		std::cout<<"Running in core mode"<<std::endl;
+		Graphics::Hardware::context_CoreProfile = true;
 	}
 	std::cout<<"Renderer Details"<<std::endl;
 	std::cout<<"  Vendor: "<<glGetString(GL_VENDOR)<<std::endl;
@@ -107,7 +111,7 @@ Renderer* Init(Settings vs)
 			legacy_mode = true;
 		}
 	}
-	
+
 	if(legacy_mode) {
 		Hardware::RendererType = Hardware::ERendererType::ERT_GL2;
 		if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
@@ -153,7 +157,7 @@ Renderer* Init(Settings vs)
 		desc.vertexColors = true;
 		vtxColorMaterial = renderer->CreateMaterial(desc);
 		vtxColorMaterial->IncRefCount();
-	} 
+	}
 
 	return renderer;
 }

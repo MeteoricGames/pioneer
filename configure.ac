@@ -72,7 +72,8 @@ STD_CXXFLAGS=
 EXTRA_CFLAGS=
 EXTRA_CXXFLAGS=
 EXTRA_CPPFLAGS=
-EXTRA_LIBS=-ldl
+EXTRA_LIBS=-ldl -lX11
+
 
 WARN_CFLAGS=
 WARN_CXXFLAGS=
@@ -149,17 +150,17 @@ AM_CONDITIONAL([DO_STRIP], [test "$DO_STRIP" = yes])
 
 
 dnl Versioning. If this is a git checkout, try to get details from it
-PARAGON_VERSION=
+PARAGON_VERSION=[Alpha10.51]
 PARAGON_EXTRAVERSION=
-if test -d .git ; then
-    AC_MSG_NOTICE([This is a git checkout])
-    PARAGON_VERSION=git
-    gitbin=`which git`
-    if test "x$gitbin" != x; then
-        PARAGON_EXTRAVERSION=`$gitbin log -n1 --format=%h`
-        AC_MSG_NOTICE([git ref: $PARAGON_EXTRAVERSION])
-    fi
-fi
+#if test -d .git ; then
+#    AC_MSG_NOTICE([This is a git checkout])
+#    PARAGON_VERSION=git
+#    gitbin=`which git`
+#    if test "x$gitbin" != x; then
+#        PARAGON_EXTRAVERSION=`$gitbin log -n1 --format=%h`
+#        AC_MSG_NOTICE([git ref: $PARAGON_EXTRAVERSION])
+#    fi
+#fi
 
 dnl And override with anything on the command line
 AC_ARG_WITH([version], AS_HELP_STRING([--with-version], [Game version]), [PARAGON_VERSION=$withval])

@@ -42,7 +42,7 @@ local shipInfo = function (args)
 		local type = Constants.EquipType[i]
 		local et = EquipDef[type]
 		local slot = et.slot
-		if (slot ~= "CARGO" and slot ~= "MISSILE" and slot ~= "ENGINE" and slot ~= "LASER") then
+		if (slot ~= "CARGO" and slot ~= "HYDROGENTANK" and slot ~= "MISSILE" and slot ~= "ENGINE" and slot ~= "LASER") then
 			local count = Game.player:GetEquipCount(slot, type)
 			if count > 0 then
 				if count > 1 then
@@ -89,6 +89,8 @@ local shipInfo = function (args)
 						{ l.FRONT_WEAPON..":", EquipDef[frontWeapon].name },
 						{ l.REAR_WEAPON..":",  EquipDef[rearWeapon].name },
 						{ l.FUEL..":",         string.format("%d%%", Game.player.fuel)},
+						{ l.HYDROGEN_FUEL..":", string.format("%d%% (%d)", Game.player:GetHydrogenPercentage(), Game.player:GetHydrogen())},
+						{ l.HYDROGEN_CAPACITY..":", string.format("%d", Game.player:GetHydrogenCapacity())},
 						{ l.DELTA_V..":",      string.format("%d km/s", deltav / 1000)},
 						"",
 						{ l.FORWARD_ACCEL..":",  string.format("%.2f m/s² (%.1f G)", fwd_acc, fwd_acc / 9.81) },

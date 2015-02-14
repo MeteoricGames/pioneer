@@ -1,4 +1,5 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+-- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 local Engine = import("Engine")
@@ -80,7 +81,7 @@ local addFuel = function (ship)
 	local count = tonumber(string.sub(drive, -1)) ^ 2
 
 	-- account for fuel it already has
-	count = count - ship:GetEquipCount('CARGO', 'HYDROGEN')
+	count = count - ship:GetEquipCount('HYDROGENTANK', 'HYDROGEN')
 
 	local added = ship:AddEquip('HYDROGEN', count)
 
@@ -1078,7 +1079,7 @@ Event.Register("onGameEnd", onGameEnd)
 
 local serialize = function ()
 	-- all we need to save is trade_ships, the rest can be rebuilt on load
-	
+
 	-- The serializer will crash if we try to serialize dead objects (issue #3123)
 	-- also, trade_ships may be nil, because it is cleared in 'onGameEnd', and this may
 	-- happen before the autosave module creates its '_exit' save

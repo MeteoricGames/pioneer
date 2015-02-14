@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "View.h"
@@ -36,7 +37,7 @@ void View::Attach() {
 	Gui::Screen::AddBaseWidget(this, 0, 0);
 
 	if (Pi::cpan) {
-		Gui::Screen::AddBaseWidget(Pi::cpan, 0, h-80);
+		Gui::Screen::AddBaseWidget(Pi::cpan, 0, 0);//h-80);
 		Gui::Screen::AddBaseWidget(m_rightButtonBar, w-342, h-26);
 		Gui::Screen::AddBaseWidget(m_rightRegion2, w-127, h-16);
 		Gui::Screen::AddBaseWidget(m_rightRegion1, w-123, h-64);

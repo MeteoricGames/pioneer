@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Lua.h"
@@ -9,6 +10,7 @@ namespace Lua {
 void Init()
 {
 	LuaObject<UI::Align>::RegisterClass();
+	LuaObject<UI::AxisIndicator>::RegisterClass();
 	LuaObject<UI::Background>::RegisterClass();
 	LuaObject<UI::Box>::RegisterClass();
 	LuaObject<UI::HBox>::RegisterClass();
@@ -66,7 +68,7 @@ UI::Widget *GetWidget(UI::Context *c, lua_State *l, int idx)
 		UI::Label* table_label = c->Label(lua_tostring(l, idx));
 		table_label->SetColor(Color::PARAGON_BLUE);
 		return table_label;
-	}	
+	}
 		//return c->Label(lua_tostring(l, idx));
 
 	return 0;

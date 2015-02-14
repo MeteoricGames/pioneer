@@ -18,6 +18,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "TweakerSettings.h"
 
 class DeathView;
 class GalacticView;
@@ -55,10 +56,10 @@ struct DetailLevel {
 	int cities;
 };
 
-enum MsgLevel {
+/*enum MsgLevel {
 	MSG_NORMAL,
 	MSG_IMPORTANT
-};
+};*/
 
 class Frame;
 class Game;
@@ -67,6 +68,7 @@ class Pi {
 public:
 	static void Init(const std::map<std::string,std::string> &options);
 	static void InitGame();
+	static void InitPostProcessing();
 	static void StarportStart(Uint32 starport);
 	static void PreStartGame();
 	static void PreStartUpdateProgress(float total, float current);
@@ -79,15 +81,29 @@ public:
 	static void OnChangeDetailLevel();
 	static void Quit() __attribute((noreturn));
 	static float GetFrameTime() { return frameTime; }
+	static float GetLazyTimer();
 	static float GetGameTickAlpha() { return gameTickAlpha; }
 	static bool KeyState(SDL_Keycode k) { return keyState[k]; }
 	static int KeyModState() { return keyModState; }
 	static bool IsConsoleActive();
+
 	static int JoystickButtonState(int joystick, int button);
 	static int JoystickHatState(int joystick, int hat);
 	static float JoystickAxisState(int joystick, int axis);
 	static bool IsJoystickEnabled() { return joystickEnabled; }
 	static void SetJoystickEnabled(bool state) { joystickEnabled = state; }
+	static int GetActiveJoystick() { return activeJoystick; }
+	static void SetActiveJoystick(int joystick_idx);
+	static int GetJoystickCount() { return joystickIDs.size(); }
+	static std::string GetJoystickName(int id) { return joysticks[joystickIDs[id]].name; }
+	static int GetJoystickAxisCount(int jindex) { return joysticks[joystickIDs[jindex]].axes.size(); }
+	static int GetJoystickAxisCount() { return GetJoystickAxisCount(GetActiveJoystick()); }
+	static bool GetJoystickAxisInvertState(int aindex) { return joysticks[GetActiveJoystick()].invertAxes[aindex]; }
+	static void SetJoystickAxisInvertState(int aindex, bool state);
+	static int ReadJoystickAxisValue(int aindex);
+	static int GetJoystickAxisDeadZone(int aindex);
+	static void SetJoystickAxisDeadZone(int aindex, int deadzone);
+
     static void SetMouseYInvert(bool state) { mouseYInvert = state; }
     static bool IsMouseYInvert() { return mouseYInvert; }
 	static bool IsNavTunnelDisplayed() { return navTunnelDisplayed; }
@@ -98,6 +114,7 @@ public:
 	static void SetTargetIndicatorsDisplayed(bool state) { targetIndicatorsDisplayed = state; }
 	static bool IsPostProcessingEnabled() { return postProcessingEnabled; }
 	static void SetPostProcessingEnabled(bool state);
+	static void UpdatePostProcessingEffects(bool active_tweak = true);
 	static int MouseButtonState(int button) { return mouseButton[button]; }
 	/// Get the default speed modifier to apply to movement (scrolling, zooming...), depending on the "shift" keys.
 	/// This is a default value only, centralized here to promote uniform user expericience.
@@ -112,7 +129,7 @@ public:
 	static float CalcHyperspaceRange(int hyperclass, float total_mass_in_tonnes, int fuel);
 	static float CalcHyperspaceDuration(int hyperclass, int total_mass_in_tonnes, float dist);
 	static float CalcHyperspaceFuelOut(int hyperclass, float dist, float hyperspace_range_max);
-	static void Message(const std::string &message, const std::string &from = "", enum MsgLevel level = MSG_NORMAL);
+	//static void Message(const std::string &message, const std::string &from = "", enum MsgLevel level = MSG_NORMAL);
 	static std::string GetSaveDir();
 	static SceneGraph::Model *FindModel(const std::string&, bool allowPlaceholder = true);
 
@@ -168,7 +185,7 @@ public:
 	static LuaConsole *luaConsole;
 	static ShipCpanel *cpan;
 	static Sound::MusicPlayer &GetMusicPlayer() { return musicPlayer; }
-	static Graphics::Renderer *renderer; // blargh
+	static Graphics::Renderer *renderer;
 	static ModelCache *modelCache;
 	static Intro *intro;
 	static SDLGraphics *sdl;
@@ -186,6 +203,11 @@ public:
 	static JobQueue *Jobs() { return jobQueue.get();}
 
 	static bool DrawGUI;
+
+
+	static void SetExpChromaticAberrationEnabled(bool state);
+	static void SetExpScanlinesEnabled(bool state);
+	static void SetExpFilmGrainEnabled(bool state);
 
 private:
 	static void HandleEvents();
@@ -206,6 +228,7 @@ private:
 	static int requestedTimeAccelIdx;
 	static bool forceTimeAccel;
 	static float frameTime;
+	static double lazyTimer; // Timer that only counts when called, used for non-time priority systems like UI
 	static std::map<SDL_Keycode,bool> keyState;
 	static int keyModState;
 	static char mouseButton[6];
@@ -222,8 +245,14 @@ private:
 		std::vector<bool> buttons;
 		std::vector<int> hats;
 		std::vector<float> axes;
+		std::string name;
+		std::vector<bool> invertAxes;
+		std::vector<int> deadZoneAxes;
 	};
+	static std::vector<SDL_JoystickID> joystickIDs;
 	static std::map<SDL_JoystickID,JoystickState> joysticks;
+	static int activeJoystick;
+
 	static Sound::MusicPlayer musicPlayer;
 
 	static bool navTunnelDisplayed;
@@ -240,6 +269,17 @@ private:
 	static RefCountedPtr<Graphics::Texture> renderTexture;
 	static std::unique_ptr<Graphics::Drawables::TexturedQuad> renderQuad;
 	static Graphics::RenderState *quadRenderState;
+
+	static unsigned m_chromaticAberrationId;
+	static unsigned m_scanlinesId;
+	static unsigned m_filmgrainId;
+
+	// Tweaker settings
+	static TS_ToneMapping ts_tonemapping, ts_default_tonemapping;
+	static TS_FilmGrain ts_filmgrain, ts_default_filmgrain;
+	static TS_Scanlines ts_scanlines, ts_default_scanlines;
+	static TS_ChromaticAberration ts_chromatic, ts_default_chromatic;
+	static TS_FXAA ts_fxaa, ts_default_fxaa;
 };
 
 #endif /* _PI_H */

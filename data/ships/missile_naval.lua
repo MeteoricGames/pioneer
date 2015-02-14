@@ -12,5 +12,6 @@ define_missile {
 	left_thrust = 9e5,
 	right_thrust = 9e5,
 	hull_mass=0,
-	price=100
+	price=100,
+	max_maneuver_speed = 900,
 }

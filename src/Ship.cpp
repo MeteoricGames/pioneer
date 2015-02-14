@@ -1,6 +1,7 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
 #include "VSLog.h"
 
 #include "Ship.h"
@@ -159,6 +160,7 @@ void Ship::Load(Serializer::Reader &rd, Space *space)
 	m_aiMessage = AIError(rd.Int32());
 	SetFuel(rd.Double());
 	m_stats.fuel_tank_mass_left = GetShipType()->fuelTankMass * GetFuel();
+	//m_stats.hydrogen_tank_left = GetShipType()->hydrogenTank;
 	m_reserveFuel = rd.Double();
 	UpdateStats(); // this is necessary, UpdateStats() in Ship::Init has wrong values of m_thrusterFuel after Load
 
@@ -167,6 +169,7 @@ void Ship::Load(Serializer::Reader &rd, Space *space)
 	p.Set("hullPercent", 100.0f * (m_stats.hull_mass_left / float(m_type->hullMass)));
 	p.Set("shieldMassLeft", m_stats.shield_mass_left);
 	p.Set("fuelMassLeft", m_stats.fuel_tank_mass_left);
+	//p.Set("hydrogenTank", m_stats.hydrogen_tank_left);
 
 	m_controller = 0;
 	const ShipController::Type ctype = static_cast<ShipController::Type>(rd.Int32());
@@ -377,7 +380,8 @@ void Ship::UpdateMass()
 
 void Ship::SetFuel(const double f)
 {
-	m_thrusterFuel = Clamp(f, 0.0, 1.0);
+	//m_thrusterFuel = Clamp(f, 0.0, 1.0);
+	m_thrusterFuel = 1.0; // Normal fuel is removed
 	Properties().Set("fuel", m_thrusterFuel*100); // XXX to match SetFuelPercent
 }
 
@@ -387,6 +391,58 @@ double Ship::GetSpeedReachedWithFuel() const
 	const double fuelmass = 1000*GetShipType()->fuelTankMass * (m_thrusterFuel - m_reserveFuel);
 	if (fuelmass < 0) return 0.0;
 	return GetShipType()->effectiveExhaustVelocity * log(GetMass()/(GetMass()-fuelmass));
+}
+
+int Ship::GetHydrogenCapacity() const
+{
+	return m_equipment.GetSlotSize(Equip::SLOT_HYDROGENTANK);
+}
+
+int Ship::GetHydrogen() const
+{
+	return m_equipment.Count(Equip::SLOT_HYDROGENTANK, Equip::HYDROGEN);
+}
+
+int Ship::GetHydrogenFree() const
+{
+	return m_equipment.FreeSpace(Equip::SLOT_HYDROGENTANK);
+}
+
+double Ship::GetHydrogenPercentage() const
+{
+	return floor(100.0 * GetHydrogen() / static_cast<double>(GetHydrogenCapacity()));
+}
+
+int Ship::AddHydrogenUnits(int num)
+{
+	assert(num >= 0);
+	int actual_add = std::min(num, GetHydrogenFree());
+	if (actual_add > 0) {
+		m_equipment.Add(Equip::HYDROGEN, actual_add);
+	}
+	return actual_add;
+}
+
+int Ship::RemoveHydrogenUnits(int num)
+{
+	assert(num >= 0);
+	int actual_remove = std::min(num, GetHydrogen());
+	if(actual_remove > 0) {
+		m_equipment.Remove(Equip::HYDROGEN, actual_remove);
+	}
+	return actual_remove;
+}
+
+void Ship::SetHydrogenUnits(int hydrogen)
+{
+	assert(hydrogen >= 0);
+	int actual_add = std::min(hydrogen, GetHydrogenCapacity()) - GetHydrogen();
+	if (actual_add > 0) {
+		m_equipment.Add(Equip::HYDROGEN, actual_add);
+	} else if(actual_add < 0) {
+		m_equipment.Remove(Equip::HYDROGEN, abs(actual_add));
+	}
+	Properties().Set("hydrogen", GetHydrogenPercentage());
 }
 
 bool Ship::OnDamage(Object *attacker, float kgDamage, const CollisionContact& contactData)
@@ -462,8 +518,10 @@ bool Ship::OnCollision(Object *b, Uint32 flags, double relVel)
 		Pi::game->GetSpace()->KillBody(dynamic_cast<Body*>(b));
 		m_equipment.Add(item);
 		UpdateEquipStats();
-		if (this->IsType(Object::PLAYER))
-			Pi::Message(stringf(Lang::CARGO_SCOOP_ACTIVE_1_TONNE_X_COLLECTED, formatarg("item", Equip::types[item].name)));
+		if (this->IsType(Object::PLAYER)) {
+			//Pi::Message(stringf(Lang::CARGO_SCOOP_ACTIVE_1_TONNE_X_COLLECTED, formatarg("item", Equip::types[item].name)));
+			Pi::game->log->Add(stringf(Lang::CARGO_SCOOP_ACTIVE_1_TONNE_X_COLLECTED, formatarg("item", Equip::types[item].name)));
+		}
 		// XXX Sfx::Add(this, Sfx::TYPE_SCOOP);
 		return true;
 	}
@@ -519,7 +577,7 @@ void Ship::SetThrusterState(const vector3d &levels)
 	}
 }
 
-void Ship::SetThrusterState(int axis, double level) 
+void Ship::SetThrusterState(int axis, double level)
 {
 	if (m_thrusterFuel <= 0.f) level = 0.0;
 	m_thrusters[axis] = Clamp(level, -1.0, 1.0);
@@ -609,13 +667,13 @@ double Ship::GetAccelMin() const
 
 double Ship::GetAccelFwd() const {
 	FlightControlState current_flight_mode = Pi::player->GetPlayerController()->GetFlightControlState();
-	if ((m_curAICmd != 0 || current_flight_mode == CONTROL_MANEUVER || current_flight_mode == CONTROL_TRANSIT) && GetVelocity().Length() > 1000) { 
+	if ((m_curAICmd != 0 || current_flight_mode == CONTROL_MANEUVER || current_flight_mode == CONTROL_TRANSIT) && GetVelocity().Length() > 1000) {
 		return std::min(m_juice, 1.0 + GetVelocity().Length() * 0.004) * -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 	}
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
 		return m_juice * -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 	}
-	return -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass(); 
+	return -m_type->linThrust[ShipType::THRUSTER_FORWARD] / GetMass();
 }
 double Ship::GetAccelRev() const {
 	FlightControlState current_flight_mode = Pi::player->GetPlayerController()->GetFlightControlState();
@@ -625,7 +683,7 @@ double Ship::GetAccelRev() const {
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
 		return m_juice*m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
 	}
-	return m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass(); 
+	return m_type->linThrust[ShipType::THRUSTER_REVERSE] / GetMass();
 }
 double Ship::GetAccelUp() const {
 	FlightControlState current_flight_mode = Pi::player->GetPlayerController()->GetFlightControlState();
@@ -635,7 +693,7 @@ double Ship::GetAccelUp() const {
 	if (GetShipType()->tag == ShipType::TAG_STATIC_SHIP) {
 		return m_juice * m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
 	}
-	return m_type->linThrust[ShipType::THRUSTER_UP] / GetMass(); 
+	return m_type->linThrust[ShipType::THRUSTER_UP] / GetMass();
 }
 
 void Ship::ClearThrusterState()
@@ -662,8 +720,15 @@ void Ship::UpdateEquipStats()
 	for (int i=0; i<Equip::SLOT_MAX; i++) {
 		for (int j=0; j<m_type->equipSlotCapacity[i]; j++) {
 			Equip::Type t = m_equipment.Get(Equip::Slot(i), j);
-			if (t) m_stats.used_capacity += Equip::types[t].mass;
-			if (Equip::Slot(i) == Equip::SLOT_CARGO) m_stats.used_cargo += Equip::types[t].mass;
+			if(Equip::Slot(i) == Equip::SLOT_HYDROGENTANK) {
+				continue;
+			}
+			if (t) {
+				m_stats.used_capacity += Equip::types[t].mass;
+			}
+			if (Equip::Slot(i) == Equip::SLOT_CARGO) {
+				m_stats.used_cargo += Equip::types[t].mass;
+			}
 		}
 	}
 	m_stats.free_capacity = m_type->capacity - m_stats.used_capacity;
@@ -688,6 +753,7 @@ void Ship::UpdateEquipStats()
 	UpdateFuelStats();
 
 	Equip::Type fuelType = GetHyperdriveFuelType();
+	Equip::Slot fuelSlot = Equip::SLOT_HYDROGENTANK;
 
 	m_stats.hyperspace_range = m_stats.hyperspace_range_max = 0;
 	if (m_type->equipSlotCapacity[Equip::SLOT_ENGINE]) {
@@ -695,7 +761,8 @@ void Ship::UpdateEquipStats()
 		int hyperclass = Equip::types[t].pval;
 		if (hyperclass) {
 			m_stats.hyperspace_range_max = Pi::CalcHyperspaceRangeMax(hyperclass, GetMass()/1000);
-			m_stats.hyperspace_range = Pi::CalcHyperspaceRange(hyperclass, GetMass()/1000, m_equipment.Count(Equip::SLOT_CARGO, fuelType));
+			m_stats.hyperspace_range = Pi::CalcHyperspaceRange(hyperclass, GetMass() / 1000,
+				m_equipment.Count(fuelSlot, fuelType));
 		}
 	}
 
@@ -706,6 +773,7 @@ void Ship::UpdateEquipStats()
 void Ship::UpdateFuelStats()
 {
 	m_stats.fuel_tank_mass_left = m_type->fuelTankMass * GetFuel();
+	//m_stats.hydrogen_tank_left = m_type->hydrogenTank;
 	Properties().Set("fuelMassLeft", m_stats.fuel_tank_mass_left);
 
 	UpdateMass();
@@ -742,8 +810,9 @@ Ship::HyperjumpStatus Ship::GetHyperspaceDetails(const SystemPath &src, const Sy
 	if (!m_hyperspace.ignoreFuel) {
 		Equip::Type t = m_equipment.Get(Equip::SLOT_ENGINE);
 		Equip::Type fuelType = GetHyperdriveFuelType();
+		Equip::Slot fuelSlot = Equip::SLOT_HYDROGENTANK;
 		int hyperclass = Equip::types[t].pval;
-		int fuel = m_equipment.Count(Equip::SLOT_CARGO, fuelType);
+		int fuel = GetHydrogen();
 		if (hyperclass == 0)
 			return HYPERJUMP_NO_DRIVE;
 
@@ -1056,6 +1125,7 @@ void Ship::DoThrusterSounds() const
 	float thruster_ang = GetAngThrusterState().Length();
 	float v_env = (Pi::worldView->GetCameraController()->IsExternal() ? 1.0f : 0.5f) * Sound::GetSfxVolume();
 	static Sound::Event sndev;
+	static Sound::Event snd_thrusterloop;
 	float volBoth = 0.0f;
 	volBoth += 0.5f*fabs(thruster_y);
 	volBoth += 0.5f*fabs(thruster_z);
@@ -1071,6 +1141,18 @@ void Ship::DoThrusterSounds() const
 	if (!sndev.VolumeAnimate(targetVol, dv_dt)) {
 		sndev.Play("Thruster_large", 0.0f, 0.0f, Sound::OP_REPEAT);
 		sndev.VolumeAnimate(targetVol, dv_dt);
+	}
+
+	float ship_velocity = GetVelocity().Length();
+	float tvol;
+	if(ship_velocity >= 1.0f || ship_velocity <= -1.0f) {
+		tvol = 1.0f * v_env;
+	} else {
+		tvol = 0.0f;
+	}
+	if(!snd_thrusterloop.VolumeAnimate(tvol, tvol, dv_dt[0], dv_dt[1])) {
+		snd_thrusterloop.Play("Thruster_loop", 0.0f, 0.0f, Sound::OP_REPEAT);
+		snd_thrusterloop.VolumeAnimate(tvol, tvol, dv_dt[0], dv_dt[1]);
 	}
 	float angthrust = 0.1f * v_env * thruster_ang;
 
@@ -1279,7 +1361,8 @@ void Ship::UpdateFuel(const float timeStep, const vector3d &thrust)
 		/ -GetShipType()->linThrust[ShipType::THRUSTER_FORWARD]*std::min(m_juice,8.0);
 
 	FuelState lastState = GetFuelState();
-	SetFuel(GetFuel() - timeStep * (totalThrust * fuelUseRate));
+	//SetFuel(GetFuel() - timeStep * (totalThrust * fuelUseRate));
+	SetFuel(1.0);
 	FuelState currentState = GetFuelState();
 
 	UpdateFuelStats();
@@ -1342,12 +1425,16 @@ void Ship::StaticUpdate(const float timeStep)
 				if ((m_stats.free_capacity) && (dot > 0.95) && (speed > 2000.0) && (density > 0.0)) {
 					double rate = speed*density*0.0003f;
 					if (Pi::rng.Double() < rate) {
-						m_equipment.Add(Equip::HYDROGEN);
-						if (GetFuel()<1.0) SetFuel(GetFuel()+0.01);
+						//m_equipment.Add(Equip::HYDROGEN);
+						AddHydrogenUnits(1);
+						//if (GetFuel()<1.0) {
+						//	SetFuel(GetFuel()+0.01);
+						//}
 						UpdateEquipStats();
 						if (this->IsType(Object::PLAYER)) {
-							Pi::Message(stringf(Lang::FUEL_SCOOP_ACTIVE_N_TONNES_H_COLLECTED,
-									formatarg("quantity", m_equipment.Count(Equip::SLOT_CARGO, Equip::HYDROGEN))));
+							//Pi::Message(stringf(Lang::FUEL_SCOOP_ACTIVE_N_TONNES_H_COLLECTED,
+							Pi::game->log->Add(stringf(Lang::FUEL_SCOOP_ACTIVE_N_TONNES_H_COLLECTED,
+								formatarg("quantity", GetHydrogen())));
 						}
 					}
 				}
@@ -1367,7 +1454,8 @@ void Ship::StaticUpdate(const float timeStep)
 			if (m_equipment.Remove(t, 1)) {
 				m_equipment.Add(Equip::FERTILIZER);
 				if (this->IsType(Object::PLAYER)) {
-					Pi::Message(Lang::CARGO_BAY_LIFE_SUPPORT_LOST);
+					//Pi::Message(Lang::CARGO_BAY_LIFE_SUPPORT_LOST);
+					Pi::game->log->Add(Lang::CARGO_BAY_LIFE_SUPPORT_LOST);
 				}
 			}
 		}
@@ -1503,7 +1591,7 @@ void Ship::SetFlightMode(EFlightMode m)
 		}
 		m_flightMode = m;
 		switch (m_flightMode) {
-			case EFM_MANEUVER: 
+			case EFM_MANEUVER:
 				GetController()->SetSpeedLimit(GetMaxManeuverSpeed());
 				break;
 
@@ -1543,7 +1631,7 @@ void Ship::StopTransitDrive()
 	}
 }
 
-void Ship::SetTransitState(TransitState transitstate) 
+void Ship::SetTransitState(TransitState transitstate)
 {
 	m_transitstate = transitstate;
 	switch (m_transitstate) {
@@ -1581,7 +1669,7 @@ void Ship::ManeuverVelocity()
 	// No thrust if ship is at max maneuver speed, otherwise due to thrust limiter jitter will occur
 	current_speed = GetVelocity().Length();
 	if (current_speed >= GetMaxManeuverSpeed() ||
-		current_speed <= -GetMaxManeuverSpeed()) 
+		current_speed <= -GetMaxManeuverSpeed())
 	{
 		v = vector3d(0.0, 0.0, 0.0);
 	}
@@ -1892,6 +1980,8 @@ void Ship::EnterHyperspace() {
 		}
 
 		Equip::Type fuelType = GetHyperdriveFuelType();
+		Equip::Slot fuelSlot = Equip::SLOT_HYDROGENTANK;
+
 		m_equipment.Remove(fuelType, fuel_cost);
 		if (fuelType == Equip::MILITARY_FUEL) {
 			m_equipment.Add(Equip::RADIOACTIVES, fuel_cost);
@@ -1993,14 +2083,14 @@ void Ship::SetRelations(Body *other, Uint8 percent)
 	m_relationsMap[other] = percent;
 }
 
-void Ship::UpdateThrusterTrails(float time) 
-{ 
+void Ship::UpdateThrusterTrails(float time)
+{
 	for(unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
-		m_thrusterTrails[i]->Update(time); 
+		m_thrusterTrails[i]->Update(time);
 	}
 }
 
-void Ship::ClearThrusterTrails() { 
+void Ship::ClearThrusterTrails() {
 	if (GetFlightState() != FlightState::HYPERSPACE) {
 		for (unsigned i = 0; i < m_thrusterTrails.size(); ++i) {
 			if (m_thrusterTrails[i]) {
@@ -2009,4 +2099,3 @@ void Ship::ClearThrusterTrails() {
 		}
 	}
 }
-

@@ -1,3 +1,7 @@
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
+// Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
+
 // EFFECT: TONEMAPPING
 
 // An effect that applies defogging, exposure, gamma, vignette, and blue shift corrections.
@@ -41,6 +45,6 @@ void main()
 
     vec3 d = c.rgb * vec3(1.05, 0.97, 1.27);
     c.rgb = mix(c.rgb, d, u_blueShift);
-    
+
 	o_FragColor = c;
 }

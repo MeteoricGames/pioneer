@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaEngine.h"
@@ -19,6 +20,7 @@
 #include "Lang.h"
 #include "Player.h"
 #include "scenegraph/Model.h"
+#include "Game.h"
 
 /*
  * Interface: Engine
@@ -359,42 +361,6 @@ static int l_engine_set_display_target_indicators(lua_State *l)
 	return 0;
 }
 
-static int l_engine_get_post_processing(lua_State *l)
-{
-	lua_pushboolean(l, Pi::config->Int("PostProcessing") != 0);
-	return 1;
-}
-
-static int l_engine_set_post_processing(lua_State *l)
-{
-	if(lua_isnone(l, 1))
-		return luaL_error(l, "EnablePostProcessing takes one boolean argument");
-	const bool enabled = lua_toboolean(l, 1);
-	Pi::config->SetInt("PostProcessing", (enabled ? 1 : 0));
-	Pi::config->Save();
-	Pi::SetPostProcessingEnabled(enabled);
-	return 0;
-}
-static int l_engine_get_cockpit_enabled(lua_State *l)
-{
-	lua_pushboolean(l, Pi::config->Int("EnableCockpit") != 0);
-	return 1;
-}
-
-static int l_engine_set_cockpit_enabled(lua_State *l)
-{
-	if (lua_isnone(l, 1))
-		return luaL_error(l, "SetCockpitEnabled takes one boolean argument");
-	const bool enabled = lua_toboolean(l, 1);
-	Pi::config->SetInt("EnableCockpit", (enabled ? 1 : 0));
-	Pi::config->Save();
-	if (Pi::player) {
-		Pi::player->InitCockpit();
-		if (enabled) Pi::player->OnCockpitActivated();
-	}
-	return 0;
-}
-
 static void set_master_volume(const bool muted, const float volume)
 {
 	Sound::Pause(muted || is_zero_exact(volume));
@@ -730,6 +696,118 @@ static int l_engine_set_joystick_enabled(lua_State *l)
 	return 0;
 }
 
+/*
+		{ "GetJoystickCount", l_engine_get_joystick_count },
+		{"GetJoystickName", l_engine_get_joystick_name},
+*/
+static int l_engine_get_joystick_count(lua_State *l)
+{
+	lua_pushinteger(l, Pi::GetJoystickCount());
+	return 1;
+}
+
+static int l_engine_get_joystick_name(lua_State *l)
+{
+	if (lua_isnone(l, 1))
+		return luaL_error(l, "GetJoystickName is not given a joystick index");
+	int idx = lua_tointeger(l, 1);
+	if (idx < Pi::GetJoystickCount()) {
+		lua_pushstring(l, Pi::GetJoystickName(idx).c_str());
+	} else {
+		return luaL_error(l, "GetJoystickName is not given a valid joystick index");
+	}
+	return 1;
+}
+
+static int l_engine_get_joystick_axis_count(lua_State *l)
+{
+	if (lua_isnone(l, 1))
+		return luaL_error(l, "GetJoystickAxisCount is not given a joystick index");
+	int idx = lua_tointeger(l, 1);
+	if(idx < Pi::GetJoystickCount()) {
+		lua_pushinteger(l, Pi::GetJoystickAxisCount(idx));
+	} else {
+		return luaL_error(l, "GetJoystickAxisCount is not given a valid joystick index");
+	}
+	return 1;
+}
+
+static int l_engine_get_active_joystick(lua_State *l)
+{
+	lua_pushinteger(l, Pi::GetActiveJoystick());
+	return 1;
+}
+
+static int l_engine_set_active_joystick(lua_State *l)
+{
+	if(lua_isnone(l, 1)) {
+		return luaL_error(l, "SetActiveJoystick is not given a joystick index");
+	}
+	int jid = lua_tointeger(l, 1);
+	if(jid < Pi::GetJoystickCount()) {
+		Pi::SetActiveJoystick(jid);
+	} else {
+		return luaL_error(l, "SetActiveJoystick is not given a valid joystick index");
+	}
+	return 0;
+}
+
+static int l_engine_get_joystick_axis_invert_state(lua_State *l)
+{
+	if(lua_isnone(l, 1)) {
+		return luaL_error(l, "GetJoystickAxisInvertState is not given axis index");
+	}
+	int aid = lua_tointeger(l, 1);
+	if(aid < Pi::GetJoystickAxisCount(Pi::GetActiveJoystick())) {
+		lua_pushboolean(l, Pi::GetJoystickAxisInvertState(aid));
+	} else {
+		return luaL_error(l, "GetJoystickAxisInvertState requires 2 integer arguments");
+	}
+	return 1;
+}
+
+static int l_engine_set_joystick_axis_invert_state(lua_State *l)
+{
+	if (lua_isnone(l, 2) || lua_isnone(l, 1)) {
+		return luaL_error(l, "GetJoystickAxisInvertState is given less than 2 arguments (axis index, invert state)");
+	}
+	int aid = lua_tointeger(l, 1);
+	bool b = lua_toboolean(l, 2);
+	Pi::SetJoystickAxisInvertState(aid, b);
+	return 0;
+}
+
+static int l_engine_read_joystick_axis_value(lua_State *l)
+{
+	if (lua_isnone(l, 1)) {
+		return luaL_error(l, "ReadJoystickAxisValue not given an axis index");
+	}
+	int aid = lua_tointeger(l, 1);
+	lua_pushinteger(l, Pi::ReadJoystickAxisValue(aid));
+	return 1;
+}
+
+static int l_engine_get_joystick_axis_deadzone(lua_State *l)
+{
+	if(lua_isnone(l, 1)) {
+		return luaL_error(l, "GetJoystickAxisDeadZone not given axis id");
+	}
+	int aid = lua_tointeger(l, 1);
+	lua_pushinteger(l, Pi::GetJoystickAxisDeadZone(aid));
+	return 1;
+}
+
+static int l_engine_set_joystick_axis_deadzone(lua_State *l)
+{
+	if(lua_isnone(l, 2) || lua_isnone(l, 1)) {
+		return luaL_error(l, "SetJoystickAxisDeadZone not given enough arguments");
+	}
+	int aid = lua_tointeger(l, 1);
+	int dz = lua_tointeger(l, 2);
+	Pi::SetJoystickAxisDeadZone(aid, dz);
+	return 0;
+}
+
 static int l_engine_get_model(lua_State *l)
 {
 	const std::string name(luaL_checkstring(l, 1));
@@ -738,11 +816,109 @@ static int l_engine_get_model(lua_State *l)
 	return 1;
 }
 
+static int l_engine_get_timer(lua_State *l)
+{
+	lua_pushnumber(l, Pi::GetLazyTimer());
+	return 1;
+}
+
 static int l_engine_update_loading_emit(lua_State *l)
 {
 	float total = luaL_checknumber(l, 1);
 	float current = luaL_checknumber(l, 2);
 	Pi::PreStartUpdateProgress(total, current);
+	return 0;
+}
+
+static int l_engine_get_cockpit_enabled(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("EnableCockpit") != 0);
+	return 1;
+}
+
+static int l_engine_set_cockpit_enabled(lua_State *l)
+{
+	if (lua_isnone(l, 1))
+		return luaL_error(l, "SetCockpitEnabled takes one boolean argument");
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("EnableCockpit", (enabled ? 1 : 0));
+	Pi::config->Save();
+	if (Pi::player) {
+		Pi::player->InitCockpit();
+		if (enabled) Pi::player->OnCockpitActivated();
+	}
+	return 0;
+}
+
+static int l_engine_get_post_processing(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("PostProcessing") != 0);
+	return 1;
+}
+
+static int l_engine_set_post_processing(lua_State *l)
+{
+	if (lua_isnone(l, 1))
+		return luaL_error(l, "EnablePostProcessing takes one boolean argument");
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("PostProcessing", (enabled ? 1 : 0));
+	Pi::config->Save();
+	Pi::SetPostProcessingEnabled(enabled);
+	return 0;
+}
+
+// Experimental Post-processing effects
+static int l_engine_get_chromaticaberration_enabled(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("EnableChromaticAberration") != 0);
+	return 1;
+}
+
+static int l_engine_set_chromaticaberration_enabled(lua_State *l)
+{
+	if (lua_isnone(l, 1)) {
+		return luaL_error(l, "SetExpChromaticAberrationEnabled takes one boolean argument");
+	}
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("EnableChromaticAberration", (enabled ? 1 : 0));
+	Pi::config->Save();
+	Pi::SetExpChromaticAberrationEnabled(enabled);
+	return 0;
+}
+
+static int l_engine_get_scanlines_enabled(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("EnableScanlines") != 0);
+	return 1;
+}
+
+static int l_engine_set_scanlines_enabled(lua_State *l)
+{
+	if (lua_isnone(l, 1)) {
+		return luaL_error(l, "SetExpScanlinesEnabled takes one boolean argument");
+	}
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("EnableScanlines", (enabled ? 1 : 0));
+	Pi::config->Save();
+	Pi::SetExpScanlinesEnabled(enabled);
+	return 0;
+}
+
+static int l_engine_get_filmgrain_enabled(lua_State *l)
+{
+	lua_pushboolean(l, Pi::config->Int("EnableFilmGrain") != 0);
+	return 1;
+}
+
+static int l_engine_set_filmgrain_enabled(lua_State *l)
+{
+	if (lua_isnone(l, 1)) {
+		return luaL_error(l, "SetExpFilmGrainEnabled takes one boolean argument");
+	}
+	const bool enabled = lua_toboolean(l, 1);
+	Pi::config->SetInt("EnableFilmGrain", (enabled ? 1 : 0));
+	Pi::config->Save();
+	Pi::SetExpFilmGrainEnabled(enabled);
 	return 0;
 }
 
@@ -790,6 +966,13 @@ void LuaEngine::Register()
 		{ "GetCockpitEnabled", l_engine_get_cockpit_enabled },
 		{ "SetCockpitEnabled", l_engine_set_cockpit_enabled },
 
+		{ "GetExpChromaticAberrationEnabled", l_engine_get_chromaticaberration_enabled },
+		{ "SetExpChromaticAberrationEnabled", l_engine_set_chromaticaberration_enabled },
+		{ "GetExpScanlinesEnabled", l_engine_get_scanlines_enabled },
+		{ "SetExpScanlinesEnabled", l_engine_set_scanlines_enabled },
+		{ "GetExpFilmGrainEnabled", l_engine_get_filmgrain_enabled },
+		{ "SetExpFilmGrainEnabled", l_engine_set_filmgrain_enabled },
+
 		{ "GetMasterMuted", l_engine_get_master_muted },
 		{ "SetMasterMuted", l_engine_set_master_muted },
 		{ "GetMasterVolume", l_engine_get_master_volume },
@@ -808,10 +991,22 @@ void LuaEngine::Register()
 		{ "ResetKeyBindings", l_engine_reset_key_bindings },
 		{ "GetMouseYInverted", l_engine_get_mouse_y_inverted },
 		{ "SetMouseYInverted", l_engine_set_mouse_y_inverted },
+
+		{ "GetActiveJoystick", l_engine_get_active_joystick },
+		{ "SetActiveJoystick", l_engine_set_active_joystick },
 		{ "GetJoystickEnabled", l_engine_get_joystick_enabled },
 		{ "SetJoystickEnabled", l_engine_set_joystick_enabled },
+		{ "GetJoystickCount", l_engine_get_joystick_count },
+		{ "GetJoystickName", l_engine_get_joystick_name },
+		{ "GetJoystickAxisCount", l_engine_get_joystick_axis_count },
+		{ "GetJoystickAxisInvertState", l_engine_get_joystick_axis_invert_state },
+		{ "SetJoystickAxisInvertState", l_engine_set_joystick_axis_invert_state },
+		{ "ReadJoystickAxisValue", l_engine_read_joystick_axis_value },
+		{ "GetJoystickAxisDeadZone", l_engine_get_joystick_axis_deadzone },
+		{ "SetJoystickAxisDeadZone", l_engine_set_joystick_axis_deadzone },
 
 		{ "GetModel", l_engine_get_model },
+		{ "GetTimer", l_engine_get_timer },
 
 		// Used to update loading gauge before game starts
 		{ "UpdateLoadingEmit", l_engine_update_loading_emit },
