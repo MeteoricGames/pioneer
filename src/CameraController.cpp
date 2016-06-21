@@ -50,8 +50,8 @@ InternalCameraController::InternalCameraController(RefCountedPtr<CameraContext> 
 	CameraController(camera, ship),
 	m_mode(MODE_FRONT),
 	m_dist(200), m_distTo(m_dist),
-	m_rotX(0),
-	m_rotY(0),
+	m_rotX(0.0),
+	m_rotY(0.0),
 	m_flDir(0.0, 0.0),
 	m_flResetTimer(0.0f)
 {
@@ -288,11 +288,12 @@ void InternalCameraController::Load(Serializer::Reader &rd)
 //-------------------------------------------------------------------- ExternalCameraController
 ExternalCameraController::ExternalCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship) :
 	CameraController(camera, ship),
-	m_dist(200), m_distTo(m_dist),
-	m_rotX(0),
+	m_dist(100), m_distTo(m_dist),
+	m_rotX(-45),
 	m_rotY(0),
 	m_extOrient(matrix3x3d::Identity())
 {
+
 }
 
 void ExternalCameraController::RotateUp(float frameTime)
@@ -341,7 +342,7 @@ void ExternalCameraController::ZoomEventUpdate(float frameTime)
 
 void ExternalCameraController::Reset()
 {
-	m_dist = 200;
+	m_dist = 100;
 	m_distTo = m_dist;
 }
 
@@ -387,11 +388,18 @@ void ExternalCameraController::Load(Serializer::Reader &rd)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------- SiderealCameraController
 SiderealCameraController::SiderealCameraController(RefCountedPtr<CameraContext> camera, const Ship *ship) :
 	CameraController(camera, ship),
-	m_dist(200), m_distTo(m_dist),
-	m_sidOrient(matrix3x3d::Identity())
+	m_dist(100), m_distTo(m_dist)
 {
+	m_sidOrient = GetShip()->GetOrientRelTo(Pi::game->GetSpace()->GetRootFrame());
+	const vector3d rotx = m_sidOrient.VectorX();
+	const vector3d roty = m_sidOrient.VectorY();
+	const vector3d rotz = m_sidOrient.VectorZ();
+	m_sidOrient = matrix3x3d::Rotate(-90.0 * M_PI / 180.0, roty) * m_sidOrient;
+	m_sidOrient = matrix3x3d::Rotate(-45.0 * M_PI / 180.0, rotz) * m_sidOrient;
 }
 
 void SiderealCameraController::RotateUp(float frameTime)
@@ -456,8 +464,15 @@ void SiderealCameraController::RollRight(float frameTime)
 
 void SiderealCameraController::Reset()
 {
-	m_dist = 200;
+	m_dist = 100;
 	m_distTo = m_dist;
+
+	m_sidOrient = GetShip()->GetOrientRelTo(Pi::game->GetSpace()->GetRootFrame());
+	const vector3d rotx = m_sidOrient.VectorX();
+	const vector3d roty = m_sidOrient.VectorY();
+	const vector3d rotz = m_sidOrient.VectorZ();
+	m_sidOrient = matrix3x3d::Rotate(-90.0 * M_PI / 180.0, roty) * m_sidOrient;
+	m_sidOrient = matrix3x3d::Rotate(-45.0 * M_PI / 180.0, rotz) * m_sidOrient;
 }
 
 void SiderealCameraController::Update()

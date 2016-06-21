@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Omni Scout',
+	name='Xian Scout',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'xian',
 	model='omni_ultralight1',
 	forward_thrust = 165e5,
 	reverse_thrust = 165e5,

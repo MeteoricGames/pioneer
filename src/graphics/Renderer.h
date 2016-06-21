@@ -12,6 +12,7 @@
 #include <stack>
 #include <memory>
 #include "graphics/GraphicsHardware.h"
+#include "PostProcessLayer.h"
 
 #define MATERIAL_MAX_LIGHTS 4
 
@@ -40,12 +41,14 @@ struct RenderTargetDesc;
 
 namespace GL3 { class Effect; }
 
-enum class MatrixMode {
+enum class MatrixMode 
+{
 	MODELVIEW,
 	PROJECTION
 };
 
-enum class CullMode {
+enum class CullMode 
+{
 	FRONT,
 	BACK,
 	FRONT_AND_BACK,
@@ -70,7 +73,7 @@ public:
 
 	virtual bool BeginFrame() = 0;
 	virtual bool EndFrame() = 0;
-	virtual bool BeginPostProcessing(RenderTarget* rt_device = nullptr) = 0;
+	virtual bool BeginPostProcessing(RenderTarget* rt_device = nullptr, PostProcessLayer layer = EPP_LAYER_GAME) = 0;
 	virtual bool PostProcessFrame(PostProcess* postprocess = nullptr) = 0;
 	virtual bool EndPostProcessing() = 0;
 	//traditionally gui happens between endframe and swapbuffers

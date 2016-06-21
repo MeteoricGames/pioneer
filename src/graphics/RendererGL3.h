@@ -20,6 +20,8 @@ namespace Graphics {
 
 class Texture;
 struct Settings;
+enum PostProcessingLayer : int;
+
 namespace GL3 { 
 	class Effect;
 	class Program;
@@ -41,7 +43,7 @@ public:
 	virtual bool GetNearFarRange(float &near, float &far) const;
 
 	virtual bool BeginFrame();
-	virtual bool BeginPostProcessing(RenderTarget* rt_device);
+	virtual bool BeginPostProcessing(RenderTarget* rt_device, PostProcessLayer layer = EPP_LAYER_GAME);
 	virtual bool PostProcessFrame(PostProcess* postprocess);
 	virtual bool EndPostProcessing();
 	virtual bool EndFrame();
@@ -124,6 +126,8 @@ protected:
 	//also sets vertex pointers
 	void EnableClientStates(const VertexArray*);
 	void EnableClientStates(const VertexBuffer*);
+	void CheckAndSetRenderState(RenderState* rs);
+	void SetFullscreenRenderState(RenderState* rs);
 	//disable previously enabled
 	virtual void DisableClientStates();
 	int m_numLights;
@@ -133,6 +137,7 @@ protected:
 	float m_minZNear;
 	float m_maxZFar;
 	bool m_useCompressedTextures;
+	bool m_customRenderState = true;
 
 	matrix4x4f& GetCurrentTransform() { return m_currentTransform; }
 	matrix4x4f m_currentTransform;

@@ -34,6 +34,8 @@ namespace Gui {
 		void SetTransparency(bool a) { m_transparent = a; }
 		virtual void UpdateAllChildSizes() = 0;
 		void RemoveChild(Widget *w);
+		virtual void ResizeToFitChildren();
+		virtual void GetChildrenSize(float size[2]);
 		// only fired if child widgets do not eat event
 		sigc::signal<void, MouseButtonEvent*> onMouseButtonEvent;
 	private:

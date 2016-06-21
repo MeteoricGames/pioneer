@@ -204,11 +204,11 @@ void UniverseBox::LoadCubeMap(Random* randomizer)
 	UniverseBox::s_cubeMap = s_emptyCube;
 	
 	if(randomizer) {
-		int new_ubox_index = randomizer->Int32(0, 4);
-		if(new_ubox_index > 0) {
+		int new_ubox_index = randomizer->Int32(0, 9);
+		if(new_ubox_index >= 0) {
 			// Load new one
 			std::ostringstream os;
-			os << "textures/cube/ub" << (new_ubox_index - 1) << ".dds";
+			os << "textures/cube/ub" << (new_ubox_index) << ".dds";
 			TextureBuilder texture_builder = TextureBuilder::Cube(os.str().c_str());
 			m_cubemap.reset(texture_builder.CreateTexture(m_renderer));
 			UniverseBox::s_cubeMap = m_cubemap.get();

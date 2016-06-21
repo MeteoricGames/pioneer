@@ -1,4 +1,5 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// d*
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
@@ -36,6 +37,7 @@
 #include "gui/GuiVScrollPortal.h"
 #include "gui/GuiFixed.h"
 #include "MainMaterial.h"
+#include "Tweaker.h"
 
 const double WorldView::PICK_OBJECT_RECT_SIZE = 20.0;
 static const Color s_hudTextColor(0,255,0,230);
@@ -44,13 +46,19 @@ static const float WHEEL_SENSITIVITY = .05f;	// Should be a variable in user set
 
 static const float HUD_CROSSHAIR_SIZE	= 10.0f;
 static const Uint8 HUD_ALPHA			= 87;
+static const Uint8 CONTACT_LIST_LIMIT   = 4;
+static Uint32 m_fastTravelTimeout = 0;
 static const float HUD_RETICLE_SIZE_X	= 0.084f; // 162 / 1920
 static const float HUD_RETICLE_SIZE_Y	= 0.15;	  // 162 / 1080
+static bool isDocking = true;
+
+Body *m_fastTravelTarget = nullptr;
 
 static void autopilot_flyto(Body *b);
 static void autopilot_dock(Body *b);
 static void autopilot_orbit(Body *b, double alt);
 static void player_target_hypercloud(HyperspaceCloud *cloud);
+
 
 WorldView::WorldView(): UIView()
 {
@@ -73,6 +81,8 @@ static const float LOW_THRUST_LEVELS[] = { 0.75, 0.5, 0.25, 0.1, 0.05, 0.01 };
 
 void WorldView::InitObject()
 {
+	Graphics::Renderer* renderer = Gui::Screen::GetRenderer();
+
 	float size[2];
 	GetSizeRequested(size);
 
@@ -91,21 +101,22 @@ void WorldView::InitObject()
 
 	m_commsOptions = new Fixed(size[0], size[1]/2);
 	m_commsOptions->SetTransparency(true);
-	Add(m_commsOptions, 10, 200);
+	Add(m_commsOptions, 130, 200);
 
 	m_commsNavOptionsContainer = new Gui::HBox();
 	m_commsNavOptionsContainer->SetSpacing(5);
-	m_commsNavOptionsContainer->SetSizeRequest(220, size[1]-180);
-	Add(m_commsNavOptionsContainer, size[0] - 230, 165);
+	m_commsNavOptionsContainer->SetSizeRequest(130, size[1]-360);
+	Add(m_commsNavOptionsContainer, 10, size[1] / 2 - (size[1] - 360) / 2);
 
-	Gui::VScrollPortal *portal = new Gui::VScrollPortal(200);
-	Gui::VScrollBar *scroll = new Gui::VScrollBar();
-	scroll->SetAdjustment(&portal->vscrollAdjust);
-	m_commsNavOptionsContainer->PackStart(scroll);
+	Gui::VScrollPortal *portal = new Gui::VScrollPortal();
+	m_scroll = new Gui::NavVScrollBar();
+	m_scroll->SetAdjustment(&portal->vscrollAdjust);
+	m_commsNavOptionsContainer->PackStart(m_scroll);
 	m_commsNavOptionsContainer->PackStart(portal);
 
 	m_commsNavOptions = new Gui::VBox();
-	m_commsNavOptions->SetSpacing(5);
+	m_commsNavOptions->SetSpacing(2);
+	m_commsNavOptions->SetTransparency(true);
 	portal->Add(m_commsNavOptions);
 
 	m_lowThrustPowerOptions = new Gui::Fixed(size[0], size[1]/2);
@@ -170,9 +181,16 @@ void WorldView::InitObject()
 	// Jump button
 	m_flightJumpButton = new Gui::MultiStateImageButton();
 	m_flightJumpButton->SetShortcut(SDLK_F8, KMOD_NONE);
-	m_flightJumpButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/jump_unavailable.png", Lang::JUMP_CONTROL_UNAVAILABLE);
+	m_flightJumpButton->AddState(FLIGHT_BUTTON_UNAVAILABLE, "icons/jump_unavailable.png", 
+		Lang::JUMP_CONTROL_UNAVAILABLE);
 	m_flightJumpButton->AddState(FLIGHT_BUTTON_OFF, "icons/jump_off.png", Lang::JUMP_CONTROL_OFF);
 	m_flightJumpButton->AddState(FLIGHT_BUTTON_ON, "icons/jump_on.png", Lang::JUMP_CONTROL_ON);
+	m_flightJumpButton->AddState(FLIGHT_PHASE_BUTTON_UNAVAILABLE, "icons/phase_jump_unavailable.png", 
+		Lang::PHASE_JUMP_CONTROL_UNAVAILABLE);
+	m_flightJumpButton->AddState(FLIGHT_PHASE_BUTTON_OFF, "icons/phase_jump_off.png", 
+		Lang::PHASE_JUMP_CONTROL_OFF);
+	m_flightJumpButton->AddState(FLIGHT_PHASE_BUTTON_ON, "icons/phase_jump_on.png", 
+		Lang::PHASE_JUMP_CONTROL_ON);
 	m_flightJumpButton->onClick.connect(sigc::mem_fun(this, &WorldView::OnClickJumpButton));
 	m_flightJumpButton->SetRenderDimensions(30.0f, 22.0f);
 	m_rightButtonBar->Add(m_flightJumpButton, 98.0f, 2.0f);
@@ -328,19 +346,18 @@ void WorldView::InitObject()
 
 	// XXX m_renderer not set yet
 	Graphics::TextureBuilder b = Graphics::TextureBuilder::UI("icons/indicator_mousedir.png");
-	m_indicatorMousedir.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_indicatorMousedir.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 
 	const Graphics::TextureDescriptor &descriptor = b.GetDescriptor();
 	m_indicatorMousedirSize = vector2f(descriptor.dataSize.x*descriptor.texSize.x,descriptor.dataSize.y*descriptor.texSize.y);
 
 	// Reticle
 	b = Graphics::TextureBuilder::UI("icons/reticle.png");
-	m_reticle.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_reticle.reset(new Gui::TexturedQuad(renderer,
+		b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/reticle_target.png");
-	m_reticleTarget.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_reticleTarget.reset(new Gui::TexturedQuad(renderer,
+		b.GetOrCreateTexture(renderer, "ui")));
 
 	// Speedlines
 
@@ -361,6 +378,8 @@ void WorldView::InitObject()
 	m_siderealCameraController.reset(new SiderealCameraController(m_cameraContext, Pi::player));
 	SetCamType(m_camType); //set the active camera
 
+	DefineTweaks();
+
 	m_onHyperspaceTargetChangedCon =
 		Pi::sectorView->onHyperspaceTargetChanged.connect(sigc::mem_fun(this, &WorldView::OnHyperspaceTargetChanged));
 
@@ -376,41 +395,31 @@ void WorldView::InitObject()
 
 	// Hud2 Icons
 	b = Graphics::TextureBuilder::UI("icons/hud2/planet.png");
-	m_hud2Planet.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2Planet.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/settlement.png");
-	m_hud2Settlement.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2Settlement.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/ship.png");
-	m_hud2Ship.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2Ship.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/ship_indicator.png");
-	m_hud2ShipIndicator.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2ShipIndicator.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/ship_offscreen_indicator.png");
-	m_hud2ShipOffscreen.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2ShipOffscreen.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/star.png");
-	m_hud2Star.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2Star.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/station.png");
-	m_hud2Station.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(), 
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2Station.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
+	b = Graphics::TextureBuilder::UI("icons/hud2/wake.png");
+	m_hud2HyperspaceCloud.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/target_offscreen_selector.png");
-	m_hud2TargetOffscreen.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2TargetOffscreen.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/target_selector.png");
-	m_hud2TargetSelector.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2TargetSelector.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/hud2/unknown.png");
-	m_hud2Unknown.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2Unknown.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/missions/current_mission_up.png");
-	m_hud2CurrentMission1.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2CurrentMission1.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 	b = Graphics::TextureBuilder::UI("icons/missions/current_mission_down.png");
-	m_hud2CurrentMission2.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
-		b.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
+	m_hud2CurrentMission2.reset(new Gui::TexturedQuad(renderer, b.GetOrCreateTexture(renderer, "ui")));
 
 	// Tutorial	
 	if(!m_tutorialSeen) {
@@ -515,10 +524,19 @@ void WorldView::InitObject()
 	// Trail gradient texture
 	m_trailGradient = Graphics::TextureBuilder::UI("textures/exhaust_gradient.png").GetOrCreateTexture(m_renderer, "effect");
 
+    m_contactListContainer = new Gui::VBox();
+	Add(m_contactListContainer, size[0] - 110, size[1] - 15);
+    m_contactListButton = new Gui::ClickableLabel(new Gui::Label("test"));
+    m_contactListButton->onClick.connect(sigc::mem_fun(this, &WorldView::ToggleContactListSize));
+    m_contactListContainer->PackStart(m_contactListButton);
+    UpdateContactList();
+
+	DefineTweaks();
 }
 
 WorldView::~WorldView()
 {
+	RemoveTweaks();
 	m_onHyperspaceTargetChangedCon.disconnect();
 	m_onPlayerChangeTargetCon.disconnect();
 	m_onChangeFlightControlStateCon.disconnect();
@@ -532,6 +550,31 @@ void WorldView::Save(Serializer::Writer &wr)
 	m_internalCameraController->Save(wr);
 	m_externalCameraController->Save(wr);
 	m_siderealCameraController->Save(wr);
+}
+
+void WorldView::DefineTweaks()
+{
+	// Define any tweaks specific to worldview
+	if(!Tweaker::IsTweakDefined("PermaCloud")) {
+		std::vector<STweakValue> vtv = {
+			STweakValue(ETWEAK_FLOAT, "Size", &Pi::ts_perma_cloud.size, &Pi::ts_perma_cloud_default.size, 
+				"min=0.25 max=10.0 step=0.1"),
+			STweakValue(ETWEAK_COLOR, "Color", &Pi::ts_perma_cloud.color.r, &Pi::ts_perma_cloud_default.color.r, 
+				"opened=true"),
+		};
+		Tweaker::DefineTweak("PermaCloud", vtv);
+	}
+}
+
+const TS_HypercloudVisual& WorldView::GetHyperCloudTweak() const
+{
+	return Pi::ts_perma_cloud;
+}
+
+void WorldView::RemoveTweaks()
+{
+	// Remove any tweaks specific to world view (using Tweaker::RemoveTweak)
+	Tweaker::RemoveTweak("PermaCloud");
 }
 
 void WorldView::SetCamType(enum CamType c)
@@ -652,7 +695,7 @@ void WorldView::OnClickJumpButton(Gui::MultiStateImageButton *b)
 	} else {
 		// Initiate hyperspace drive
 		SystemPath path = Pi::sectorView->GetHyperspaceTarget();
-		Pi::player->StartHyperspaceCountdown(path);
+		Pi::player->StartHyperspaceCountdown(path, Pi::player->IsPhaseJumpMode());
 		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
 	}
 }
@@ -715,7 +758,7 @@ void WorldView::OnClickHyperspace()
 	} else {
 		// Initiate hyperspace drive
 		SystemPath path = Pi::sectorView->GetHyperspaceTarget();
-		Pi::player->StartHyperspaceCountdown(path);
+		Pi::player->StartHyperspaceCountdown(path, Pi::player->IsPhaseJumpMode());
 	}
 }
 
@@ -768,9 +811,12 @@ void WorldView::DrawThrusterTrails()
 		it != Pi::player->GetSensors()->GetContacts().end(); ++it) 
 	{
 		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
-			ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
-			if (tt) {
-				tt->Render(m_trailDepthMtrl.get());
+			Ship* ship = it->ship;
+			if(ship->IsVisible()) {
+				ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
+				if (tt) {
+					tt->Render(m_trailDepthMtrl.get());
+				}
 			}
 		}
 	}
@@ -796,9 +842,12 @@ void WorldView::DrawThrusterTrails()
 	// Diffuse pass
 	for(auto it = Pi::player->GetSensors()->GetContacts().begin(); it != Pi::player->GetSensors()->GetContacts().end(); ++it) {
 		for(unsigned i = 0; i < it->ship->GetThrusterTrailsNum(); ++i) {
-			ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
-			if (tt) {
-				it->ship->GetThrusterTrail(i)->Render(m_trailMtrl.get());
+			Ship* ship = it->ship;
+			if(ship->IsVisible()) {
+				ThrusterTrail* tt = it->ship->GetThrusterTrail(i);
+				if (tt) {
+					it->ship->GetThrusterTrail(i)->Render(m_trailMtrl.get());
+				}
 			}
 		}
 	}
@@ -839,19 +888,30 @@ static Color get_color_for_warning_meter_bar(float v) {
 }
 
 void WorldView::RefreshHyperspaceButton() {
-	if (Pi::player->IsTransitPossible() && Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget())) {
-		m_hyperspaceButton->Show();
-		if(Pi::player->IsHyperspaceActive()) {
-			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_ON);
-		} else {
-			m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_OFF);
+	bool phase_jump_mode = Pi::player->IsPhaseJumpMode(true);
+	bool phase_jump_range = Pi::player->IsPhaseJumpRange(true);
+
+	if (Pi::player->IsTransitPossible() && phase_jump_mode == phase_jump_range) {
+		if (Pi::player->CanHyperspaceTo(Pi::sectorView->GetHyperspaceTarget(), phase_jump_mode)) {
+			m_hyperspaceButton->Show();
+
+			int on_state = !phase_jump_mode ? FLIGHT_BUTTON_ON : FLIGHT_PHASE_BUTTON_ON;
+			int off_state = !phase_jump_mode ? FLIGHT_BUTTON_OFF : FLIGHT_PHASE_BUTTON_OFF;
+
+			if(Pi::player->IsHyperspaceActive()) {
+				m_flightJumpButton->SetActiveState(on_state);
+			} else {
+				m_flightJumpButton->SetActiveState(off_state);
+			}
+			m_flightJumpButton->SetEnabled(true);
+			return;
 		}
-		m_flightJumpButton->SetEnabled(true);
-	} else {
-		m_hyperspaceButton->Hide();
-		m_flightJumpButton->SetActiveState(FLIGHT_BUTTON_UNAVAILABLE);
-		m_flightJumpButton->SetEnabled(false);		
 	}
+
+	m_hyperspaceButton->Hide();
+	int unav_btn = !phase_jump_range ? FLIGHT_BUTTON_UNAVAILABLE : FLIGHT_PHASE_BUTTON_UNAVAILABLE;
+	m_flightJumpButton->SetActiveState(unav_btn);
+	m_flightJumpButton->SetEnabled(false);
 }
 
 void WorldView::RefreshFreightTeleporterState() {
@@ -940,7 +1000,12 @@ void WorldView::RefreshButtonStateAndVisibility()
 	if(!m_bAltitudeAvailable && Pi::player->GetFlightState() != Ship::HYPERSPACE) {
 		// Check for space station bubble
 		const Frame* player_frame = Pi::player->GetFrame();
-		if(player_frame && player_frame->GetBody() && player_frame->GetBody()->IsType(Object::SPACESTATION)) {
+		auto sbody_type = player_frame->GetSystemBody() ? player_frame->GetSystemBody()->GetSuperType() :
+			SystemBody::BodySuperType::SUPERTYPE_NONE;
+		if(	player_frame && 
+			(player_frame->GetBody() && player_frame->GetBody()->IsType(Object::SPACESTATION) ||
+			sbody_type == SystemBody::BodySuperType::SUPERTYPE_HYPERSPACE_CLOUD))
+		{
 			double distance = (Pi::player->GetFrame()->GetBody()->GetPosition() - Pi::player->GetPosition()).Length();
 			if(distance <= TRANSIT_GRAVITY_RANGE_1) {
 				is_outside_gravity_bubble = false;
@@ -1065,9 +1130,13 @@ void WorldView::RefreshButtonStateAndVisibility()
 			m_showTargetActionsTimeout = 0;
 			m_commsOptions->DeleteAllChildren();
 			m_commsNavOptions->DeleteAllChildren();
+			m_commsOptions->Hide();
+			m_commsNavOptionsContainer->Hide();
 		}
-		m_commsOptions->ShowAll();
-		m_commsNavOptionsContainer->ShowAll();
+		else {
+			m_commsOptions->ShowAll();
+			m_commsNavOptionsContainer->ShowAll();
+		}
 	} else {
 		m_commsOptions->Hide();
 		m_commsNavOptionsContainer->Hide();
@@ -1238,7 +1307,14 @@ void WorldView::RefreshButtonStateAndVisibility()
 				static_cast<Planet*>(astro)->GetAtmosphericState(center_dist, &pressure, &density);
 
 				m_overlayBuffer[1] = stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", pressure));
-				m_hudHullTemp->SetValue(float(Pi::player->GetHullTemperature()));
+				float hullTemp = (float)Pi::player->GetHullTemperature();
+				m_hudHullTemp->SetValue(hullTemp);
+				if (hullTemp >= Pi::player->GetMaxHullTemp()) {
+					m_hudHullTemp->SetColor(get_color_for_warning_meter_bar(hullTemp));
+				}
+				else {
+					m_hudHullTemp->SetColor(Color::PARAGON_GREEN);
+				}
 			} else {
 				m_overlayBuffer[1] = stringf(Lang::PRESSURE_N_ATMOSPHERES, formatarg("pressure", 0.0));
 			}
@@ -1262,20 +1338,25 @@ void WorldView::RefreshButtonStateAndVisibility()
 	const float activeWeaponTemp = Pi::player->GetGunTemperature(GetActiveWeapon());
 	m_hudWeaponTemp->SetValue(activeWeaponTemp);
 
-	float hull = Pi::player->GetPercentHull();
-
-	//m_hudHullIntegrity->SetColor(get_color_for_warning_meter_bar(hull));
+	float hull = Pi::player->GetPercentHull();	
 	m_hudHullIntegrity->SetValue(hull*0.01f);
 
 	float shields = Pi::player->GetPercentShields();
 
 	//m_hudShieldIntegrity->SetColor(get_color_for_warning_meter_bar(shields));
-	m_hudShieldIntegrity->SetValue(shields*0.01f);
+	if (shields <= 0.0f) {
+		m_hudShieldIntegrity->SetValue(1.0f);
+		m_hudShieldIntegrity->SetColor(get_color_for_warning_meter_bar(shields));
+	}
+	else {
+		m_hudShieldIntegrity->SetValue(shields*0.01f);
+		m_hudShieldIntegrity->SetColor(Color::PARAGON_GREEN);
+	}
 	m_hudShieldIntegrity->Show();
 
 	Body *b = Pi::player->GetCombatTarget() ? Pi::player->GetCombatTarget() : Pi::player->GetNavTarget();
 	if (b) {
-		if (b->IsType(Object::SHIP) && Pi::player->m_equipment.Get(Equip::SLOT_RADARMAPPER) == Equip::RADAR_MAPPER) {
+		if ((b->IsType(Object::SHIP) && Pi::player->m_equipment.Get(Equip::SLOT_RADARMAPPER) == Equip::RADAR_MAPPER)) {
 			assert(b->IsType(Object::SHIP));
 			Ship *s = static_cast<Ship*>(b);
 
@@ -1349,10 +1430,11 @@ void WorldView::RefreshButtonStateAndVisibility()
 			else {
 				const SystemPath dest = ship->GetHyperspaceDest();
 				RefCountedPtr<const Sector> s = Sector::cache.GetCached(dest);
-				m_hudTargetShip->SetText(cloud->IsArrival() ? Lang::HYPERSPACE_ARRIVAL_CLOUD : Lang::HYPERSPACE_DEPARTURE_CLOUD);
+                
+				m_hudTargetShip->SetText(cloud->GetCloudTypeString());
 				m_vHudTargetInfo[0]->SetText(
 					stringf(Lang::SHIP_MASS_N_TONNES, formatarg("mass", ship->GetStats().total_mass)));
-				text = (cloud->IsArrival() ? Lang::SOURCE : Lang::DESTINATION);
+				text = (cloud->GetCloudDirString());
 				text += ": ";
 				text += s->m_systems[dest.systemIndex].name;
 				m_vHudTargetInfo[1]->SetText(text);
@@ -1437,6 +1519,8 @@ void WorldView::Update()
 	assert(Pi::player);
 	assert(!Pi::player->IsDead());
 
+    UpdateFastTravel();
+
 	const double frameTime = Pi::GetFrameTime();
 	// show state-appropriate buttons
 	RefreshButtonStateAndVisibility();
@@ -1452,6 +1536,7 @@ void WorldView::Update()
 	m_bodyLabels->SetLabelsVisible(false);
 
 	bool targetObject = false;
+	bool deselectAll = false;
 
 	// XXX ugly hack checking for console here
 	if (!Pi::IsConsoleActive()) {
@@ -1501,6 +1586,7 @@ void WorldView::Update()
 
 		// note if we have to target the object in the crosshairs
 		targetObject = KeyBindings::targetObject.IsActive();
+		deselectAll = KeyBindings::deselectAll.IsActive();
 	}
 
 	m_activeCameraController->Update();
@@ -1535,6 +1621,8 @@ void WorldView::Update()
 	if (targetObject) {
 		Body* const target = PickBody(double(Gui::Screen::GetWidth())/2.0, double(Gui::Screen::GetHeight())/2.0);
 		SelectBody(target, false);
+	} else if (deselectAll) {
+		DeselectAll();
 	}
 
 	if(!Pi::game->IsHyperspace()) {
@@ -1561,6 +1649,8 @@ void WorldView::Update()
 		}
 	}
 
+
+    UpdateContactList();
 	UIView::Update();
 }
 
@@ -1598,21 +1688,21 @@ void WorldView::HideTargetActions()
 
 Gui::Button *WorldView::AddCommsOption(std::string msg, int ypos, int optnum)
 {
-	Gui::Label *l = new Gui::Label(msg);
+	char buffIntToString[2];
+	snprintf(buffIntToString, sizeof(buffIntToString), "%d", optnum);
+	Gui::Label *l = new Gui::Label(std::string(buffIntToString) + ". " + msg);
 	l->Color(Color::PARAGON_BLUE);
-	m_commsOptions->Add(l, 50, float(ypos));
 
-	char buf[8];
-	snprintf(buf, sizeof(buf), "%d", optnum);
-	Gui::LabelButton *b = new Gui::LabelButton(new Gui::Label(buf));
+	Gui::ClickableLabel *b = new Gui::ClickableLabel(l);
 	b->SetShortcut(SDL_Keycode(SDLK_0 + optnum), KMOD_NONE);
+
 	// hide target actions when things get clicked on
 	b->onClick.connect(sigc::mem_fun(this, &WorldView::ToggleTargetActions));
 	m_commsOptions->Add(b, 16, float(ypos));
 	return b;
 }
 
-void WorldView::OnClickCommsNavOption(Body *target)
+void WorldView::OnClickCommsNavOption(Body *target, Gui::ClickableLabel *button)
 {
 	Pi::player->SetNavTarget(target);
 	m_showTargetActionsTimeout = SDL_GetTicks();
@@ -1624,13 +1714,27 @@ void WorldView::AddCommsNavOption(std::string msg, Body *target)
 	Gui::HBox *hbox = new Gui::HBox();
 	hbox->SetSpacing(5);
 
-	Gui::Screen::PushFont("OverlayFont");
-	Gui::Label *l = (new Gui::Label(msg))->Color(Color::PARAGON_BLUE);
-	Gui::Screen::PopFont();
-	hbox->PackStart(l);
+	std::string imgLocation;
+	GetNavIconFile(target->GetType(), imgLocation);
 
-	Gui::Button *b = new Gui::SolidButton();
-	b->onClick.connect(sigc::bind(sigc::mem_fun(this, &WorldView::OnClickCommsNavOption), target));
+	Gui::Screen::PushFont("HudFont");
+	Gui::Label *l;
+	Color clr;
+	if (Pi::player->GetNavTarget() != nullptr && Pi::player->GetNavTarget()->GetLabel() == msg) // Currently done here but might move inside the ClickableLabel class.
+	{
+		clr = Color::PARAGON_GREEN;
+		l = (new Gui::Label("      " + msg))->Color(clr); // Bandaid fix to the padding issue.
+	}
+	else
+	{
+		clr = Color::PARAGON_BLUE;
+		l = (new Gui::Label("      " + msg))->Color(clr); // Bandaid fix to the padding issue.
+	}
+	Gui::Screen::PopFont();
+	//hbox->PackStart(l);;
+
+	Gui::ClickableLabel *b = new Gui::ClickableLabel(l, imgLocation.c_str(), clr);
+	b->onClick.connect(sigc::bind(sigc::mem_fun(this, &WorldView::OnClickCommsNavOption), target, b));
 	hbox->PackStart(b);
 
 	m_commsNavOptions->PackEnd(hbox);
@@ -1639,24 +1743,42 @@ void WorldView::AddCommsNavOption(std::string msg, Body *target)
 void WorldView::BuildCommsNavOptions()
 {
 	std::map< Uint32,std::vector<SystemBody*> > groups;
-
-	Gui::Screen::PushFont("OverlayFont");
-	m_commsNavOptions->PackEnd((new Gui::Label(std::string(Lang::NAVIGATION_TARGETS_IN_THIS_SYSTEM)+std::string("\n")))->Color(Color::PARAGON_BLUE));	
-	Gui::Screen::PopFont();
-
+	Body * const navTarget = Pi::player->GetNavTarget();
+	Body * const comTarget = Pi::player->GetCombatTarget();
+	bool targetFoundInList = false;
 	for (SystemBody* station : Pi::game->GetSpace()->GetStarSystem()->GetSpaceStations()) {
 		groups[station->GetParent()->GetPath().bodyIndex].push_back(station);
 	}
 
-	for ( std::map< Uint32,std::vector<SystemBody*> >::const_iterator i = groups.begin(); i != groups.end(); ++i ) {
-		m_commsNavOptions->PackEnd((new Gui::Label(Pi::game->GetSpace()->GetStarSystem()->GetBodies()[(*i).first]->GetName()))->Color(Color::PARAGON_BLUE));
+	HyperspaceCloud* hc = Pi::game->GetSpace()->GetNearestPermaHyperspaceCloud(Pi::player);
+    	if(hc) {
+        	SystemBody* sb = const_cast<SystemBody*>(hc->GetSystemBody());
+        	groups[sb->GetPath().bodyIndex].push_back(sb);
+    	}
+
+
+	for (std::map<Uint32, std::vector<SystemBody*> >::const_iterator i = groups.begin(); i != groups.end(); ++i) {
+		if (i != groups.begin()) {
+			m_commsNavOptions->PackEnd((new Gui::Label("\n"))->Color(Color::PARAGON_BLUE));
+		}
 
 		for ( std::vector<SystemBody*>::const_iterator j = (*i).second.begin(); j != (*i).second.end(); ++j) {
 			SystemPath path = Pi::game->GetSpace()->GetStarSystem()->GetPathOf(*j);
 			Body *body = Pi::game->GetSpace()->FindBodyForPath(&path);
 			AddCommsNavOption((*j)->GetName(), body);
+			if (navTarget && navTarget->GetLabel() == (*j)->GetName())
+				targetFoundInList = true;
 		}
 	}
+	if (comTarget) {
+		m_commsNavOptions->PackEnd((new Gui::Label("\n"))->Color(Color::PARAGON_BLUE));
+		AddCommsNavOption(comTarget->GetLabel(), comTarget);
+	}
+	if (navTarget && comTarget != navTarget && !targetFoundInList) {
+		m_commsNavOptions->PackEnd((new Gui::Label("\n"))->Color(Color::PARAGON_BLUE));
+		AddCommsNavOption(navTarget->GetLabel(), navTarget);
+	}
+	m_commsNavOptions->ResizeRequest();
 }
 
 void WorldView::HideLowThrustPowerOptions()
@@ -1747,16 +1869,34 @@ void WorldView::OnPlayerChangeTarget()
 
 static void autopilot_flyto(Body *b)
 {
-	Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_AUTOPILOT);
-	Pi::player->AIFlyTo(b);
+    if (isDocking && m_fastTravelTarget) {
+        if (static_cast<SpaceStation*>(m_fastTravelTarget))
+        static_cast<SpaceStation*>(m_fastTravelTarget)->CancelDockingApproach(Pi::player);
+        m_fastTravelTarget = nullptr;
+    }
+    isDocking = false;
+    m_fastTravelTarget = b;
+    Pi::player->SetInvulnerable(true);
+    Pi::game->SetFastTravel(true);
+    m_fastTravelTimeout = SDL_GetTicks();
 }
 static void autopilot_dock(Body *b)
 {
+    if (isDocking && m_fastTravelTarget) {
+        if (static_cast<SpaceStation*>(m_fastTravelTarget))
+        static_cast<SpaceStation*>(m_fastTravelTarget)->CancelDockingApproach(Pi::player);
+        m_fastTravelTarget = nullptr;
+    }
 	if(Pi::player->GetFlightState() != Ship::FLYING)
 		return;
 
-	Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_AUTOPILOT);
-	Pi::player->AIDock(static_cast<SpaceStation*>(b));
+
+    isDocking = true;
+    m_fastTravelTarget = b;
+    Pi::player->SetInvulnerable(true);
+    Pi::game->SetFastTravel(true);
+    m_fastTravelTimeout = SDL_GetTicks();
+
 }
 static void autopilot_orbit(Body *b, double alt)
 {
@@ -1766,82 +1906,49 @@ static void autopilot_orbit(Body *b, double alt)
 
 static void player_target_hypercloud(HyperspaceCloud *cloud)
 {
-	Pi::sectorView->SetHyperspaceTarget(cloud->GetShip()->GetHyperspaceDest());
+	if(cloud->GetShip()) {
+		Pi::sectorView->SetHyperspaceTarget(cloud->GetShip()->GetHyperspaceDest());
+	}
 }
 
 void WorldView::UpdateCommsOptions()
 {
-	Gui::Screen::PushFont("OverlayFont");
+	Gui::Screen::PushFont("HudFont");
 
 	m_commsOptions->DeleteAllChildren();
 	m_commsNavOptions->DeleteAllChildren();
-
+	
 	if (m_showTargetActionsTimeout == 0) return;
 
-	if (Pi::game->GetSpace()->GetStarSystem()->HasSpaceStations())
-	{
-		BuildCommsNavOptions();
-	}
+	BuildCommsNavOptions();
 
-	Body * const navtarget = Pi::player->GetNavTarget();
-	Body * const comtarget = Pi::player->GetCombatTarget();
 	Gui::Button *button;
 	int ypos = 0;
-	int optnum = 1;
-	if (!(navtarget || comtarget)) {
-		m_commsOptions->Add((
-			new Gui::Label(std::string(Lang::NO_TARGET_SELECTED)))->Color(Color::PARAGON_BLUE), 16, float(ypos));
-	}
+	Body * const navtarget = Pi::player->GetNavTarget();
 
-	const bool hasAutopilot = (Pi::player->m_equipment.Get(Equip::SLOT_AUTOPILOT) == Equip::AUTOPILOT) && 
+	int optnum = 1;	const bool hasAutopilot = (Pi::player->m_equipment.Get(Equip::SLOT_AUTOPILOT) == Equip::AUTOPILOT) && 
 		(Pi::player->GetFlightState() == Ship::FLYING);
 
 	if (navtarget) {
-		m_commsOptions->Add((new Gui::Label(navtarget->GetLabel()))->Color(Color::PARAGON_BLUE), 16, float(ypos));
-		ypos += 32;
+		ypos += 16;
 		if (navtarget->IsType(Object::SPACESTATION)) {
-			SpaceStation *pStation = static_cast<SpaceStation *>(navtarget);
-			if( pStation->GetMyDockingPort(Pi::player) == -1 )
-			{
-				button = AddCommsOption(Lang::REQUEST_DOCKING_CLEARANCE, ypos, optnum++);
-				button->onClick.connect(sigc::bind(sigc::ptr_fun(&PlayerRequestDockingClearance), static_cast<SpaceStation*>(navtarget)));
-				ypos += 32;
-			}
-
 			if( hasAutopilot )
 			{
 				button = AddCommsOption(Lang::AUTOPILOT_DOCK_WITH_STATION, ypos, optnum++);
 				button->onClick.connect(sigc::bind(sigc::ptr_fun(&autopilot_dock), navtarget));
-				ypos += 32;
+				ypos += 16;
 			}
-
-			// XXX paying fine remotely can't really be done until crime and
-			// worldview are in Lua. I'm leaving this code here so its not
-			// forgotten
-			/*
-			Sint64 crime, fine;
-			Polit::GetCrime(&crime, &fine);
-			if (fine) {
-				button = AddCommsOption(stringf(Lang::PAY_FINE_REMOTELY,
-							formatarg("amount", format_money(fine))), ypos, optnum++);
-				button->onClick.connect(sigc::ptr_fun(&PlayerPayFine));
-				ypos += 32;
-			}
-			*/
 		}
 		if (hasAutopilot) {
 			button = AddCommsOption(stringf(Lang::AUTOPILOT_FLY_TO_VICINITY_OF, formatarg("target", navtarget->GetLabel())), ypos, optnum++);
 			button->onClick.connect(sigc::bind(sigc::ptr_fun(&autopilot_flyto), navtarget));
-			ypos += 32;
+			ypos += 16;
 
 			if (navtarget->IsType(Object::PLANET) || navtarget->IsType(Object::STAR)) {
 				button = AddCommsOption(stringf(Lang::AUTOPILOT_ENTER_LOW_ORBIT_AROUND, formatarg("target", navtarget->GetLabel())), ypos, optnum++);
 				button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_orbit), navtarget, 1.2));
-				ypos += 32;
+				ypos += 16;
 
-				//button = AddCommsOption(stringf(Lang::AUTOPILOT_ENTER_MEDIUM_ORBIT_AROUND, formatarg("target", navtarget->GetLabel())), ypos, optnum++);
-				//button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_orbit), navtarget, 1.6));
-				//ypos += 32;
 
 				//button = AddCommsOption(stringf(Lang::AUTOPILOT_ENTER_HIGH_ORBIT_AROUND, formatarg("target", navtarget->GetLabel())), ypos, optnum++);
 				//button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_orbit), navtarget, 3.2));
@@ -1851,7 +1958,7 @@ void WorldView::UpdateCommsOptions()
 					if (navtarget->GetSystemBody()->IsScoopable() && navtarget->GetSystemBody()->GetMass() < EARTH_MASS*150.0) {
 						button = AddCommsOption(stringf(Lang::AUTOPILOT_ENTER_SCOOP_ORBIT_AROUND, formatarg("target", navtarget->GetLabel())), ypos, optnum++);
 						button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_orbit), navtarget, 0.99998));
-						ypos += 32;
+						ypos += 16;
 					}
 				}
 			}
@@ -1860,19 +1967,14 @@ void WorldView::UpdateCommsOptions()
 		const Equip::Type t = Pi::player->m_equipment.Get(Equip::SLOT_HYPERCLOUD);
 		if ((t != Equip::NONE) && navtarget->IsType(Object::HYPERSPACECLOUD)) {
 			HyperspaceCloud *cloud = static_cast<HyperspaceCloud*>(navtarget);
-			if (!cloud->IsArrival()) {
+			if (cloud->SupportsDeparture() && cloud->HasShip()) {
 				button = AddCommsOption(Lang::SET_HYPERSPACE_TARGET_TO_FOLLOW_THIS_DEPARTURE, ypos, optnum++);
 				button->onClick.connect(sigc::bind(sigc::ptr_fun(player_target_hypercloud), cloud));
 			}
 		}
 	}
-	if (comtarget && hasAutopilot) {
-		m_commsOptions->Add((new Gui::Label(comtarget->GetLabel()))->Color(Color::PARAGON_BLUE), 16, float(ypos));
-		ypos += 32;
-		button = AddCommsOption(stringf(Lang::AUTOPILOT_FLY_TO_VICINITY_OF, formatarg("target", comtarget->GetLabel())), ypos, optnum++);
-		button->onClick.connect(sigc::bind(sigc::ptr_fun(autopilot_flyto), comtarget));
-		ypos += 32;
-	}
+
+	CenterAutopilotOptions();
 
 	Gui::Screen::PopFont();
 }
@@ -1895,6 +1997,12 @@ void WorldView::SelectBody(Body *target, bool reselectIsDeselect)
 			Pi::player->SetNavTarget(target, Pi::KeyState(SDLK_LCTRL) || Pi::KeyState(SDLK_RCTRL));
 		}
 	}
+}
+
+void WorldView::DeselectAll()
+{
+	Pi::player->SetCombatTarget(nullptr);
+	Pi::player->SetNavTarget(nullptr);
 }
 
 Body* WorldView::PickBody(const double screenX, const double screenY) const
@@ -2371,6 +2479,8 @@ void WorldView::Draw()
 		}
 	}
 
+    //m_renderer->ClearScreen();
+
 	View::Draw();
 }
 
@@ -2587,6 +2697,10 @@ void WorldView::DrawBodyIcon(Object::Type type, vector2f position, bool current_
 			tquad = m_hud2Planet.get();
 			break;
 
+		case Object::Type::HYPERSPACECLOUD:
+			tquad = m_hud2HyperspaceCloud.get();
+			break;
+
 		case Object::Type::PROJECTILE:
 		case Object::Type::MISSILE:
 		case Object::Type::PLAYER:
@@ -2658,6 +2772,169 @@ double WorldView::Unjitter(double value, double max_value)
 		return value;
 	}
 }
+
+void WorldView::GetNavIconFile(Object::Type type, std::string &fileLocation)
+{
+	switch (type) {
+	case Object::Type::SHIP:
+		fileLocation = "icons/hud2/ship.png";
+		break;
+
+	case Object::Type::CITYONPLANET:
+		fileLocation = "icons/hud2/planet.png";
+		break;
+
+	case Object::Type::CARGOBODY:
+		fileLocation = "icons/hud2/planet.png";
+		break;
+
+	case Object::Type::SPACESTATION:
+		fileLocation = "icons/hud2/station.png";
+		break;
+
+	case Object::Type::STAR:
+		fileLocation = "icons/hud2/star.png";
+		break;
+
+	case Object::Type::PLANET:
+		fileLocation = "icons/hud2/planet.png";
+		break;
+	case Object::Type::TERRAINBODY:
+		fileLocation = "icons/hud2/planet.png";
+		break;
+
+	case Object::Type::HYPERSPACECLOUD:
+		fileLocation = "icons/hud2/unknown.png";
+		break;
+
+	case Object::Type::PROJECTILE:
+		fileLocation = "icons/hud2/unknown.png";
+		break;
+	case Object::Type::MISSILE:
+		fileLocation = "icons/hud2/unknown.png";
+		break;
+	case Object::Type::PLAYER:
+		fileLocation = "icons/hud2/unknown.png";
+		break;
+	default:
+		fileLocation = "icons/hud2/unknown.png";
+		break;
+	}
+}
+
+void WorldView::CenterAutopilotOptions(){
+	m_commsNavOptions->ShowAll();
+	m_commsNavOptionsContainer->ShowAll();
+
+	m_commsOptions->ResizeToFitChildren();
+	m_commsNavOptions->ResizeToFitChildren();
+
+	float navPos[2], navSize[2], navCSize[2], commSize[2], scrollSize[2], size[2];
+	GetSizeRequested(size);
+	m_commsNavOptionsContainer->GetSize(navCSize);
+	m_commsNavOptions->GetSize(navSize);
+	m_commsOptions->GetSize(commSize);
+	m_scroll->GetSize(scrollSize);
+	m_scroll->SetOffsetY(navCSize[1] - navSize[1]);
+	MoveChild(m_commsNavOptionsContainer, 10, 17 * 2 /* see below */ + (size[1] / 2.0f) - ((scrollSize[1] - m_scroll->GetOffsetY()) / 2.0f));
+	m_commsNavOptionsContainer->GetAbsolutePosition(navPos);  // This seems faulty, it gives me a position that is wrong by 17 pixels. (might not be this function but the move function, to investigate (seems to be only on the Y axis))
+	MoveChild(m_commsOptions, navPos[0] + navCSize[0] + 10, ((m_scroll->GetOffsetY() > 135.0f) ? (-45.0f / 4.0f) : 0.0f) + navPos[1] - 17.0f /* Magical number to remove once I fix the get position function above */ + ((scrollSize[1] - m_scroll->GetOffsetY()) / 2.0f) - (commSize[1] / 2.0f));
+
+	m_commsOptions->ShowAll();
+}
+
+void WorldView::UpdateContactList() {
+	Gui::Screen::PushFont("HudFont");
+    const std::vector<std::string> contactShips = Pi::player->GetNamesOfNearbyShips();
+
+    m_contactListContainer->RemoveChild(m_contactListButton);
+
+    m_contactListContainer->DeleteAllChildren();
+
+    m_contactListContainer->PackStart(m_contactListButton);
+
+    for (size_t i = 0; i < contactShips.size(); i++) {
+        Gui::Label* shipLabel = new Gui::Label("  " + contactShips[i]);
+        shipLabel->Color(Color::PARAGON_BLUE);
+        m_contactListContainer->PackEnd(shipLabel);
+        if (!m_longContactList && i == CONTACT_LIST_LIMIT) {
+            break;
+        }
+    }
+
+    float contSize[2], screenSize[2];
+    GetSizeRequested(screenSize);
+    m_contactListContainer->GetSize(contSize);
+    Gui::Label* contactLabel;
+    if (CONTACT_LIST_LIMIT + 1 < contactShips.size() && !m_longContactList) {
+        contactLabel = new Gui::Label("+ Contact List +");
+        MoveChild(m_contactListContainer, screenSize[0] - 110, screenSize[1] - 15);
+    }
+    else if (CONTACT_LIST_LIMIT + 1 < contactShips.size()) {
+        contactLabel = new Gui::Label("- Contact List -");
+        MoveChild(m_contactListContainer, screenSize[0] - 110, screenSize[1] - contSize[1] / 2);
+    }
+    else {
+        contactLabel = new Gui::Label("  Contact List  ");
+        MoveChild(m_contactListContainer, screenSize[0] - 110, screenSize[1] - 15);
+    }
+    contactLabel->Color(Color::PARAGON_GREEN);
+    m_contactListButton->SetLabel(contactLabel);
+
+    m_contactListContainer->ShowAll();
+
+    m_contactListContainer->ResizeToFitChildren();
+
+
+
+
+
+
+    Gui::Screen::PopFont();
+}
+
+void WorldView::ToggleContactListSize() {
+    //m_longContactList = !m_longContactList;
+    UpdateContactList();
+}
+
+void WorldView::UpdateFastTravel() {
+	if (m_fastTravelTimeout != 0) {
+        if (SDL_GetTicks() - m_fastTravelTimeout < 5000) {
+            Pi::player->SetFrame(m_fastTravelTarget->GetFrame());
+            double radius = m_fastTravelTarget->GetFrame()->GetRadius() / 2.0;
+            if (radius > 10000.0)
+                radius = 10000.0;
+            vector3d offset(m_fastTravelTarget->GetOrient().VectorY() * radius);
+            Pi::player->SetPosition(vector3d(m_fastTravelTarget->GetPosition().x + offset.x, m_fastTravelTarget->GetPosition().y + offset.y, m_fastTravelTarget->GetPosition().z + offset.z));
+            Pi::player->GetPlayerController()->SetFlightControlState(CONTROL_AUTOPILOT);
+            if (isDocking) {
+                Pi::player->AIDock(static_cast<SpaceStation*>(m_fastTravelTarget));
+            }
+            else {
+                Pi::player->AIFlyTo(m_fastTravelTarget);
+            }
+
+            Pi::player->TmpSetVelocity(vector3d(0.0, 0.0, 0.0));
+        }
+        else if (SDL_GetTicks() - m_fastTravelTimeout > 10000) {
+            m_fastTravelTimeout = 0;
+            Pi::game->SetFastTravel(false);
+            Pi::player->SetInvulnerable(false);
+        }
+        else {
+            Pi::player->TmpSetVelocity(vector3d(0.0, 0.0, 0.0));
+        }
+    }
+    else if (m_fastTravelTarget && Pi::player->GetFlightState() == Ship::FlightState::HYPERSPACE) {
+        m_fastTravelTarget = nullptr;
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+//                               NAV TUNNEL WIDGET                                //
+////////////////////////////////////////////////////////////////////////////////////
 
 NavTunnelWidget::NavTunnelWidget(WorldView *worldview, Graphics::RenderState *rs)
 	: Widget()

@@ -29,19 +29,13 @@ public:
 	bool IsMoving() const { return m_isMoving; }
 	virtual double GetMass() const { return m_mass; }	// XXX don't override this
 	virtual void TimeStepUpdate(const float timeStep);
-	void CalcExternalForce();
+	virtual void CalcExternalForce();
 	void UndoTimestep();
 
 	void SetMass(double);
-	void AddForce(const vector3d &);
-	void AddTorque(const vector3d &);
-	void SetForce(const vector3d &);
 	void SetTorque(const vector3d &);
 	vector3d GetLastForce() const { return m_lastForce; }
 	vector3d GetLastTorque() const { return m_lastTorque; }
-	// body-relative forces
-	void AddRelForce(const vector3d &);
-	void AddRelTorque(const vector3d &);
 	vector3d GetExternalForce() const { return m_externalForce; }
 	vector3d GetAtmosForce() const { return m_atmosForce; }
 	vector3d GetGravityForce() const { return m_gravityForce; }
@@ -53,7 +47,12 @@ public:
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
 	virtual void Load(Serializer::Reader &rd, Space *space);
-private:
+	void AddForce(const vector3d &);
+	void AddTorque(const vector3d &);
+	void SetForce(const vector3d &);
+	// body-relative forces
+	void AddRelForce(const vector3d &);
+	void AddRelTorque(const vector3d &);
 	vector3d m_oldPos;
 	vector3d m_oldAngDisplacement;
 

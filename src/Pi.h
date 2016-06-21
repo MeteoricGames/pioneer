@@ -156,7 +156,8 @@ public:
 	static LuaNameGen *luaNameGen;
 
 	static RefCountedPtr<UI::Context> ui;
-
+	static RefCountedPtr<UI::Context> console;
+	
 	static Random rng;
 	static int statSceneTris;
 
@@ -208,6 +209,22 @@ public:
 	static void SetExpChromaticAberrationEnabled(bool state);
 	static void SetExpScanlinesEnabled(bool state);
 	static void SetExpFilmGrainEnabled(bool state);
+
+	// Tweaker settings
+	const static TS_ToneMapping ts_default_tonemapping;
+		  static TS_ToneMapping ts_tonemapping;
+	const static TS_FilmGrain ts_default_filmgrain;
+		  static TS_FilmGrain ts_filmgrain;
+	const static TS_Scanlines ts_default_scanlines;
+		  static TS_Scanlines ts_scanlines;
+	const static TS_ChromaticAberration ts_default_chromatic;
+		  static TS_ChromaticAberration ts_chromatic;
+	const static TS_FXAA ts_default_fxaa;
+		  static TS_FXAA ts_fxaa;
+	const static TS_HypercloudVisual ts_perma_cloud_default;
+		  static TS_HypercloudVisual ts_perma_cloud;
+	const static TS_IrradianceLighting ts_irr_light_default;
+		  static TS_IrradianceLighting ts_irr_light;
 
 private:
 	static void HandleEvents();
@@ -274,12 +291,11 @@ private:
 	static unsigned m_scanlinesId;
 	static unsigned m_filmgrainId;
 
-	// Tweaker settings
-	static TS_ToneMapping ts_tonemapping, ts_default_tonemapping;
-	static TS_FilmGrain ts_filmgrain, ts_default_filmgrain;
-	static TS_Scanlines ts_scanlines, ts_default_scanlines;
-	static TS_ChromaticAberration ts_chromatic, ts_default_chromatic;
-	static TS_FXAA ts_fxaa, ts_default_fxaa;
+	static std::shared_ptr<Graphics::GL3::Effect> m_fxaa;
+	static std::shared_ptr<Graphics::GL3::Effect> m_chromaticAberration;
+	static std::shared_ptr<Graphics::GL3::Effect> m_scanlines;
+	static std::shared_ptr<Graphics::GL3::Effect> m_filmgrain;
+	static std::shared_ptr<Graphics::GL3::Effect> m_tonemapping;
 };
 
 #endif /* _PI_H */

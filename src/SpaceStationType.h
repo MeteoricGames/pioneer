@@ -68,6 +68,7 @@ struct SpaceStationType {
 	 * Note station animations may continue for any number of stages after
 	 * ship has been released and is under player control again */
 	bool GetDockAnimPositionOrient(const unsigned int port, int stage, double t, const vector3d &from, positionOrient_t &outPosOrient, const Ship *ship) const;
+	bool GetShipApproachWaypoints(const int stage, positionOrient_t &outPosOrient) const;
 
 	static void Init();
 	static void Uninit();

@@ -243,8 +243,10 @@ local onShipDestroyed = function (ship, body)
 			   not body:IsPlayer() then
 				mission.status = 'FAILED'
 				mission.notplayer = 'TRUE'
+				mission.ship:SetModuleStatus(mission.shipstate..' - '..'FAILED')
 			else -- well done, comrade
 				mission.status = 'COMPLETED'
+				mission.ship:SetModuleStatus(mission.shipstate..' - '..'COMPLETED')
 				mission.location = mission.backstation
 				mission.notplayer = 'FALSE'
 			end
@@ -300,6 +302,8 @@ local onEnterSystem = function (ship)
 						end
 						_setupHooksForMission(mission)
 						mission.shipstate = 'docked'
+						mission.ship:SetModuleName('Assassination')
+						mission.ship:SetModuleStatus('docked'..' - '..mission.status)
 					end
 				else	-- too late
 					mission.status = 'FAILED'
@@ -359,6 +363,7 @@ local onShipDocked = function (ship, station)
 		else
 			if mission.ship == ship then
 				mission.status = 'FAILED'
+				mission.ship:SetModuleStatus(mission.shipstate..' - '..'FAILED')
 			end
 		end
 		return

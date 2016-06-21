@@ -159,6 +159,21 @@ bool SpaceStationType::GetShipApproachWaypoints(const unsigned int port, const i
 	return gotOrient;
 }
 
+bool SpaceStationType::GetShipApproachWaypoints(const int stage, positionOrient_t &outPosOrient) const
+{
+	bool gotOrient = false;
+
+	if (stage > 0) {
+		outPosOrient.pos = vector3d(2000, 2000, 2000);
+		outPosOrient.xaxis = vector3d(1, 1, 1);
+		outPosOrient.yaxis = vector3d(1, 1, 1);
+		outPosOrient.zaxis = vector3d(1, 1, 1);
+		gotOrient = true;
+	}
+	return gotOrient;
+
+}
+
 double SpaceStationType::GetDockAnimStageDuration(const int stage) const
 {
 	assert(stage>=0 && stage<numDockingStages);

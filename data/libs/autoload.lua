@@ -1,5 +1,4 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
--- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 -- this is the only library automatically loaded at startup
@@ -8,6 +7,10 @@
 local dev = import("Dev")
 local Comms = import("Comms")
 local Game = import("Game")
+local Space = import("Space")
+local SystemPath = import("SystemPath")
+local Engine = import("Engine")
+local utils = import("utils")
 
 math.clamp = function(v, min, max)
 	return math.min(max, math.max(v,min))
@@ -31,15 +34,25 @@ debug.giveme = function(m)
 	game.player:AddMoney(m)
 end
 
+-- Test spawn ships in hyperspace
+debug.spawnHyperShip = function()
+	game = import("Game")
+	game:SpawnHyperShip()
+end
+
+-- In-game live tweaker
+-- Only 1 tweak window can be active at a time.
 _G.tweaker = {}
 
+-- List all defined tweaks
 tweaker.list = function()
 	out = dev:TweakerList()
-	if out ~= nil then
+	if out ~= nil then 
 		print(out)
 	end
 end
 
+-- Start a defined tweak by name
 tweaker.tweak = function(t)
 	out = dev:Tweak(t)
 	if out ~= nil then
@@ -47,8 +60,19 @@ tweaker.tweak = function(t)
 	end
 end
 
+-- Close currently opened tweak
 tweaker.close = function()
 	out = dev:TweakerClose()
+	if out ~= nil then
+		print(out)
+	end
+end
+
+-- Start the special in-game objects monitor
+-- This will show an info window for your currently selected nav target by type.
+-- When you deselect window is closed. When you select a new object its window will be opened.
+tweaker.monitor = function()
+	out = dev:TweakerMonitor()
 	if out ~= nil then
 		print(out)
 	end
@@ -72,8 +96,29 @@ debug.TestMultilineMessage = function()
 		" billion\nSecurity Rating : "..math.round(1-Game.system.lawlessness,2).."")
 end
 
-debug.TestLineMessage = function()
-	Comms.ImportantInfo("I HAVE GROWN TIRED WITH THIS STUPID PC NOT TURNING ON AFTER ELECTRICITY LOSS")
+-- Development methods (used for live testing of features)
+debug.dev1 = function(p)
+	game = import("Game")
+	out = game:Dev1(p)
+	if out ~= nil then print(out) end
+end
+
+debug.dev2 = function(p)
+	game = import("Game")
+	out = game:Dev2(p)
+	if out ~= nil then print(out) end
+end
+
+debug.dev3 = function(p)
+	game = import("Game")
+	out = game:Dev3(p)
+	if out ~= nil then print(out) end
+end
+
+debug.dev4 = function(p)
+	game = import("Game")
+	out = game:Dev4(p)
+	if out ~= nil then print(out) end
 end
 
 -- make import break. you should never import this file

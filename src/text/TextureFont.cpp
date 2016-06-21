@@ -9,7 +9,8 @@
 #include "TextSupport.h"
 #include "utils.h"
 #include <algorithm>
-#include "MainMaterial.h"
+#include "graphics/gl3/Effect.h"
+#include "graphics/gl3/EffectMaterial.h"
 
 #include FT_GLYPH_H
 
@@ -222,6 +223,8 @@ void TextureFont::RenderString(const char *str, float x, float y, const Color &c
 	}
 
 	if(m_vertices.GetNumVerts() > 0) {
+		m_mat->GetEffect()->SetProgram();
+		m_mat->GetEffect()->GetUniform(m_outlineId).Set(m_descriptor.outline ? 1.0f : 0.0f);
 		m_renderer->DrawTriangles(&m_vertices, m_renderState, m_mat.get());
 	}
 }
@@ -286,6 +289,8 @@ Color TextureFont::RenderMarkup(const char *str, float x, float y, const Color &
 	}
 
 	if(m_vertices.GetNumVerts() > 0) {
+		m_mat->GetEffect()->SetProgram();
+		m_mat->GetEffect()->GetUniform(m_outlineId).Set(m_descriptor.outline ? 1.0f : 0.0f);
 		m_renderer->DrawTriangles(&m_vertices, m_renderState, m_mat.get());
 	}
 	return c;
@@ -372,7 +377,7 @@ TextureFont::Glyph TextureFont::BakeGlyph(Uint32 chr)
 		const FT_BitmapGlyph bmStrokeGlyph = FT_BitmapGlyph(strokeGlyph);
 
 		//don't run off atlas borders
-		m_atlasVIncrement = std::max(m_atlasVIncrement, bmStrokeGlyph->bitmap.rows);
+		m_atlasVIncrement = std::max<int>(m_atlasVIncrement, bmStrokeGlyph->bitmap.rows);
 		if (m_atlasU + bmStrokeGlyph->bitmap.width > ATLAS_SIZE) {
 			m_atlasU = 0;
 			m_atlasV += m_atlasVIncrement;
@@ -403,8 +408,8 @@ TextureFont::Glyph TextureFont::BakeGlyph(Uint32 chr)
 		// stroke first into the alpha channel
 		for (int y = 0; y < strokeRows; y++) {
 			for (int x = 0; x < strokePitch; x++) {
-				const int d = ALIGN(strokePitch*2,4)*y+x*2;
-				const int s = strokePitch*y+x;
+				const int d = ALIGN(strokePitch * 2, 4) * y + x * 2;
+				const int s = strokePitch * y + x;
 				m_buf[d+1] = bmStrokeGlyph->bitmap.buffer[s]; // alpha
 			}
 		}
@@ -412,8 +417,8 @@ TextureFont::Glyph TextureFont::BakeGlyph(Uint32 chr)
 		// now the normal glyph into the luminance channel
 		for (int y = 0; y < rows; y++) {
 			for (int x = 0; x < pitch; x++) {
-				const int d = ALIGN(strokePitch*2,4)*(y+yoff)+(x+xoff)*2;
-				const int s = pitch*y+x;
+				const int d = ALIGN(strokePitch * 2, 4) * (y + yoff) + (x + xoff) * 2;
+				const int s = pitch * y + x;
 				m_buf[d] = bmGlyph->bitmap.buffer[s]; // luminance
 			}
 		}
@@ -437,7 +442,7 @@ TextureFont::Glyph TextureFont::BakeGlyph(Uint32 chr)
 	else {
 
 		//don't run off atlas borders
-		m_atlasVIncrement = std::max(m_atlasVIncrement, bmGlyph->bitmap.rows);
+		m_atlasVIncrement = std::max<int>(m_atlasVIncrement, bmGlyph->bitmap.rows);
 		if (m_atlasU + bmGlyph->bitmap.width >= ATLAS_SIZE) {
 			m_atlasU = 0;
 			m_atlasV += m_atlasVIncrement;
@@ -489,6 +494,7 @@ TextureFont::TextureFont(const FontDescriptor &descriptor, Graphics::Renderer *r
 	, m_atlasU(0)
 	, m_atlasV(0)
 	, m_atlasVIncrement(0)
+	, m_outlineId(-1)
 {
 	FT_Error err; // used to store freetype error return codes
 
@@ -516,7 +522,7 @@ TextureFont::TextureFont(const FontDescriptor &descriptor, Graphics::Renderer *r
 
 	FT_Set_Pixel_Sizes(m_face, a_width, a_height);
 
-	m_texFormat = m_descriptor.outline ? Graphics::TEXTURE_LUMINANCE_ALPHA_88 : Graphics::TEXTURE_INTENSITY_8;
+	m_texFormat = m_descriptor.outline ? Graphics::TEXTURE_RG_88 : Graphics::TEXTURE_R_8;
 
 	m_bpp = m_descriptor.outline ? 2 : 1;
 
@@ -529,10 +535,21 @@ TextureFont::TextureFont(const FontDescriptor &descriptor, Graphics::Renderer *r
 	desc.vertexColors = true; //to allow per-character colors
 	desc.textures = 1;
 	if(Graphics::Hardware::GL3()) {
-		m_mat.reset(new MainMaterial(m_renderer, desc));
+		Graphics::GL3::EffectDescriptor edesc;
+		edesc.uniforms.push_back("su_ModelViewProjectionMatrix");
+		edesc.uniforms.push_back("texture0");
+		edesc.uniforms.push_back("invLogZfarPlus1");
+		edesc.uniforms.push_back("u_outline");
+		edesc.vertex_shader = "gl3/font.vert";
+		edesc.fragment_shader = "gl3/font.frag";
+		m_mat.reset(new Graphics::GL3::EffectMaterial(m_renderer, edesc));
+		m_outlineId = m_mat->GetEffect()->GetUniformID("u_outline");
+		m_mat->GetEffect()->SetProgram();
+		m_mat->GetEffect()->GetUniform(m_outlineId).Set(m_descriptor.outline ? 1.0f : 0.0f);
 	} else {
 		m_mat.reset(m_renderer->CreateMaterial(desc));
 	}
+
 	Graphics::TextureDescriptor textureDescriptor(m_texFormat, vector2f(ATLAS_SIZE), Graphics::NEAREST_CLAMP, false, false);
 	m_texture.Reset(m_renderer->CreateTexture(textureDescriptor));
 	m_mat->texture0 = m_texture.Get();

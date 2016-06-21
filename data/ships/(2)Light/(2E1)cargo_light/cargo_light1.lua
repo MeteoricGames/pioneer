@@ -1,7 +1,7 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Cargo Hauler',
+	name='AV MCS 2000',
 	ship_class = 'cargo',
 	manufacturer = 'alders_vectrum',
 	model='cargo_light1',

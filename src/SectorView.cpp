@@ -159,14 +159,14 @@ void SectorView::InitObject()
 	Gui::Screen::PopFont();
 
 	m_sectorLabel = new Gui::Label("");
-	Add(m_sectorLabel, 2, Gui::Screen::GetHeight()-Gui::Screen::GetFontHeight()*2-66);
+	Add(m_sectorLabel, 14, Gui::Screen::GetHeight()-Gui::Screen::GetFontHeight()*2-66);
 	m_distanceLabel = new Gui::Label("");
-	Add(m_distanceLabel, 2, Gui::Screen::GetHeight()-Gui::Screen::GetFontHeight()-66);
+	Add(m_distanceLabel, 14, Gui::Screen::GetHeight()-Gui::Screen::GetFontHeight()-66);
 
 	m_zoomInButton = new Gui::ImageButton("icons/zoom_in.png");
 	m_zoomInButton->SetToolTip(Lang::ZOOM_IN);
 	m_zoomInButton->SetRenderDimensions(30, 22);
-	Add(m_zoomInButton, 700, 5);
+	Add(m_zoomInButton, 710, 5);
 
 	m_zoomLevelLabel = (new Gui::Label(""))->Color(69, 219, 235);
 	Add(m_zoomLevelLabel, 640, 5);
@@ -174,12 +174,12 @@ void SectorView::InitObject()
 	m_zoomOutButton = new Gui::ImageButton("icons/zoom_out.png");
 	m_zoomOutButton->SetToolTip(Lang::ZOOM_OUT);
 	m_zoomOutButton->SetRenderDimensions(30, 22);
-	Add(m_zoomOutButton, 732, 5);
+	Add(m_zoomOutButton, 742, 5);
 
-	Add(new Gui::Label(Lang::SEARCH), 640, 500);
+	Add(new Gui::Label(Lang::SEARCH), 625, 500);
 	m_searchBox = new Gui::TextEntry();
 	m_searchBox->onKeyPress.connect(sigc::mem_fun(this, &SectorView::OnSearchBoxKeyPress));
-	Add(m_searchBox, 700, 500);
+	Add(m_searchBox, 690, 500);
 
 	m_renderer = Pi::renderer; //XXX pass cleanly to all views constructors!
 
@@ -901,7 +901,8 @@ void SectorView::UpdateDistanceLabelAndLine(DistanceIndicator &distance, const S
 
 		int fuelRequired;
 		double dur;
-		enum Ship::HyperjumpStatus jumpStatus = Pi::player->GetHyperspaceDetails(src, dest, fuelRequired, dur);
+		enum Ship::HyperjumpStatus jumpStatus = Pi::player->GetHyperspaceDetails(src, dest, fuelRequired, 
+			dur, Pi::player->IsPhaseJumpMode());
 		const double MinutesNeeded = dur*(1.0 / (60));
 		const double SecondsNeeded = (MinutesNeeded - floor(MinutesNeeded))*60;
 
@@ -1599,9 +1600,10 @@ void SectorView::Update()
 
 	ShrinkCache();
 
-	m_playerHyperspaceRange = Pi::player->GetStats().hyperspace_range;
-
-
+	m_playerHyperspaceRange = Pi::player->GetStats().hyperspace_range; 
+	if (Pi::player->IsPhaseJumpMode()) {
+		m_playerHyperspaceRange *= HYPERCLOUD_PERMA_MULTIPLIER;
+	}
 
 	// Check all visible sector icons for mouse over and show info tooltip accordingly
 	m_clickableLabels->UpdateTooltip();

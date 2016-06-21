@@ -17,6 +17,9 @@
 #include "AnimationCurves.h"
 #include "graphics/Material.h"
 #include "graphics/Renderer.h"
+#include "graphics/TextureBuilder.h"
+#include "graphics/gl3/Effect.h"
+#include "graphics/gl3/EffectMaterial.h"
 
 using namespace Graphics;
 
@@ -26,8 +29,7 @@ static const float MAX_ZOOM = 1e30f;
 static const float ZOOM_IN_SPEED = 2;
 static const float ZOOM_OUT_SPEED = 1.f/ZOOM_IN_SPEED;
 static const float WHEEL_SENSITIVITY = .1f;		// Should be a variable in user settings.
-// i don't know how to name it
-static const double ROUGH_SIZE_OF_TURD = 10.0;
+static const double VISUAL_CUTOFF_SIZE = 10.0;
 static const Color BACKGROUND_COLOR = Color(0, 89, 178, 255);
 
 SystemView::SystemView() : UIView()
@@ -45,14 +47,20 @@ SystemView::SystemView() : UIView()
 	Add(m_objectLabels, 0, 0);
 	Gui::Screen::PopFont();
 
+	Gui::Screen::PushFont("GuiFont");
 	m_timePoint = (new Gui::Label(""))->Color(178, 178, 178);
-	Add(m_timePoint, 2, Gui::Screen::GetHeight()-Gui::Screen::GetFontHeight()-66);
+	Add(m_timePoint, 12, Gui::Screen::GetHeight()-Gui::Screen::GetFontHeight()-66);
 
 	m_infoLabel = (new Gui::Label(""))->Color(178, 178, 178);
 	Add(m_infoLabel, 2, 0);
 
 	m_infoText = (new Gui::Label(""))->Color(178, 178, 178);
 	Add(m_infoText, 200, 0);
+	Gui::Screen::PopFont();
+
+    Graphics::TextureBuilder tb = TextureBuilder::UI("icons/sectorview/wake.png");
+    m_hypercloudQuad.reset(new Gui::TexturedQuad(Gui::Screen::GetRenderer(),
+        tb.GetOrCreateTexture(Gui::Screen::GetRenderer(), "ui")));
 
 	m_zoomInButton = new Gui::ImageButton("icons/zoom_in.png");
 	m_zoomInButton->SetToolTip(Lang::ZOOM_IN);
@@ -64,7 +72,7 @@ SystemView::SystemView() : UIView()
 	m_zoomOutButton->SetRenderDimensions(30, 22);
 	Add(m_zoomOutButton, 732, 5);
 
-	const int time_controls_left = Gui::Screen::GetWidth() - 150;
+	const int time_controls_left = Gui::Screen::GetWidth() - 160;
 	const int time_controls_top = Gui::Screen::GetHeight() - 86;
 
 	Gui::ImageButton *b = new Gui::ImageButton("icons/sysview_accel_r3.png", "icons/sysview_accel_r3_on.png");
@@ -174,7 +182,7 @@ void SystemView::OnClickObject(const SystemBody *b)
 	data += b->GetName()+"\n";
 
 	desc += std::string(Lang::DAY_LENGTH);
-	desc += std::string(Lang::ROTATIONAL_PERIOD);
+	//desc += std::string(Lang::ROTATIONAL_PERIOD);
 	desc += ":\n";
 	data += stringf(Lang::N_DAYS, formatarg("days", b->GetRotationPeriodInDays())) + "\n";
 
@@ -210,8 +218,12 @@ void SystemView::PutLabel(const SystemBody *b, const vector3d &offset)
 
 	vector3d pos;
 	if (Gui::Screen::Project(offset, pos)) {
-		// libsigc++ is a beautiful thing
-		m_objectLabels->Add(b->GetName(), sigc::bind(sigc::mem_fun(this, &SystemView::OnClickObject), b), pos.x, pos.y);
+        if(b->GetSuperType() != SystemBody::SUPERTYPE_HYPERSPACE_CLOUD) {
+		    // libsigc++ is a beautiful thing
+		    m_objectLabels->Add(b->GetName(), sigc::bind(sigc::mem_fun(this, &SystemView::OnClickObject), b), pos.x, pos.y);
+        } else {
+            m_hyperclouds.push_back(vector2f(pos.x, pos.y));
+        }
 	}
 
 	Gui::Screen::LeaveOrtho();
@@ -220,7 +232,7 @@ void SystemView::PutLabel(const SystemBody *b, const vector3d &offset)
 void SystemView::PutBody(const SystemBody *b, const vector3d &offset, const matrix4x4f &trans)
 {
 	if (b->GetType() == SystemBody::TYPE_STARPORT_SURFACE) return;
-	if (b->GetType() != SystemBody::TYPE_GRAVPOINT) {
+	if (b->GetType() != SystemBody::TYPE_GRAVPOINT ) {
 
 		if (!m_bodyIcon) {
 			Graphics::RenderStateDesc rsd;
@@ -256,8 +268,12 @@ void SystemView::PutBody(const SystemBody *b, const vector3d &offset, const matr
 
 	if (b->HasChildren()) {
 		for(const SystemBody* kid : b->GetChildren()) {
-			if (is_zero_general(kid->GetOrbit().GetSemiMajorAxis())) continue;
-			if (kid->GetOrbit().GetSemiMajorAxis() * m_zoom < ROUGH_SIZE_OF_TURD) {
+			if (is_zero_general(kid->GetOrbit().GetSemiMajorAxis())) {
+                continue;
+            }
+			if (kid->GetType() != SystemBody::TYPE_HYPERSPACE_CLOUD && 
+                kid->GetOrbit().GetSemiMajorAxis() * m_zoom < VISUAL_CUTOFF_SIZE) 
+            {
 				PutOrbit(&(kid->GetOrbit()), offset, Color::PARAGON_BLUE);
 			}
 
@@ -342,38 +358,57 @@ void SystemView::Draw3D()
 
 	if (m_realtime) {
 		m_time = Pi::game->GetTime();
-	}
-	else {
+	} else {
 		m_time += m_timeStep*Pi::GetFrameTime();
 	}
-	std::string t = Lang::TIME_POINT+format_date(m_time);
+	std::string t = Lang::TIME_POINT + format_date(m_time);
 	m_timePoint->SetText(t);
 
-	if (!m_system) m_system = StarSystemCache::GetCached(path);
+	if (!m_system) {
+        m_system = StarSystemCache::GetCached(path);
+    }
 
 	matrix4x4f trans = matrix4x4f::Identity();
-	trans.Translate(0,0,-ROUGH_SIZE_OF_TURD);
+	trans.Translate(0, 0, -VISUAL_CUTOFF_SIZE);
 	trans.Rotate(DEG2RAD(m_rot_x), 1, 0, 0);
 	trans.Rotate(DEG2RAD(m_rot_z), 0, 0, 1);
 	m_renderer->SetTransform(trans);
 
 	vector3d pos(0,0,0);
-	if (m_selectedObject) GetTransformTo(m_selectedObject, pos);
+	if (m_selectedObject) {
+        GetTransformTo(m_selectedObject, pos);
+    }
 
 	m_objectLabels->Clear();
-	if (m_system->GetUnexplored())
+    m_hyperclouds.clear();
+
+	if (m_system->GetUnexplored()) {
 		m_infoLabel->SetText(Lang::UNEXPLORED_SYSTEM_NO_SYSTEM_VIEW);
-	else if (m_system->GetRootBody()) {
+    } else if (m_system->GetRootBody()) {
 		PutBody(m_system->GetRootBody().Get(), pos, trans);
 		if (Pi::game->GetSpace()->GetStarSystem() == m_system) {
 			const Body *navTarget = Pi::player->GetNavTarget();
 			const SystemBody *navTargetSystemBody = navTarget ? navTarget->GetSystemBody() : 0;
-			if (navTargetSystemBody)
+			if (navTargetSystemBody) {
 				PutSelectionBox(navTargetSystemBody, pos, Color::GREEN);
+            }
 		}
 	}
 
-	UIView::Draw3D();
+    Gui::Screen::EnterOrtho();
+
+    // Draw hypercloud icons
+    if (m_hypercloudQuad && !m_hyperclouds.empty()) {
+        vector2f size(20.0f, 20.0f);
+        Gui::Screen::ConvertSizeToUI(size.x, size.y, size.x, size.y);
+        for (unsigned i = 0; i < m_hyperclouds.size(); ++i) {
+            m_hypercloudQuad->Draw(m_hyperclouds[i] - (size / 2.0f), size, Color::PARAGON_BLUE);
+        }
+    }
+
+    Gui::Screen::LeaveOrtho();
+
+    UIView::Draw3D();
 }
 
 void SystemView::Update()

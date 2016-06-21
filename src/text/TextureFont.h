@@ -74,6 +74,7 @@ private:
 	float m_height;
 	float m_descender;
 	std::unique_ptr<Graphics::Material> m_mat;
+	int m_outlineId;
 	Graphics::VertexArray m_vertices;
 	Graphics::RenderState *m_renderState;
 

@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Omni Ranger',
+	name='Xian Hammerhead',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'xian',
 	model='omni_light1',
 	forward_thrust = 538e5,
 	reverse_thrust = 538e5,

@@ -56,6 +56,7 @@ struct Color4ub {
 
 	Color4f ToColor4f() const { return Color4f(r/255.0f, g/255.0f, b/255.0f, a/255.0f); }
 	vector4f ToVector4f() const { return vector4f(r/255.0f, g/255.0f, b/255.0f, a/255.0f); }
+	vector3f ToVector3f() const { return vector3f(r/255.0f, g/255.0f, b/255.0f); }
 
 	void ToLuaTable(lua_State *l);
 	static Color4ub FromLuaTable(lua_State *l, int idx);

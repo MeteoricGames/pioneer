@@ -10,6 +10,8 @@
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 
+double oldLen = 0;
+
 TerrainBody::TerrainBody(SystemBody *sbody) :
 	Body(),
 	m_sbody(0),
@@ -66,6 +68,10 @@ void TerrainBody::Render(Graphics::Renderer *renderer, const Camera *camera, con
 	renderer->GetNearFarRange(znear, zfar);
 
 	double len = fpos.Length();
+    if (len != len)
+        len = oldLen;
+    else
+        oldLen = len;
 	//objects very far away are downscaled, because they cannot be
 	//accurately drawn using actual distances
 	int shrink = 0;

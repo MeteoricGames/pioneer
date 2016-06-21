@@ -150,7 +150,7 @@ AM_CONDITIONAL([DO_STRIP], [test "$DO_STRIP" = yes])
 
 
 dnl Versioning. If this is a git checkout, try to get details from it
-PARAGON_VERSION=[Alpha10.51]
+PARAGON_VERSION=[Alpha12.2]
 PARAGON_EXTRAVERSION=
 #if test -d .git ; then
 #    AC_MSG_NOTICE([This is a git checkout])
@@ -344,11 +344,28 @@ case "$host" in
 	PLATFORM=posix
 	;;
 esac
+
+case $host_os in
+  darwin* )
+		PLATFORM_OS=osx
+        ;;
+  linux*)
+		PLATFORM_OS=linux
+        ;;
+    *)
+        #Default Case
+        PLATFORM_OS=windows
+        ;;
+esac
+
 AC_SUBST([PLATFORM])
 AC_MSG_RESULT($PLATFORM)
+AC_SUBST([PLATFORM_OS])
+AC_MSG_RESULT($PLATFORM_OS)
 
 AM_CONDITIONAL([BUILD_WIN32], [test "x-$PLATFORM" = "x-win32"])
 AM_CONDITIONAL([BUILD_POSIX], [test "x-$PLATFORM" = "x-posix"])
+AM_CONDITIONAL([BUILD_OSX], [test "x-$PLATFORM_OS" = "x-osx"])
 
 dnl ###########################################################################
 dnl System-specific stuff not covered above

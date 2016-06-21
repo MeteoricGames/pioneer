@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Armed Transport',
+	name='Sukhov Combat Transport',
 	ship_class = 'passenger',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'sukhov',
 	model='passenger_ultralight2',
 	cockpit='civilian_fighter2_cockpit',
 	forward_thrust = 10e5,

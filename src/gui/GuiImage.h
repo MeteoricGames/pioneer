@@ -17,11 +17,13 @@ namespace Gui {
 		virtual void GetSizeRequested(float size[2]);
 		void SetModulateColor(const Color &color) { m_color = color; }
 		void SetRenderDimensions(const float wide, const float high);
+		void SetPosition(const vector2f pos) { m_position = pos; }
 	private:
 		void InitTexture(const char* filename);
 		std::unique_ptr<TexturedQuad> m_quad;
 		Color m_color;
 		float m_width, m_height;
+		vector2f m_position = vector2f(0.0f, 0.0f);
 	};
 }
 

@@ -67,9 +67,11 @@ public:
 	void SetCombatTarget(Body* const target, bool setSpeedTo = false);
 	void SetNavTarget(Body* const target, bool setSpeedTo = false);
 
-	virtual Ship::HyperjumpStatus InitiateHyperjumpTo(const SystemPath &dest, int warmup_time, double duration, LuaRef checks);
+	virtual Ship::HyperjumpStatus InitiateHyperjumpTo(const SystemPath &dest, 
+	 	int warmup_time, double duration, LuaRef checks, bool phase_mode) override;
 	virtual void AbortHyperjump();
-	virtual Ship::HyperjumpStatus StartHyperspaceCountdown(const SystemPath &dest);
+	virtual Ship::HyperjumpStatus StartHyperspaceCountdown(const SystemPath &dest,
+		bool phase_mode) override;
 	virtual void ResetHyperspaceCountdown();
 
 	// XXX cockpit is here for now because it has a physics component
@@ -104,6 +106,7 @@ public:
 	EFreightTeleporterTargetType GetFreightTeleporterTargetType() const;
 	/// FT Status: not available, no target, target out of range, or FT is active (Ready to fire!)
 	EFreightTeleporterStatus GetFreightTeleporterStatus() const;
+
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);

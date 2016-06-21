@@ -1,7 +1,7 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Epsilon Corvette',
+	name='AV Epsilon',
 	ship_class = 'military',
 	manufacturer = 'alders_vectrum',
 	model='military_light2',
@@ -30,5 +30,5 @@ define_ship {
 	price = 325000,
 	hyperdrive_class = 5,
 	-- Paragon Flight System
-    max_maneuver_speed = 700,
+    max_maneuver_speed = 600,
 }

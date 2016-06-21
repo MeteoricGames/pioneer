@@ -82,6 +82,9 @@ namespace Graphics {
 			int m_universeBoxId;
 			int m_atmosColorId;
 			int m_atmosDensityId;
+			int m_hemiDiffId;
+			int m_hemiGlossId;
+			int m_irrGlossyExpId;
 			
 			bool m_isInit;
 		};

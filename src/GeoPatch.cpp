@@ -88,6 +88,13 @@ void GeoPatch::_UpdateVBOs(Graphics::Renderer *renderer)
 		GeoPatchContext::VBOVertex* vtxPtr = m_vertexBuffer->Map<GeoPatchContext::VBOVertex>(Graphics::BUFFER_MAP_WRITE);
 		assert(m_vertexBuffer->GetDesc().stride == sizeof(GeoPatchContext::VBOVertex));
 
+		assert(vtxPtr);
+		if(!vtxPtr) {
+			// According to crashdumps, vtxPtr sometimes is null when OpenGL fails to map buffers for an unknown reason.
+            // It's better not to crash in release for now.
+			return;
+		}
+
 		const Sint32 edgeLen = ctx->edgeLen;
 		const double frac = ctx->frac;
 		const double *pHts = heights.get();

@@ -28,8 +28,10 @@ Intro::Intro(Graphics::Renderer *r, int width, int height)
 
 	const Color one = Color::WHITE;
 	const Color two = Color(77, 77, 204, 0);
-	m_lights.push_back(Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f, 0.3f, 1.f), one, one));
-	m_lights.push_back(Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f, -1.f, 0.f), two, Color::BLACK));
+	m_lights.push_back(Light(Graphics::Light::LIGHT_DIRECTIONAL, 
+		vector3f(0.f, 0.3f, 1.f), one, one, 0.0f));
+	m_lights.push_back(Light(Graphics::Light::LIGHT_DIRECTIONAL, 
+		vector3f(0.f, -1.f, 0.f), two, Color::BLACK, 0.0f));
 
 }
 

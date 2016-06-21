@@ -1,8 +1,13 @@
 #!/bin/sh
 # Executable wrapper script
 # Ensures the program is up-to-date, then hands over
+# Allows the use of multiple tools by passing the name of the tool as argument
 
 PROGRAM_NAME=$0
 
 EXEC_BIN=src/$PROGRAM_NAME
-make && exec $EXEC_BIN $*
+case $1 in
+	gdb) make && gdb $EXEC_BIN $*;;
+	valgrind) make && valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes --error-limit=no $EXEC_BIN $*;;
+	*) make && exec $EXEC_BIN $*;;
+esac

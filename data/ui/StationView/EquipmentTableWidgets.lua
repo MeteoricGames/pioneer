@@ -209,7 +209,7 @@ local stationColumnValue = {
 		if station_stock <= 1 then 
 			return nil 
 		end
-		local btn = ui:Button(ui:Label("Buy.."))
+		local btn = ui:Button(ui:Label("Buy.."):SetColor(c))
 		btn.onClick:Connect(
 			function()
 				flagBulkOperation = true
@@ -287,7 +287,7 @@ local shipColumnValue = {
 		if item_count <= 1 then
 			return nil
 		end
-		local btn = ui:Button(ui:Label("Sell.."))
+		local btn = ui:Button(ui:Label("Sell.."):SetColor(c))
 		btn.onClick:Connect(
 			function()
 				-- This removes the 1 unit buy the click will cause

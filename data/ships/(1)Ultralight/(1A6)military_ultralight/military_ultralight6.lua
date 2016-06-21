@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='RCV Light Fighter',
+	name='AV Light Fighter',
 	ship_class = 'military',
-	manufacturer = 'ncom',
+	manufacturer = 'alders_vectrum',
 	model = 'military_ultralight6',
 	cockpit='fighter_cockpit',
 	forward_thrust = 16e5,

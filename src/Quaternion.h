@@ -81,7 +81,10 @@ public:
 	}
 
 	Quaternion Normalized() const {
-		T l = 1.0 / sqrt (w*w + x*x + y*y + z*z);
+		T l = 0;
+		T s = sqrt (w*w + x*x + y*y + z*z);
+		if (s > 0) // Cant allow to divide by 0.
+			l = 1.0 / s;
 		return Quaternion(w*l, x*l, y*l, z*l);
 	}
 	static T Dot (const Quaternion &a, const Quaternion &b) { return a.w*b.w + a.x*b.x + a.y*b.y + a.z*b.z; }

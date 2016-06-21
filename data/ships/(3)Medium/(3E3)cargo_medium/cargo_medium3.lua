@@ -2,9 +2,9 @@
 
 --Ships not available for purchase (ambient ships)
 define_ship {
-	name='Pelican Fast Freighter',
+	name='Xian Pelican',
 	ship_class = 'cargo',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'xian',
 	model='cargo_medium3',
 	forward_thrust = 12000e5,
 	reverse_thrust = 12000e5,

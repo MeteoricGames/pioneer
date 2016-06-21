@@ -131,7 +131,8 @@ ModelViewer::~ModelViewer()
 
 void ModelViewer::Run(const std::string &modelName)
 {
-	std::unique_ptr<GameConfig> config(new GameConfig);
+	std::map<std::string, std::string> tmp;
+	std::unique_ptr<GameConfig> config(new GameConfig(tmp));
 
 	Graphics::Renderer *renderer;
 	ModelViewer *viewer;
@@ -1080,7 +1081,8 @@ void ModelViewer::SetupUI()
 			->AddOption("1  Front white")
 			->AddOption("2  Two-point")
 			->AddOption("3  Backlight")
-			//->AddOption("4  Nuts")
+			->AddOption("4  Carnival")
+			->AddOption("5  Point lights")
 	);
 	lightSelector->SetSelectedOption("1  Front white");
 	m_options.lightPreset = 0;
@@ -1246,26 +1248,50 @@ void ModelViewer::UpdateLights()
 	switch(m_options.lightPreset) {
 	case 0:
 		//Front white
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(90,0), Color(255), Color(255)));
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0,-90), Color(13, 13, 26), Color(255)));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(90,0), 
+			Color(255), Color(255), 0.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0,-90), 
+			Color(13, 13, 26), Color(255), 0.0f));
 		break;
+
 	case 1:
 		//Two-point
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(120,0), Color(230, 204, 204), Color(255)));
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(-30,-90), Color(178, 128, 0), Color(255)));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(120,0), 
+			Color(230, 204, 204), Color(255), 0.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(-30,-90), 
+			Color(178, 128, 0), Color(255), 0.0f));
 		break;
+
 	case 2:
 		//Backlight
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(-75,20), Color(255), Color(255)));
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0,-90), Color(13, 13, 26), Color(255)));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(-75,20), 
+			Color(255), Color(255), 0.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0,-90), 
+			Color(13, 13, 26), Color(255), 0.0f));
 		break;
+
 	case 3:
-		//4 lights
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, 90), Color::YELLOW, Color(255)));
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, -90), Color::GREEN, Color(255)));
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, 45), Color::BLUE, Color(255)));
-		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, -45), Color::WHITE, Color(255)));
+		//Carnival
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, 90), 
+			Color::YELLOW, Color(255), 0.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, -90), 
+			Color::GREEN, Color(255), 0.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, 45), 
+			Color::BLUE, Color(255), 0.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, -45), 
+			Color::RED, Color(255), 0.0f));
 		break;
+
+	case 4:
+		//Point lights
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, 90),
+			Color::YELLOW, Color(255), 1.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, -90),
+			Color::GREEN, Color(255), 2.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, 45),
+			Color::BLUE, Color(255), 3.0f));
+		lights.push_back(Light(Light::LIGHT_DIRECTIONAL, az_el_to_dir(0, -45),
+			Color::RED, Color(255), 4.0f));
 	};
 
 	m_renderer->SetLights(int(lights.size()), &lights[0]);

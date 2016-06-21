@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Starling Shuttle',
+	name='Ncom Interstar S2',
 	ship_class = 'passenger',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'ncom',
 	model='passenger_ultralight3',
 	cockpit='civilian_fighter2_cockpit',
 	forward_thrust = 165e5,

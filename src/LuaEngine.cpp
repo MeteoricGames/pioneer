@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaEngine.h"
@@ -707,7 +706,7 @@ static int l_engine_get_joystick_count(lua_State *l)
 }
 
 static int l_engine_get_joystick_name(lua_State *l)
-{
+{	
 	if (lua_isnone(l, 1))
 		return luaL_error(l, "GetJoystickName is not given a joystick index");
 	int idx = lua_tointeger(l, 1);

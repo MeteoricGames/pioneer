@@ -12,7 +12,7 @@ enum RunMode {
 	MODE_MODELVIEWER,
 	MODE_VERSION,
 	MODE_USAGE,
-	MODE_USAGE_ERROR
+	MODE_UNKNOWN
 };
 
 int main(int argc, char** argv)
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	if (argc > 1) {
 		const char switchchar = argv[1][0];
 		if (!(switchchar == '-' || switchchar == '/')) {
-			mode = MODE_USAGE_ERROR;
+			mode = MODE_UNKNOWN;
 			goto start;
 		}
 
@@ -52,15 +52,15 @@ int main(int argc, char** argv)
 			goto start;
 		}
 
-		mode = MODE_USAGE_ERROR;
+		mode = MODE_UNKNOWN;
 	}
 
 start:
-
 	switch (mode) {
-		case MODE_GAME: {
+		case MODE_GAME:
+        case MODE_UNKNOWN: {
 			std::map<std::string,std::string> options;
-			if (argc > 2) {
+			/*if (argc > 2) {
 				static const std::string delim("=");
 				int pos = 2;
 				for (; pos < argc; pos++) {
@@ -74,7 +74,7 @@ start:
 					const std::string val(arg.substr(mid+1, arg.length()));
 					options[key] = val;
 				}
-			}
+			}*/
 			Pi::Init(options);
 			for (;;) Pi::Start();
 			break;
@@ -91,17 +91,13 @@ start:
 		case MODE_VERSION: {
 			std::string version(PARAGON_VERSION);
 			if (strlen(PARAGON_EXTRAVERSION)) version += " (" PARAGON_EXTRAVERSION ")";
-			Output("paragon %s\n", version.c_str());
+			Output("JumpDrive %s\n", version.c_str());
 			break;
 		}
 
-		case MODE_USAGE_ERROR:
-			Output("paragon: unknown mode %s\n", argv[1]);
-			// fall through
-
 		case MODE_USAGE:
 			Output(
-				"usage: paragon [mode] [options...]\n"
+				"usage: JumpDrive [mode] [options...]\n"
 				"available modes:\n"
 				"    -game        [-g]     game (default)\n"
 				"    -modelviewer [-mv]    model viewer\n"

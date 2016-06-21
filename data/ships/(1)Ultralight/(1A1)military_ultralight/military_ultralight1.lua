@@ -1,10 +1,11 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Falcon',
+	name='AV Vector',
 	ship_class = 'military',
-	manufacturer = 'Arcor',
+	manufacturer = 'alders_vectrum',
 	model = 'military_ultralight1',
+	cockpit='military_cockpit',
 	forward_thrust = 16e5,
 	reverse_thrust = 16e5,
 	up_thrust = 160e5,
@@ -25,7 +26,7 @@ define_ship {
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.
 	effective_exhaust_velocity = 120000e3,
-	price = 0,
+	price = 190000,
 	hyperdrive_class = 0,
 	-- Paragon Flight System
     max_maneuver_speed = 900,

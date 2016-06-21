@@ -78,6 +78,10 @@ void EffectMaterial::PreInit()
 	m_atmosColorId = -1;
 	m_atmosDensityId = -1;
 
+	m_hemiDiffId = -1;
+	m_hemiGlossId = -1;
+	m_irrGlossyExpId = -1;
+
 	m_isInit = false;
 }
 
@@ -94,6 +98,11 @@ void EffectMaterial::Init()
 		m_lightsBlock = m_effect->InitUniformBlock(Effect::GetSharedUniformBlock(
 			LightSourcesBlock_Name.c_str()));
 	}
+
+	// Lighting tweaks
+	m_hemiDiffId = m_effect->GetUniformID("u_hemiDiff");
+	m_hemiGlossId = m_effect->GetUniformID("u_hemiGloss");
+	m_irrGlossyExpId = m_effect->GetUniformID("u_irrGlossyExp");
 	
 	// Textures
 	m_texture0Id = m_effect->GetUniformID("texture0");
@@ -185,6 +194,11 @@ void EffectMaterial::Apply()
 	if(m_materialsBlock > -1) {
 		MaterialBlock mb(diffuse, emissive, specular, shininess);
 		m_effect->WriteUniformBlock(m_materialsBlock, sizeof(MaterialBlock), &mb);
+	}
+	if(m_hemiDiffId > -1) {
+		m_effect->GetUniform(m_hemiDiffId).Set(Pi::ts_irr_light.hemi_diffuse_intensity);
+		m_effect->GetUniform(m_hemiGlossId).Set(Pi::ts_irr_light.hemi_gloss_intensity);
+		m_effect->GetUniform(m_irrGlossyExpId).Set(Pi::ts_irr_light.irradiance_gloss_exponential);
 	}
 
 	if(m_usesDeprecatedMtrl) {

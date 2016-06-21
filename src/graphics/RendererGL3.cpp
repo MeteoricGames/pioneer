@@ -77,7 +77,7 @@ RendererGL3::RendererGL3(WindowSDL *window, const Graphics::Settings &vs)
 
 	// Define renderer shared uniform blocks
 	GL3::Effect::DefineSharedUniformBlock("UBMaterial", sizeof(MaterialBlock));
-	GL3::Effect::DefineSharedUniformBlock("UBLightSources", sizeof(LightSource)* MATERIAL_MAX_LIGHTS);
+	GL3::Effect::DefineSharedUniformBlock("UBLightSources", sizeof(LightSource) * MATERIAL_MAX_LIGHTS);
 	
 	// Flat color materials
 	GL3::EffectDescriptorDirect fc_desc;
@@ -161,10 +161,10 @@ bool RendererGL3::BeginFrame()
 	return true;
 }
 
-bool RendererGL3::BeginPostProcessing(RenderTarget* rt_device)
+bool RendererGL3::BeginPostProcessing(RenderTarget* rt_device, PostProcessLayer layer)
 {
 	m_postprocessing->SetDeviceRT(rt_device);
-	m_postprocessing->BeginFrame();
+	m_postprocessing->BeginFrame(layer);
 	return true;
 }
 
@@ -234,6 +234,7 @@ bool RendererGL3::SwapBuffers()
 
 bool RendererGL3::SetRenderState(RenderState *rs)
 {
+	m_customRenderState = true;
 	if (m_activeRenderState != rs) {
 		static_cast<GL3::RenderState*>(rs)->Apply();
 		m_activeRenderState = rs;
@@ -377,7 +378,8 @@ bool RendererGL3::SetLights(int numlights, const Light *lights)
 		m_lights[i].position = pos.NormalizedSafe();
 		m_lights[i].position.w = 0.0f;
 		m_lights[i].diffuse = l.GetDiffuse().ToVector4f();
-		m_lights[i].specular = l.GetSpecular().ToVector4f();
+		m_lights[i].specular = l.GetSpecular().ToVector3f();
+		m_lights[i].radius = l.GetRadius();
 		ls.numLights += 1;
 	}
 	memcpy(ls.lights, lights, sizeof(Light)* ls.numLights);
@@ -446,7 +448,7 @@ bool RendererGL3::DrawLines(int count, const vector3f *v, const Color *c, Render
 		m_linesDiffuseVA->Add(v[i], c[i]);
 	}
 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 
 	m_linesDiffuseVA->UpdateInternalVB();
 	GL3::VertexBuffer* vb = m_linesDiffuseVA->GetVB();
@@ -462,7 +464,7 @@ bool RendererGL3::DrawLines(int count, VertexArray *va, const Color *c, RenderSt
 	PROFILE_SCOPED()
 	assert(count > 1 && va && c);
 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 
 	va->UpdateInternalVB();
 	GL3::VertexBuffer* vb = va->GetVB();
@@ -480,7 +482,7 @@ bool RendererGL3::DrawLinesBuffer(int count, VertexBuffer *vb, RenderState* stat
 		return false;
 	}
 	
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 	BeginDrawVB(vb, vtxColorMaterial);
 	glDrawArrays(type, 0, count);
 	EndDrawVB(vb, vtxColorMaterial);
@@ -507,7 +509,7 @@ bool RendererGL3::DrawLines(int count, VertexArray *va, const Color &c, RenderSt
 	PROFILE_SCOPED()
 	assert(count >= 2 && va);
 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 
 	flatColorMaterial->diffuse = c;
 	va->UpdateInternalVB();
@@ -525,7 +527,7 @@ bool RendererGL3::DrawLines2D(int count, const vector2f *v, const Color &c,
 	PROFILE_SCOPED()
 	assert(count >= 2 && v);
 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 
 	m_linesVA->Clear();
 	for(int i = 0; i < count; ++i) {
@@ -541,7 +543,7 @@ bool RendererGL3::DrawPoints(int count, const vector3f *points, const Color *col
 	assert(count > 0 && points && colors);
 
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 
 	m_pointsVA->Clear();
 	for(int i = 0; i < count; ++i) {
@@ -562,7 +564,7 @@ bool RendererGL3::DrawTriangles(VertexArray *v, RenderState *rs, Material *mat, 
 {
 	assert(m_activeEffect || mat);
 	assert(v && v->GetNumVerts() >= 3);
-	SetRenderState(rs);
+	CheckAndSetRenderState(rs);
 	v->UpdateInternalVB();
 	GL3::VertexBuffer* vb = v->GetVB();
 	BeginDrawVB(vb, mat);
@@ -578,7 +580,7 @@ bool RendererGL3::DrawTriangles(int vertCount, VertexArray *vertices, RenderStat
 	assert(vertCount >= 2 && vertices);
 	assert(m_activeEffect || material);
 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 	vertices->UpdateInternalVB();
 	GL3::VertexBuffer* vb = vertices->GetVB();
 	BeginDrawVB(vb, material);
@@ -628,7 +630,8 @@ bool RendererGL3::DrawBuffer(VertexBuffer* vb, RenderState* state, Material* mat
 {
 	assert(vb && (mat || m_activeEffect));
 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
+
 	BeginDrawVB(vb, mat);
 	glDrawArrays(pt, 0, vb->GetVertexCount());
 	EndDrawVB(vb, mat);
@@ -639,7 +642,7 @@ bool RendererGL3::DrawBuffer(VertexBuffer* vb, RenderState* state, Material* mat
 bool RendererGL3::DrawBufferIndexed(VertexBuffer *vb, IndexBuffer *ib, RenderState *state, 
 	Material *mat, PrimitiveType pt, unsigned start_index, unsigned index_count)
 { 
-	SetRenderState(state);
+	CheckAndSetRenderState(state);
 
 	BeginDrawVB(vb, mat);
 	ib->Bind();
@@ -656,7 +659,7 @@ bool RendererGL3::DrawFullscreenQuad(Material *mat, RenderState *state, bool cle
 	assert(mat);
 	state = state == nullptr? m_screenQuadRS : state;
 
-	SetRenderState(state);
+	SetFullscreenRenderState(state);
 
 	if(clear_rt) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -684,8 +687,9 @@ bool RendererGL3::DrawFullscreenQuad(RenderState *state, bool clear_rt)
 {
 	assert(m_activeEffect);
 	state = state == nullptr? m_screenQuadRS : state;
-	SetRenderState(state);
 
+	SetFullscreenRenderState(state);
+	
 	if(clear_rt) {
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
@@ -1048,6 +1052,27 @@ void RendererGL3::Scale( const float x, const float y, const float z )
 		case MatrixMode::PROJECTION:
 			m_modelViewStack.top().Scale(x,y,z);
 			break;
+	}
+}
+
+void RendererGL3::CheckAndSetRenderState(RenderState* rs)
+{
+	if (!m_customRenderState) {
+		if (m_activeRenderState != rs) {
+			static_cast<GL3::RenderState*>(rs)->Apply();
+			m_activeRenderState = rs;
+		}
+	}
+	else {
+		m_customRenderState = false;
+	}
+}
+
+void RendererGL3::SetFullscreenRenderState(RenderState* rs)
+{
+	if (m_activeRenderState != rs) {
+		static_cast<GL3::RenderState*>(rs)->Apply();
+		m_activeRenderState = rs;
 	}
 }
 

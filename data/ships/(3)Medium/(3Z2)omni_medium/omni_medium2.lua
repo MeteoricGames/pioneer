@@ -2,9 +2,9 @@
 
 --Ships not available for purchase (ambient ships)
 define_ship {
-	name='Unitech Long Range Explorer',
+	name='Sukhov LR Explorer',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'sukhov',
 	model='omni_medium2',
 	cockpit='unitech_light_cockpit',
 	forward_thrust = 12000e5,

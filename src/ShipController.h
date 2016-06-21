@@ -24,9 +24,12 @@ enum FlightControlState {
 };
 
 enum FlightButtonStatus {
-	FLIGHT_BUTTON_UNAVAILABLE	= 0,
-	FLIGHT_BUTTON_OFF			= 1,
-	FLIGHT_BUTTON_ON			= 2,
+	FLIGHT_BUTTON_UNAVAILABLE,
+	FLIGHT_BUTTON_OFF,			
+	FLIGHT_BUTTON_ON,			
+	FLIGHT_PHASE_BUTTON_UNAVAILABLE,
+	FLIGHT_PHASE_BUTTON_OFF,
+	FLIGHT_PHASE_BUTTON_ON,		
 };
 
 // Mouse flight deadzone is in pixels offset from center of screen

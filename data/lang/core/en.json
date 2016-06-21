@@ -2,6 +2,14 @@
   "TEST" : {
       "description" : "",
       "message" : "Test"
+   },
+   "ADVANCED_FREIGHT_TELEPORTER" : {
+	  "description" : "",
+	  "message" : "Advanced Freight Teleporter"
+   },
+   "ADVANCED_FREIGHT_TELEPORTER_DESCRIPTION" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter with advanced capabilities"
    },   
    "AIR_PROCESSORS" : {
       "description" : "",
@@ -77,23 +85,23 @@
    },
    "AUTOPILOT_DOCK_WITH_STATION" : {
       "description" : "",
-      "message" : "Autopilot: Dock with space station"
+      "message" : "Dock"
    },
    "AUTOPILOT_ENTER_HIGH_ORBIT_AROUND" : {
       "description" : "",
-      "message" : "Autopilot: Enter high orbit around %target"
+      "message" : "High orbit"
    },
    "AUTOPILOT_ENTER_LOW_ORBIT_AROUND" : {
       "description" : "",
-      "message" : "Autopilot: Enter low orbit around %target"
+      "message" : "Low orbit"
    },
    "AUTOPILOT_ENTER_MEDIUM_ORBIT_AROUND" : {
       "description" : "",
-      "message" : "Autopilot: Enter medium orbit around %target"
+      "message" : "Medium orbit"
    },
    "AUTOPILOT_FLY_TO_VICINITY_OF" : {
       "description" : "",
-      "message" : "Autopilot: Fly to vicinity of %target"
+      "message" : "Approach"
    },
    "AUTOPILOT_ON" : {
       "description" : "",
@@ -119,9 +127,21 @@
       "description" : "",
       "message" : "Only a few thousand"
    },
+   "BASIC_FREIGHT_TELEPORTER" : {
+	  "description" : "",
+	  "message" : "Basic Freight Teleporter"
+   },
+   "BASIC_FREIGHT_TELEPORTER_DESCRIPTION" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter with basic capabilities"
+   },
    "BATTLE_WEAPONS" : {
       "description" : "",
       "message" : "Battle weapons"
+   },
+   "BIDIRECTIONAL" : {
+      "description" : "",
+	  "message" : "Bidirectional"
    },
    "BINARY_SYSTEM" : {
       "description" : "",
@@ -170,50 +190,6 @@
    "CAMERA_FREE_VIEW" : {
 	  "description" : "",
 	  "message" : "Free camera"
-   },
-   "FREELOOK_UP" : {
-	  "description" : "",
-	  "message" : "Freelook Up"
-   },
-   "FREELOOK_DOWN" : {
-	  "description" : "",
-	  "message" : "Freelook Down"
-   },
-   "FREELOOK_LEFT" : {
-	  "description" : "",
-	  "message" : "Freelook Left"
-   },
-   "FREELOOK_RIGHT" : {
-	  "description" : "",
-	  "message" : "Freelook Right"
-   },
-   "FREELOOK_CENTRE" : {
-	  "description" : "",
-	  "message" : "Freelook Centre"
-   },
-   "FREIGHT_TELEPORTER" : {
-	  "description" : "",
-	  "message" : "Freight Teleporter"
-   },
-   "FREIGHT_TELEPORTER_DESCRIPTION" : {
-	  "description" : "",
-	  "message" : "Freight Teleporter is able to teleports cargo into your ship"
-   },
-   "BASIC_FREIGHT_TELEPORTER" : {
-	  "description" : "",
-	  "message" : "Basic Freight Teleporter"
-   },
-   "BASIC_FREIGHT_TELEPORTER_DESCRIPTION" : {
-	  "description" : "",
-	  "message" : "Freight Teleporter with basic capabilities"
-   },
-   "ADVANCED_FREIGHT_TELEPORTER" : {
-	  "description" : "",
-	  "message" : "Advanced Freight Teleporter"
-   },
-   "ADVANCED_FREIGHT_TELEPORTER_DESCRIPTION" : {
-	  "description" : "",
-	  "message" : "Freight Teleporter with advanced capabilities"
    },
    "CANT_SAVE_IN_HYPERSPACE" : {
       "description" : "",
@@ -599,6 +575,34 @@
       "description" : "",
       "message" : "following selection"
    },
+   "FREELOOK_UP" : {
+	  "description" : "",
+	  "message" : "Freelook Up"
+   },
+   "FREELOOK_DOWN" : {
+	  "description" : "",
+	  "message" : "Freelook Down"
+   },
+   "FREELOOK_LEFT" : {
+	  "description" : "",
+	  "message" : "Freelook Left"
+   },
+   "FREELOOK_RIGHT" : {
+	  "description" : "",
+	  "message" : "Freelook Right"
+   },
+   "FREELOOK_CENTRE" : {
+	  "description" : "",
+	  "message" : "Freelook Centre"
+   },
+   "FREIGHT_TELEPORTER" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter"
+   },
+   "FREIGHT_TELEPORTER_DESCRIPTION" : {
+	  "description" : "",
+	  "message" : "Freight Teleporter is able to teleports cargo into your ship"
+   },
    "FRONT" : {
       "description" : "",
       "message" : "Front"
@@ -747,9 +751,25 @@
       "description" : "",
       "message" : "Phase drive departure jump wake"
    },
+   "HYPERSPACE_PERMA_CLOUD" : {
+      "description" : "",
+	  "message" : "Phase drive bidirectional jump wake"
+   },
    "HYPERSPACE_JUMP" : {
       "description" : "",
       "message" : "Phase Drive Jump"
+   },
+   "JUMP_FAILED_ENTERED_PHASE_RANGE" : {
+      "description" : "",
+	  "message" : "Jump Aborted: you entered phase jump range"
+   },
+   "JUMP_FAILED_LEFT_PHASE_RANGE" : {
+	  "description" : "",
+	  "message" : "Jump Aborted: you left phase jump range"
+   },
+   "JUMP_FAILED_HYPERCLOUD_INUSE" : {
+      "description" : "",
+	  "message" : "Jump Aborted: phase hypercloud in use"
    },
    "HYPERSPACE_JUMP_ABORTED" : {
       "description" : "",
@@ -937,11 +957,23 @@
    },
    "JUMP_CONTROL_OFF" : {
       "description" : "",
-	  "message" : "Jump mode off"
+	  "message" : "Initiate Hyper Jump"
    },
    "JUMP_CONTROL_ON" : {
       "description" : "",
-	  "message" : "Jump mode on"
+	  "message" : "Cancel Hyper Jump"
+   },
+   "PHASE_JUMP_CONTROL_UNAVAILABLE" : {
+	  "description" : "",
+	  "message" : "Jump mode unavailable"
+   },
+   "PHASE_JUMP_CONTROL_OFF" : {
+      "description" : "",
+	  "message" : "Initiate Phase Jump"
+   },
+   "PHASE_JUMP_CONTROL_ON" : {
+	  "description" : "",
+	  "message" : "Cancel Phase Jump"
    },
    "MAP_LOCK_HYPERSPACE_TARGET" : {
       "description" : "",
@@ -1922,6 +1954,10 @@
    "TARGET_OBJECT_IN_SIGHTS" : {
       "description" : "",
       "message" : "Target object in cross-hairs"
+   },
+   "DESELECT_ALL_OBJECTS" : {
+	  "description" : "",
+	  "message" : "Deselect objects"
    },
    "TENUOUS" : {
       "description" : "",

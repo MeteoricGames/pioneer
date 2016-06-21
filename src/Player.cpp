@@ -1,7 +1,6 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
-
 #include "VSLog.h"
 
 #include "Player.h"
@@ -18,6 +17,7 @@
 #include "WorldView.h"
 #include "StringF.h"
 #include "ThrusterTrail.h"
+#include "Tweaker.h"
 
 //Some player specific sounds
 static Sound::Event s_soundUndercarriage;
@@ -157,17 +157,16 @@ void Player::SetAlertState(Ship::AlertState as)
 
 void Player::NotifyRemoved(const Body* const removedBody)
 {
-	if (GetNavTarget() == removedBody)
+	if (GetNavTarget() == removedBody) {
 		SetNavTarget(0);
-
-	else if (GetCombatTarget() == removedBody) {
+	} else if (GetCombatTarget() == removedBody) {
 		SetCombatTarget(0);
 
 		if (!GetNavTarget() && removedBody->IsType(Object::SHIP))
 			SetNavTarget(static_cast<const Ship*>(removedBody)->GetHyperspaceCloud());
 	}
-
 	Ship::NotifyRemoved(removedBody);
+	Tweaker::NotifyRemoved(removedBody);
 }
 
 //XXX ui stuff
@@ -180,7 +179,7 @@ void Player::OnEnterHyperspace()
 	Pi::worldView->HideTargetActions(); // hide the comms menu
 	m_controller->SetFlightControlState(CONTROL_MANEUVER); //could set CONTROL_HYPERDRIVE
 	ClearThrusterState();
-	Pi::game->WantHyperspace();
+	Pi::game->WantHyperspace(m_hyperspace.phaseMode);
 }
 
 void Player::OnEnterSystem()
@@ -224,8 +223,11 @@ void Player::SetNavTarget(Body* const target, bool setSpeedTo)
 }
 //temporary targeting stuff ends
 
-Ship::HyperjumpStatus Player::InitiateHyperjumpTo(const SystemPath &dest, int warmup_time, double duration, LuaRef checks) {
-	HyperjumpStatus status = Ship::InitiateHyperjumpTo(dest, warmup_time, duration, checks);
+Ship::HyperjumpStatus Player::InitiateHyperjumpTo(const SystemPath &dest, int warmup_time, 
+	double duration, LuaRef checks, bool phase_mode) 
+{
+	HyperjumpStatus status = Ship::InitiateHyperjumpTo(dest, warmup_time, duration, checks, 
+		phase_mode);
 
 	if (status == HYPERJUMP_OK)
 		s_soundHyperdrive.Play("Hyperdrive_Charge");
@@ -233,9 +235,9 @@ Ship::HyperjumpStatus Player::InitiateHyperjumpTo(const SystemPath &dest, int wa
 	return status;
 }
 
-Ship::HyperjumpStatus Player::StartHyperspaceCountdown(const SystemPath &dest)
+Ship::HyperjumpStatus Player::StartHyperspaceCountdown(const SystemPath &dest, bool phase_mode)
 {
-	HyperjumpStatus status = Ship::StartHyperspaceCountdown(dest);
+	HyperjumpStatus status = Ship::StartHyperspaceCountdown(dest, phase_mode);
 
 	if (status == HYPERJUMP_OK)
 		s_soundHyperdrive.Play("Hyperdrive_Charge");
@@ -309,7 +311,7 @@ void Player::StartTransitDrive()
 {
 	Ship::StartTransitDrive();
 	if(Pi::GetView() && Pi::GetView() == Pi::worldView && Pi::worldView->GetCameraController() &&
-		Pi::worldView->GetCamType() == WorldView::CamType::CAM_INTERNAL)
+		Pi::worldView->GetCamType() == WorldView::CamType::CAM_INTERNAL) 
 	{
 		InternalCameraController* cam = static_cast<InternalCameraController*>(
 			Pi::worldView->GetCameraController());
@@ -352,7 +354,7 @@ int Player::GetFreightTeleporterLevel() const
 	return 0;
 }
 
-Body* Player::GetFreightTeleporterTarget() const
+Body* Player::GetFreightTeleporterTarget() const 
 {
 	return m_ftTarget;
 }
@@ -371,7 +373,7 @@ void Player::UpdateFreightTeleporter()
 			return;
 		}
 
-		// TODO:
+		// TODO: 
 		// - I noticed that all ships show as "shielded" so perhaps I should check for equipment first.
 		const SFreightTeleporterSpecs& ft_specs = FreightTeleporterSpecs[ft_level - 1];
 		Body* combat_tgt = GetCombatTarget();
@@ -389,8 +391,8 @@ void Player::UpdateFreightTeleporter()
 				combat_tgt_status = EFT_S_TGT_OUT_OF_RANGE;
 			} else {
 				Ship* tgt = dynamic_cast<Ship*>(combat_tgt);
-				if(tgt->m_equipment.Get(Equip::SLOT_SHIELD) != Equip::NONE &&
-					tgt->GetPercentShields() > ft_specs.shield_override * 100.0f)
+				if(tgt->m_equipment.Get(Equip::SLOT_SHIELD) != Equip::NONE && 
+					tgt->GetPercentShields() > ft_specs.shield_override * 100.0f) 
 				{
 					combat_tgt = nullptr;
 					combat_tgt_status = EFT_S_TGT_SHIELDED;
@@ -487,7 +489,7 @@ void Player::FireFreightTeleporter()
 				//VSLog::stream << "Cargo items count in target: " << cargo_size << std::endl;
 				Equip::Type chosen_equip = tgt->m_equipment.Get(Equip::SLOT_CARGO, rc);
 				//VSLog::stream << "Random cargo: " << rc << " is " << static_cast<int>(chosen_equip) << std::endl;
-				//VSLog::stream << "Ship has: " << tgt->m_equipment.Count(Equip::SLOT_CARGO, chosen_equip)
+				//VSLog::stream << "Ship has: " << tgt->m_equipment.Count(Equip::SLOT_CARGO, chosen_equip) 
 				//	<< std::endl;
 				//VSLog::outputLog();
 				// - steal 1 unit of said random cargo
@@ -517,3 +519,4 @@ EFreightTeleporterStatus Player::GetFreightTeleporterStatus() const
 {
 	return m_ftStatus;
 }
+

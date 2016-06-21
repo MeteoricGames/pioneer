@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='701 Ferry',
+	name='AV 383 Ferry',
 	ship_class = 'passenger',
-	manufacturer = 'kisaragi',
+	manufacturer = 'alders_vectrum',
 	model='passenger_light1',
 	forward_thrust = 202e5,
 	reverse_thrust = 202e5,

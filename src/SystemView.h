@@ -49,7 +49,11 @@ private:
 	Gui::Label *m_infoLabel;
 	Gui::Label *m_infoText;
 	Gui::LabelSet *m_objectLabels;
+
 	sigc::connection m_onMouseWheelCon;
+
+    std::vector<vector2f> m_hyperclouds;
+    std::unique_ptr<Gui::TexturedQuad> m_hypercloudQuad;
 
 	std::unique_ptr<Graphics::Drawables::Disk> m_bodyIcon;
 	Graphics::RenderState *m_lineState;

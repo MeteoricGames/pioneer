@@ -101,10 +101,11 @@ static int l_starsystem_get_body_paths(lua_State *l)
 
 	lua_newtable(l);
 
-	for (RefCountedPtr<const SystemBody> sb : s->GetBodies())
-	{
+	//for (RefCountedPtr<const SystemBody> sb : s->GetBodiesMap())
+	auto sb_map = s->GetBodiesMap();
+	for(auto sb_iter = sb_map.begin(); sb_iter != sb_map.end(); ++sb_iter) {
 		lua_pushinteger(l, lua_rawlen(l, -1)+1);
-		LuaObject<SystemPath>::PushToLua(&sb->GetPath());
+		LuaObject<SystemPath>::PushToLua(&sb_iter->second->GetPath());
 		lua_rawset(l, -3);
 	}
 

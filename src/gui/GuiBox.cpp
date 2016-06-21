@@ -170,4 +170,34 @@ void Box::Remove(Widget *child)
 	ResizeRequest();
 }
 
+void HBox::GetChildrenSize(float size[2])
+{
+	for (WidgetList::iterator i = m_children.begin(), itEnd = m_children.end(); i != itEnd; ++i) {
+		if (i != m_children.begin()) {
+			size[0] += GetPadding();
+		}
+		float childSize[2];
+		(*i).w->GetSize(childSize);
+		size[0] += childSize[0];
+		if (childSize[1] > size[1])
+			size[1] = childSize[1];
+
+	}
+}
+
+void VBox::GetChildrenSize(float size[2])
+{
+	for (WidgetList::iterator i = m_children.begin(), itEnd = m_children.end(); i != itEnd; ++i) {
+		if (i != m_children.begin()) {
+			size[1] += GetSpacing();
+		}
+		float childSize[2];
+		(*i).w->GetSize(childSize);
+		if (childSize[0] > size[0])
+			size[0] = childSize[0];
+		size[1] += childSize[1];
+
+	}
+}
+
 }

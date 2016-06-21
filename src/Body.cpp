@@ -90,24 +90,33 @@ Body *Body::Unserialize(Serializer::Reader &_rd, Space *space)
 	Object::Type type = Object::Type(rd.Int32());
 	switch (type) {
 		case Object::STAR:
-			b = new Star(); break;
+			b = new Star(); 
+            break;
 		case Object::PLANET:
 			b = new Planet();
 			break;
 		case Object::SPACESTATION:
-			b = new SpaceStation(); break;
+			b = new SpaceStation(); 
+            break;
 		case Object::SHIP:
-			b = new Ship(); break;
+			b = new Ship(); 
+            break;
 		case Object::PLAYER:
-			b = new Player(); break;
+			b = new Player(); 
+            break;
 		case Object::MISSILE:
-			b = new Missile(); break;
+			b = new Missile(); 
+            break;
 		case Object::PROJECTILE:
-			b = new Projectile(); break;
+			b = new Projectile(); 
+            break;
 		case Object::CARGOBODY:
-			b = new CargoBody(); break;
+			b = new CargoBody(); 
+            break;
 		case Object::HYPERSPACECLOUD:
-			b = new HyperspaceCloud(); break;
+			// This should detect and create permanent clouds
+            b = space->CreateHyperspaceCloud(); 
+            break;
 		default:
 			assert(0);
 	}

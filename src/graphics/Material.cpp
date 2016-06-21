@@ -56,7 +56,8 @@ bool operator==(const MaterialDescriptor &a, const MaterialDescriptor &b)
 		a.textures == b.textures &&
 		a.dirLights == b.dirLights &&
 		a.quality == b.quality &&
-		a.testMode == b.testMode
+		a.testMode == b.testMode &&
+		a.irradiance == b.irradiance
 	);
 }
 

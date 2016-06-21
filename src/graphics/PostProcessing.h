@@ -1,11 +1,12 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright ï¿½ 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright ï¿½ 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _POST_PROCESSING_H_
 #define _POST_PROCESSING_H_
 
 #include "libs.h"
+#include "PostProcessLayer.h"
 
 namespace Graphics {
 	class Renderer;
@@ -21,7 +22,7 @@ namespace Graphics {
 		explicit PostProcessing(Renderer *renderer);
 		virtual ~PostProcessing();
 	
-		void BeginFrame();
+		void BeginFrame(PostProcessLayer layer = EPP_LAYER_GAME);
 		void EndFrame();
 		void Run(PostProcess* pp = nullptr);
 		void SetPerformPostProcessing(bool enabled);
@@ -37,12 +38,14 @@ namespace Graphics {
 		void Init();
 		
 		std::unique_ptr<GL3::EffectMaterial> m_mtrlFullscreenQuad;
-		int m_uScreenQuadBufferId;		
 		Renderer* m_renderer;
 		RenderTarget* m_rtDevice;
-		RenderTarget* m_rtMain;
 		RenderState* m_renderState;
+		RenderState* m_renderStateLayer; // Used for layering
 		bool m_bPerformPostProcessing;
+		RenderTarget* m_rtMain;
+		RenderTarget* m_rtTemp;
+		PostProcessLayer m_currentLayer;
 	};
 }
 

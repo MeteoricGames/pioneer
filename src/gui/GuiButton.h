@@ -63,6 +63,22 @@ namespace Gui {
 		float m_padding;
 		float m_padding_y;
 	};
+
+	class ClickableLabel : public LabelButton {
+	public:
+		ClickableLabel(Label *label, const char *imageFileName, Color color);
+		ClickableLabel(Label *label) : LabelButton(label) {}
+		virtual ~ClickableLabel();
+		virtual void Draw();
+        void SetLabel(Label *label);
+	private:
+		void OnSetSize();
+		void SizeImage();
+		Image *m_img = nullptr;
+		float m_padding;
+		float m_padding_y;
+
+	};
 }
 
 #endif /* _GUIBUTTON_H */

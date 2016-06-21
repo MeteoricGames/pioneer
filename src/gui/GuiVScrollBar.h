@@ -31,6 +31,19 @@ namespace Gui {
 	public:
 		VScrollBar(): ScrollBar(false) {}
 	};
+
+	class NavVScrollBar : public VScrollBar {
+	public:
+		NavVScrollBar();
+		virtual ~NavVScrollBar();
+		virtual void Draw();
+		void SetOffsetY(float offset);
+		const float GetOffsetY() const;
+	private:
+		virtual void LoadImages();
+		Image *m_topImage, *m_midImage, *m_bottomImage, *m_thumbImage;
+		float m_offsetY = 0.0f; // This shouldnt be needed, I'll look into it again.
+	};
 }
 
 #endif /* _GUIVSCROLLBAR */

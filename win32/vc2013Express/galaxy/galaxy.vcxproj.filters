@@ -10,6 +10,7 @@
       <Filter>win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\galaxy\SectorCache.cpp" />
+    <ClCompile Include="..\..\..\src\galaxy\SystemBody.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\galaxy\CustomSystem.h" />

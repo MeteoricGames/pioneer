@@ -1,5 +1,5 @@
+
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaGame.h"
@@ -12,6 +12,8 @@
 #include "Lang.h"
 #include "StringF.h"
 #include "WorldView.h"
+#include <sstream>
+#include "LuaEvent.h"
 
 /*
  * Interface: Game
@@ -261,6 +263,151 @@ static int l_game_switch_to_world_view(lua_State *l)
 	return 0;
 }
 
+static int l_game_dev1(lua_State* l)
+{
+	std::string out;
+	if(!Pi::game) {
+		out = "Dev1 requires game to be running (Pi::game != nullptr)";
+	} else {
+		std::list<HyperspaceCloud*> clouds;
+		Pi::game->EnumerateAllHyperspaceClouds(clouds);
+		if(clouds.size() == 0) {
+			out = "No hyperspace clouds found in system.";
+		} else {
+			std::ostringstream ss;
+			int cc = 0;
+			int nearest_departure_cloud = -1;
+			double cloud_distance = std::numeric_limits<double>::max();
+
+			for(auto hc : clouds) {
+				cc += 1;
+				ss << "Cloud " << cc << ": ";
+				ss << hc->GetCloudTypeString() << " - ";
+				ss << (hc->HasShip() ? "Ship" : "Empty") << " - ";
+				ss << "due date: " << hc->GetDueDate();
+				if(Pi::player) {
+					vector3d cp = hc->GetPositionRelTo(Pi::player->GetFrame());
+					double dist = (cp - Pi::player->GetPosition()).Length();
+					if(dist < cloud_distance) {
+						cloud_distance = dist;
+						if(hc->SupportsDeparture()) {
+							nearest_departure_cloud = cc - 1;	
+						}
+					}
+					ss << " - dist: " << (dist / 1000.0);
+				}
+				ss << std::endl;
+			}
+			if(nearest_departure_cloud > -1) {
+				ss << "Nearest departure cloud is " << (nearest_departure_cloud + 1) << std::endl;
+			} else if(Pi::player) {
+				ss << "No departure cloud is found." << std::endl;
+			}
+			out = ss.str().c_str();
+		}
+	}
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
+static std::string SystemBodyTypeName(SystemBody::BodyType bt) {
+	std::string out;
+	switch (bt) {
+		case SystemBody::BodyType::TYPE_STARPORT_ORBITAL:
+			out = "Orbital Starport";
+			break;
+		case SystemBody::BodyType::TYPE_STARPORT_SURFACE:
+			out = "Surface Starport";
+			break;
+		case SystemBody::BodyType::TYPE_PLANET_ASTEROID:
+			out = "Planet Asteroid";
+			break;
+		case SystemBody::BodyType::TYPE_PLANET_GAS_GIANT:
+			out = "Planet Gas Giant";
+			break;
+		case SystemBody::BodyType::TYPE_PLANET_TERRESTRIAL:
+			out = "Planet Terretrial";
+			break;
+		case SystemBody::BodyType::TYPE_GRAVPOINT:
+			out = "Gravity Point";
+			break;
+        case SystemBody::BodyType::TYPE_HYPERSPACE_CLOUD:
+            out = "Hyperspace Cloud";
+            break;
+		default:
+			out = "Star";
+			break;
+	}
+	return out;
+}
+
+static int l_game_dev2(lua_State* l)
+{
+	//std::string out("Not implemented 2");
+	//lua_pushlstring(l, out.c_str(), out.size());
+	std::string out;
+	std::ostringstream ss;
+	if (!Pi::game) {
+		out = "Dev2 requires game to be running (Pi::game != nullptr)";
+	} else {
+		ss << "Enumerating all system bodies in current system..." << std::endl;
+		auto sbodies = Pi::game->GetSpace()->GetStarSystem()->GetBodiesMap();
+		for(auto sb_iter = sbodies.begin(); sb_iter != sbodies.end(); ++sb_iter) {
+			ss << "SystemBody[" << sb_iter->first << "] -> Type: ";
+			ss << SystemBodyTypeName(sb_iter->second->GetType());
+			ss << " " << sb_iter->second->GetName() << " (" << 
+				sb_iter->second->GetNumChildren() << " children)";
+			if(sb_iter->second->GetNumChildren() > 0) {
+				ss << std::endl << "    Children: " << std::endl;
+				auto iter_proxy = sb_iter->second->GetChildren();
+				for(auto it : iter_proxy) {
+					ss << "    > " << SystemBodyTypeName(it->GetType()) << 
+						" " << it->GetName() << std::endl;
+				}
+			}
+			ss << std::endl;
+			out = ss.str().c_str();
+		}
+	}
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
+static int l_game_dev3(lua_State* l)
+{
+	//std::string out("Not implemented 3");
+	//lua_pushlstring(l, out.c_str(), out.size());
+	
+	// Destroy a body by index
+	/*
+	std::string out;
+	std::ostringstream ss;
+	unsigned sbody_index = luaL_checkunsigned(l, 2);
+	if(sbody_index >= Pi::game->GetSpace()->GetStarSystem()->GetNumBodies()) {
+		ss << "LuaGame Dev 3 has been given an invalid system body: " << sbody_index << std::endl;
+	} else {
+		auto sbody_map = Pi::game->GetSpace()->GetStarSystem()->GetBodiesMap();
+		Pi::game->GetSpace()->GetStarSystem()->DestroyBody(sbody_map[sbody_index].Get());
+	}
+	lua_pushlstring(l, out.c_str(), out.size());
+	*/
+
+	// Create new system body cloud at player location
+	Pi::player->AIFlyToPermaCloud();
+	std::string out("Player fly to perma cloud command test.");
+    lua_pushlstring(l, out.c_str(), out.size());
+
+	return 1;
+}
+
+static int l_game_dev4(lua_State* l)
+{
+	LuaEvent::Queue("onAICommand", Pi::player, "hyperspawntest");
+	std::string out("Sent spawn hyperspace ship.");
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
 static int l_game_spawn_test_cargo(lua_State* l)
 {
 	std::string out;
@@ -279,6 +426,12 @@ static int l_game_spawn_test_cargo(lua_State* l)
 	return 1;
 }
 
+static int l_game_hyper_spawn_test(lua_State* l)
+{
+	LuaEvent::Queue("onAICommand", Pi::player, "hyperspawntest");
+	return 0;
+}
+
 void LuaGame::Register()
 {
 	lua_State *l = Lua::manager->GetLuaState();
@@ -294,6 +447,12 @@ void LuaGame::Register()
 		{"SwitchToWorldView", l_game_switch_to_world_view},
 
 		{"SpawnTestCargo", l_game_spawn_test_cargo},
+		{"SpawnHyperShip", l_game_hyper_spawn_test},
+
+		{ "Dev1", l_game_dev1 },
+		{ "Dev2", l_game_dev2 },
+		{ "Dev3", l_game_dev3 },
+		{ "Dev4", l_game_dev4 },
 
 		{ 0, 0 }
 	};

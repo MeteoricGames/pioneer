@@ -210,6 +210,9 @@ bool Parser::parseLine(const std::string &line)
 				} else if (match(token, "use_patterns")) {
 					m_curMat->use_pattern = true;
 					return true;
+				} else if (match(token, "use_irradiance")) {
+					m_curMat->use_irradiance = true;
+					return true;
 				}
 				else
 					throw ParseError("Unknown instruction");

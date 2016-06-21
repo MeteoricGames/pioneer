@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaObject.h"
@@ -18,6 +17,7 @@
 #include "Player.h"
 #include "HyperspaceCloud.h"
 #include "Game.h"
+#include "StringF.h"
 
 /*
  * Class: Ship
@@ -473,7 +473,7 @@ static int l_ship_add_equip(lua_State *l)
 {
 	Ship *s = LuaObject<Ship>::CheckFromLua(1);
 	Equip::Type e = static_cast<Equip::Type>(LuaConstants::GetConstantFromArg(l, "EquipType", 2));
-
+	
 	int num = luaL_optinteger(l, 3, 1);
 	if(e != Equip::HYDROGEN) {
 		if (num < 0) {
@@ -653,7 +653,7 @@ static int l_ship_get_hydrogen_capacity(lua_State *l)
 
 /*
  * Method: GetHydrogenPercentage
- *
+ * 
  * Get hydrogen percentage in tank.
  *
  */
@@ -832,7 +832,7 @@ static int l_ship_undock(lua_State *l)
  * Spawn a missile near the ship.
  *
  * > missile = ship:SpawnMissile(type, target, power)
- *
+ * 
  * Parameters:
  *
  *   shiptype - a string for the missile type. specifying an
@@ -917,7 +917,8 @@ static int l_ship_initiate_hyperjump_to(lua_State *l)
 	if (lua_gettop(l) >= 5)
 		checks = LuaRef(l, 5);
 
-	Ship::HyperjumpStatus status = s->InitiateHyperjumpTo(*dest, warmup_time, duration, checks);
+	Ship::HyperjumpStatus status = s->InitiateHyperjumpTo(*dest, warmup_time, duration, checks,
+		s->IsPhaseJumpMode());
 
 	lua_pushstring(l, EnumStrings::GetString("ShipJumpStatus", status));
 	return 1;
@@ -942,6 +943,39 @@ static int l_ship_abort_hyperjump(lua_State *l)
 {
 	LuaObject<Ship>::CheckFromLua(1)->AbortHyperjump();
 	return 0;
+}
+
+/*
+ * Method: IsInPhaseRange
+ *
+ * Returns whether ship is in correct phase range for phase jumping.
+ *
+ */
+static int l_ship_in_phase_range(lua_State *l)
+{
+	Ship* s = LuaObject<Ship>::CheckFromLua(1);
+	lua_pushboolean(l, s->IsPhaseJumpRange());
+	return 1;
+}
+
+/*
+ * Method: GetPhaseModeMultiplier
+ *
+ * Phase mode multiplier is for hyperspace range, cost of jumps will be: 1/multiplier
+ * Returns 1.0 if ship is not in phase range.
+ * Returns set multiplier if ship is within phase range.
+ * Used in LUA to calculate hyperspace range in phase range.
+ *
+ */
+static int l_ship_get_phase_mode_multiplier(lua_State *l)
+{
+	Ship* s = LuaObject<Ship>::CheckFromLua(1);
+	lua_Number phase_multiplier = 1.0;
+	if(s && s->IsPhaseJumpRange()) {
+		phase_multiplier = HYPERCLOUD_PERMA_MULTIPLIER;
+	}
+	lua_pushnumber(l, phase_multiplier);
+	return 1;
 }
 
 /*
@@ -984,7 +1018,7 @@ static int l_ship_check_hyperspace_to(lua_State *l)
 
 	int fuel;
 	double duration;
-	Ship::HyperjumpStatus status = s->CheckHyperspaceTo(*dest, fuel, duration);
+	Ship::HyperjumpStatus status = s->CheckHyperspaceTo(*dest, fuel, duration, s->IsPhaseJumpMode());
 
 	lua_pushstring(l, EnumStrings::GetString("ShipJumpStatus", status));
 	if (status == Ship::HYPERJUMP_OK) {
@@ -1036,7 +1070,7 @@ static int l_ship_get_hyperspace_details(lua_State *l)
 
 	int fuel;
 	double duration;
-	Ship::HyperjumpStatus status = s->GetHyperspaceDetails(*dest, fuel, duration);
+	Ship::HyperjumpStatus status = s->GetHyperspaceDetails(*dest, fuel, duration, s->IsPhaseJumpMode());
 
 	lua_pushstring(l, EnumStrings::GetString("ShipJumpStatus", status));
 	if (status == Ship::HYPERJUMP_OK) {
@@ -1057,6 +1091,7 @@ static int l_ship_get_hyperspace_details(lua_State *l)
  * If the status returned is "OK", then a hyperspace departure cloud will be
  * created where the ship was and the <Event.onLeaveSystem> event will be
  * triggered.
+ * 
  *
  * Parameters:
  *
@@ -1076,6 +1111,8 @@ static int l_ship_get_hyperspace_details(lua_State *l)
  * Availability:
  *
  *   alpha 10
+ *   alpha 10.6:
+ *     Added handling of hyperspace jumps using permanent clouds.
  *
  * Status:
  *
@@ -1088,15 +1125,78 @@ static int l_ship_hyperspace_to(lua_State *l)
 
 	int fuel;
 	double duration;
-	Ship::HyperjumpStatus status = s->CheckHyperspaceTo(*dest, fuel, duration);
+	Ship::HyperjumpStatus status = s->CheckHyperspaceTo(*dest, fuel, duration, s->IsPhaseJumpMode());
 
 	lua_pushstring(l, EnumStrings::GetString("ShipJumpStatus", status));
 	if (status != Ship::HYPERJUMP_OK)
 		return 1;
 
-	s->StartHyperspaceCountdown(*dest);
+	s->StartHyperspaceCountdown(*dest, s->IsPhaseJumpMode());
 	lua_pushinteger(l, fuel);
 	lua_pushnumber(l, duration);
+	return 3;
+}
+
+/*
+ * Method: PhaseHyperspaceTo
+ *
+ * Attempts to initiate phase hyperspace jump to a given system
+ *
+ * > status = ship:PhaseHyperspaceTo(path)
+ *
+ * If the ship isn't in phase range to a permanent cloud the jump will fail
+ * returning: HYPERJUMP_OUT_OF_RANGE
+ *
+ * Parameters:
+ *
+ *   path - a <SystemPath> for the destination system
+ *
+ * Result:
+ *
+ *   status - a <Constants.ShipJumpStatus> string for the result of the phase jump
+ *            attempt
+ *
+ *   fuel - if status is 'OK', contains the amount of fuel required to make
+ *          the jump (tonnes)
+ *
+ *   duration - if status is 'OK', contains the time that the jump will take
+ *              (seconds)
+ *
+ * Availability:
+ *
+ *   alpha 10.7
+ *
+ * Status:
+ *
+ *   development
+ */
+static int l_ship_phase_hyperspace_to(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	SystemPath *dest = LuaObject<SystemPath>::CheckFromLua(2);
+
+	int fuel;
+	double duration;
+	Ship::HyperjumpStatus status;
+	if(!s->IsPhaseJumpRange()) {
+		status = Ship::HyperjumpStatus::HYPERJUMP_OUT_OF_RANGE;
+	} else {
+		status = s->CheckHyperspaceTo(*dest, fuel, duration, true);
+	}
+
+	std::string stringified(EnumStrings::GetString("ShipJumpStatus", status));
+	if(stringified.empty()) {
+		stringified = stringf("Status %0", static_cast<int>(status));
+	}
+	lua_pushstring(l, stringified.c_str());
+	if (status != Ship::HYPERJUMP_OK) {
+		return 1;
+	}
+
+	s->StartHyperspaceCountdown(*dest, true);
+	lua_pushinteger(l, fuel);
+	lua_pushnumber(l, duration);
+
 	return 3;
 }
 
@@ -1147,6 +1247,34 @@ static int l_ship_set_invulnerable(lua_State *l)
 	Ship *s = LuaObject<Ship>::CheckFromLua(1);
 	luaL_checkany(l, 2);
 	s->SetInvulnerable(lua_toboolean(l, 2));
+	return 0;
+}
+
+/*
+ * Method: SetModuleStatus
+ *
+ * Set a string representing module status of ship coming from its lua module.
+ *
+ */
+static int l_ship_set_module_status(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	std::string status(luaL_checkstring(l, 2));
+	s->SetModuleStatus(status);
+	return 0;
+}
+
+/*
+* Method: SetModuleName
+*
+* The name of the module that created the ship.
+*
+*/
+static int l_ship_set_module_name(lua_State *l)
+{
+	Ship *s = LuaObject<Ship>::CheckFromLua(1);
+	std::string name(luaL_checkstring(l, 2));
+	s->SetModuleName(name);
 	return 0;
 }
 
@@ -1392,6 +1520,37 @@ static int l_ship_ai_fly_formation(lua_State *l)
 }
 
 /*
+* Method: AIFlyToPermaCloud
+*
+* Fly to within jump range of the closest permanent cloud to ship.
+*
+* > ship:AIFlyToPermaCloud()
+*
+* Parameters:
+*
+*   none
+*
+* Availability:
+*
+*  alpha
+*
+* Status:
+*
+*  experimental
+*/
+static int l_ship_ai_fly_to_perma_cloud(lua_State *l)
+{
+	// Determine nearest perma cloud
+	// Fly to nearest perma cloud
+	Ship* s = LuaObject<Ship>::CheckFromLua(1);
+	if(s->GetFlightState() == Ship::HYPERSPACE) {
+		return luaL_error(l, "Ship::AIFlyToPermaCloud() cannot be called on a ship in hyperspace");
+	}
+	s->AIFlyToPermaCloud();
+	return 0;
+}
+
+/*
  * Method: AIDockWith
  *
  * Fly to and dock with a given station
@@ -1619,6 +1778,7 @@ template <> void LuaObject<Ship>::RegisterClass()
 		{ "AIFlyTo",            l_ship_ai_fly_to             },
 		{ "AIFlyToClose",       l_ship_ai_fly_to_close       },
 		{ "AIFlyFormation",     l_ship_ai_fly_formation      },
+		{ "AIFlyToPermaCloud",	l_ship_ai_fly_to_perma_cloud },
 		{ "AIDockWith",         l_ship_ai_dock_with          },
 		{ "AIEnterLowOrbit",    l_ship_ai_enter_low_orbit    },
 		{ "AIEnterMediumOrbit", l_ship_ai_enter_medium_orbit },
@@ -1626,14 +1786,20 @@ template <> void LuaObject<Ship>::RegisterClass()
 		{ "CancelAI",           l_ship_cancel_ai             },
 		{ "AIHoldPos",          l_ship_hold_ai               },
 
-		{ "CheckHyperspaceTo", l_ship_check_hyperspace_to },
-		{ "GetHyperspaceDetails", l_ship_get_hyperspace_details },
-		{ "HyperspaceTo",    l_ship_hyperspace_to     },
-		{ "InitiateHyperjumpTo",    l_ship_initiate_hyperjump_to     },
-		{ "AbortHyperjump",    l_ship_abort_hyperjump     },
+		{ "CheckHyperspaceTo",		l_ship_check_hyperspace_to		},
+		{ "GetHyperspaceDetails",	l_ship_get_hyperspace_details	},
+		{ "HyperspaceTo",			l_ship_hyperspace_to			},
+		{ "PhaseHyperspaceTo",		l_ship_phase_hyperspace_to		},
+		{ "InitiateHyperjumpTo",	l_ship_initiate_hyperjump_to    },
+		{ "AbortHyperjump",			l_ship_abort_hyperjump			},
+		{ "IsInPhaseRange",			l_ship_in_phase_range			},
+		{ "GetPhaseModeMultiplier",	l_ship_get_phase_mode_multiplier},
 
-		{ "GetInvulnerable", l_ship_get_invulnerable },
-		{ "SetInvulnerable", l_ship_set_invulnerable },
+		{ "GetInvulnerable",	l_ship_get_invulnerable		},
+		{ "SetInvulnerable",	l_ship_set_invulnerable		},
+
+		{ "SetModuleStatus",	l_ship_set_module_status	},
+		{ "SetModuleName",		l_ship_set_module_name		},
 
 		{ 0, 0 }
 	};

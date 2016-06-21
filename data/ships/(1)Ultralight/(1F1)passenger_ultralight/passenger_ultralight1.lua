@@ -1,9 +1,9 @@
 ﻿-- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='601 Shuttle',
+	name='AV 282 Shuttle',
 	ship_class = 'passenger',
-	manufacturer = 'kisaragi',
+	manufacturer = 'alders_vectrum',
 	model='passenger_ultralight1',
 	cockpit='passenger_shuttle_cockpit',
 	forward_thrust = 32e5,

@@ -2,6 +2,8 @@
 // Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
+// System Info/Economy
+
 #include "Pi.h"
 #include "galaxy/Sector.h"
 #include "SectorView.h"
@@ -217,6 +219,9 @@ void SystemInfoView::UpdateEconomyTab()
 
 void SystemInfoView::PutBodies(SystemBody *body, Gui::Fixed *container, int dir, float pos[2], int &majorBodies, int &starports, int &onSurface, float &prevSize)
 {
+    if (body->GetType() == SystemBody::TYPE_HYPERSPACE_CLOUD) {
+        return; 
+    }
 	float size[2];
 	float myPos[2];
 	myPos[0] = pos[0];

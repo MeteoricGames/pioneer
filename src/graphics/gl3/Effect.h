@@ -1,5 +1,4 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright � 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _EFFECT_H_
@@ -12,7 +11,7 @@
 #include "utils.h"
 
 namespace Graphics {
-	class Renderer;
+	class Renderer; 
 	namespace GL3 {
 
 class EffectProgram;
@@ -29,9 +28,9 @@ enum EffectGLSLVersion
 };
 
 static const char* GLSLVersions[] = {
-	"#version 110\n",
-	"#version 120\n",
-	"#version 140\n",
+	"#version 110\n", 
+	"#version 120\n", 
+	"#version 140\n", 
 	"#version 150\n",
 #if defined(_WIN32) || defined(__linux) || defined(__unix)
 	"#version 140\n"
@@ -60,7 +59,7 @@ struct EffectDescriptor
 };
 
 // Describes loading of vertex/fragment shaders directly by string.
-struct EffectDescriptorDirect
+struct EffectDescriptorDirect 
 {
 	EffectDescriptorDirect() : version(ESV_GLSL_GL3), strict(false) { }
 
@@ -168,7 +167,8 @@ public:
 	Effect(Renderer* renderer, const EffectDescriptorDirect& effect_desc);
 	virtual ~Effect();
 
-	// Effect can be applied more than once to support updating of parameters
+	// Effect can be applied anytime for updating parameters before rendering. If it's already
+	// applied the function does nothing. (so it can be called multiple times)
 	virtual void SetProgram();
 	virtual void UnsetProgram();
 	virtual void Apply();

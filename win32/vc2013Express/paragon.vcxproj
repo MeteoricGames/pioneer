@@ -347,6 +347,7 @@
     <ClInclude Include="..\..\src\ShipAICmdParagon.h" />
     <ClInclude Include="..\..\src\SMAA.h" />
     <ClInclude Include="..\..\src\Tweaker.h" />
+    <ClInclude Include="..\..\src\TweakerMonitors.h" />
     <ClInclude Include="..\..\src\TweakerSettings.h" />
     <ClInclude Include="..\..\src\vector4.h" />
     <ClInclude Include="..\..\src\VSLog.h" />

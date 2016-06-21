@@ -1,5 +1,4 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright � 2008-2014 Pioneer Developers. See AUTHORS.txt for details
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "graphics/gl3/VertexBufferGL3.h"
@@ -197,11 +196,11 @@ void VertexBuffer::SetAttribPointers(Effect* effect)
 		auto offset = reinterpret_cast<const GLvoid*>(m_desc.attrib[i].offset);
 
 		if(al < 0) {
-			// Unused attributes get culled by GLSL compilers regardless of situation, should carry on
+			// Unused attributes get culled by GLSL compilers regardless of situation, should carry on 
 			// as usual even if an attribute is not found. It'll be skipped by stride and correct data
 			// is sent to GPU.
 			//
-			//Error("VertexBuffer GL3 (set): Attribute (%s) not found in effect: %s",
+			//Error("VertexBuffer GL3 (set): Attribute (%s) not found in effect: %s", 
 			//	EffectAttributes[static_cast<unsigned>(at)].c_str(), effect->GetDebugString());
 			continue;
 		} else {

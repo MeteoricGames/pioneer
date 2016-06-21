@@ -24,4 +24,5 @@ libgalaxy_a_SOURCES = \
 	Sector.cpp \
 	SectorCache.cpp \
 	StarSystem.cpp \
+	SystemBody.cpp \
 	SystemPath.cpp

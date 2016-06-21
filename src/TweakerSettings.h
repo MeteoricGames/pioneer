@@ -118,6 +118,47 @@ struct TS_ChromaticAberration
 
 struct TS_FXAA
 {
+	TS_FXAA()
+	{
+		span_max = 8.0f;
+		reduce_mul = 8.0f;
+		reduce_min = 128.0f;
+		effect = nullptr;
+		spanMaxId = -1;
+		reduceMulId = -1;
+		reduceMinId = -1;
+	}
+
+	float span_max;
+	float reduce_mul;
+	float reduce_min;
+
+	Graphics::GL3::Effect* effect;
+	int spanMaxId;
+	int reduceMulId;
+	int reduceMinId;
+};
+
+struct TS_IrradianceLighting
+{
+	TS_IrradianceLighting() :
+		hemi_diffuse_intensity(0.35f), 
+		hemi_gloss_intensity(0.35f),
+		irradiance_gloss_exponential(4.0f) {
+	}
+	float hemi_diffuse_intensity;
+	float hemi_gloss_intensity;
+	float irradiance_gloss_exponential;
+};
+
+struct TS_HypercloudVisual
+{
+	TS_HypercloudVisual() {
+		color = Color::GREEN.ToColor4f();
+		size = 1.0f;
+	}
+	Color4f color;
+	float size;
 };
 
 #endif // TWEAKER_SETTINGS_H

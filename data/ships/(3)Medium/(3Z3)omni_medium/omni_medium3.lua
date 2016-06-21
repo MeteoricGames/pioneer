@@ -2,9 +2,9 @@
 
 --Ships not available for purchase (ambient ships)
 define_ship {
-	name='Unitech Trade Explorer',
+	name='Mitsuba Trader',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'mitsuba',
 	model='omni_medium3',
 	cockpit='unitech_light_cockpit',
 	forward_thrust = 12000e5,

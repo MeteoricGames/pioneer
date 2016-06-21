@@ -32,6 +32,7 @@ void BaseLoader::ConvertMaterialDefinition(const MaterialDefinition &mdef)
 
 	//diffuse texture is a must. Will create a white dummy texture if one is not supplied
 	matDesc.textures = 1;
+	matDesc.irradiance = mdef.use_irradiance;
 	matDesc.specularMap = !specTex.empty();
 	matDesc.glowMap = !glowTex.empty();
 	matDesc.quality = Graphics::HAS_HEAT_GRADIENT;

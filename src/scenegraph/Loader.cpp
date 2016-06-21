@@ -129,7 +129,6 @@ Model *Loader::LoadModel(const std::string &filename)
 Model *Loader::LoadModel(const std::string &shortname, const std::string &basepath)
 {
 	m_logMessages.clear();
-
 	FileSystem::FileSource &fileSource = FileSystem::gameDataFiles;
 	for (FileSystem::FileEnumerator files(fileSource, basepath, FileSystem::FileEnumerator::Recurse); !files.Finished(); files.Next())
 	{

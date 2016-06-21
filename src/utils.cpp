@@ -76,6 +76,7 @@ timedate &timedate::operator=(int stamp)
 	month = 0;
 	while (day >= days[leap][month])
 		day -= days[leap][month++];
+	month = month % 12;
 
 	return *this;
 }
@@ -84,7 +85,7 @@ std::string timedate::fmt_time_date()
 {
 	char buf[32];
 	snprintf(buf, sizeof (buf), "%02d:%02d:%02d %d %s %d",
-	         hour, minute, second, day + 1, months[month], year);
+	         hour, minute, second, day + 1, months[month % 12], year);
 	return buf;
 }
 
@@ -92,7 +93,7 @@ std::string timedate::fmt_date()
 {
 	char buf[16];
 	snprintf(buf, sizeof (buf), "%d %s %d",
-	         day + 1, months[month], year);
+	         day + 1, months[month % 12], year);
 	return buf;
 }
 
@@ -130,7 +131,7 @@ void Error(const char *format, ...)
 	va_end(ap);
 
 	Output("error: %s\n", buf);
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Paragon error", buf, 0);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "JumpDrive error", buf, 0);
 
 	exit(1);
 }
@@ -144,7 +145,7 @@ void Warning(const char *format, ...)
 	va_end(ap);
 
 	Output("warning: %s\n", buf);
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Paragon warning", buf, 0);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "JumpDrive warning", buf, 0);
 }
 
 void Output(const char *format, ...)

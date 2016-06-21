@@ -189,7 +189,6 @@ void Container::Draw()
 	PROFILE_SCOPED()
 
 	Graphics::Renderer *r = Gui::Screen::GetRenderer();
-	r->SetRenderState(Gui::Screen::alphaBlendState);
 
 	float size[2];
 	GetSize(size);
@@ -271,6 +270,27 @@ void Container::HideAll()
 void Container::SetBgColor(const Color &col)
 {
 	m_bgcol = col;
+}
+
+void Container::ResizeToFitChildren()
+{
+	float newSize[2] = { 0.0f, 0.0f };
+
+	GetChildrenSize(newSize);
+
+	SetSize(newSize[0], newSize[1]);
+}
+
+void Container::GetChildrenSize(float size[2])
+{
+	for (WidgetList::iterator i = m_children.begin(), itEnd = m_children.end(); i != itEnd; ++i) {
+		float childSize[2];
+		(*i).w->GetSize(childSize);
+		if (size[0] > size[0])
+			size[0] = childSize[0];
+		size[1] += childSize[1];
+
+	}
 }
 
 }

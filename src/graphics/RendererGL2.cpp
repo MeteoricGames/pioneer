@@ -156,7 +156,7 @@ bool RendererGL2::BeginFrame()
 	return true;
 }
 
-bool RendererGL2::BeginPostProcessing(RenderTarget* rt_device)
+bool RendererGL2::BeginPostProcessing(RenderTarget* rt_device, PostProcessLayer layer)
 {
 	m_postprocessing->SetDeviceRT(rt_device);
 	m_postprocessing->BeginFrame();

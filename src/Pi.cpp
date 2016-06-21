@@ -108,6 +108,7 @@ int Pi::mouseMotion[2];
 bool Pi::doingMouseGrab = false;
 bool Pi::warpAfterMouseGrab = false;
 int Pi::mouseGrabWarpPos[2];
+Uint32 lastTravelTick = 0;
 Player *Pi::player;
 View *Pi::currentView;
 WorldView *Pi::worldView;
@@ -150,6 +151,7 @@ Gui::Fixed *Pi::menu;
 bool Pi::DrawGUI = true;
 Graphics::Renderer *Pi::renderer;
 RefCountedPtr<UI::Context> Pi::ui;
+RefCountedPtr<UI::Context> Pi::console;
 ModelCache *Pi::modelCache;
 Intro *Pi::intro;
 SDLGraphics *Pi::sdl;
@@ -165,11 +167,25 @@ Graphics::RenderState *Pi::quadRenderState = nullptr;
 unsigned Pi::m_chromaticAberrationId = -1;
 unsigned Pi::m_scanlinesId = -1;
 unsigned Pi::m_filmgrainId = -1;
-TS_ToneMapping Pi::ts_tonemapping, Pi::ts_default_tonemapping;
-TS_FilmGrain Pi::ts_filmgrain, Pi::ts_default_filmgrain;
-TS_Scanlines Pi::ts_scanlines, Pi::ts_default_scanlines;
-TS_ChromaticAberration Pi::ts_chromatic, Pi::ts_default_chromatic;
-TS_FXAA Pi::ts_fxaa;
+std::shared_ptr<Graphics::GL3::Effect> Pi::m_fxaa;
+std::shared_ptr<Graphics::GL3::Effect> Pi::m_chromaticAberration;
+std::shared_ptr<Graphics::GL3::Effect> Pi::m_scanlines;
+std::shared_ptr<Graphics::GL3::Effect> Pi::m_filmgrain;
+std::shared_ptr<Graphics::GL3::Effect> Pi::m_tonemapping;
+const TS_ToneMapping Pi::ts_default_tonemapping;
+	  TS_ToneMapping Pi::ts_tonemapping;		
+const TS_FilmGrain Pi::ts_default_filmgrain;
+	  TS_FilmGrain Pi::ts_filmgrain;
+const TS_Scanlines Pi::ts_default_scanlines;
+	  TS_Scanlines Pi::ts_scanlines;
+const TS_ChromaticAberration Pi::ts_default_chromatic;
+	  TS_ChromaticAberration Pi::ts_chromatic;
+const TS_FXAA Pi::ts_default_fxaa;
+	  TS_FXAA Pi::ts_fxaa;
+const TS_HypercloudVisual Pi::ts_perma_cloud_default;
+	  TS_HypercloudVisual Pi::ts_perma_cloud;
+const TS_IrradianceLighting Pi::ts_irr_light_default;
+	  TS_IrradianceLighting Pi::ts_irr_light;
 
 #if WITH_OBJECTVIEWER
 ObjectViewerView *Pi::objectViewerView;
@@ -403,7 +419,7 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 
 	ModManager::Init();
 
-	Lang::Resource res(Lang::GetResource("core", config->String("Lang")));
+	Lang::Resource res(Lang::GetResource("core", "en"));
 	Lang::MakeCore(res);
 
 	Pi::detail.planets = config->Int("DetailPlanets");
@@ -435,7 +451,7 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	videoSettings.useTextureCompression = (config->Int("UseTextureCompression") != 0);
 	videoSettings.enableDebugMessages = (config->Int("EnableGLDebug") != 0);
 	videoSettings.iconFile = OS::GetIconFilename();
-	videoSettings.title = "Paragon";
+	videoSettings.title = "JumpDrive";
 
 	Pi::renderer = Graphics::Init(videoSettings);
 	{
@@ -480,7 +496,10 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 	// templates. so now we have crap everywhere :/
 	Lua::Init();
 
-	Pi::ui.Reset(new UI::Context(Lua::manager, Pi::renderer, Graphics::GetScreenWidth(), Graphics::GetScreenHeight(), Lang::GetCore().GetLangCode()));
+	Pi::ui.Reset(new UI::Context(Lua::manager, Pi::renderer, Graphics::GetScreenWidth(), 
+		Graphics::GetScreenHeight(), Lang::GetCore().GetLangCode()));
+	Pi::console.Reset(new UI::Context(Lua::manager, Pi::renderer, Graphics::GetScreenWidth(),
+		Graphics::GetScreenHeight(), Lang::GetCore().GetLangCode()));
 
 	LuaInit();
 
@@ -737,6 +756,19 @@ void Pi::Init(const std::map<std::string,std::string> &options)
 		Tweaker::DefineTweak("Test", vtv);
 	}*/
 
+	// Irradiance lighting tweak
+	{
+		std::vector<STweakValue> vtv = {
+			STweakValue(ETWEAK_FLOAT, "Diffuse Intensity", &ts_irr_light.hemi_diffuse_intensity, 
+				&ts_irr_light_default.hemi_diffuse_intensity, "min=0.0 max=1.0 step=0.01"),
+			STweakValue(ETWEAK_FLOAT, "Gloss Intensity", &ts_irr_light.hemi_gloss_intensity,
+				&ts_irr_light_default.hemi_gloss_intensity, "min=0.0 max=1.0 step=0.01"),
+			STweakValue(ETWEAK_FLOAT, "Glossy Exponent", &ts_irr_light.irradiance_gloss_exponential,
+				&ts_irr_light_default.irradiance_gloss_exponential, "min=0.0 max=128.0 step=1.0"),
+		};
+		Tweaker::DefineTweak("Irradiance", vtv);
+	}
+
 	InitPostProcessing();
 
 	// Mouse cursor
@@ -747,6 +779,7 @@ void Pi::InitPostProcessing()
 {
 	// Define post processes
 	m_gamePP = new Graphics::PostProcess("Bloom", renderer->GetWindow());
+	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
 
 	if (Graphics::Hardware::GL3()) {
 		// FXAA
@@ -764,14 +797,30 @@ void Pi::InitPostProcessing()
 			fxaa_desc.fragment_shader = "gl3/postprocessing/fxaa.frag";
 			Graphics::GL3::Effect* fxaa = new Graphics::GL3::Effect(renderer, fxaa_desc);
 			fxaa->SetProgram();
+
 			fxaa->GetUniform(fxaa->GetUniformID("u_texCoordOffset")).Set(vector2f(
 				1.0f / static_cast<float>(renderer->GetWindow()->GetWidth()),
 				1.0f / static_cast<float>(renderer->GetWindow()->GetHeight())));
-			fxaa->GetUniform(fxaa->GetUniformID("u_fxaaSpanMax")).Set(8.0f);
-			fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMul")).Set(1.0f / 8.0f);
-			fxaa->GetUniform(fxaa->GetUniformID("u_fxaaReduceMin")).Set(1.0f / 128.0f);
+			
+			ts_fxaa.effect = fxaa;
+			ts_fxaa.spanMaxId = fxaa->GetUniformID("u_fxaaSpanMax");
+			ts_fxaa.reduceMulId = fxaa->GetUniformID("u_fxaaReduceMul");
+			ts_fxaa.reduceMinId = fxaa->GetUniformID("u_fxaaReduceMin");
 
-			m_gamePP->AddPass(renderer, "FXAA", std::shared_ptr<Graphics::GL3::Effect>(fxaa));
+			{
+				std::vector<STweakValue> vtv = {
+					STweakValue(ETWEAK_FLOAT, "Span Max", &ts_fxaa.span_max, &ts_default_fxaa.span_max, 
+						"min=0.0 max=64.0 step=0.25"),
+					STweakValue(ETWEAK_FLOAT, "Reduce Multiplier", &ts_fxaa.reduce_mul,
+						&ts_default_fxaa.reduce_mul, "min=1.0 max=64.0 step=0.5"),
+					STweakValue(ETWEAK_FLOAT, "Reduce Minimum", &ts_fxaa.reduce_min,
+						&ts_default_fxaa.reduce_min, "min=1.0 max=256.0 step=1.0")
+				};
+				Tweaker::DefineTweak("FXAA", vtv);
+			}
+
+			m_fxaa.reset(fxaa);
+			m_gamePP->AddPass(renderer, "FXAA", m_fxaa);
 		}
 
 		// Chromatic Aberration
@@ -804,8 +853,9 @@ void Pi::InitPostProcessing()
 				Tweaker::DefineTweak("ChromaticAberration", vtv);
 			}
 
-			m_chromaticAberrationId = m_gamePP->AddPass(renderer, "Chromatic Aberration",
-				std::shared_ptr<Graphics::GL3::Effect>(chromaber));
+			m_chromaticAberration.reset(chromaber);
+			m_chromaticAberrationId = m_gamePP->AddPass(renderer, "Chromatic Aberration", 
+				m_chromaticAberration);
 			m_gamePP->SetBypassState(m_chromaticAberrationId,
 				Pi::config->Int("EnableChromaticAberration") == 0);
 		}
@@ -858,10 +908,9 @@ void Pi::InitPostProcessing()
 				Tweaker::DefineTweak("Scanlines", vtv);
 			}
 
-			m_scanlinesId = m_gamePP->AddPass(renderer, "Scanlines",
-				std::shared_ptr<Graphics::GL3::Effect>(scanlines));
-			m_gamePP->SetBypassState(m_scanlinesId,
-				Pi::config->Int("EnableScanlines") == 0);
+			m_scanlines.reset(scanlines);
+			m_scanlinesId = m_guiPP->AddPass(renderer, "Scanlines", m_scanlines);
+			m_guiPP->SetBypassState(m_scanlinesId, Pi::config->Int("EnableScanlines") == 0);
 		}
 
 		// FilmGrain
@@ -890,10 +939,9 @@ void Pi::InitPostProcessing()
 				Tweaker::DefineTweak("FilmGrain", vtv);
 			}
 
-			m_filmgrainId = m_gamePP->AddPass(renderer, "Film Grain",
-				std::shared_ptr<Graphics::GL3::Effect>(filmgrain));
-			m_gamePP->SetBypassState(m_filmgrainId,
-				Pi::config->Int("EnableFilmGrain") == 0);
+			m_filmgrain.reset(filmgrain);
+			m_filmgrainId = m_gamePP->AddPass(renderer, "Film Grain", m_filmgrain);
+			m_gamePP->SetBypassState(m_filmgrainId, Pi::config->Int("EnableFilmGrain") == 0);
 		}
 
 		// Bloomless Tone Mapping
@@ -953,15 +1001,14 @@ void Pi::InitPostProcessing()
 			Tweaker::DefineTweak("ToneMapping", vtv);
 		}
 
-		m_gamePP->AddPass(renderer, "ToneMapping", std::shared_ptr<Graphics::GL3::Effect>(tonemap));
+		m_tonemapping.reset(tonemap);
+		m_gamePP->AddPass(renderer, "ToneMapping", m_tonemapping);
 	} else {
 		m_gamePP->AddPass(renderer, "HBlur", Graphics::EFFECT_HORIZONTAL_BLUR);
 		m_gamePP->AddPass(renderer, "VBlur", Graphics::EFFECT_VERTICAL_BLUR);
 		m_gamePP->AddPass(renderer, "Compose", Graphics::EFFECT_BLOOM_COMPOSITOR,
 			Graphics::PP_PASS_COMPOSE);
 	}
-
-	m_guiPP = new Graphics::PostProcess("GUI", renderer->GetWindow());
 
 	// Set post processing option
 	Pi::renderer->GetPostProcessing()->SetPerformPostProcessing(postProcessingEnabled);
@@ -1007,6 +1054,7 @@ void Pi::Quit()
 	CustomSystem::Uninit();
 	Graphics::Uninit();
 	Pi::ui.Reset(0);
+	Pi::console.Reset(0);
 	LuaUninit();
 	Gui::Uninit();
 	delete Pi::modelCache;
@@ -1089,11 +1137,16 @@ void Pi::HandleEvents()
 		if (ui->DispatchSDLEvent(event))
 			continue;
 
+		if(console->DispatchSDLEvent(event)) {
+			continue;
+		}
+
 		bool consoleActive = Pi::IsConsoleActive();
-		if (!consoleActive)
+		if (!consoleActive) {
 			KeyBindings::DispatchSDLEvent(&event);
-		else
+		} else {
 			KeyBindings::toggleLuaConsole.CheckSDLEventAndDispatch(&event);
+		}
 		if (consoleActive != Pi::IsConsoleActive()) {
 			skipTextInput = true;
 			continue;
@@ -1117,7 +1170,7 @@ void Pi::HandleEvents()
 							else {
 								Pi::game->RequestTimeAccel(Game::TIMEACCEL_1X);
 								SetView(Pi::player->IsDead()
-										? static_cast<View*>(deathView)
+                                        ? static_cast<View*>(deathView)
 										: static_cast<View*>(worldView));
 							}
 						}
@@ -1328,7 +1381,6 @@ void Pi::TombStoneLoop()
 		Pi::renderer->GetWindow()->SetGrab(false);
 
 		// render the scene
-		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
 		Pi::renderer->BeginPostProcessing();
 		tombstone->Draw(_time);	
@@ -1341,9 +1393,7 @@ void Pi::TombStoneLoop()
 		Pi::renderer->EndPostProcessing();
 		Pi::renderer->EndFrame();
 		Gui::Draw();
-		//Pi::EndRenderTarget();
 
-		//Pi::DrawRenderTarget();
 		Pi::renderer->SwapBuffers();
 
 		Pi::frameTime = 0.001f*(SDL_GetTicks() - last_time);
@@ -1460,6 +1510,7 @@ void Pi::Start()
 	Pi::intro = new Intro(Pi::renderer, Graphics::GetScreenWidth(), Graphics::GetScreenHeight());
 
 	ui->DropAllLayers();
+	console->DropAllLayers();
 	ui->GetTopLayer()->SetInnerWidget(ui->CallTemplate("MainMenu"));
 
 	//XXX global ambient colour hack to make explicit the old default ambient colour dependency
@@ -1482,11 +1533,12 @@ void Pi::Start()
 	while (!Pi::game) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT)
+			if (event.type == SDL_QUIT) {
 				Pi::Quit();
-			else
+			} else {
 				ui->DispatchSDLEvent(event);
-
+				console->DispatchSDLEvent(event);
+			}
 			// XXX hack
 			// if we hit our exit conditions then ignore further queued events
 			// protects against eg double-click during game generation
@@ -1494,30 +1546,37 @@ void Pi::Start()
 				while (SDL_PollEvent(&event)) {}
 		}
 
-		//Pi::BeginRenderTarget();
 		Pi::renderer->BeginFrame();
-		renderer->ClearDepthBuffer();
+		
 		Pi::renderer->BeginPostProcessing();
 		intro->Draw(_time);		
 		
-		// Test
-		//m_smaa->PostProcess();
 		if (Pi::IsPostProcessingEnabled()) {
 			UpdatePostProcessingEffects();
 			Pi::renderer->PostProcessFrame(m_gamePP);
 		} else {
 			Pi::renderer->PostProcessFrame(nullptr);
 		}
+
 		Pi::renderer->EndPostProcessing();
-		Pi::renderer->EndFrame();
+		Pi::renderer->BeginPostProcessing(nullptr, Graphics::PostProcessLayer::EPP_LAYER_GUI);
 
 		ui->Update();
 		ui->Draw();
+		if(Pi::IsPostProcessingEnabled()) {
+			Pi::renderer->PostProcessFrame(m_guiPP);
+		} else {
+			Pi::renderer->PostProcessFrame(nullptr);
+		}
+
+		Pi::renderer->EndPostProcessing();
 		
 		if(mouseCursor) {
 			mouseCursor->Update();
 			mouseCursor->Draw();
 		}
+
+		Pi::renderer->EndFrame();
 		
 		//Pi::EndRenderTarget();
 
@@ -1533,6 +1592,9 @@ void Pi::Start()
 
 	ui->DropAllLayers();
 	ui->Layout(); // UI does important things on layout, like updating keyboard shortcuts
+
+	console->DropAllLayers();
+	console->Layout();
 
 	delete Pi::intro; Pi::intro = 0;
 
@@ -1663,8 +1725,6 @@ void Pi::MainLoop()
 			}
 		}
 
-		//Pi::BeginRenderTarget();
-
 		Pi::renderer->BeginFrame();
 		Pi::renderer->BeginPostProcessing();
 		Pi::renderer->SetTransform(matrix4x4f::Identity());
@@ -1677,7 +1737,9 @@ void Pi::MainLoop()
 		game->GetSpace()->GetRootFrame()->UpdateInterpTransform(Pi::GetGameTickAlpha());
 
 		currentView->Update();
-		currentView->Draw3D();
+        if (game && !game->GetFastTravel())
+            currentView->Draw3D();
+
 		// XXX HandleEvents at the moment must be after view->Draw3D and before
 		// Gui::Draw so that labels drawn to screen can have mouse events correctly
 		// detected. Gui::Draw wipes memory of label positions.
@@ -1686,33 +1748,58 @@ void Pi::MainLoop()
 
 		//SetMouseGrab(Pi::MouseButtonState(SDL_BUTTON_RIGHT));
 
-		if(currentView != worldView) {
-			if (Pi::IsPostProcessingEnabled()) {
-				UpdatePostProcessingEffects();
-				Pi::renderer->PostProcessFrame(m_guiPP);
-			} else {
-				Pi::renderer->PostProcessFrame(nullptr);
-			}
-		} else {
+		if(Pi::IsPostProcessingEnabled()) {
+			UpdatePostProcessingEffects();
+		}
+
+		if(currentView == worldView) {
 			// TEMP: Pending conversion to 3.X
 			//m_smaa->PostProcess();
 			if (Pi::IsPostProcessingEnabled()) {
-				UpdatePostProcessingEffects();
 				Pi::renderer->PostProcessFrame(m_gamePP);
-			} else {
+			}
+            else {
 				Pi::renderer->PostProcessFrame(nullptr);
 			}
+			Pi::renderer->BeginPostProcessing(nullptr, Graphics::EPP_LAYER_GUI);
 		}
-
-		Pi::renderer->EndPostProcessing();
-		Pi::renderer->EndFrame();
 		
-		if( DrawGUI ) {
+		if( DrawGUI && game && !game->GetFastTravel()) {
 			Gui::Draw();
 			if (game) {
 				game->log->DrawHudMessages(renderer);
 			}
-		} else if (game && game->IsNormalSpace()) {
+		}
+        else if (game && game->GetFastTravel()) {
+            const RefCountedPtr<StarSystem> sys = game->GetSpace()->GetStarSystem();
+            const SystemPath sp = sys->GetPath();
+            std::ostringstream pathStr;
+
+            // fill in pathStr from sp values and sys->GetName()
+            static const std::string comma(", ");
+            const std::string *loadString = nullptr;
+            if (SDL_GetTicks() % 999 < 333) {
+                loadString = new std::string(".");
+            }
+            else if (SDL_GetTicks() % 999 < 666) {
+                loadString = new std::string("..");
+            }
+            else {
+                loadString = new std::string("...");
+            }
+
+            pathStr << Pi::player->GetFrame()->GetLabel() << comma << sys->GetName() << " (" << sp.sectorX << comma << sp.sectorY << comma << sp.sectorZ << ")";
+
+            // display pathStr
+            Gui::Screen::EnterOrtho();
+            Gui::Screen::PushFont("HudFont");
+            Gui::Screen::RenderString("Fast travel in progress",  20.f, Gui::Screen::GetHeight() / 2.0f, Color::PARAGON_BLUE);
+            Gui::Screen::RenderString(loadString->c_str(),  20.f, Gui::Screen::GetHeight() / 2.0f + 10.f, Color::PARAGON_BLUE);
+            delete loadString;
+            Gui::Screen::PopFont();
+            Gui::Screen::LeaveOrtho();
+        }
+        else if (game && game->IsNormalSpace()) {
 			if (config->Int("DisableScreenshotInfo")==0) {
 				const RefCountedPtr<StarSystem> sys = game->GetSpace()->GetStarSystem();
 				const SystemPath sp = sys->GetPath();
@@ -1740,12 +1827,27 @@ void Pi::MainLoop()
 			Pi::ui->Draw();
 		}
 
+		if (Pi::IsPostProcessingEnabled()) {
+			Pi::renderer->PostProcessFrame(m_guiPP);
+		} else {
+			Pi::renderer->PostProcessFrame(nullptr);
+		}
+
+		if(IsConsoleActive()) {
+			Pi::console->Update();
+			Pi::console->Draw();
+		}
+
+		Pi::renderer->EndPostProcessing();
+		Pi::renderer->EndFrame();
+
 		if(Pi::mouseCursor) {
 			Pi::mouseCursor->Update();
 			Pi::mouseCursor->Draw();
 		}
 
-		// Draw tweaker (when enabled)
+		// Update/Draw tweaker (when enabled)
+		Tweaker::Update();
 		Tweaker::Draw();
 
 #if WITH_DEVKEYS
@@ -2067,6 +2169,11 @@ void Pi::UpdatePostProcessingEffects(bool active_tweak)
 		ts_chromatic.effect->SetProgram();
 		ts_chromatic.effect->GetUniform(ts_chromatic.centerBufferId).Set(ts_chromatic.centerBuffer);
 		ts_chromatic.effect->GetUniform(ts_chromatic.aberrationStrengthId).Set(ts_chromatic.aberrationStrength);
+
+		ts_fxaa.effect->SetProgram();
+		ts_fxaa.effect->GetUniform(ts_fxaa.spanMaxId).Set(ts_fxaa.span_max);
+		ts_fxaa.effect->GetUniform(ts_fxaa.reduceMulId).Set(1.0f/ts_fxaa.reduce_mul);
+		ts_fxaa.effect->GetUniform(ts_fxaa.reduceMinId).Set(1.0f/ts_fxaa.reduce_min);
 	}
 }
 
@@ -2080,7 +2187,7 @@ void Pi::SetExpChromaticAberrationEnabled(bool state)
 void Pi::SetExpScanlinesEnabled(bool state)
 {
 	if (m_scanlinesId != -1) {
-		m_gamePP->SetBypassState(m_scanlinesId, !state);
+		m_guiPP->SetBypassState(m_scanlinesId, !state);
 	}
 }
 

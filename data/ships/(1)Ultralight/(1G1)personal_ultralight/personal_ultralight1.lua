@@ -1,7 +1,7 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Personal Skiff',
+	name='AV Skiff',
 	ship_class = 'personal',
 	manufacturer = 'alders_vectrum',
 	model='personal_ultralight1',

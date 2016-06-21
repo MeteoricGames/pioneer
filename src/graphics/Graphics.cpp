@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Graphics.h"
@@ -67,13 +66,13 @@ Renderer* Init(Settings vs)
 		vs.height = modes.front().height;
 	}
 
-	WindowSDL *window = new WindowSDL(vs, "Paragon");
+	WindowSDL *window = new WindowSDL(vs, "JumpDrive");
 	width = window->GetWidth();
 	height = window->GetHeight();
 
 	glewExperimental = true;
 	glewInit();
-
+	
 	int major, minor;
 	if(GLEW_VERSION_3_2) {
 		major = 3;
@@ -86,7 +85,7 @@ Renderer* Init(Settings vs)
 		minor = 1;
 	}
 	std::cout<<"Glew reports support for OpenGL "<<major<<"."<<minor<<std::endl;
-
+	
 	if(GLEW_ARB_compatibility) {
 		std::cout<<"Running in compatibility mode"<<std::endl;
 		Graphics::Hardware::context_CoreProfile = false;
@@ -101,41 +100,16 @@ Renderer* Init(Settings vs)
 
 	Renderer *renderer = 0;
 
-	bool legacy_mode = false;
 
 	if (!glewIsSupported("GL_VERSION_3_2") && !glewIsSupported("GL_VERSION_3_1") ) {
-		Warning("OpenGL Version 3.1 and 3.2 are not supported. Paragon will try to run in legacy OpenGL 2.1 mode.");
-		if (!glewIsSupported("GL_VERSION_2_1")) {
-			Error("OpenGL Version 2.1 is not supported. Paragon cannot run on your graphics card.");
-		} else {
-			legacy_mode = true;
-		}
+		Error("OpenGL Version 3.1 and 3.2 are not supported. JumpDrive cannot run on your graphics card.");
 	}
+	
 
-	if(legacy_mode) {
-		Hardware::RendererType = Hardware::ERendererType::ERT_GL2;
-		if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-			Error("OpenGL extension ARB_vertex_buffer_object not supported. Paragon can not run on your graphics card.");
-		}
-		if (!glewIsSupported("GL_EXT_framebuffer_object") && !glewIsSupported("GL_ARB_framebuffer_object")) {
-			Warning("OpenGL extension EXT/ARB_framebuffer_object not supported. \nParagon's post-processing disabled.");
-			Hardware::supports_FramebufferObjects = false;
-		} else {
-			Hardware::supports_FramebufferObjects = true;
-		}
-		if (!glewIsSupported("GL_EXT_framebuffer_sRGB") && !glewIsSupported("GL_ARB_framebuffer_sRGB")) {
-			Warning("Required OpenGL extension EXT/ARB_framebuffer_sRGB not supported. \nParagon's enhanced anti-aliasing (SMAA) is disabled.");
-			Hardware::supports_sRGBFramebuffers = false;
-		} else {
-			Hardware::supports_sRGBFramebuffers = true;
-		}
-		renderer = new RendererGL2(window, vs);
-	} else {
-		Hardware::RendererType = Hardware::ERendererType::ERT_GL3;	// OpenGL 3.X renderer
-		Hardware::supports_FramebufferObjects = true;				// Core since 3.0
-		Hardware::supports_sRGBFramebuffers = true;					// Core since 3.0
-		renderer = new RendererGL3(window, vs);
-	}
+	Hardware::RendererType = Hardware::ERendererType::ERT_GL3;	// OpenGL 3.X renderer
+	Hardware::supports_FramebufferObjects = true;				// Core since 3.0
+	Hardware::supports_sRGBFramebuffers = true;					// Core since 3.0
+	renderer = new RendererGL3(window, vs);
 
 	Output("Initialized %s\n", renderer->GetName());
 
@@ -157,7 +131,7 @@ Renderer* Init(Settings vs)
 		desc.vertexColors = true;
 		vtxColorMaterial = renderer->CreateMaterial(desc);
 		vtxColorMaterial->IncRefCount();
-	}
+	} 
 
 	return renderer;
 }

@@ -1,5 +1,5 @@
-// Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright Â© 2013-14 Meteoric Games Ltd
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "PostProcess.h"
@@ -43,7 +43,7 @@ PostProcess::~PostProcess()
 	}
 }
 
-unsigned PostProcess::AddPass(Renderer* renderer, const std::string& pass_name,
+unsigned PostProcess::AddPass(Renderer* renderer, const std::string& pass_name, 
 	std::shared_ptr<Material>& material, PostProcessPassType pass_type)
 {
 	assert(renderer != nullptr);

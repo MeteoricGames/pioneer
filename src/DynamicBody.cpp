@@ -113,7 +113,7 @@ void DynamicBody::CalcExternalForce()
 	// gravity
 	if (!GetFrame()) return;			// no external force if not in a frame
 	Body *body = GetFrame()->GetBody();
-	if (body && !body->IsType(Object::SPACESTATION)) {	// they ought to have mass though...
+	if (body && (!body->IsType(Object::SPACESTATION) && !body->IsType(Object::HYPERSPACECLOUD))) {	// they ought to have mass though...
 		vector3d b1b2 = GetPosition();
 		double m1m2 = GetMass() * body->GetMass();
 		double invrsqr = 1.0 / b1b2.LengthSqr();

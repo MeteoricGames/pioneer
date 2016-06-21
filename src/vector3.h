@@ -60,7 +60,13 @@ public:
 	T Dot(const vector3 &b) const { return x*b.x + y*b.y + z*b.z; }
 	T Length() const { return sqrt (x*x + y*y + z*z); }
 	T LengthSqr() const { return x*x + y*y + z*z; }
-	vector3 Normalized() const { const T l = 1.0f / sqrt(x*x + y*y + z*z); return vector3(x*l, y*l, z*l); }
+	vector3 Normalized() const {
+		T l = 0.0;
+		T s = sqrt (x*x + y*y + z*z);
+		if (s > 0) // Cant allow to divide by 0.
+			l = 1.0 / s;
+		return vector3(x*l, y*l, z*l);
+	}
 	vector3 Normalized(T& length) const { const T l = sqrt(x*x + y*y + z*z); length = l; return vector3(x/l, y/l, z/l); }
 	vector3 NormalizedSafe() const {
 		const T lenSqr = x*x + y*y + z*z;

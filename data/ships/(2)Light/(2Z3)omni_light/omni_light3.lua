@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Light Explorer',
+	name='BSC Ranger',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'bsc',
 	model='omni_light3',
 	cockpit='unitech_light_cockpit',
 	forward_thrust = 538e5,

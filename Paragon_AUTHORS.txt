@@ -1,8 +1,9 @@
-As of 15/05/2013 the Paragon Developers are
+As of 04/11/2015 the Paragon Developers are
 
-As of the 8 March 2013 The Paragon developers are in alphabetical order;
+As of the 4 November 2015 The Paragon developers are in alphabetical order;
 
 
+Adel El Hassani
 Lionheart
 Salwan Hilali
 Shadmar

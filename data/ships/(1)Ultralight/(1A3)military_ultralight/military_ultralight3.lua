@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='vector fighter',
+	name='BSC Lancer',
 	ship_class = 'military',
-	manufacturer = 'ncom',
+	manufacturer = 'bsc',
 	model = 'military_ultralight3',
 	cockpit='civilian_fighter2_cockpit',
 	forward_thrust = 16e5,

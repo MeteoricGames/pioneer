@@ -1,5 +1,4 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
--- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 local Lang = import("Lang")
@@ -12,6 +11,7 @@ local messages = {
 	GRAV_TOO_HIGH    = l.CANNOT_COMPENSATE_FOR_LOCAL_GRAVITY,
 	REFUSED_PERM     = l.CANNOT_COMPUTE_ORBIT_PARAMETERS,
 	ORBIT_IMPOSSIBLE = l.STARPORT_REFUSED_DOCKING_PERMISSION,
+	REMOTE_DOCKING	 = l.REMOTE_DOCKING,
 }
 
 Event.Register("onAICompleted", function (s, e)

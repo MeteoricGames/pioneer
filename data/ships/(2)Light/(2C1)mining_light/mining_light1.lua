@@ -1,7 +1,7 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Mining Ship',
+	name='Sukhov Light Miner',
 	ship_class = 'mining',
 	manufacturer = 'alders_vectrum',
 	model='mining_light1',

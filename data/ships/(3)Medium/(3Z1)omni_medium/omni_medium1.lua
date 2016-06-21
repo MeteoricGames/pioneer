@@ -2,9 +2,9 @@
 
 --Ships not available for purchase (ambient ships)
 define_ship {
-	name='Omni Explorer',
+	name='Xian Starcruiser',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'xian',
 	model='omni_medium1',
 	forward_thrust = 3000e5,
 	reverse_thrust = 3000e5,

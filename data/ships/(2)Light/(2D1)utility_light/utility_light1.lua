@@ -1,7 +1,7 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Utility Tender',
+	name='AV Utility Tender',
 	ship_class = 'utility',
 	manufacturer = 'alders_vectrum',
 	model='utility_light1',

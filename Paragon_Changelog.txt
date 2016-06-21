@@ -1,3 +1,33 @@
+Alpha 10.6
+	* UI
+	  * Positional and boundaries changes
+	  * Hyperspace UI changes
+	  * Changed default display mode to 1280x720
+	  
+	* Game
+	  * OSX support is back!
+	  * Changed Hyperspace clouds gameplay features
+	  * Added new permanent hyperspace clouds that allow cheaper hyper jumps
+	  * External and sidereal cameras use new angles as default
+	  
+	* Graphics
+	  * Post processing system supports multiple layers of effects
+	  * New separate effects for GUI
+	  * Fixed issue passing model material shininess correctly
+	  
+	* Art
+	  * New ships
+	  * New sound effects and music
+	  * HUD changes
+	  * Polish for ships, starports and cities
+	  
+	* Input
+	  * New control binding for deselecting nav and combat targets (default: Y)
+	  
+	* Fixes
+	  * Fixed crash caused by MapInternal returning NULL in rare cases
+	  * Several small fixes
+
 Alpha 10.5
 	* Input
 	  * Joystick support fully upgraded for multiple axes, invert and deadzones
@@ -43,6 +73,7 @@ Alpha 9.22
 	  * Fixed issue causing missions to be wiped out at times between save/load leading to a crash after loading
 	  * Fixed issue causing an exception after jumping to destination when a taxi mission is active
 	  * Fixed issue causing hyperspace lines to be drawn in paragon blue instead of white gradient
+	  
 Alpha 9.2
 	* Game
 	  * Optimization pass for loading times and game

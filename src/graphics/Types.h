@@ -69,10 +69,18 @@ enum FaceCullMode {
 };
 
 // Used for Light Sources uniform block buffer
-struct LightSource {
+struct LightSource 
+{
+	LightSource() {
+		position = vector4f(0.0f);
+		diffuse = vector4f(0.0f);
+		specular = vector3f(0.0f);
+		radius = 0.0f;
+	}
 	vector4f position;
 	vector4f diffuse;
-	vector4f specular;
+	vector3f specular;
+	float radius;
 };
 
 }

@@ -14,8 +14,8 @@ GameConfig::GameConfig(const std::map<std::string,std::string> &override_)
 	map["DisableEclipse"] = "0";
 	map["DisableSound"] = "0";
 	map["StartFullscreen"] = "0";
-	map["ScrWidth"] = "800";
-	map["ScrHeight"] = "600";
+	map["ScrWidth"] = "1280";
+	map["ScrHeight"] = "720";
 	map["DetailCities"] = "1";
 	map["DetailPlanets"] = "1";
 	map["SfxVolume"] = "0.8";

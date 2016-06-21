@@ -7,6 +7,7 @@ local FileSystem = import("FileSystem")
 
 local ui = Engine.ui
 local l = Lang.GetResource("ui-core");
+local c = {r = 0.0, g = 0.86, b = 1.0}
 
 ui.templates.FileDialog = function (args)
 	local title       = args.title       or l.SELECT_FILE
@@ -26,8 +27,8 @@ ui.templates.FileDialog = function (args)
 	local list = ui:List()
 	for i = 1,#files do list:AddOption(files[i]) end
 
-	local selectButton = ui:Button(ui:Label(selectLabel):SetFont("HEADING_NORMAL"))
-	local cancelButton = ui:Button(ui:Label(cancelLabel):SetFont("HEADING_NORMAL"))
+	local selectButton = ui:Button(ui:Label(selectLabel):SetFont("HEADING_NORMAL"):SetColor(c))
+	local cancelButton = ui:Button(ui:Label(cancelLabel):SetFont("HEADING_NORMAL"):SetColor(c))
 	cancelButton.onClick:Connect(onCancel)
 
 	if #files > 0 then
@@ -40,6 +41,7 @@ ui.templates.FileDialog = function (args)
 	local fileEntry
 	if args.allowNewFile then
 		fileEntry = ui:TextEntry()
+		fileEntry:SetColor(c)
 		if #files > 0 then
 			fileEntry:SetText(files[1])
 		end
@@ -69,9 +71,9 @@ ui.templates.FileDialog = function (args)
 	end
 
 	local content = ui:VBox()
-	content:PackEnd(ui:Align("MIDDLE", ui:Label(title):SetFont("HEADING_NORMAL")))
+	content:PackEnd(ui:Align("MIDDLE", ui:Label(title):SetFont("HEADING_NORMAL"):SetColor(c)))
 	if args.helpText then
-		content:PackEnd(ui:Label(args.helpText):SetFont("NORMAL"))
+		content:PackEnd(ui:Label(args.helpText):SetFont("NORMAL"):SetColor(c))
 	end
 	if fileEntry then content:PackEnd(fileEntry); end
 	content

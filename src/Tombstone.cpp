@@ -13,7 +13,8 @@ Tombstone::Tombstone(Graphics::Renderer *r, int width, int height)
 	m_ambientColor = Color(13, 13, 26, 255);
 
 	const Color lc(255, 255, 255, 0);
-	m_lights.push_back(Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f, 0.8f, 1.0f), lc, lc));
+	m_lights.push_back(Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, 
+		vector3f(0.f, 0.8f, 1.0f), lc, lc, 0.0f));
 
 	m_model = Pi::FindModel("tombstone");
 	m_model->SetLabel(Lang::TOMBSTONE_EPITAPH);

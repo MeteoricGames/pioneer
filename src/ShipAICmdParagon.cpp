@@ -312,7 +312,7 @@ bool AIParagonCmdFlyTo::TimeStepUpdate()
 			}
 		} else {
 			m_ship->GetController()->SetSpeedLimit(m_ship->GetMaxManeuverSpeed());
-			m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * std::min<double>(distance, m_ship->GetMaxManeuverSpeed()));
+			m_ship->SetVelocity(-m_ship->GetOrient().VectorZ() * std::min<double>(distance, m_ship->GetMaxManeuverSpeed())); // Creates a crash.
 			return true;
 		}
 	} else {
@@ -398,7 +398,7 @@ bool AIParagonCmdSteerAround::TimeStepUpdate()
 	CacheData();
 
 	if (m_data.target_to_sbody_distance > DESTINATION_RADIUS) {
-		m_remainingDistance = acos(-m_data.ship_to_sbody_dir.Dot(-m_data.target_to_sbody_dir)) *
+		m_remainingDistance = SAFEACOS(-m_data.ship_to_sbody_dir.Dot(-m_data.target_to_sbody_dir)) *
 			m_data.sbody_transit_radius;
 	} else {
 		m_remainingDistance = m_data.ship_to_sbody_distance - m_data.sbody_transit_radius;
@@ -865,7 +865,7 @@ bool AIParagonCmdGoTo::TimeStepUpdate()
 			vector3d dir = (m_endPO.pos - ship_position).Normalized(dist);
 			if(dist > 0.1) {
 				double speed = dist < m_speedLimit? std::max(dist, 10.0) : m_speedLimit;
-				m_ship->AIMatchVel(ai_orient * (dir * speed));
+				m_ship->AIMatchVel(ai_orient * (dir * speed), true);
 			} else {
 				m_ship->ClearThrusterState();
 				m_ship->SetVelocity(vector3d(0.0, 0.0, 0.0));
@@ -1027,6 +1027,7 @@ void AIParagonCmdDock::GetStatusText(char *str)
 
 bool AIParagonCmdDock::TimeStepUpdate()
 {
+	m_ship->SetRemotlyDocked(false);
 	if (m_ship->GetFlightState() == Ship::JUMPING || !ProcessChild()) {
 		return false;
 	}
@@ -1059,12 +1060,15 @@ bool AIParagonCmdDock::TimeStepUpdate()
 	} else if (m_state == EDS_START) {				// Zero speed
 		m_ship->SetVelocity(vector3d(0.0, 0.0, 0.0));
 		int port = m_station->GetMyDockingPort(m_ship);
-		if(port == -1) {
+		if (port == -1) {
 			std::string msg;
 			bool cleared = m_station->GetDockingClearance(m_ship, msg);
 			port = m_station->GetMyDockingPort(m_ship);
-			if(!cleared || port == -1) {
-				m_ship->AIMessage(Ship::AIERROR_REFUSED_PERM);
+			if (!cleared || port == -1) {
+				m_ship->AIMessage(Ship::AIERROR_REMOTE_DOCKING);
+				m_ship->SetRemotlyDocked(true);
+				port = m_station->GetRemoteDockingPort();
+				m_ship->SetDockedWith(m_station, port);
 				return true;
 			}
 		}
@@ -1087,6 +1091,7 @@ bool AIParagonCmdDock::TimeStepUpdate()
 	} else if (m_state == EDS_WAYPOINTS) {	// Prepare docking points
 		SpaceStationType::positionOrient_t po1, po2;
 		vector3d ship_pos = m_ship->GetPositionRelTo(m_station);
+
 		bool got_orient_1 = m_station->GetStationType()->GetShipApproachWaypoints(
 			m_station->GetMyDockingPort(m_ship), 1, po1);
 		bool got_orient_2 = m_station->GetStationType()->GetShipApproachWaypoints(

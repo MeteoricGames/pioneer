@@ -340,11 +340,11 @@ private:
 	enum EDockingState
 	{
 		EDS_ZERO = 0,		// Ship gets to station and stops
-		EDS_START,			// Docking process starts
+		EDS_START,		// Docking process starts
 		EDS_WAIT_FOR_GO,	// Ship waits for station to give it the go signal (queue)
 		EDS_WAYPOINTS,		// Ship reads all waypoints necessary to get to dock
 		EDS_DOCKING,		// Ship follows waypoints consecutively to dock
-		EDS_DOCK,			// Ship actually docks
+		EDS_DOCK,		// Ship actually docks
 
 		EDS_TOTAL,
 	};

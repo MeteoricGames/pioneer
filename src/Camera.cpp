@@ -114,7 +114,8 @@ static void position_system_lights(Frame *camFrame, Frame *frame, std::vector<Ca
 
 		const Color lightCol(col[0], col[1], col[2], 0);
 		vector3f lightpos(lpos.x, lpos.y, lpos.z);
-		lights.push_back(Camera::LightSource(frame->GetBody(), Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, lightpos, lightCol, lightCol)));
+		lights.push_back(Camera::LightSource(frame->GetBody(), 
+			Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, lightpos, lightCol, lightCol, 0.0f)));
 	}
 
 	for (Frame* kid : frame->GetChildren()) {
@@ -202,7 +203,8 @@ void Camera::BeginDraw(const Body *excludeBody)
 	if (m_lightSources.empty()) {
 		// no lights means we're somewhere weird (eg hyperspace). fake one
 		const Color col(255);
-		m_lightSources.push_back(LightSource(0, Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f), col, col)));
+		m_lightSources.push_back(LightSource(0, 
+			Graphics::Light(Graphics::Light::LIGHT_DIRECTIONAL, vector3f(0.f), col, col, 0.0f)));
 	}
 
 	//fade space background based on atmosphere thickness and light angle

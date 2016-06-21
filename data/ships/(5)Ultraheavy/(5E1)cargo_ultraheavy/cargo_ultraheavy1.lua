@@ -4,7 +4,7 @@
 define_ship {
 	name='Cargo Megafreighter',
 	ship_class = 'cargo',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'xian',
 	model='cargo_ultraheavy1',
 	forward_thrust = 427180e5,
 	reverse_thrust = 427180e5,

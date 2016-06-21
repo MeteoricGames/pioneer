@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "LuaDev.h"
@@ -60,6 +59,18 @@ static int l_dev_tweaker_close(lua_State *l)
 	return 0;
 }
 
+static int l_dev_tweaker_monitor(lua_State *l)
+{
+	std::string out;
+	if(Tweaker::Monitor()) {
+		out = "Monitor mode enabled.";
+	} else {
+		out = "Monitor mode error.";
+	}
+	lua_pushlstring(l, out.c_str(), out.size());
+	return 1;
+}
+
 void LuaDev::Register()
 {
 	lua_State *l = Lua::manager->GetLuaState();
@@ -71,6 +82,7 @@ void LuaDev::Register()
 		{ "TweakerList", l_dev_tweaker_list },
 		{ "Tweak", l_dev_tweak },
 		{ "TweakerClose", l_dev_tweaker_close },
+		{ "TweakerMonitor", l_dev_tweaker_monitor },
 		{ 0, 0 }
 	};
 

@@ -18,8 +18,12 @@ enum TextureFormat {
 
 	//luminance/intensity formats are deprecated in opengl 3+
 	//so we might remove them someday
-	TEXTURE_LUMINANCE_ALPHA_88, //luminance value put into R,G,B components; separate alpha value
-	TEXTURE_INTENSITY_8, //intensity value put into RGBA components
+	//TEXTURE_LUMINANCE_ALPHA_88, //luminance value put into R,G,B components; separate alpha value
+	//TEXTURE_INTENSITY_8, //intensity value put into RGBA components
+	// These two formats are causing problems with text rendering, use RED and RG instead. <Salwan>
+
+	TEXTURE_R_8,
+	TEXTURE_RG_88,
 
 	TEXTURE_DXT1, // data is expected to be pre-compressed
 	TEXTURE_DXT5,

@@ -104,4 +104,67 @@ void ScrollBar::GetMinimumSize(float size[2])
 	size[0] = size[1] = SCROLLBAR_SIZE;
 }
 
+
+NavVScrollBar::NavVScrollBar() : VScrollBar()
+{
+	LoadImages();
+}
+
+NavVScrollBar::~NavVScrollBar()
+{
+	delete m_bottomImage;
+	delete m_midImage;
+	delete m_topImage;
+}
+
+void NavVScrollBar::LoadImages()
+{
+	m_topImage = new Image("textures/scroll_top.png"); // TODO: Shouldnt need to load textures here.
+	m_midImage = new Image("textures/scroll_middle.png");
+	m_bottomImage = new Image("textures/scroll_bottom.png");
+	m_thumbImage = new Image("textures/scroll_cross.png");
+}
+
+void NavVScrollBar::Draw()
+{
+	PROFILE_SCOPED()
+	float size[2];
+	float pos = m_adjustment->GetValue();
+	GetSize(size);
+	size[1] -= m_offsetY;
+	float offset2 = 0.0f;
+	if (m_offsetY > 135.0f)
+		offset2 = 50.0f;
+
+	m_topImage->SetSize(23.0f / 2.0f, 35.0f / 2.0f);
+	m_topImage->SetPosition(vector2f(0.0f, -offset2 / 4.0f));
+	m_topImage->Draw();
+	m_midImage->SetSize(25.f / 2.0f, size[1] - 63.0f / 2.0f);
+	m_midImage->SetPosition(vector2f(8.0f / 2.0f, -offset2 / 4.0f + 32.0f / 2.0f));
+	m_midImage->Draw();
+	m_bottomImage->SetSize(23.0f / 2.0f, 35.0f / 2.0f);
+	m_bottomImage->SetPosition(vector2f(0.0f, -offset2 / 4.0f + size[1] - 35.0f / 2.0f));
+	m_bottomImage->Draw();
+	if (!(m_offsetY > 0.0f)) {
+		m_thumbImage->SetSize(7.0f, 3.5f);
+		m_thumbImage->SetPosition(vector2f(13.0f / 2.0f, 19.f / 2.0f + (size[1] - 23.f) * pos));
+		m_thumbImage->Draw();
+	}
+}
+
+void NavVScrollBar::SetOffsetY(float offset)
+{
+	if (offset >= 0.0f && offset <= 135.0f)
+		m_offsetY = offset;
+	else if (offset > 135.0f)
+		m_offsetY = 140.0f;
+	else
+		m_offsetY = 0.0f;
+}
+
+const float NavVScrollBar::GetOffsetY() const
+{
+	return m_offsetY;
+}
+
 }

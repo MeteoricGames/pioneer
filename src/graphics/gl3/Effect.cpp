@@ -1,5 +1,4 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright � 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Effect.h"
@@ -34,7 +33,7 @@ std::vector<Effect::UniformBlock*> Effect::s_uniformBlocks;
 std::map<std::string, int> Effect::s_uniformBlockNames;
 
 Effect::Effect(Renderer* renderer, const EffectDescriptor& effect_desc) :
-	m_renderer(renderer), m_isDirect(false), m_effectDesc(effect_desc),
+	m_renderer(renderer), m_isDirect(false), m_effectDesc(effect_desc), 
 	m_vertexShader(nullptr), m_fragmentShader(nullptr), m_program(nullptr),
 	m_curSettingsHash(0), m_curVSHash(0), m_curFSHash(0), m_attribsStride(0),
 	m_isApplied(false), m_isProgramUsed(false)
@@ -110,7 +109,7 @@ Effect::~Effect()
 
 void Effect::StaticInit()
 {
-	if(s_isInit) {
+	if(s_isInit) { 
 		return;
 	}
 	s_isInit = true;
@@ -187,9 +186,9 @@ int Effect::InitUniformBlock(int uniform_block)
 	} else {
 		return -1;
 	}
-	// If block index is not found it'll fail silently since there is no explicit
+	// If block index is not found it'll fail silently since there is no explicit 
 	// requirement for existence of shared uniform blocks.
-
+	
 }
 
 void Effect::WriteUniformBlock(int uniform_block, size_t data_size, void* data)
@@ -204,7 +203,7 @@ void Effect::WriteUniformBlock(int uniform_block, size_t data_size, void* data)
 	}
 	int u = uniform_block - 1;
 	if(data_size > s_uniformBlocks[u]->data_size) {
-		Error("Uniform block data size too large while attempting to write to uniform block: \"%s\"",
+		Error("Uniform block data size too large while attempting to write to uniform block: \"%s\"", 
 			s_uniformBlocks[u]->name.c_str());
 	}
 	size_t write_size = std::min(data_size, s_uniformBlocks[u]->data_size);
@@ -325,7 +324,7 @@ void Effect::InitUniforms(unsigned int hash)
 		if(!sp_cached) {
 			// Standard parameter
 			auto spi = s_stdParams.find(m_effectDesc.uniforms[i]);
-			if(spi != s_stdParams.end()) {
+			if(spi != s_stdParams.end()) { 
 				// Found one.
 				m_stdParams->insert(std::make_pair(spi->second, i));
 			}
@@ -449,7 +448,7 @@ EffectFileCache* Effect::LoadShader(const std::string& shader_file)
 		return sf_iter->second;
 	} else {
 		// Load file
-		RefCountedPtr<FileSystem::FileData> file =
+		RefCountedPtr<FileSystem::FileData> file = 
 			FileSystem::gameDataFiles.ReadFile(ShadersPath + shader_file);
 		assert(file);
 		StringRange str = file->AsStringRange().StripUTF8BOM();

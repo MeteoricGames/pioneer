@@ -71,6 +71,15 @@ void SpaceStation::Save(Serializer::Writer &wr, Space *space)
 	}
 
 	m_navLights->Save(wr);
+	m_skin.Save(wr);
+	wr.Int32(m_remoteShipDocking.size());
+	for (Uint32 i=0; i<m_remoteShipDocking.size(); i++) {
+		wr.Int32(space->GetIndexForBody(m_remoteShipDocking[i].ship));
+		wr.Int32(m_remoteShipDocking[i].stage);
+		wr.Float(float(m_remoteShipDocking[i].stagePos));
+		wr.Vector3d(m_remoteShipDocking[i].fromPos);
+		wr.WrQuaternionf(m_remoteShipDocking[i].fromRot);
+	}
 }
 
 void SpaceStation::Load(Serializer::Reader &rd, Space *space)
@@ -127,6 +136,24 @@ void SpaceStation::Load(Serializer::Reader &rd, Space *space)
 	InitStation();
 
 	m_navLights->Load(rd);
+	if (Game::s_loadedGameVersion >= 80){
+		m_skin.Load(rd);
+		m_skin.Apply(GetModel());
+	}
+	if (Game::s_loadedGameVersion >= 81) {
+		const Uint32 numRemoteShipDocking = rd.Int32();
+		m_shipDocking.reserve(numRemoteShipDocking);
+		for (Uint32 i=0; i<numRemoteShipDocking; i++) {
+			m_remoteShipDocking.push_back(shipDocking_t());
+			shipDocking_t &sd = m_remoteShipDocking.back();
+			sd.shipIndex = rd.Int32();
+			sd.stage = rd.Int32();
+			sd.stagePos = rd.Float();
+			sd.fromPos = rd.Vector3d();
+			sd.fromRot = rd.RdQuaternionf();
+		}
+
+	}
 }
 
 void SpaceStation::PostLoadFixup(Space *space)
@@ -167,7 +194,8 @@ void SpaceStation::InitStation()
 		else
 			m_type = &SpaceStationType::surfaceStationTypes[ 1 ];
 	} else {
-		m_type = &SpaceStationType::orbitalStationTypes[ rand.Int32(SpaceStationType::orbitalStationTypes.size()) ];
+		m_type = &SpaceStationType::orbitalStationTypes[ 
+            rand.Int32(SpaceStationType::orbitalStationTypes.size()) ];
 	}
 
 	if(m_shipDocking.empty()) {
@@ -179,7 +207,12 @@ void SpaceStation::InitStation()
 		m_doorAnimationStep = m_doorAnimationState = 0.0;
 	}
 	assert(m_shipDocking.size() == m_type->numDockingPorts);
-
+/* 	if (m_remoteShipDocking.empty()) {
+ * 		m_shipDocking.reserve(1);
+ * 		m_shipDocking.push_back(shipDocking_t());
+ * 	}
+ * 
+ */
 	// This SpaceStation's bay groups is an instance of...
 	mBayGroups = m_type->bayGroups;
 
@@ -199,9 +232,9 @@ void SpaceStation::InitStation()
 
 	m_doorAnimation = model->FindAnimation("doors");
 
-	SceneGraph::ModelSkin skin;
-	skin.SetDecal("pioneer");
-	skin.Apply(model);
+	m_skin.SetRandomColors(Pi::rng);
+	m_skin.SetDecal("pioneer");
+	m_skin.Apply(model);
 }
 
 SpaceStation::~SpaceStation()
@@ -216,6 +249,12 @@ void SpaceStation::NotifyRemoved(const Body* const removedBody)
 			m_shipDocking[i].ship = 0;
 		}
 	}
+	for (Uint32 i=0; i<m_remoteShipDocking.size(); i++) {
+		if (m_remoteShipDocking[i].ship == removedBody) {
+			m_remoteShipDocking[i].ship = 0;
+		}
+	}
+
 }
 
 int SpaceStation::GetMyDockingPort(const Ship *s) const
@@ -260,6 +299,16 @@ int SpaceStation::GetFreeDockingPort(const Ship *s) const
 	return -1;
 }
 
+int SpaceStation::GetRemoteDockingPort() {
+	for (unsigned i = 0; i < m_remoteShipDocking.size(); i++) {
+		if (m_remoteShipDocking[i].ship == NULL) {
+			return i;
+		}
+	}
+	m_remoteShipDocking.push_back(shipDocking_t());
+	return m_remoteShipDocking.size() - 1;	
+}
+
 bool SpaceStation::HasFreeDockingPort() const
 {
 	for(unsigned i = 0; i < m_type->numDockingPorts; ++i) {
@@ -272,12 +321,14 @@ bool SpaceStation::HasFreeDockingPort() const
 
 void SpaceStation::SetDocked(Ship *ship, int port)
 {
-	m_shipDocking[port].ship = ship;
-	m_shipDocking[port].stage = m_type->numDockingStages+1;
+	shipDocking_t *temp;
+	GetDockingPort(port, ship->IsRemotlyDocked(), temp);
+	temp->ship = ship;
+	temp->stage = m_type->numDockingStages+1;
 
 	// have to do this crap again in case it was called directly (Ship::SetDockWith())
 	ship->SetFlightState(Ship::DOCKED);
-	ship->SetVelocity(vector3d(0.0));
+	ship->TmpSetVelocity(vector3d(0.0));
 	ship->SetAngVelocity(vector3d(0.0));
 	ship->ClearThrusterState();
 	PositionDockedShip(ship, port);
@@ -299,14 +350,15 @@ void SpaceStation::SwapDockedShipsPort(const int oldPort, const int newPort)
 
 bool SpaceStation::LaunchShip(Ship *ship, int port)
 {
-	shipDocking_t &sd = m_shipDocking[port];
-	if (sd.stage < 0) return true;			// already launching
+	shipDocking_t *sd; 
+	GetDockingPort(port, ship->IsRemotlyDocked(), sd);
+	if (sd->stage < 0) return true;			// already launching
 	if (IsPortLocked(port)) return false;	// another ship docking
 	LockPort(port, true);
 
-	sd.ship = ship;
-	sd.stage = -1;
-	sd.stagePos = 0.0;
+	sd->ship = ship;
+	sd->stage = -1;
+	sd->stagePos = 0.0;
 
 	m_doorAnimationStep = 0.3; // open door
 
@@ -314,11 +366,14 @@ bool SpaceStation::LaunchShip(Ship *ship, int port)
 	const matrix3x3d mt = ship->GetOrient();
 	const vector3d up = mt.VectorY().Normalized() * aabb.min.y;
 
-	sd.fromPos = (ship->GetPosition() - GetPosition() + up) * GetOrient();	// station space
-	sd.fromRot = Quaterniond::FromMatrix3x3(GetOrient().Transpose() * mt);
+	sd->fromPos = (ship->GetPosition() - GetPosition() + up) * GetOrient();	// station space
+	sd->fromRot = Quaterniond::FromMatrix3x3(GetOrient().Transpose() * mt);
 
-	ship->SetFlightState(Ship::DOCKING);
-
+	if (ship->IsRemotlyDocked())
+		ship->SetFlightState(Ship::FLYING);
+	else
+		ship->SetFlightState(Ship::DOCKING);
+	//ship->SetRemotlyDocked(false);
 	return true;
 }
 
@@ -504,22 +559,26 @@ void SpaceStation::DockingUpdate(const double timeStep)
 		m_doorAnimation->SetProgress(m_doorAnimationState);
 }
 
-void SpaceStation::PositionDockedShip(Ship *ship, int port) const
+void SpaceStation::PositionDockedShip(Ship *ship, int port)
 {
-	const shipDocking_t &dt = m_shipDocking[port];
+	if (ship->IsRemotlyDocked()) {
+		return;	
+	}
+	shipDocking_t *dt;
+	GetDockingPort(port, ship->IsRemotlyDocked(), dt);	
 	SpaceStationType::positionOrient_t dport;
-	PiVerify(m_type->GetDockAnimPositionOrient(port, dt.stage, dt.stagePos, dt.fromPos, dport, ship));
-	assert(dt.ship == ship);
+	PiVerify(m_type->GetDockAnimPositionOrient(port, dt->stage, dt->stagePos, dt->fromPos, dport, ship));
+	assert(dt->ship == ship);
 
 	ship->SetPosition(GetPosition() + GetOrient()*dport.pos);
 
 	// Still in docking animation process?
-	if (dt.stage <= m_type->numDockingStages) {
+	if (dt->stage <= m_type->numDockingStages) {
 		matrix3x3d wantRot = matrix3x3d::FromVectors(dport.xaxis, dport.yaxis, dport.zaxis);
 		// use quaternion spherical linear interpolation to do
 		// rotation smoothly
 		Quaterniond wantQuat = Quaterniond::FromMatrix3x3(wantRot);
-		Quaterniond q = Quaterniond::Nlerp(dt.fromRot, wantQuat, dt.stagePos);
+		Quaterniond q = Quaterniond::Nlerp(dt->fromRot, wantQuat, dt->stagePos);
 		wantRot = q.ToMatrix3x3<double>();
 		ship->SetOrient(GetOrient() * wantRot);
 	} else {
@@ -731,6 +790,13 @@ void SpaceStation::LockPort(const int bay, const bool lockIt)
 			}
 		}
 	}
+}
+
+void SpaceStation::GetDockingPort(int &port, bool remote, shipDocking_t *&portOut) {
+	if (remote)
+		portOut = &m_remoteShipDocking[port];
+	else
+		portOut = &m_shipDocking[port];
 }
 
 void SpaceStation::RequestDockingApproach(Ship* ship)

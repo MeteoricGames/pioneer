@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _GAME_H
@@ -59,7 +58,7 @@ public:
 	bool UpdateTimeAccel();
 
 	// request switch to hyperspace
-	void WantHyperspace();
+	void WantHyperspace(bool phase_mode);
 
 	// hyperspace parameters. only meaningful when IsHyperspace() is true
 	float GetHyperspaceProgress() const { return m_hyperspaceProgress; }
@@ -93,6 +92,11 @@ public:
 
 	GameLog *log;
 
+	void EnumerateAllHyperspaceClouds(std::list<HyperspaceCloud*>& clouds_out);
+
+    void SetFastTravel(const bool value);
+    const bool GetFastTravel() const;
+
 private:
 	void CreateViews();
 	void LoadViews(Serializer::Reader &rd);
@@ -113,6 +117,7 @@ private:
 	State m_state;
 
 	bool m_wantHyperspace;
+	bool m_wantPhaseMode;
 
 	std::list<HyperspaceCloud*> m_hyperspaceClouds;
 	SystemPath m_hyperspaceSource;
@@ -120,10 +125,12 @@ private:
 	double m_hyperspaceProgress;
 	double m_hyperspaceDuration;
 	double m_hyperspaceEndTime;
+	bool m_hyperspacePhaseMode;
 
 	TimeAccel m_timeAccel;
 	TimeAccel m_requestedTimeAccel;
 	bool m_forceTimeAccel;
+    bool m_isInFastTravel = false;
 
 	static const float s_timeAccelRates[];
 	static const float s_timeInvAccelRates[];

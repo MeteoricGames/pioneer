@@ -1,19 +1,41 @@
-// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
+// Copyright ï¿½ 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright ï¿½ 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Tweaker.h"
+#include "TweakerMonitors.h"
 #include <SDL.h>
-#include <AntTweakBar.h>
 #include "graphics/GraphicsHardware.h"
 #include <sstream>
 #include "FileSystem.h"
+#include "Pi.h"
+#include "Game.h"
+#include "Player.h"
+#include "LuaEvent.h"
+
+#include <AntTweakBar.h>
+#if defined(_WIN32) || defined(__linux) || defined(__unix)
+bool Tweaker::s_doNotUseLib = false;
+#define TWEAKER(call) call
+#elif defined(__APPLE__)
+bool Tweaker::s_doNotUseLib = true;
+#define TWEAKER(call)
+#endif
 
 bool Tweaker::s_isInit = false;
 bool Tweaker::s_enabled = true;
+
+bool Tweaker::s_monitorMode = false;
+Body* Tweaker::s_monitorCurrentTarget = nullptr;
+TwBar* Tweaker::s_activeMonitor = nullptr;
+TM_SHIP Tweaker::s_monitor_ship;
+TM_HYPERCLOUD Tweaker::s_monitor_cloud;
+
 std::map<std::string, std::vector<STweakValue> > Tweaker::s_tweaksMap;
 std::map<std::string, std::shared_ptr<IniConfig> > Tweaker::s_configMap;
 TwBar* Tweaker::s_activeTweak = nullptr;
+TW_AICOMMAND Tweaker::s_aiCommand_FlyToPermaCloud;
+TW_AICOMMAND Tweaker::s_aiCommand_ClearAI;
 
 FileSystem::FileSourceFS* Tweaker::s_gameDataFS = nullptr;
 
@@ -23,11 +45,17 @@ bool Tweaker::Init(int window_width, int window_height)
 		return true;
 	}
 	s_gameDataFS = new FileSystem::FileSourceFS(FileSystem::GetDataDir(), true);
+    
+    if(s_doNotUseLib) {
+        s_isInit = true;
+        return true;
+    }
+    
 	int success;
 	if(Graphics::Hardware::context_CoreProfile) {
-		success = TwInit(TW_OPENGL_CORE, nullptr);
+		TWEAKER(success = TwInit(TW_OPENGL_CORE, nullptr));
 	} else {
-		success = TwInit(TW_OPENGL, nullptr);
+		TWEAKER(success = TwInit(TW_OPENGL, nullptr));
 	}
 	assert(success);
 	if(success) {
@@ -51,8 +79,44 @@ bool Tweaker::Init(int window_width, int window_height)
 
 bool Tweaker::Terminate()
 {
-	if(s_isInit) {
+	if(s_isInit && !s_doNotUseLib) {
+		Tweaker::Close();
 		return TwTerminate() == 0? false : true;
+	} else {
+		return false;
+	}
+}
+
+bool Tweaker::Update()
+{
+	if(s_isInit && s_enabled) {
+		if(s_monitorMode && Pi::player) {
+			Body* nt = Pi::player->GetNavTarget();
+			Body* ct = Pi::player->GetCombatTarget();
+			//Body* target = nt != nullptr ? nt : ct; // Prioritize navtarget over combat target
+			Body* target = ct != nullptr ? ct : nt; // Prioritize combattarget since we only care about ships now
+			// Check if target changed
+			if(target != s_monitorCurrentTarget) {
+				// Target changed.
+				// Remove active monitor if necessary
+				if( s_activeMonitor && target && s_monitorCurrentTarget &&
+				    target->GetType() == s_monitorCurrentTarget->GetType()) 
+				{
+					// Keep the same monitor
+				} else {
+					// Change monitor
+					TwDeleteBar(s_activeMonitor);
+					s_activeMonitor = nullptr;
+					if(target) { // Only add new monitor if there is a valid target
+						s_activeMonitor = CreateMonitor(target);
+					}
+				}
+				s_monitorCurrentTarget = target;
+			}
+			// Updated monitors
+			UpdateMonitor(target);
+		}
+		return true;
 	} else {
 		return false;
 	}
@@ -60,7 +124,7 @@ bool Tweaker::Terminate()
 
 bool Tweaker::Draw()
 {
-	if(s_isInit && s_enabled) {
+	if(s_isInit && s_enabled && !s_doNotUseLib) {
 		return TwDraw() == 0 ? false : true;
 	} else {
 		return false;
@@ -69,7 +133,7 @@ bool Tweaker::Draw()
 
 bool Tweaker::TranslateEvent(SDL_Event& event)
 {
-	if(!s_isInit || !s_enabled) {
+	if(!s_isInit || !s_enabled || s_doNotUseLib) {
 		return false;
 	}
 
@@ -156,6 +220,20 @@ bool Tweaker::TranslateEvent(SDL_Event& event)
 	return handled != 0? true : false;
 }
 
+void Tweaker::NotifyRemoved(const Body* removed_body)
+{
+	if (!s_isInit || !s_enabled) {
+		return;
+	}
+	if(removed_body && s_monitorCurrentTarget == removed_body) {
+		s_monitorCurrentTarget = nullptr;
+		if(s_activeMonitor) {
+			TwDeleteBar(s_activeMonitor);
+			s_activeMonitor = nullptr;
+		}
+	}
+}
+
 bool Tweaker::DefineTweak(const std::string& name, std::vector<STweakValue> description)
 {
 	assert(!name.empty() && description.size() > 0);
@@ -169,7 +247,8 @@ bool Tweaker::DefineTweak(const std::string& name, std::vector<STweakValue> desc
 		return false;
 	}  else {
 		s_tweaksMap.insert(std::make_pair(name, description));
-		// Read ./features/{name} settings file. Create one if none using *param as data (loaded with defaults).
+		// Read ./features/{name} settings file. 
+		// Create one if none found using *param as data (loaded with defaults).
 		if (description.size() > 0) {
 			auto cit = s_configMap.find(name);
 			if(cit == s_configMap.end()) {
@@ -190,6 +269,37 @@ bool Tweaker::DefineTweak(const std::string& name, std::vector<STweakValue> desc
 		return true;
 	}
 	
+}
+
+bool Tweaker::IsTweakDefined(const std::string& name)
+{
+	auto search_it = s_tweaksMap.find(name);
+	if(search_it == s_tweaksMap.end()) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+bool Tweaker::RemoveTweak(const std::string& name)
+{
+	assert(!name.empty());
+	if(name.empty()) {
+		return false;
+	}
+	auto search_it = s_tweaksMap.find(name);
+	if(search_it != s_tweaksMap.end()) {
+		// tweak found
+		if(s_activeTweak) {
+			Tweaker::Close();
+			s_activeTweak = nullptr;
+		}
+		s_tweaksMap.erase(search_it);
+		return true;
+	} else {
+		// tweak not found
+		return false;
+	}
 }
 
 bool Tweaker::Tweak(const std::string& name) 
@@ -378,32 +488,39 @@ void TW_CALL Tweaker::callback_Save(void *clientData)
 	cfg->Write(*s_gameDataFS, features_path);
 }
 
+void TW_CALL Tweaker::callback_AICommand(void *clientData)
+{
+	TW_AICOMMAND* cmd = static_cast<TW_AICOMMAND*>(clientData);
+	LuaEvent::Queue("onAICommand", cmd->ship, cmd->command.c_str());
+}
+
 TwBar* Tweaker::CreateTweak(std::map<std::string, std::vector<STweakValue> >::iterator& tweak)
 {
 	if (s_activeTweak != nullptr) {
 		Tweaker::Close();
 	}
-	TwBar* bar = TwNewBar(tweak->first.c_str());
+    TwBar* bar = nullptr;
+	TWEAKER(bar = TwNewBar(tweak->first.c_str()));
 	auto cfg_it = s_configMap.find(tweak->first);
 	IniConfig* cfg = cfg_it != s_configMap.end()? cfg_it->second.get() : nullptr;
 	for(auto& tv : tweak->second) {
 		switch(tv.type) {
 			case ETWEAK_FLOAT:
-				TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_FLOAT, tv.param, tv.settings.c_str());
+				TWEAKER(TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_FLOAT, tv.param, tv.settings.c_str()));
 				if(cfg) {
 					cfg->SetFloat(tv.name, *static_cast<float*>(tv.param));
 				}
 				break;
 
 			case ETWEAK_INT:
-				TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_INT32, tv.param, tv.settings.c_str());
+				TWEAKER(TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_INT32, tv.param, tv.settings.c_str()));
 				if(cfg) {
 					cfg->SetInt(tv.name, *static_cast<int*>(tv.param));
 				}
 				break;
 
 			case ETWEAK_COLOR:
-				TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_COLOR4F, tv.param, tv.settings.c_str());
+				TWEAKER(TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_COLOR4F, tv.param, tv.settings.c_str()));
 				if(cfg) {
 					std::ostringstream ss;
 					Color4f* c = static_cast<Color4f*>(tv.param);
@@ -413,11 +530,11 @@ TwBar* Tweaker::CreateTweak(std::map<std::string, std::vector<STweakValue> >::it
 				break;
 
 			case ETWEAK_SEPERATOR:
-				TwAddSeparator(bar, tv.name.c_str(), tv.settings.c_str());
+				TWEAKER(TwAddSeparator(bar, tv.name.c_str(), tv.settings.c_str()));
 				break;
 
 			case ETWEAK_TOGGLE:
-				TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_BOOL32, tv.param, tv.settings.c_str());
+				TWEAKER(TwAddVarRW(bar, tv.name.c_str(), TW_TYPE_BOOL32, tv.param, tv.settings.c_str()));
 				if(cfg) {
 					cfg->SetInt(tv.name, *static_cast<int*>(tv.param));
 				}
@@ -428,16 +545,16 @@ TwBar* Tweaker::CreateTweak(std::map<std::string, std::vector<STweakValue> >::it
 		}
 	}
 	
-	TwAddSeparator(bar, "data", nullptr);
+	TWEAKER(TwAddSeparator(bar, "data", nullptr));
 	// Add copy to clipboard button
-	TwAddButton(bar, "CopyToClipboard", callback_CopyToClipboard, 
-		(void*)(tweak->first.c_str()), "label='To Clipboard'");
+	TWEAKER(TwAddButton(bar, "CopyToClipboard", callback_CopyToClipboard,
+		(void*)(tweak->first.c_str()), "label='To Clipboard'"));
 	// Add reset button
-	TwAddButton(bar, "Reset", callback_Reset,
-		(void*)(tweak->first.c_str()), "label='Reset'");
+	TWEAKER(TwAddButton(bar, "Reset", callback_Reset,
+		(void*)(tweak->first.c_str()), "label='Reset'"));
 	// Add save button
-	TwAddButton(bar, "Save", callback_Save,
-		(void*)(tweak->first.c_str()), "label='Save'");
+	TWEAKER(TwAddButton(bar, "Save", callback_Save,
+		(void*)(tweak->first.c_str()), "label='Save'"));
 	//
 	s_activeTweak = bar;
 	return bar;
@@ -445,14 +562,24 @@ TwBar* Tweaker::CreateTweak(std::map<std::string, std::vector<STweakValue> >::it
 
 bool Tweaker::Close()
 {
-	TwDeleteAllBars();
+	TWEAKER(TwDeleteAllBars());
 	s_activeTweak = nullptr;
+	s_monitorCurrentTarget = nullptr;
+	s_activeMonitor = nullptr;
+	return true;
+}
+
+bool Tweaker::Monitor()
+{
+	s_monitorMode = true;
+	s_monitorCurrentTarget = nullptr;
+	s_activeMonitor = nullptr;
 	return true;
 }
 
 std::string Tweaker::LUAListTweaks()
 {
-	if(!s_isInit) {
+	if(!s_isInit || s_doNotUseLib) {
 		return "Tweaker is not initialized.";
 	} else {
 		if(s_tweaksMap.size() == 0) {
@@ -460,9 +587,112 @@ std::string Tweaker::LUAListTweaks()
 		} else {
 			std::ostringstream ss;
 			for(auto& it : s_tweaksMap) {
-				ss << it.first << " ";
+				if(it.first[0] != '_') {
+					ss << it.first << " ";
+				}
 			}
 			return ss.str();
+		}
+	}
+}
+
+TwBar* Tweaker::CreateMonitor(Body* body)
+{
+	TwBar* bar = nullptr;
+
+	std::ostringstream ss;
+	const int mw = static_cast<int>(Pi::renderer->GetWindow()->GetWidth() * 0.8f);
+	const int mh = static_cast<int>(Pi::renderer->GetWindow()->GetHeight() * 0.25);
+	const int vw = static_cast<int>(mw * 0.88f);
+	const int px = Pi::renderer->GetWindow()->GetWidth() - mw - 16;
+	ss << " Main label='~ " << body->GetTypeString() << " ~' ";
+	ss << "position='" << px << " " << 16 << "' ";
+	ss << "size='" << mw << " " << mh << "' ";
+	ss << "valueswidth=" << vw << " ";
+	ss << "refresh=" << 0.33 << " ";
+	bar = TwNewBar("Main");
+	TwDefine(ss.str().c_str());
+
+	switch(body->GetType()) {
+		case Body::Type::SHIP:
+			// Ship monitor
+			{
+				Ship* s = static_cast<Ship*>(body);
+				TwAddVarRO(bar, "Name", TW_TYPE_STDSTRING, &s_monitor_ship.Name, nullptr);
+				TwAddVarRO(bar, "Velocity", TW_TYPE_DOUBLE, &s_monitor_ship.Velocity, nullptr);
+				TwAddVarRO(bar, "Direction", TW_TYPE_DIR3D, &s_monitor_ship.Direction.x, nullptr);
+				TwAddVarRO(bar, "AIStatus", TW_TYPE_STDSTRING, &s_monitor_ship.AIStatus, nullptr);
+				TwAddVarRO(bar, "ModuleName", TW_TYPE_STDSTRING, &s_monitor_ship.ModuleName, nullptr);
+				TwAddVarRO(bar, "ModuleStatus", TW_TYPE_STDSTRING, &s_monitor_ship.ModuleStatus, nullptr);
+				s_aiCommand_FlyToPermaCloud.command = AICOMMAND_FLYTO_PERMACLOUD;
+				s_aiCommand_FlyToPermaCloud.ship = s;
+				TwAddButton(bar, "FlyToPermaCloud", callback_AICommand, &s_aiCommand_FlyToPermaCloud,
+					" label='Command: Fly To Permanent Cloud' color='255 0 0' ");
+				s_aiCommand_ClearAI.command = AICOMMAND_CLEARAI;
+				s_aiCommand_ClearAI.ship = s;
+				TwAddButton(bar, "ClearAI", callback_AICommand, &s_aiCommand_ClearAI,
+					" label='Command: Clear AI' color='255 0 0' ");
+			}
+			break;
+
+		case Body::Type::HYPERSPACECLOUD:
+			{
+				TwAddVarRO(bar, "Type", TW_TYPE_STDSTRING, &s_monitor_cloud.Type, nullptr);
+				TwAddVarRO(bar, "HasShip", TW_TYPE_BOOLCPP, &s_monitor_cloud.HasShip, nullptr);
+				TwAddVarRO(bar, "ShipName", TW_TYPE_STDSTRING, &s_monitor_cloud.ShipName, nullptr);
+				TwAddVarRO(bar, "Due", TW_TYPE_DOUBLE, &s_monitor_cloud.Due, nullptr);
+				TwAddVarRO(bar, "GameTime", TW_TYPE_DOUBLE, &s_monitor_cloud.GameTime, nullptr);
+			}
+			break;
+
+		default:
+			// Object monitor (unknown)
+			{
+				TwAddButton(bar, "info.1", nullptr, nullptr, " label='Monitor not defined' ");
+				TwAddButton(bar, "info.2", nullptr, nullptr, " label='for this type.' ");
+			}
+	}
+	return bar;
+}
+
+void Tweaker::UpdateMonitor(Body* body)
+{
+	static char buffer[256];
+	if (body) {
+		switch (body->GetType()) {
+			case Body::Type::SHIP:
+				{
+					Ship* s = static_cast<Ship*>(body);
+					s_monitor_ship.Name = s->GetLabel();
+					vector3d vel = s->GetVelocity();
+					vector3d dir = s->GetOrient().VectorZ();
+					s_monitor_ship.Velocity = vel.Length();
+					s_monitor_ship.Direction = dir;
+					s->AIGetStatusText(buffer);
+					s_monitor_ship.AIStatus = buffer;
+					s_monitor_ship.ModuleName = s->GetModuleName();
+					s_monitor_ship.ModuleStatus = s->GetModuleStatus();
+				}
+				break;
+
+			case Body::Type::HYPERSPACECLOUD:
+				{
+					HyperspaceCloud* hc = static_cast<HyperspaceCloud*>(body);
+					s_monitor_cloud.HasShip = hc->HasShip();
+					s_monitor_cloud.Due = hc->GetDueDate();
+					s_monitor_cloud.GameTime = Pi::game->GetTime();
+					s_monitor_cloud.Type = hc->GetCloudTypeString();
+					if(hc->HasShip()) {
+						s_monitor_cloud.ShipName = hc->GetShip()->GetLabel();
+					} else {
+						s_monitor_cloud.ShipName = "Empty";
+					}
+				}
+				break;
+
+			default:
+				// Not implemented
+				break;
 		}
 	}
 }

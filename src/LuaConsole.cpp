@@ -27,15 +27,15 @@ LuaConsole::LuaConsole():
 	m_precompletionStatement(),
 	m_completionList() {
 
-	m_output = Pi::ui->MultiLineText("");
-	m_entry = Pi::ui->TextEntry();
+	m_output = Pi::console->MultiLineText("");
+	m_entry = Pi::console->TextEntry();
 
-	m_scroller = Pi::ui->Scroller()->SetInnerWidget(m_output);
+	m_scroller = Pi::console->Scroller()->SetInnerWidget(m_output);
 
-	m_container.Reset(Pi::ui->Margin(10)->SetInnerWidget(
-		Pi::ui->ColorBackground(Color(0,0,0,0xc0))->SetInnerWidget(
-			Pi::ui->VBox()->PackEnd(UI::WidgetSet(
-				Pi::ui->Expand()->SetInnerWidget(
+	m_container.Reset(Pi::console->Margin(10)->SetInnerWidget(
+		Pi::console->ColorBackground(Color(0,0,0,0xc0))->SetInnerWidget(
+			Pi::console->VBox()->PackEnd(UI::WidgetSet(
+				Pi::console->Expand()->SetInnerWidget(
 					m_scroller
 				),
 				m_entry
@@ -57,10 +57,10 @@ LuaConsole::LuaConsole():
 void LuaConsole::Toggle()
 {
 	if (m_active)
-		Pi::ui->DropLayer();
+		Pi::console->DropLayer();
 	else {
-		Pi::ui->NewLayer()->SetInnerWidget(m_container.Get());
-		Pi::ui->SelectWidget(m_entry);
+		Pi::console->NewLayer()->SetInnerWidget(m_container.Get());
+		Pi::console->SelectWidget(m_entry);
 	}
 	m_active = !m_active;
 }
@@ -237,7 +237,7 @@ void LuaConsole::OnEnter(const std::string &text) {
 	if (!text.empty())
 		ExecOrContinue(text);
 	m_completionList.clear();
-	Pi::ui->SelectWidget(m_entry);
+	Pi::console->SelectWidget(m_entry);
 	m_scroller->SetScrollPosition(1.0f);
 }
 

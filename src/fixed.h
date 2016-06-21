@@ -7,6 +7,12 @@
 #include <SDL_stdinc.h>
 #include <cassert>
 
+// This is class needs a more solid implementation and a better interface.
+// Numbers are defined in fixed as A/B. So 0.5 is: fixed(1,2) 
+
+#define FLOAT_TO_RAW_FIXED(num)  (static_cast<Uint64>(round(num * pow(2.0, FRAC))))
+#define DOUBLE_TO_RAW_FIXED(num) (static_cast<Uint64>(round(num * pow(2.0, FRAC))))
+
 template <int FRAC_BITS>
 class fixedf {
 public:
@@ -14,22 +20,73 @@ public:
 	static const Uint64 MASK = (Uint64(1UL)<<FRAC_BITS)-1;
 	static const Sint64 DUMMY= -1 ;		// -1 to ensure signed type (signedness warning otherwise)
 
+    Sint64 v;
+
 	fixedf(): v(0) {}
 //	template <int bits>
 //	fixedf(fixedf<bits> f) { *this = f; }
-	fixedf(Sint64 raw): v(raw) {}
+    fixedf(Sint64 raw) : v(raw) {}
+    fixedf(Uint64 raw) : v(raw) {}
+    fixedf(Sint32 raw) : v(raw) {}
+    fixedf(Uint32 raw) : v(raw) {}
 	fixedf(Sint64 num, Sint64 denom): v((num<<FRAC) / denom) {}
+    fixedf(Sint32 num, Sint32 denom) : v((Sint64(num) << FRAC) / denom) {}
+    fixedf(Uint32 num, Uint32 denom) : v((Sint64(num) << FRAC) / denom) {}
 	// ^^ this is fucking shit
+    
+    // Fixed now knows about floats and doubles
+    fixedf(float num) 
+    {
+        v = FLOAT_TO_RAW_FIXED(num);
+    }
+
+    fixedf(double num) 
+    {
+        v = DOUBLE_TO_RAW_FIXED(num);
+    }
 
 	fixedf Abs() const { return fixedf(v >= 0 ? v : -v); }
+
 	friend fixedf operator+(const fixedf a, const Sint64 b) { return a+fixedf(b<<FRAC); }
 	friend fixedf operator-(const fixedf a, const Sint64 b) { return a-fixedf(b<<FRAC); }
 	friend fixedf operator*(const fixedf a, const Sint64 b) { return a*fixedf(b<<FRAC); }
 	friend fixedf operator/(const fixedf a, const Sint64 b) { return a/fixedf(b<<FRAC); }
+
 	friend fixedf operator+(const Sint64 a, const fixedf b) { return fixedf(a<<FRAC)+b; }
 	friend fixedf operator-(const Sint64 a, const fixedf b) { return fixedf(a<<FRAC)-b; }
 	friend fixedf operator*(const Sint64 a, const fixedf b) { return fixedf(a<<FRAC)*b; }
 	friend fixedf operator/(const Sint64 a, const fixedf b) { return fixedf(a<<FRAC)/b; }
+    //
+    friend fixedf operator+(const fixedf a, const Sint32 b) { return a + fixedf(Sint64(b) << FRAC); }
+    friend fixedf operator-(const fixedf a, const Sint32 b) { return a - fixedf(Sint64(b) << FRAC); }
+    friend fixedf operator*(const fixedf a, const Sint32 b) { return a * fixedf(Sint64(b) << FRAC); }
+    friend fixedf operator/(const fixedf a, const Sint32 b) { return a / fixedf(Sint64(b) << FRAC); }
+
+    friend fixedf operator+(const Sint32 a, const fixedf b) { return fixedf(Sint64(a) << FRAC) + b; }
+    friend fixedf operator-(const Sint32 a, const fixedf b) { return fixedf(Sint64(a) << FRAC) - b; }
+    friend fixedf operator*(const Sint32 a, const fixedf b) { return fixedf(Sint64(a) << FRAC) * b; }
+    friend fixedf operator/(const Sint32 a, const fixedf b) { return fixedf(Sint64(a) << FRAC) / b; }
+    //
+    friend fixedf operator+(const float a, const fixedf b)  { return fixedf(a) + b; }
+    friend fixedf operator-(const float a, const fixedf b)  { return fixedf(a) - b; }
+    friend fixedf operator*(const float a, const fixedf b)  { return fixedf(a) * b; }
+    friend fixedf operator/(const float a, const fixedf b)  { return fixedf(a) / b; }
+
+    friend fixedf operator+(const fixedf a, const float b)  { return a + fixedf(b); }
+    friend fixedf operator-(const fixedf a, const float b)  { return a - fixedf(b); }
+    friend fixedf operator*(const fixedf a, const float b)  { return a * fixedf(b); }
+    friend fixedf operator/(const fixedf a, const float b)  { return a / fixedf(b); }
+    //
+    friend fixedf operator+(const double a, const fixedf b)  { return fixedf(a) + b; }
+    friend fixedf operator-(const double a, const fixedf b)  { return fixedf(a) - b; }
+    friend fixedf operator*(const double a, const fixedf b)  { return fixedf(a) * b; }
+    friend fixedf operator/(const double a, const fixedf b)  { return fixedf(a) / b; }
+
+    friend fixedf operator+(const fixedf a, const double b)  { return a + fixedf(b); }
+    friend fixedf operator-(const fixedf a, const double b)  { return a - fixedf(b); }
+    friend fixedf operator*(const fixedf a, const double b)  { return a * fixedf(b); }
+    friend fixedf operator/(const fixedf a, const double b)  { return a / fixedf(b); }
+    //
 	friend bool operator==(const fixedf a, const Sint64 b) { return a == fixedf(b<<FRAC); }
 	friend bool operator==(const Sint64 a, const fixedf b) { return b == fixedf(a<<FRAC); }
 	friend bool operator!=(const fixedf a, const Sint64 b) { return a != fixedf(b<<FRAC); }
@@ -42,17 +99,34 @@ public:
 	friend bool operator>(const Sint64 a, const fixedf b) { return b > fixedf(a<<FRAC); }
 	friend bool operator<(const fixedf a, const Sint64 b) { return a < fixedf(b<<FRAC); }
 	friend bool operator<(const Sint64 a, const fixedf b) { return b < fixedf(a<<FRAC); }
+
 	friend fixedf operator>>(const fixedf a, const int b) { return fixedf(a.v >> b); }
 	friend fixedf operator<<(const fixedf a, const int b) { return fixedf(a.v << b); }
 
-	fixedf &operator*=(const fixedf a) { (*this) = (*this)*a; return (*this); }
-	fixedf &operator*=(const Sint64 a) { (*this) = (*this)*a; return (*this); }
-	fixedf &operator/=(const fixedf a) { (*this) = (*this)/a; return (*this); }
-	fixedf &operator/=(const Sint64 a) { (*this) = (*this)/a; return (*this); }
-	fixedf &operator+=(const fixedf a) { (*this) = (*this)+a; return (*this); }
-	fixedf &operator+=(const Sint64 a) { (*this) = (*this)+a; return (*this); }
+	fixedf &operator*=(const fixedf a) { (*this) = (*this) * a; return (*this);         }
+    fixedf &operator*=(const Sint64 a) { (*this) = (*this) * a; return (*this);         }
+    fixedf &operator*=(const Sint32 a) { (*this) = (*this) * a; return (*this);         }
+    fixedf &operator*=(const float  a) { (*this) = (*this) * fixedf(a); return (*this); }
+    fixedf &operator*=(const double a) { (*this) = (*this) * fixedf(a); return (*this); }
+
+	fixedf &operator/=(const fixedf a) { (*this) = (*this)/a; return (*this);         }
+    fixedf &operator/=(const Sint64 a) { (*this) = (*this) / a; return (*this); }
+    fixedf &operator/=(const Sint32 a) { (*this) = (*this) / a; return (*this); }
+    fixedf &operator/=(const float  a) { (*this) = (*this)/fixedf(a); return (*this); }
+    fixedf &operator/=(const double a) { (*this) = (*this)/fixedf(a); return (*this); }
+
+	fixedf &operator+=(const fixedf a) { (*this) = (*this)+a; return (*this);         }
+	fixedf &operator+=(const Sint64 a) { (*this) = (*this)+a; return (*this);         }
+    fixedf &operator+=(const Sint32 a) { (*this) = (*this) + a; return (*this); }
+    fixedf &operator+=(const float  a) { (*this) = (*this)+fixedf(a); return (*this); }
+    fixedf &operator+=(const double a) { (*this) = (*this)+fixedf(a); return (*this); }
+
 	fixedf &operator-=(const fixedf a) { (*this) = (*this)-a; return (*this); }
 	fixedf &operator-=(const Sint64 a) { (*this) = (*this)-a; return (*this); }
+    fixedf &operator-=(const Sint32 a) { (*this) = (*this) - a; return (*this); }
+    fixedf &operator-=(const float  a) { (*this) = (*this)-fixedf(a); return (*this); }
+    fixedf &operator-=(const double a) { (*this) = (*this)-fixedf(a); return (*this); }
+
 	fixedf &operator>>=(const int a) { v >>= a; return (*this); }
 	fixedf &operator<<=(const int a) { v <<= a; return (*this); }
 
@@ -131,7 +205,7 @@ public:
 				quotient_lo |= 1;
 			}
 		}
-		return (isneg ? -Sint64(quotient_lo) : quotient_lo);
+		return fixedf(isneg ? -Sint64(quotient_lo) : quotient_lo);
 	}
 	friend bool operator==(const fixedf a, const fixedf b) { return a.v == b.v; }
 	friend bool operator!=(const fixedf a, const fixedf b) { return a.v != b.v; }
@@ -181,9 +255,6 @@ public:
 		for (int i=0; i<48; i++) x = fixedf(1,3) * ((a / (x*x)) + 2*x);
 		return x;
 	}
-
-
-	Sint64 v;
 };
 
 typedef fixedf<32> fixed;

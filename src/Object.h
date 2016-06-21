@@ -22,5 +22,6 @@ class Object : public DeleteEmitter {
 	virtual Object::Type GetType() const { return Object::__TYPE; } \
 	virtual bool IsType(Type c) const { \
 	if (__thisClass::GetType() == (c)) return true; \
-	else return __parentClass::IsType(c); }
+	else return __parentClass::IsType(c); } \
+	virtual std::string GetTypeString() { return std::string(#__TYPE); }
 #endif /* _OBJECT_H */

@@ -54,7 +54,7 @@ struct cityflavourdef_t {
 
 void CityOnPlanet::PutCityBit(Random &rand, const matrix4x4d &rot, vector3d p1, vector3d p2, vector3d p3, vector3d p4)
 {
-	double rad = (p1-p2).Length()*0.5;
+	double rad = (p1-p2).Length()*0.9;
 	Model *model(0);
 	double modelRadXZ(0.0);
 	const CollMesh *cmesh(0);

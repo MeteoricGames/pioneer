@@ -83,12 +83,15 @@ void MainMaterial::Init()
 		"su_NormalMatrix",
 		"su_ModelViewProjectionMatrix",
 		"u_numLights",
+		"su_ViewMatrixInverse",
 	};
-	if (m_isLit && m_descriptor.specularMap) {
+	if (m_isLit && m_descriptor.irradiance) {
 		e_desc.uniforms.push_back("u_universeBox");
-		e_desc.uniforms.push_back("su_ViewMatrixInverse");
 		e_desc.uniforms.push_back("u_atmosDensity");
 		e_desc.uniforms.push_back("u_atmosColor");
+		e_desc.uniforms.push_back("u_hemiDiff");
+		e_desc.uniforms.push_back("u_hemiGloss");
+		e_desc.uniforms.push_back("u_irrGlossyExp");
 		e_desc.settings.push_back("HEMISPHERE_LIGHT");
 	}
 	if (m_descriptor.effect == EffectType::EFFECT_SHIELD) {

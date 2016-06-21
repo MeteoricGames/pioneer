@@ -631,7 +631,6 @@ ui.templates.Settings = function (args)
 	setTabs = TabGroup.New()
 	setTabs:AddTab({ id = "Video",    title = l.VIDEO,    icon = "VideoCamera", template = wrapWithScroller(videoTemplate)    })
 	setTabs:AddTab({ id = "Sound",    title = l.SOUND,    icon = "Speaker",     template = wrapWithScroller(soundTemplate)    })
-	setTabs:AddTab({ id = "Language", title = l.LANGUAGE, icon = "Globe1",      template = wrapWithScroller(languageTemplate) })
 	setTabs:AddTab({ id = "Controls", title = l.CONTROLS, icon = "Gamepad",     template = wrapWithScroller(controlsTemplate) })
 
 	local close_buttons = {}

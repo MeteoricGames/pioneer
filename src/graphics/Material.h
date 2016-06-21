@@ -75,24 +75,25 @@ public:
 	Uint32 dirLights; //set by rendererGL2 if lighting == true
 	Uint32 quality; // see: Graphics::MaterialQuality
 	bool testMode;
+	bool irradiance;
 
 	friend bool operator==(const MaterialDescriptor &a, const MaterialDescriptor &b);
 };
 
 struct MaterialBlock
 {
-	MaterialBlock(const vector4f& _diffuse, const vector4f& _emission, const vector4f& _specular, float _shininess)
+	MaterialBlock(const vector4f& _diffuse, const vector4f& _emission, const vector3f& _specular, float _shininess)
 		: diffuse(_diffuse), emission(_emission), specular(_specular), shininess(_shininess) { }
 	MaterialBlock(const Color& _diffuse, const Color& _emission, const Color& _specular, float _shininess)
 	{
 		diffuse = _diffuse.ToVector4f();
 		emission = _emission.ToVector4f();
-		specular = _specular.ToVector4f();
+		specular = _specular.ToVector3f();
 		shininess = _shininess;
 	}
 	vector4f diffuse;
 	vector4f emission;
-	vector4f specular;
+	vector3f specular;
 	float shininess;
 };
 

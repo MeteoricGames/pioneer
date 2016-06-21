@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Terapin Light Ranger',
+	name='Sukhov LR Terapin',
 	ship_class = 'omni',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'sukhov',
 	model='omni_light4',
 	cockpit='unitech_light_cockpit',
 	forward_thrust = 538e5,

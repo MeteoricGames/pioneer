@@ -15,6 +15,7 @@
 #include "EquipType.h"
 #include "Camera.h"
 #include "CameraController.h"
+#include "TweakerSettings.h"
 
 class Body;
 class Frame;
@@ -53,12 +54,16 @@ public:
 	double GetAltitude() const { return m_altitude; }
 
 	sigc::signal<void> onChangeCamType;
+	const TS_HypercloudVisual& GetHyperCloudTweak() const; 
 
 protected:
 	virtual void OnSwitchTo();
 	virtual void OnSwitchFrom();
 private:
 	void InitObject();
+
+	void DefineTweaks();
+	void RemoveTweaks();
 
 	void RefreshHyperspaceButton();
 	void RefreshButtonStateAndVisibility();
@@ -68,6 +73,9 @@ private:
 	void UpdateCommsOptions();
 
 	void ChangeInternalCameraMode(InternalCameraController::Mode m);
+	
+	void CenterAutopilotOptions();
+    void UpdateContactList();
 
 	enum IndicatorSide {
 		INDICATOR_HIDDEN,
@@ -110,7 +118,7 @@ private:
 
 	Gui::Button *AddCommsOption(const std::string msg, int ypos, int optnum);
 	void AddCommsNavOption(const std::string msg, Body *target);
-	void OnClickCommsNavOption(Body *target);
+	void OnClickCommsNavOption(Body *target, Gui::ClickableLabel *button);
 	void BuildCommsNavOptions();
 
 	void HideLowThrustPowerOptions();
@@ -131,11 +139,17 @@ private:
 	void OnPlayerChangeTarget();
 	void OnPlayerChangeFlightControlState();
 	void SelectBody(Body *, bool reselectIsDeselect);
+	void DeselectAll();
 	Body* PickBody(const double screenX, const double screenY) const;
 	void MouseWheel(bool up);
 
 	std::string PadWithZeroes(int number, int desired_digits);
 	double Unjitter(double speed, double max_speed);
+	bool CheckPhaseJumpMode();
+
+	void GetNavIconFile(Object::Type type, std::string &fileLocation);
+    void ToggleContactListSize();
+    void UpdateFastTravel();
 
 	NavTunnelWidget *m_navTunnel;
 	std::unique_ptr<SpeedLines> m_speedLines;
@@ -149,6 +163,7 @@ private:
 	Gui::Fixed *m_lowThrustPowerOptions;
 	Gui::Label *m_flightStatus, *m_debugText;
 	Gui::ImageButton *m_launchButton;
+    Gui::ClickableLabel *m_contactListButton;
 
 	Gui::MultiStateImageButton *m_flightAutopilotButton;
 	Gui::MultiStateImageButton *m_flightManeuverButton;
@@ -171,6 +186,7 @@ private:
 	Uint32 m_showTargetActionsTimeout;
 	Uint32 m_showLowThrustPowerTimeout;
 	bool m_tutorialSeen;
+    bool m_longContactList = false;
 
 #if WITH_DEVKEYS
 	Gui::Label *m_debugInfo;
@@ -218,6 +234,7 @@ private:
 	std::unique_ptr<Gui::TexturedQuad> m_hud2ShipOffscreen;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2Star;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2Station;
+	std::unique_ptr<Gui::TexturedQuad> m_hud2HyperspaceCloud;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2TargetOffscreen;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2TargetSelector;
 	std::unique_ptr<Gui::TexturedQuad> m_hud2Unknown;
@@ -243,6 +260,9 @@ private:
 	std::unique_ptr<Graphics::Material> m_trailMtrl;
 	int m_windowSizeUniformId;
 	Graphics::Texture* m_trailGradient;
+	Gui::NavVScrollBar* m_scroll;
+    Gui::VBox *m_contactListContainer;
+
 };
 
 class NavTunnelWidget: public Gui::Widget {

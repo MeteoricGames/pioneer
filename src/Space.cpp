@@ -130,13 +130,22 @@ Space::Space(Game *game, Serializer::Reader &rd, double at_time)
 	RebuildFrameIndex();
 
 	Uint32 nbodies = rd.Int32();
-	for (Uint32 i = 0; i < nbodies; i++)
+	for (Uint32 i = 0; i < nbodies; i++) {
 		m_bodies.push_back(Body::Unserialize(rd, this));
+	}
 	RebuildBodyIndex();
 
 	Frame::PostUnserializeFixup(m_rootFrame.get(), this);
-	for (Body* b : m_bodies)
+	for (Body* b : m_bodies) {
 		b->PostLoadFixup(this);
+		// Add hyperspace clouds to collections
+		if(b->GetType() == Body::Type::HYPERSPACECLOUD) {
+			HyperspaceCloud* hc = static_cast<HyperspaceCloud*>(b);
+			if(hc->GetCloudType() == EHCT_PERMANENT) {
+				m_permaHyperspaceClouds.push_back(hc);	
+			}
+		}
+	}
 
 	GenSectorCache(&path);
 }
@@ -144,8 +153,11 @@ Space::Space(Game *game, Serializer::Reader &rd, double at_time)
 Space::~Space()
 {
 	UpdateBodies(); // make sure anything waiting to be removed gets removed before we go and kill everything else
-	for (std::list<Body*>::iterator i = m_bodies.begin(); i != m_bodies.end(); ++i)
+    for (std::list<Body*>::iterator i = m_bodies.begin(); i != m_bodies.end(); ++i) {
 		KillBody(*i);
+    }
+    m_hyperspaceClouds.clear();
+    m_permaHyperspaceClouds.clear();
 	UpdateBodies();
 }
 
@@ -162,8 +174,9 @@ void Space::Serialize(Serializer::Writer &wr)
 	wr.WrSection("Frames", section.GetData());
 
 	wr.Int32(m_bodies.size());
-	for (Body* b : m_bodies)
+	for (Body* b : m_bodies) {
 		b->Serialize(wr, this);
+	}
 }
 
 Frame *Space::GetFrameByIndex(Uint32 idx) const
@@ -182,6 +195,7 @@ Body *Space::GetBodyByIndex(Uint32 idx) const
 
 SystemBody *Space::GetSystemBodyByIndex(Uint32 idx) const
 {
+	printf("idx:%d\nsize: %d\n", idx, m_sbodyIndex.size());
 	assert(m_sbodyIndexValid);
 	assert(m_sbodyIndex.size() > idx);
 	return m_sbodyIndex[idx];
@@ -290,6 +304,13 @@ void Space::KillBody(Body* b)
 	assert(!m_processingFinalizationQueue);
 #endif
 	if (!b->IsDead()) {
+        if(b->GetType() == Body::Type::HYPERSPACECLOUD) {
+            auto f = std::find(m_hyperspaceClouds.begin(), m_hyperspaceClouds.end(), b);
+            if(f != m_hyperspaceClouds.end()) {
+                m_hyperspaceClouds.erase(f);
+            }
+            // No need to check m_permaHyperspaceClouds as those are assumed constant and will be cleared with Space destruction
+        }
 		b->MarkDead();
 
 		// player needs to stay alive so things like the death animation
@@ -341,7 +362,8 @@ vector3d Space::GetHyperspaceExitPoint(const SystemPath &source, const SystemPat
 	// point along the line between source and dest, a reasonable distance
 	// away based on the radius (don't want to end up inside black holes, and
 	// then mix it up so that ships don't end up on top of each other
-	vector3d pos = (sourcePos - destPos).Normalized() * (primary->GetSystemBody()->GetRadius()/AU+1.0)*11.0*AU*Pi::rng.Double(0.95,1.2) + MathUtil::RandomPointOnSphere(5.0,20.0)*1000.0;
+	vector3d pos = (sourcePos - destPos).Normalized() * (primary->GetSystemBody()->GetRadius() / AU+1.0) 
+		* 11.0 * AU * Pi::rng.Double(0.95,1.2) + MathUtil::RandomPointOnSphere(5.0, 20.0) * 1000.0;
 	assert(pos.Length() > primary->GetSystemBody()->GetRadius());
 	return pos + primary->GetPositionRelTo(GetRootFrame());
 }
@@ -554,8 +576,7 @@ static Frame *MakeFrameFor(double at_time, SystemBody *sbody, Body *b, Frame *f)
 
 		b->SetFrame(rotFrame);
 		return orbFrame;
-	}
-	else if (supertype == SystemBody::SUPERTYPE_STAR) {
+	} else if (supertype == SystemBody::SUPERTYPE_STAR) {
 		// stars want a single small non-rotating frame
 		// bigger than it's furtherest orbiting body.
 		// if there are no orbiting bodies use a frame of several radii.
@@ -569,8 +590,8 @@ static Frame *MakeFrameFor(double at_time, SystemBody *sbody, Body *b, Frame *f)
 		orbFrame->SetRadius(frameRadius);
 		b->SetFrame(orbFrame);
 		return orbFrame;
-	}
-	else if (sbody->GetType() == SystemBody::TYPE_STARPORT_ORBITAL) {
+	} else if (sbody->GetType() == SystemBody::TYPE_STARPORT_ORBITAL || 
+               supertype == SystemBody::SUPERTYPE_HYPERSPACE_CLOUD) {
 		// space stations want non-rotating frame to some distance
 		// and a zero-size rotating frame
 		Frame *orbFrame = new Frame(f, sbody->GetName().c_str(), Frame::FLAG_HAS_ROT);
@@ -653,6 +674,10 @@ void Space::GenBody(double at_time, SystemBody *sbody, Frame *f)
 		           (sbody->GetType() == SystemBody::TYPE_STARPORT_SURFACE)) {
 			SpaceStation *ss = new SpaceStation(sbody);
 			b = ss;
+		} else if(sbody->GetSuperType() == SystemBody::SUPERTYPE_HYPERSPACE_CLOUD) {
+			// Clouds in system body are always permanent
+            HyperspaceCloud* hscloud = CreatePermaHyperspaceCloud(sbody);
+			b = hscloud;
 		} else {
 			Planet *planet = new Planet(sbody);
 			b = planet;
@@ -896,3 +921,83 @@ void Space::DebugDumpFrames()
 	Output("Frame structure for '%s':\n", m_starSystem->GetName().c_str());
 	DebugDumpFrame(m_rootFrame.get(), 2);
 }
+
+HyperspaceCloud* Space::CreatePermaHyperspaceCloud(SystemBody* sbody)
+{
+    auto hc = new HyperspaceCloud(sbody, EHCT_PERMANENT);
+    m_hyperspaceClouds.push_back(hc);
+    m_permaHyperspaceClouds.push_back(hc);
+    return hc;
+
+	//SystemBody* sb = GetStarSystem()->CreateHyperspaceCloudSBody();
+	//GenBody(0, sb, m_rootFrame.get());
+
+	// TODO
+	// How do I get the body? Do I need it?
+	// How do I get the frame? Do I need it?
+ }
+
+HyperspaceCloud* Space::CreateHyperspaceCloud(Ship* ship, double date_due, HyperspaceCloudType cloud_type)
+{
+    HyperspaceCloud* hc;
+    if(ship) {
+        hc = new HyperspaceCloud(ship, date_due, cloud_type);
+    } else {
+        hc = new HyperspaceCloud();
+    }
+    m_hyperspaceClouds.push_back(hc);
+    return hc;
+}
+
+HyperspaceCloud* Space::GetNearestHyperspaceCloud(Body* to_body)
+{
+	if (m_hyperspaceClouds.empty()) {
+		return nullptr;
+	}
+	double d = std::numeric_limits<double>::max();
+	HyperspaceCloud* out_hc = nullptr;
+	for (auto hc : m_hyperspaceClouds) {
+		double dist = hc->GetPositionRelTo(to_body).LengthSqr();
+		if (dist < d) {
+			d = dist;
+			out_hc = hc;
+		}
+	}
+	return out_hc;
+}
+
+HyperspaceCloud* Space::GetNearestPermaHyperspaceCloud(Body* to_body)
+{
+	if (m_permaHyperspaceClouds.empty()) {
+		return nullptr;
+	}
+	double d = std::numeric_limits<double>::max();
+	HyperspaceCloud* out_hc = nullptr;
+	for (auto hc : m_permaHyperspaceClouds) {
+		double dist = hc->GetPositionRelTo(to_body).LengthSqr();
+		if (dist < d) {
+			d = dist;
+			out_hc = hc;
+		}
+	}
+	return out_hc;
+}
+
+HyperspaceCloud* Space::GetFreePermaHyperspaceCloud()
+{
+	assert(!m_permaHyperspaceClouds.empty());
+	if(m_permaHyperspaceClouds.empty()) {
+		return nullptr;
+	}
+	HyperspaceCloud* out_hc = nullptr;
+	for (auto hc : m_permaHyperspaceClouds) {
+		if(!hc->HasShip()) {
+			out_hc = hc;
+			break;
+		}
+	}
+	return out_hc; // could be nullptr if none is found
+}
+
+
+

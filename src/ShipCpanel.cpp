@@ -66,7 +66,7 @@ void ShipCpanel::InitObject()
 
 //	Gui::RadioGroup *g = new Gui::RadioGroup();
 	float ui_width = static_cast<float>(Gui::Screen::GetWidth());
-	const float pp_margin = 40.0f, clock_margin = 135.0f;
+	const float pp_margin = 40.0f, clock_margin = 145.0f;
 
 	Gui::ImageRadioButton *b;
 

@@ -322,6 +322,10 @@ if BUILD_WIN32
 paragon_LDFLAGS = -Wl,-Map=paragon.map
 endif
 
+if BUILD_OSX
+paragon_LDFLAGS = -framework AppKit
+endif
+
 if !HAVE_LUA
 paragon_LDADD += ../contrib/lua/liblua.a
 endif

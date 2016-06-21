@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "ShipType.h"
@@ -115,7 +114,7 @@ int _define_ship(lua_State *L, ShipType::Tag tag, std::vector<ShipType::Id> *lis
 	s.equipSlotCapacity[Equip::SLOT_LASERCOOLER] = t.Get("max_lasercooler", 1);
 	s.equipSlotCapacity[Equip::SLOT_CARGOLIFESUPPORT] = t.Get("max_cargolifesupport", 1);
 	s.equipSlotCapacity[Equip::SLOT_AUTOPILOT] = t.Get("max_autopilot", 1);
-
+	
 	s.capacity = t.Get("capacity", 0);
 	s.hullMass = t.Get("hull_mass", 100);
 	s.fuelTankMass = t.Get("fuel_tank_mass", 5);
@@ -322,3 +321,4 @@ void ShipType::Init()
 	if (ShipType::playable_atmospheric_ships.empty())
 		Error("No ships can fit atmospheric shields! The game cannot run.");
 }
+

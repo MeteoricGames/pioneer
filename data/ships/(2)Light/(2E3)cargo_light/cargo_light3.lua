@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Alders Vectrum LCH 800',
+	name='Sukhov LCH 800',
 	ship_class = 'cargo',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'sukhov',
 	model='cargo_light3',
 	forward_thrust = 1120e5,
 	reverse_thrust = 1120e5,

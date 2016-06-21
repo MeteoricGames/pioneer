@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Mining Pod',
+	name='Sukhov UL Miner',
 	ship_class = 'mining',
-	manufacturer = 'xian',
+	manufacturer = 'sukhov',
 	model='mining_ultralight1',
 	cockpit='unitech_ultralight_cockpit',
 	forward_thrust = 21e5,
@@ -22,6 +22,7 @@ define_ship {
 	max_crew = 2,
 	capacity = 21,
 	hull_mass = 11,
+	hydrogen_tank = 10,
 	fuel_tank_mass = 4,
 	-- Exhaust velocity Vc [m/s] is equivalent of engine efficiency and depend on used technology. Higher Vc means lower fuel consumption.
 	-- Smaller ships built for speed often mount engines with higher Vc. Another way to make faster ship is to increase fuel_tank_mass.

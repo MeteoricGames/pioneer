@@ -1,7 +1,7 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Vampire RX Ranger',
+	name='AV Vampire',
 	ship_class = 'omni',
 	manufacturer = 'alders_vectrum',
 	model='omni_light2',

@@ -13,11 +13,11 @@
 #include "galaxy/StarSystem.h"
 #include "Background.h"
 #include "IterationProxy.h"
+#include "HyperspaceCloud.h"
 
 class Body;
 class Frame;
 class Ship;
-class HyperspaceCloud;
 class Game;
 
 class Space {
@@ -80,6 +80,12 @@ public:
 		m_bodyNearFinder.GetBodiesMaybeNear(pos, dist, bodies);
 	}
 
+    HyperspaceCloud* CreatePermaHyperspaceCloud(SystemBody* sbody);
+    HyperspaceCloud* CreateHyperspaceCloud(Ship* ship = nullptr, double date_due = 0.0, 
+                                           HyperspaceCloudType cloud_type = EHCT_ARRIVAL);
+    HyperspaceCloud* GetNearestHyperspaceCloud(Body* to_body);
+    HyperspaceCloud* GetNearestPermaHyperspaceCloud(Body* to_body);
+	HyperspaceCloud* GetFreePermaHyperspaceCloud();
 
 private:
 	void GenSectorCache(const SystemPath* here);
@@ -121,6 +127,9 @@ private:
 	//background (elements that are infinitely far away,
 	//e.g. starfield and milky way)
 	std::unique_ptr<Background::Container> m_background;
+
+    std::vector<HyperspaceCloud*> m_hyperspaceClouds;
+    std::vector<HyperspaceCloud*> m_permaHyperspaceClouds;
 
 	class BodyNearFinder {
 	public:

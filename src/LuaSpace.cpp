@@ -49,9 +49,18 @@ static void _unpack_hyperspace_args(lua_State *l, int index, SystemPath* &path, 
 
 static Body *_maybe_wrap_ship_with_cloud(Ship *ship, SystemPath *path, double due)
 {
-	if (!path) return ship;
+	if (!path) {
+		return ship;
+	}
 
-	HyperspaceCloud *cloud = new HyperspaceCloud(ship, due, true);
+	HyperspaceCloud *cloud =  Pi::game->GetSpace()->GetFreePermaHyperspaceCloud();
+	if(cloud) {
+		// Spawn in permanent cloud
+		cloud->ReceiveShip(ship, due);
+	} else {
+		// Use normal spawn cloud because perma clouds are all in use
+		cloud = Pi::game->GetSpace()->CreateHyperspaceCloud(ship, due);
+	}
 	ship->SetHyperspaceDest(path);
 	ship->SetFlightState(Ship::HYPERSPACE);
 
@@ -129,16 +138,29 @@ static int l_space_spawn_ship(lua_State *l)
 
 	Body *thing = _maybe_wrap_ship_with_cloud(ship, path, due);
 
-	// XXX protect against spawning inside the body
-	thing->SetFrame(Pi::game->GetSpace()->GetRootFrame());
-	if (!path)
+	if (!path) {
+		// Thing is a ship
 		thing->SetPosition(MathUtil::RandomPointOnSphere(min_dist, max_dist)*AU);
-	else
-		// XXX broken. this is ignoring min_dist & max_dist. otoh, what's the
-		// correct behaviour given there's now a fixed hyperspace exit point?
-		thing->SetPosition(Pi::game->GetSpace()->GetHyperspaceExitPoint(*path));
-	thing->SetVelocity(vector3d(0,0,0));
-	Pi::game->GetSpace()->AddBody(thing);
+		// XXX protect against spawning inside the body
+		thing->SetFrame(Pi::game->GetSpace()->GetRootFrame());
+		thing->SetVelocity(vector3d(0, 0, 0));
+		Pi::game->GetSpace()->AddBody(thing);
+	} else {
+		// Thing is a hyperspace cloud
+		auto hc = static_cast<HyperspaceCloud*>(thing);
+
+		if(hc->IsPermanent()) {
+			// Permanent ship handles it, no need to do anything.
+		} else {
+			// Normal temp cloud
+			thing->SetFrame(Pi::game->GetSpace()->GetRootFrame());
+			thing->SetPosition(Pi::game->GetSpace()->GetHyperspaceExitPoint(*path));
+			thing->SetVelocity(vector3d(0, 0, 0));
+			Pi::game->GetSpace()->AddBody(thing);
+			// XXX broken. this ^ is ignoring min_dist & max_dist. otoh, what's the
+			// correct behaviour given there's now a fixed hyperspace exit point?
+		}
+	}
 
 	LuaObject<Ship>::PushToLua(ship);
 
@@ -211,23 +233,29 @@ static int l_space_spawn_ship_near(lua_State *l)
 	assert(ship);
 
 	Body *thing = _maybe_wrap_ship_with_cloud(ship, path, due);
+	bool perma = path && static_cast<HyperspaceCloud*>(thing)->IsPermanent();
 
-	// XXX protect against spawning inside the body
-	Frame * newframe = nearbody->GetFrame();
-	const vector3d newPosition = (MathUtil::RandomPointOnSphere(min_dist, max_dist)* 1000.0) + nearbody->GetPosition();
+	if(!perma) {
+		// XXX protect against spawning inside the body
+		Frame * newframe = nearbody->GetFrame();
+		const vector3d newPosition = (MathUtil::RandomPointOnSphere(min_dist, max_dist) * 1000.0) + 
+			nearbody->GetPosition();
 	
-	// If the frame is rotating and the chosen position is too far, use non-rotating parent.
-	// Otherwise the ship will be given a massive initial velocity when it's bumped out of the
-	// rotating frame in the next update
-	if (newframe->IsRotFrame() && newframe->GetRadius() < newPosition.Length()) {
-		assert(newframe->GetParent());
-		newframe = newframe->GetParent();
-	}
+		// If the frame is rotating and the chosen position is too far, use non-rotating parent.
+		// Otherwise the ship will be given a massive initial velocity when it's bumped out of the
+		// rotating frame in the next update
+		if (newframe->IsRotFrame() && newframe->GetRadius() < newPosition.Length()) {
+			assert(newframe->GetParent());
+			newframe = newframe->GetParent();
+		}
 
-	thing->SetFrame(newframe);;
-	thing->SetPosition(newPosition);
-	thing->SetVelocity(vector3d(0,0,0));
-	Pi::game->GetSpace()->AddBody(thing);
+		thing->SetFrame(newframe);;
+		thing->SetPosition(newPosition);
+		thing->SetVelocity(vector3d(0,0,0));
+		Pi::game->GetSpace()->AddBody(thing);
+	} else {
+		// Permanent cloud handles it, no need to do anything
+	}
 
 	LuaObject<Ship>::PushToLua(ship);
 

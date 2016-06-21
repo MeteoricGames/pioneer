@@ -1,9 +1,9 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Cayman Shuttle',
+	name='Ncom Cayman',
 	ship_class = 'passenger',
-	manufacturer = 'alders_vectrum',
+	manufacturer = 'ncom',
 	model='passenger_ultralight4',
 	cockpit='cayman_cockpit',
 	forward_thrust = 165e5,

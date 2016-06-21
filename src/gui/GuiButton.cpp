@@ -142,4 +142,44 @@ void LabelButton::OnSetSize()
 	m_label->SetSize(size[0]-2*m_padding, size[1]);
 }
 
+ClickableLabel::ClickableLabel(Label *label, const char *imageFileName, Color color) : LabelButton(label)
+{
+	m_img = new Image(imageFileName); // TODO: optimize it shouldnt be needed to load the texture everytime we create a button.
+	m_img->SetModulateColor(color);
+	SizeImage();
+}
+
+ClickableLabel::~ClickableLabel()
+{
+	delete m_img;
+}
+
+void ClickableLabel::Draw()
+{
+	if (m_img)
+		m_img->Draw();
+	m_label->Draw();
+}
+
+void ClickableLabel::OnSetSize()
+{
+	float size[2];
+	GetSize(size);
+
+	//m_label->SetSize(size[0] - 2 * m_padding, size[1]); // Doesn't seem to work.
+}
+
+void ClickableLabel::SizeImage()
+{
+	float size[2];
+	GetSize(size);
+
+	m_img->SetSize(size[1] / 2, size[1] / 2);
+	m_img->SetPosition(vector2f(0.0f, 1.0f));
+}
+
+void ClickableLabel::SetLabel(Label* label) {
+    m_label = label;
+}
+
 }

@@ -38,16 +38,21 @@ namespace Gui {
 		float m_spacing;
 		float m_padding;
 		enum BoxOrientation m_orient;
+	protected:
+		const float GetSpacing() const { return m_spacing; }
+		const float GetPadding() const { return m_padding; }
 	};
 
 	class VBox: public Box {
 	public:
-		VBox(): Box(BOX_VERTICAL) {}
+		VBox() : Box(BOX_VERTICAL) {}
+		virtual void GetChildrenSize(float size[2]) override;
 	};
 
 	class HBox: public Box {
 	public:
-		HBox(): Box(BOX_HORIZONTAL) {}
+		HBox() : Box(BOX_HORIZONTAL) {}
+		virtual void GetChildrenSize(float size[2]) override;;
 	};
 }
 

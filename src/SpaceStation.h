@@ -12,6 +12,8 @@
 #include "Serializer.h"
 #include "ShipType.h"
 #include "SpaceStationType.h"
+#include "scenegraph/SceneGraph.h"
+#include "scenegraph/ModelSkin.h"
 
 #define MAX_DOCKING_PORTS		240	//256-(0x10), 0x10 is used because the collision surfaces use it as an identifying flag
 
@@ -56,6 +58,7 @@ public:
 	int GetDockingPortCount() const { return m_type->numDockingPorts; }
 	int GetFreeDockingPort(const Ship *s) const; // returns -1 if none free
 	int GetMyDockingPort(const Ship *s) const;
+	int GetRemoteDockingPort();
 	bool HasFreeDockingPort() const; // returns true if there is at least one free port of any size
 	int NumShipsDocked() const;
 
@@ -89,7 +92,7 @@ protected:
 
 private:
 	void DockingUpdate(const double timeStep);
-	void PositionDockedShip(Ship *ship, int port) const;
+	void PositionDockedShip(Ship *ship, int port);
 	void DoLawAndOrder(const double timeStep);
 	bool IsPortLocked(const int bay) const;
 	void LockPort(const int bay, const bool lockIt);
@@ -113,9 +116,11 @@ private:
 		vector3d fromPos; // in station model coords
 		Quaterniond fromRot;
 	};
+	void GetDockingPort(int &port, bool remote, shipDocking_t *&portOut);
 	typedef std::vector<shipDocking_t>::const_iterator	constShipDockingIter;
 	typedef std::vector<shipDocking_t>::iterator		shipDockingIter;
 	std::vector<shipDocking_t> m_shipDocking;
+	std::vector<shipDocking_t> m_remoteShipDocking;
 
 	SpaceStationType::TBayGroups mBayGroups;
 
@@ -139,6 +144,7 @@ private:
 	typedef std::list<Ship*> DockingQueue;
 	DockingQueue m_dockingQueue;
 	std::vector<int> m_dockingQueueLoadedData;	// used for post load fixup of docking queue (holds body indices)
+	SceneGraph::ModelSkin m_skin;
 };
 
 #endif /* _SPACESTATION_H */

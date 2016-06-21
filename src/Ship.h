@@ -193,24 +193,23 @@ public:
 		HYPERJUMP_SAFETY_LOCKOUT
 	};
 
-	HyperjumpStatus GetHyperspaceDetails(const SystemPath &src, const SystemPath &dest, int &outFuelRequired, double &outDurationSecs);
-	HyperjumpStatus GetHyperspaceDetails(const SystemPath &dest, int &outFuelRequired, double &outDurationSecs);
-	HyperjumpStatus CheckHyperspaceTo(const SystemPath &dest, int &outFuelRequired, double &outDurationSecs);
-	HyperjumpStatus CheckHyperspaceTo(const SystemPath &dest) {
-		int unusedFuel;
-		double unusedDuration;
-		return CheckHyperspaceTo(dest, unusedFuel, unusedDuration);
-	}
-	bool CanHyperspaceTo(const SystemPath &dest, HyperjumpStatus &status) {
-		status = CheckHyperspaceTo(dest);
-		return (status == HYPERJUMP_OK);
-	}
-	bool CanHyperspaceTo(const SystemPath &dest) { return (CheckHyperspaceTo(dest) == HYPERJUMP_OK); }
+	HyperjumpStatus GetHyperspaceDetails(const SystemPath &src, const SystemPath &dest, 
+		int &outFuelRequired, double &outDurationSecs, bool phase_jump);
+	HyperjumpStatus GetHyperspaceDetails(const SystemPath &dest, int &outFuelRequired, 
+		double &outDurationSecs, bool phase_jump);
+	HyperjumpStatus CheckHyperspaceTo(const SystemPath &dest, int &outFuelRequired, 
+		double &outDurationSecs, bool phase_jump);
+	HyperjumpStatus CheckHyperspaceTo(const SystemPath &dest, bool phase_jump);
+	bool CanHyperspaceTo(const SystemPath &dest, HyperjumpStatus &status, 
+ 		bool phase_jump);
+	bool CanHyperspaceTo(const SystemPath &dest, bool phase_jump);
 
 	Ship::HyperjumpStatus CheckHyperjumpCapability() const;
-	virtual Ship::HyperjumpStatus InitiateHyperjumpTo(const SystemPath &dest, int warmup_time, double duration, LuaRef checks);
+	virtual Ship::HyperjumpStatus InitiateHyperjumpTo(const SystemPath &dest, 
+		int warmup_time, double duration, LuaRef checks, bool phase_mode);
 	virtual void AbortHyperjump();
-	virtual Ship::HyperjumpStatus StartHyperspaceCountdown(const SystemPath &dest);
+	virtual Ship::HyperjumpStatus StartHyperspaceCountdown(const SystemPath &dest,
+		bool phase_mode);
 	float GetHyperspaceCountdown() const { return m_hyperspace.countdown; }
 	bool IsHyperspaceActive() const { return (m_hyperspace.countdown > 0.0); }
 	virtual void ResetHyperspaceCountdown();
@@ -228,8 +227,8 @@ public:
 	};
 	AlertState GetAlertState() { return m_alertState; }
 
-	bool AIMatchVel(const vector3d &vel);
-	bool AIChangeVelBy(const vector3d &diffvel);		// acts in obj space
+	bool AIMatchVel(const vector3d &vel, bool isDocking = false);
+	bool AIChangeVelBy(const vector3d &diffvel, bool isDocking = false);		// acts in obj space
 	vector3d AIChangeVelDir(const vector3d &diffvel);	// world space, maintain direction
 	void AIMatchAngVelObjSpace(const vector3d &angvel);
 	double AIFaceUpdir(const vector3d &updir, double av=0);
@@ -250,7 +249,8 @@ public:
 		AIERROR_NONE=0,
 		AIERROR_GRAV_TOO_HIGH,
 		AIERROR_REFUSED_PERM,
-		AIERROR_ORBIT_IMPOSSIBLE
+		AIERROR_ORBIT_IMPOSSIBLE,
+		AIERROR_REMOTE_DOCKING
 	};
 	AIError AIMessage(AIError msg=AIERROR_NONE) { AIError tmp = m_aiMessage; m_aiMessage = msg; return tmp; }
 
@@ -262,6 +262,7 @@ public:
 	void AIFlyTo(Body *target);
 	void AIFlyTo(Body *target, vector3d posoff);
 	void AIFlyToClose(Body *target, double dist);
+	void AIFlyToPermaCloud();
 	void AIOrbit(Body *target, double alt);
 	void AIHoldPosition();
 
@@ -336,10 +337,29 @@ public:
 	ThrusterTrail* GetThrusterTrail(unsigned int index) const { return m_thrusterTrails[index]; }
 	void UpdateThrusterTrails(float time);
 	void ClearThrusterTrails();
+	bool IsPhaseJumpRange(bool recalc = false);
+	bool IsPhaseJumpMode(bool recalc = false);
 
 	sigc::signal<void>& OnPlayerChangeFlightModeSignal() {
 		return m_onPlayerChangeFlightModeSignal;
 	}
+
+	const std::string& GetModuleStatus() const { return m_moduleStatus; }
+	void SetModuleStatus(const std::string& status) { m_moduleStatus = status; }
+	const std::string& GetModuleName() const { return m_moduleName; }
+	void SetModuleName(const std::string& name) { m_moduleName = name; }
+
+	bool IsVisible() const { return m_visible; }
+	void SetVisible(bool visible) { m_visible = visible; }
+
+	float GetMaxHullTemp() const { return m_maxHullTemp; }
+
+	bool IsRemotlyDocked() const { return m_isRemotlyDocked; }
+	void SetRemotlyDocked(bool state) { m_isRemotlyDocked = state; }
+	virtual void CalcExternalForce() override;
+	virtual void SetVelocity(const vector3d &v) override {};
+	virtual void TmpSetVelocity(const vector3d &v) { DynamicBody::SetVelocity(v); }
+    const std::vector<std::string> GetNamesOfNearbyShips() { return m_namesOfNearbyShips; }
 
 protected:
 	virtual void Save(Serializer::Writer &wr, Space *space);
@@ -374,6 +394,20 @@ protected:
 	ShipController *m_controller;
 	std::vector<ThrusterTrail*> m_thrusterTrails;
 
+	struct HyperspacingOut {
+		SystemPath dest;
+		// > 0 means active
+		float countdown;
+		bool now;
+		bool ignoreFuel; // XXX: To remove once the fuel handling is out of the core
+		double duration;
+		bool phaseMode;
+		LuaRef checks; // A Lua function to check all the conditions before the jump
+	} m_hyperspace;
+
+	const float m_maxHullTemp = 0.1f; // The temperature that the hull can take until it starts damaging the ship.
+    std::vector<std::string> m_namesOfNearbyShips;
+
 private:
 	float GetECMRechargeTime();
 	void DoThrusterSounds() const;
@@ -387,6 +421,9 @@ private:
 	void EnterHyperspace();
 	void InitGun(const char *tag, int num);
 	void InitMaterials();
+	bool UpdatePhaseJumpRange();
+	bool UpdatePhaseJumpMode();
+	virtual void PrivateSetVelocity(const vector3d &v);
 
 	bool m_invulnerable;
 
@@ -413,15 +450,6 @@ private:
 	AlertState m_alertState;
 	double m_lastFiringAlert;
 
-	struct HyperspacingOut {
-		SystemPath dest;
-		// > 0 means active
-		float countdown;
-		bool now;
-		bool ignoreFuel; // XXX: To remove once the fuel handling is out of the core
-		double duration;
-		LuaRef checks; // A Lua function to check all the conditions before the jump
-	} m_hyperspace;
 	HyperspaceCloud *m_hyperspaceCloud;
 
 	AICommand *m_curAICmd;
@@ -446,6 +474,15 @@ private:
 	static HeatGradientParameters_t s_heatGradientParams;
 
 	bool m_unlabeled;
+	bool m_phaseJumpMode;
+	bool m_phaseJumpRange;
+	HyperspaceCloud* m_phaseModeCloud;
+
+	std::string m_moduleStatus; // Ship status coming from module
+	std::string m_moduleName;	// LUA module that create the ship
+
+	bool m_visible;
+	bool m_isRemotlyDocked = false;
 };
 
 

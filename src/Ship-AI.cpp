@@ -167,6 +167,23 @@ void Ship::AIFlyToClose(Body *target, double dist)
 	m_curAICmd = new AIParagonCmdFlyTo(this, target, dist);
 }
 
+void Ship::AIFlyToPermaCloud()
+{
+	AIClearInstructions();
+	SetFuelReserve((GetFuel() < 0.5) ? GetFuel() / 2 : 0.25);
+	auto hc = Pi::game->GetSpace()->GetNearestPermaHyperspaceCloud(this);
+	assert(hc);
+	if(hc) {
+		GetController()->SetFlightControlState(CONTROL_AUTOPILOT);
+		m_curAICmd = new AIParagonCmdFlyTo(this, hc->GetFrame(), vector3d(3000.0, 0.0, 0.0), 0.0, false);
+	} else {
+#ifndef NDEBUG
+		throw std::runtime_error("Ship::AIFlyToPermaCloud(): Failed to find nearest perma hyperspace cloud.");
+#endif
+		m_curAICmd = nullptr;
+	}
+}
+
 void Ship::AIDock(SpaceStation *target)
 {
 	AIClearInstructions();
@@ -231,25 +248,30 @@ double calc_ivel_pos(double dist, double vel, double acc)
 
 // vel is desired velocity in ship's frame
 // returns true if this can be attained in a single timestep
-bool Ship::AIMatchVel(const vector3d &vel)
+bool Ship::AIMatchVel(const vector3d &vel, bool isDocking)
 {
 	vector3d diffvel = (vel - GetVelocity()) * GetOrient();
-	return AIChangeVelBy(diffvel);
+	return AIChangeVelBy(diffvel, isDocking);
 }
 
 // diffvel is required change in velocity in object space
 // returns true if this can be done in a single timestep
-bool Ship::AIChangeVelBy(const vector3d &diffvel)
+bool Ship::AIChangeVelBy(const vector3d &diffvel, bool isDocking)
 {
-	// counter external forces
-	vector3d extf = GetExternalForce() * (Pi::game->GetTimeStep() / GetMass());
-	vector3d diffvel2 = diffvel - extf * GetOrient();
+    vector3d diffvel2 = diffvel;
+    if (IsPlayerShip()) {
+        if (!isDocking) {
+            diffvel2.x = 0;
+            diffvel2.y = 0;
+        }
+    }
 
 	vector3d maxThrust = GetMaxThrust(diffvel2);
 	vector3d maxFrameAccel = maxThrust * (Pi::game->GetTimeStep() / GetMass());
-	vector3d thrust(diffvel2.x / maxFrameAccel.x,
+    vector3d thrust(diffvel2.x / maxFrameAccel.x,
 					diffvel2.y / maxFrameAccel.y,
 					diffvel2.z / maxFrameAccel.z);
+
 	SetThrusterState(thrust);			// use clamping
 	if (thrust.x*thrust.x > 1.0 || thrust.y*thrust.y > 1.0 || thrust.z*thrust.z > 1.0) return false;
 	return true;

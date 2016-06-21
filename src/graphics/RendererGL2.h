@@ -20,6 +20,7 @@ namespace Graphics {
 
 class Texture;
 struct Settings;
+enum PostProcessingLayer : int;
 
 namespace GL2 {
 	class GeoSphereSkyMaterial;
@@ -58,7 +59,7 @@ public:
 	virtual bool GetNearFarRange(float &near, float &far) const;
 
 	virtual bool BeginFrame();
-	virtual bool BeginPostProcessing(RenderTarget* rt_device);
+	virtual bool BeginPostProcessing(RenderTarget* rt_device, PostProcessLayer layer = EPP_LAYER_GAME);
 	virtual bool PostProcessFrame(PostProcess* postprocess);
 	virtual bool EndPostProcessing();
 	virtual bool EndFrame();

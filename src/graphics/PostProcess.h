@@ -1,5 +1,5 @@
-// Copyright Â© 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright Â© 2013-14 Meteoric Games Ltd
+// Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
+// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #ifndef _POST_PROCESS_H_
@@ -56,12 +56,12 @@ namespace Graphics {
 		PostProcess(const std::string& effect_name, WindowSDL* window, bool with_alpha = false);
 		virtual ~PostProcess();
 
-		unsigned AddPass(Renderer* renderer, const std::string& pass_name,
+		unsigned AddPass(Renderer* renderer, const std::string& pass_name, 
 			std::shared_ptr<Material>& material, PostProcessPassType pass_type = PP_PASS_THROUGH);
-		unsigned AddPass(Renderer* renderer, const std::string& pass_name,
+		unsigned AddPass(Renderer* renderer, const std::string& pass_name, 
 			Graphics::EffectType effect_type, PostProcessPassType pass_type = PP_PASS_THROUGH);
 		unsigned AddPass(Renderer* renderer, const std::string& pass_name,
-			std::shared_ptr<Graphics::GL3::Effect> effect,
+			std::shared_ptr<Graphics::GL3::Effect> effect, 
 			PostProcessPassType pass_type = PP_PASS_THROUGH);
 		bool GetBypassState(unsigned pass_id) const;
 		void SetBypassState(unsigned pass_id, bool bypass);
@@ -69,7 +69,7 @@ namespace Graphics {
 		// Accessors
 		unsigned int GetPassCount() const { return vPasses.size(); }
 
-	protected:
+	protected:		
 
 	private:
 		PostProcess(const PostProcess&);

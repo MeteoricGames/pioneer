@@ -85,6 +85,12 @@ inline float  DEG2RAD(float  x) { return x*(float(M_PI)/180.f); }
 inline double RAD2DEG(double x) { return x*(180./M_PI); }
 inline float  RAD2DEG(float  x) { return x*(180.f/float(M_PI)); }
 
+inline double SAFEACOS (double x) {
+    if (x < -1.0) x = -1.0;
+    else if (x > 1.0) x = 1.0;
+    return std::acos (x);
+}
+
 // from StackOverflow: http://stackoverflow.com/a/1500517/52251
 // Q: "Compile time sizeof_array without using a macro"
 template <typename T, size_t N>

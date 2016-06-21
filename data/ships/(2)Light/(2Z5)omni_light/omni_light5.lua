@@ -1,11 +1,11 @@
 -- Copyright © 2013-2014 Meteoric Games Ltd
 
 define_ship {
-	name='Gannet Ranger',
+	name='AV Gannet',
 	ship_class = 'omni',
 	manufacturer = 'alders_vectrum',
 	model='omni_light5',
-	cockpit='unitech_light_cockpit',
+	cockpit='omni_ranger_5_cockpit',
 	forward_thrust = 538e5,
 	reverse_thrust = 538e5,
 	up_thrust = 5380e5,

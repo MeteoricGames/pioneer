@@ -1,5 +1,4 @@
 -- Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
--- Copyright © 2013-14 Meteoric Games Ltd
 -- Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 local Engine = import("Engine")
@@ -209,6 +208,7 @@ local doOrbit = function (ship)
 	local body = Space.GetBody(sbody.parent.index)
 	ship:AIEnterLowOrbit(body)
 	trader['status'] = 'orbit'
+	ship:SetModuleStatus('orbit:1')
 	print(ship.label..' ordering orbit of '..body.label)
 end
 
@@ -251,9 +251,15 @@ local getRandomStarport = function (ship, current)
 				starport = orbital_starports[i]
 				if starport.numDocks > 100 then break end
 			end
-			if ship~=nil and starport.numDocks <= 100 then trade_ships[ship]['status'] = 'outbound' end
+			if ship~=nil and starport.numDocks <= 100 then 
+				trade_ships[ship]['status'] = 'outbound' 
+				ship:SetModuleStatus('outbound:1')
+			end
 		else
-			if ship~=nil then trade_ships[ship]['status'] = 'outbound' end
+			if ship~=nil then 
+				trade_ships[ship]['status'] = 'outbound' 
+				ship:SetModuleStatus('outbound:2')
+			end
 			return starports[Engine.rand:Integer(1,#starports)] --fallback and land anyway if all fails
 		end
 	end
@@ -261,7 +267,7 @@ local getRandomStarport = function (ship, current)
 end
 
 local getSystem = function (ship)
-	local systems_in_range = Game.system:GetNearbySystems(ship.hyperspaceRange)
+	local systems_in_range = Game.system:GetNearbySystems(ship.hyperspaceRange)-- * ship:GetPhaseModeMultiplier())
 	if #systems_in_range == 0 then return nil end
 	if #systems_in_range == 1 then
 		return systems_in_range[1].path
@@ -289,7 +295,7 @@ local getSystem = function (ship)
 		target_system = systems_in_range[Engine.rand:Integer(1, #systems_in_range)]
 
 		-- get closer systems
-		local systems_half_range = Game.system:GetNearbySystems(ship.hyperspaceRange / 2)
+		local systems_half_range = Game.system:GetNearbySystems(ship.hyperspaceRange / 2) -- * ship:GetPhaseModeMultiplier() / 2)
 
 		if #systems_half_range > 1 then
 			target_system = systems_half_range[Engine.rand:Integer(1, #systems_half_range)]
@@ -306,10 +312,17 @@ local getSystem = function (ship)
 	return target_system.path
 end
 
-local jumpToSystem = function (ship, target_path)
-	if target_path == nil then return nil end
+local jumpToSystem = function (ship, target_path, phase_jump)
+	if target_path == nil then return 'target_path = nil' end
 
-	local status, fuel, duration = ship:HyperspaceTo(target_path)
+	local status, fuel, duration
+	
+	if phase_jump == false then 
+		status, fuel, duration = ship:HyperspaceTo(target_path)
+	else 
+		status, fuel, duration = ship:PhaseHyperspaceTo(target_path)
+		if status == nil then return 'PhaseHyperspaceTo() returned nil' end
+	end
 
 	if status ~= 'OK' then
 		print(trade_ships[ship]['ship_name']..' jump status is not OK')
@@ -322,11 +335,12 @@ local jumpToSystem = function (ship, target_path)
 	trade_ships[ship]['dest_time'] = Game.time + duration
 	trade_ships[ship]['dest_path'] = target_path
 	trade_ships[ship]['from_path'] = Game.system.path
+	ship:SetModuleStatus('hyperspace:1')
 	return status
 end
 
-local getSystemAndJump = function (ship)
-	return jumpToSystem(ship, getSystem(ship))
+local getSystemAndJump = function (ship, phase_jump)
+	return jumpToSystem(ship, getSystem(ship), phase_jump)
 end
 
 local getAcceptableShips = function ()
@@ -448,6 +462,8 @@ local spawnInitialShips = function (game_start)
 					starport	= starport,
 					ship_name	= ship_name,
 				}
+				ship:SetModuleName('TradeShips')
+				ship:SetModuleStatus('docked:1')
 				addShipEquip(ship)
 			else
 				-- the starport must have been full
@@ -459,6 +475,8 @@ local spawnInitialShips = function (game_start)
 						starport	= starport,
 						ship_name	= ship_name,
 					}
+					ship:SetModuleName('TradeShips')
+					ship:SetModuleStatus('inbound:1')
 					addShipEquip(ship)
 				else
 					print("WARNING: TradeShips.lua:453 spawned an invalid ship!")
@@ -478,6 +496,8 @@ local spawnInitialShips = function (game_start)
 					status		= 'inbound',
 					ship_name	= ship_name,
 				}
+				ship:SetModuleName('TradeShips')
+				ship:SetModuleStatus('inbound:2')
 				-- Add ship equipment right now, because...
 				addShipEquip(ship)
 				-- ...this next call needs to see if there's an atmospheric shield.
@@ -502,6 +522,8 @@ local spawnInitialShips = function (game_start)
 					from_path	= from,
 					ship_name	= ship_name,
 				}
+				ship:SetModuleName('TradeShips')
+				ship:SetModuleStatus('hyperspace:2')
 				addShipEquip(ship)
 			else
 				print("WARNING: TradeShips.lua:494 spawned an invalid ship!")
@@ -554,7 +576,9 @@ local spawnReplacement = function ()
 				from_path	= from,
 				ship_name	= ship_name,
 			}
-
+			ship:SetModuleName('TradeShips')
+			ship:SetModuleStatus('hyperspace:3')
+			
 			addShipEquip(ship)
 			local fuel_added = addFuel(ship)
 			addShipCargo(ship, 'import')
@@ -586,6 +610,9 @@ local spawnReplacementFast = function ()
 				starport	= starport,
 				ship_name	= ship_name,
 			}
+			ship:SetModuleName('TradeShips')
+			ship:SetModuleStatus('inbound:3')
+			
 			addShipEquip(ship)
 			ship:AIDockWith(starport)
 			trade_ships[ship]['starport'] = starport
@@ -612,6 +639,8 @@ local spawnReplacementFast = function ()
 				starport	= starport,
 				ship_name	= ship_name,
 			}
+			ship:SetModuleName('TradeShips')
+			ship:SetModuleStatus('docked:2')
 			addShipEquip(ship)
 			addShipCargo(ship, 'import')
 			Timer:CallAt(Game.time+Engine.rand:Integer(25, 200), function () doUndock(ship) end)
@@ -676,13 +705,14 @@ local onEnterSystem = function (ship)
 		if #starports == 0 then
 			-- this only happens if player has followed ship to empty system
 
-			getSystemAndJump(ship)
+			getSystemAndJump(ship, false)
 			-- if we couldn't reach any systems wait for player to attack
 		else
 			local starport = getRandomStarport(ship)
 			ship:AIDockWith(starport)
 			trade_ships[ship]['starport'] = starport
 			trade_ships[ship]['status'] = 'inbound'
+			ship:SetModuleStatus('inbound:4')
 		end
 	end
 end
@@ -735,9 +765,7 @@ local onFrameChanged = function (ship)
 			delta=dist-ship:DistanceTo(getMyStarport(ship))
 			print('delta: '..delta..',dist: '..dist)
 			if delta~=nil and delta > 0 and delta < 50000000 then
-				for variable = 0, Engine.rand:Number(0, 3), 1 do
-					Timer:CallAt(Game.time+Engine.rand:Number(1, 30), function () spawnReplacementFast() end)
-				end
+                Timer:CallAt(Game.time+Engine.rand:Number(1, 15), function () spawnReplacementFast() end)
 			end
 		end)
 		return
@@ -747,12 +775,18 @@ local onFrameChanged = function (ship)
 	local trader = trade_ships[ship]
 
 	if trader.status == 'outbound' then
-		-- the cloud inherits the ship velocity and vector
-		ship:CancelAI()
-		if getSystemAndJump(ship) ~= 'OK' then
-			ship:AIDockWith(trader.starport)
-			trader['status'] = 'inbound'
+		-- Jump via phase hyperspace cloud
+		if ship:IsInPhaseRange() and getSystemAndJump(ship, true) ~= 'OK' then
+			ship:SetModuleStatus("phase jump failed")
 		end
+	
+		-- the cloud inherits the ship velocity and vector
+		--ship:CancelAI()
+		--if getSystemAndJump(ship) ~= 'OK' then
+		--	ship:AIDockWith(trader.starport)
+		--	trader['status'] = 'inbound'
+		--	ship:SetModuleStatus('inbound:5')
+		--end
 	end
 
 
@@ -767,8 +801,10 @@ local onShipDocked = function (ship, starport)
 
 	if trader.status == 'fleeing' then
 		trader['status'] = 'cowering'
+		ship:SetModuleStatus('cowering:1')
 	else
 		trader['status'] = 'docked'
+		ship:SetModuleStatus('docked:3')
 	end
 	if trader.chance then
 		trader['chance'] = trader.chance / 2
@@ -812,10 +848,13 @@ local onShipUndocked = function (ship, starport)
 	-- fly to the limit of the starport frame
 	local trader = trade_ships[ship]
 	trade_ships[ship]['status'] = 'wait'
-	local sbody = trader.starport.path:GetSystemBody()
-	local body = Space.GetBody(sbody.parent.index)
-	ship:AIEnterLowOrbit(body)
+	ship:SetModuleStatus('wait:1')
+	--local sbody = trader.starport.path:GetSystemBody()
+	--local body = Space.GetBody(sbody.parent.index)
+	--ship:AIEnterLowOrbit(body)
 	trade_ships[ship]['status'] = 'outbound'
+	ship:SetModuleStatus('outbound:11')
+	ship:AIFlyToPermaCloud()
 
 	Timer:CallAt(Game.time+10, function ()
 		if trade_ships[ship] == nil then return end
@@ -830,9 +869,11 @@ local onAICompleted = function (ship, ai_error)
 		print(ship.label..' AICompleted: Error: '..ai_error..' Status: '..trader.status) end
 
 	if trader.status == 'outbound' then
-		if getSystemAndJump(ship) ~= 'OK' then
+		local jump_check = getSystemAndJump(ship, true) or 'No reason given'
+		if jump_check ~= 'OK' then
 			ship:AIDockWith(trader.starport)
 			trader['status'] = 'inbound'
+			ship:SetModuleStatus('inbound:6 failed to jump: '..jump_check)
 		end
 	elseif trader.status == 'orbit' then
 		if ai_error == 'NONE' then
@@ -843,6 +884,7 @@ local onAICompleted = function (ship, ai_error)
 					ship:AIDockWith(trader.starport)
 					trader['status'] = 'inbound'
 					trader['delay'] = nil
+					ship:SetModuleStatus('inbound:7')
 				end
 			end)
 		end
@@ -852,6 +894,61 @@ local onAICompleted = function (ship, ai_error)
 	end
 end
 Event.Register("onAICompleted", onAICompleted)
+
+local onAICommand = function (ship, command)
+	if ship == nil then 
+		print('onAICommand: ('..command..'): given ship is nil!')
+		return 
+	end
+	print("Received an AI Command.")
+	ship:SetModuleStatus('ai_command:1')
+	local trader = trade_ships[ship]
+	if command == 'flytopermacloud' then 
+		if trader == nil then return end
+		if trader.status == 'docked' then
+			doUndock(ship)
+			ship:SetModuleStatus('have to undock ship first, repeat order afterwards')
+		else 
+			trader.status = 'outbound'
+			ship:SetModuleStatus('outbound:2')
+			ship:AIFlyToPermaCloud()
+		end
+	elseif command == 'clearai' then
+		if trader == nil then return end
+		trader.status = 'wait'
+		ship:SetModuleStatus('wait:2')
+		ship:CancelAI()
+	elseif command == 'hyperspawntest' then		
+		local ship_names = getAcceptableShips()
+		if #ship_names == 0 then 
+			print("Hyper Spawn Test failed, ship_names is empty.")
+			return nil 
+		end
+		local ship_name = ship_names[Engine.rand:Integer(1, #ship_names)]
+		local dest_time = Game.time + 5
+		local from = from_paths[Engine.rand:Integer(1, #from_paths)]
+		s = Space.SpawnShip(ship_name, 1, 2, {from, dest_time})
+		if s ~= nil then
+			s:SetLabel(Ship.MakeRandomLabel())
+			trade_ships[s] = {
+				status		= 'hyperspace',
+				dest_time	= dest_time,
+				dest_path	= Game.system.path,
+				from_path	= from,
+				ship_name	= ship_name,
+			}
+			s:SetModuleName('TradeShips')
+			s:SetModuleStatus('hyperspace:x')
+			addShipEquip(s)
+			print("Hyperspace Spawn Test has been carried out successfully: "..ship_name)
+		else
+			print("WARNING: TradeShips.lua:939 spawned an invalid ship!")
+		end
+	else
+		ship:SetModuleStatus('unknown_command:1')
+	end
+end
+Event.Register("onAICommand", onAICommand)
 
 local onShipLanded = function (ship, body)
 	if trade_ships[ship] == nil then return end
@@ -874,9 +971,11 @@ local onShipAlertChanged = function (ship, alert)
 		if trader.status == 'fleeing' then
 			-- had not reached starport yet
 			trader['status'] = 'inbound'
+			ship:SetModuleStatus('inbound:8')
 		elseif trader.status == 'cowering' then
 			-- already reached starport and docked
 			trader['status'] = 'docked'
+			ship:SetModuleStatus('docked:4')
 			if trader.delay > Game.time then
 				--[[ not ready to undock, so schedule it
 				there is a slight chance that the status was changed while
@@ -904,13 +1003,14 @@ local onShipHit = function (ship, attacker)
 
 	-- if outbound jump now
 	if trader.status == 'outbound' then
-		if getSystemAndJump(ship) == 'OK' then
+		if getSystemAndJump(ship, false) == 'OK' then
 			return
 		end
 	end
 
 	trader['status'] = 'fleeing'
 	trader['attacker'] = attacker
+	ship:SetModuleStatus('fleeing:1')
 
 	-- update last_flee
 	trader['last_flee'] = Game.time
@@ -922,7 +1022,7 @@ local onShipHit = function (ship, attacker)
 		elseif Engine.rand:Number(1) < trader.chance then
 			local distance = ship:DistanceTo(trader.starport)
 			if distance > 149598000 * (2 - trader.chance) then -- 149,598,000km = 1AU
-				if getSystemAndJump(ship) then
+				if getSystemAndJump(ship, false) then
 					return
 				else
 					trader['no_jump'] = true
@@ -984,10 +1084,12 @@ local onShipDestroyed = function (ship, attacker)
 				if trader.status == 'fleeing' then
 					-- had not reached starport yet
 					trader['status'] = 'inbound'
+					ship:SetModuleStatus('inbound:9')
 				elseif trader.status == 'cowering' then
 					-- already reached starport and docked
 					trader['status'] = 'docked'
-
+					ship:SetModuleStatus('docked:5')
+					
 					if trader.delay > Game.time then
 						--[[ not ready to undock, so schedule it
 						there is a slight chance that the status was changed while
@@ -1061,6 +1163,7 @@ local onGameStart = function ()
 							ship:AIDockWith(trader.starport)
 							trader['status'] = 'inbound'
 							trader['delay'] = nil
+							ship:SetModuleStatus('inbound:10')
 						end
 					end)
 				end
@@ -1079,7 +1182,7 @@ Event.Register("onGameEnd", onGameEnd)
 
 local serialize = function ()
 	-- all we need to save is trade_ships, the rest can be rebuilt on load
-
+	
 	-- The serializer will crash if we try to serialize dead objects (issue #3123)
 	-- also, trade_ships may be nil, because it is cleared in 'onGameEnd', and this may
 	-- happen before the autosave module creates its '_exit' save

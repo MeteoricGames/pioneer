@@ -1,5 +1,4 @@
 // Copyright © 2008-2014 Pioneer Developers. See AUTHORS.txt for details
-// Copyright © 2013-14 Meteoric Games Ltd
 // Licensed under the terms of the GPL v3. See licenses/GPL-3.txt
 
 #include "Game.h"
@@ -36,6 +35,7 @@ Game::Game(const SystemPath &path, double time) :
 	m_time(time),
 	m_state(STATE_NORMAL),
 	m_wantHyperspace(false),
+	m_wantPhaseMode(false),
 	m_timeAccel(TIMEACCEL_1X),
 	m_requestedTimeAccel(TIMEACCEL_1X),
 	m_forceTimeAccel(false)
@@ -62,6 +62,7 @@ Game::Game(const SystemPath &path, const vector3d &pos, double time) :
 	m_time(time),
 	m_state(STATE_NORMAL),
 	m_wantHyperspace(false),
+	m_wantPhaseMode(false),
 	m_timeAccel(TIMEACCEL_1X),
 	m_requestedTimeAccel(TIMEACCEL_1X),
 	m_forceTimeAccel(false)
@@ -166,6 +167,13 @@ Game::Game(Serializer::Reader &rd) :
 	m_state = State(section.Int32());
 
 	m_wantHyperspace = section.Bool();
+	//------------------------- SAVE PATCH 79
+	if(s_loadedGameVersion >= 79) {	
+		m_wantPhaseMode = section.Bool();
+	} else {
+		m_wantPhaseMode = false;
+	}
+	//------------------------- PATCH 79 END
 	m_hyperspaceProgress = section.Double();
 	m_hyperspaceDuration = section.Double();
 	m_hyperspaceEndTime = section.Double();
@@ -180,8 +188,9 @@ Game::Game(Serializer::Reader &rd) :
 
 	// hyperspace clouds being brought over from the previous system
 	Uint32 nclouds = section.Int32();
-	for (Uint32 i = 0; i < nclouds; i++)
+	for (Uint32 i = 0; i < nclouds; i++) {
 		m_hyperspaceClouds.push_back(static_cast<HyperspaceCloud*>(Body::Unserialize(section, 0)));
+    }
 
 	// system political stuff
 	section = rd.RdSection("Polit");
@@ -226,6 +235,7 @@ void Game::Serialize(Serializer::Writer &wr)
 	section.Int32(Uint32(m_state));
 
 	section.Bool(m_wantHyperspace);
+	section.Bool(m_wantPhaseMode);
 	section.Double(m_hyperspaceProgress);
 	section.Double(m_hyperspaceDuration);
 	section.Double(m_hyperspaceEndTime);
@@ -245,8 +255,9 @@ void Game::Serialize(Serializer::Writer &wr)
 
 	// hyperspace clouds being brought over from the previous system
 	section.Int32(m_hyperspaceClouds.size());
-	for (std::list<HyperspaceCloud*>::const_iterator i = m_hyperspaceClouds.begin(); i != m_hyperspaceClouds.end(); ++i)
+    for (std::list<HyperspaceCloud*>::const_iterator i = m_hyperspaceClouds.begin(); i != m_hyperspaceClouds.end(); ++i) {
 		(*i)->Serialize(section, m_space.get());
+    }
 
 	wr.WrSection("HyperspaceClouds", section.GetData());
 
@@ -387,6 +398,9 @@ bool Game::UpdateTimeAccel()
 		}
 	}
 
+    if (m_isInFastTravel)
+        newTimeAccel = Game::TIMEACCEL_10X;
+
 	// no change
 	if (newTimeAccel == m_timeAccel)
 		return false;
@@ -395,10 +409,11 @@ bool Game::UpdateTimeAccel()
 	return true;
 }
 
-void Game::WantHyperspace()
+void Game::WantHyperspace(bool phase_mode)
 {
 	assert(m_state == STATE_NORMAL);
 	m_wantHyperspace = true;
+	m_wantPhaseMode = phase_mode;
 }
 
 double Game::GetHyperspaceArrivalProbability() const
@@ -415,17 +430,19 @@ void Game::SwitchToHyperspace()
 	// remember where we came from so we can properly place the player on exit
 	m_hyperspaceSource = m_space->GetStarSystem()->GetPath();
 	m_hyperspaceDest =  m_player->GetHyperspaceDest();
+	m_hyperspacePhaseMode = m_wantPhaseMode;
 
 	// find all the departure clouds, convert them to arrival clouds and store
 	// them for the next system
 	m_hyperspaceClouds.clear();
+
 	for (Body* b : m_space->GetBodies()) {
 
 		if (!b->IsType(Object::HYPERSPACECLOUD)) continue;
 
 		// only want departure clouds with ships in them
 		HyperspaceCloud *cloud = static_cast<HyperspaceCloud*>(b);
-		if (cloud->IsArrival() || cloud->GetShip() == 0)
+		if (!cloud->SupportsDeparture() || cloud->GetShip() == 0)
 			continue;
 
 		// make sure they're going to the same place as us
@@ -443,7 +460,7 @@ void Game::SwitchToHyperspace()
 
 		// turn the cloud arround
 		cloud->GetShip()->SetHyperspaceDest(m_hyperspaceSource);
-		cloud->SetIsArrival(true);
+		cloud->SetCloudType(EHCT_ARRIVAL);
 
 		// and remember it
 		m_hyperspaceClouds.push_back(cloud);
@@ -493,19 +510,37 @@ void Game::SwitchToNormalSpace()
 	m_player->SetFrame(m_space->GetRootFrame());
 	m_space->AddBody(m_player.get());
 
+	// Non-phase mode: Normal departure cloud
+	// Phase mode: Phase permanent cloud
+	HyperspaceCloud* target_perma_cloud = nullptr;
+	if(m_hyperspacePhaseMode) {
+		target_perma_cloud = m_space->GetFreePermaHyperspaceCloud();
+	}
+
 	// place it
-	m_player->SetPosition(m_space->GetHyperspaceExitPoint(m_hyperspaceSource, m_hyperspaceDest));
+	if(!target_perma_cloud) {
+		m_player->SetPosition(m_space->GetHyperspaceExitPoint(m_hyperspaceSource, m_hyperspaceDest));
+	} else {
+		m_player->SetFrame(target_perma_cloud->GetFrame());
+		m_player->SetPosition(target_perma_cloud->GetPosition());
+	}
 	m_player->SetVelocity(vector3d(0,0,-100.0));
 	m_player->SetOrient(matrix3x3d::Identity());
 
-	// place the exit cloud
-	HyperspaceCloud *cloud = new HyperspaceCloud(0, Pi::game->GetTime(), true);
-	cloud->SetFrame(m_space->GetRootFrame());
-	cloud->SetPosition(m_player->GetPosition());
-	m_space->AddBody(cloud);
+	HyperspaceCloud* cloud = nullptr;
+	if(!target_perma_cloud) {
+		// place the exit cloud
+		cloud = m_space->CreateHyperspaceCloud(0, Pi::game->GetTime(), EHCT_ARRIVAL);
+		cloud->SetFrame(m_space->GetRootFrame());
+		cloud->SetPosition(m_player->GetPosition());
+		m_space->AddBody(cloud);
+	}
 
 	for (std::list<HyperspaceCloud*>::iterator i = m_hyperspaceClouds.begin(); i != m_hyperspaceClouds.end(); ++i) {
 		cloud = *i;
+
+		// TODO: This should handle other permanent clouds transporting NPC ships (Salwan) (#166)
+		if (cloud->IsPermanent()) continue;
 
 		cloud->SetFrame(m_space->GetRootFrame());
 		cloud->SetPosition(m_space->GetHyperspaceExitPoint(m_hyperspaceSource, m_hyperspaceDest));
@@ -526,9 +561,7 @@ void Game::SwitchToNormalSpace()
 				// travelling to the system as a whole, so just dump them on
 				// the cloud - we can't do any better in this case
 				ship->SetPosition(cloud->GetPosition());
-			}
-
-			else {
+			} else {
 				// on their way to a body. they're already in-system so we
 				// want to simulate some travel to their destination. we
 				// naively assume full accel for half the distance, flip and
@@ -536,7 +569,8 @@ void Game::SwitchToNormalSpace()
 				Body *target_body = m_space->FindBodyForPath(&sdest);
 				double dist_to_target = cloud->GetPositionRelTo(target_body).Length();
 				double half_dist_to_target = dist_to_target / 2.0;
-				double accel = -(ship->GetShipType()->linThrust[ShipType::THRUSTER_FORWARD] / ship->GetMass());
+				double accel = -(ship->GetShipType()->linThrust[ShipType::THRUSTER_FORWARD] / 
+					ship->GetMass());
 				double travel_time = Pi::game->GetTime() - cloud->GetDueDate();
 
 				// I can't help but feel some actual math would do better here
@@ -558,9 +592,7 @@ void Game::SwitchToNormalSpace()
 						target_body->GetPositionRelTo(m_space->GetRootFrame()) +
 						cloud->GetPositionRelTo(target_body).Normalized() * (dist_to_target - dist);
 					ship->SetPosition(pos);
-				}
-
-				else {
+				} else {
 					// ship made it with time to spare. just put it somewhere
 					// near the body. the script should be issuing a dock or
 					// flyto command in onEnterSystem so it should sort it
@@ -801,4 +833,22 @@ void Game::SaveGame(const std::string &filename, Game *game)
 	fclose(f);
 
 	if (nwritten != 1) throw CouldNotWriteToFileException();
+}
+
+void Game::EnumerateAllHyperspaceClouds(std::list<HyperspaceCloud*>& clouds_out) 
+{
+	for (Body* b : m_space->GetBodies()) {
+		if (!b->IsType(Object::HYPERSPACECLOUD)) {
+            continue;
+        }
+        clouds_out.push_back(static_cast<HyperspaceCloud*>(b));
+	}
+}
+
+void Game::SetFastTravel(const bool value) {
+    m_isInFastTravel = value;
+}
+
+const bool Game::GetFastTravel() const {
+    return m_isInFastTravel;
 }

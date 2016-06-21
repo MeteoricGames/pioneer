@@ -55,7 +55,7 @@ void Image::Draw()
 	GetSize(allocSize);
 
 	Graphics::Renderer *r = Gui::Screen::GetRenderer();
-	m_quad->Draw(vector2f(0.0f), vector2f(allocSize[0],allocSize[1]), m_color);
+	m_quad->Draw(m_position, vector2f(allocSize[0],allocSize[1]), m_color);
 }
 
 }

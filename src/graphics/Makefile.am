@@ -23,6 +23,7 @@ noinst_HEADERS = \
 	RenderState.h \
 	PostProcess.h \
 	PostProcessing.h \
+	PostProcessLayer.h \
 	VertexArray.h \
 	Surface.h \
 	Texture.h \
